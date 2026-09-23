@@ -1,11 +1,15 @@
 {
   "format": "genesis-company-public-v1",
   "files": {
-    "src/PublicApp.tsx": "ced06be1291405c9e88d1ac7569caac747d88ee3afc7c51905c8055ff6c473d8",
+    "src/PublicApp.tsx": "bec6f21d67dd6f6e4d1c8423ca1507af640a3bac86c39f2e62adeaa55e33b4ec",
     "src/public.tsx": "768c039776eaf9b8d68b2a9a03cb141b79072e16d6bc9fad522d43e369b7c2b3",
     "src/vite-env.d.ts": "65996936fbb042915f7b74a200fcdde7e410f32a669b1ab9597cfaa4b0faddb5",
     "src/pages/Explore.tsx": "c91e96e973c8d6101fa43c2c187e4f1a7850f1b398a47c6e10447d5fa956932e",
-    "src/shared/SiteShell.tsx": "424e2313e0f97f750663973bb72b0e503a8bbe267085515aa5db2fd9a5c1bef6",
+    "src/pages/Welcome.tsx": "e4d84c1493789d1241e087abc0ce3ffa8fa998790b5a224bac970afa447fe396",
+    "src/pages/ProductLaunch.tsx": "61d2c0e54b2872d9fc6d6f44d1fc271d2b8f905dc934ba212478dac06957718f",
+    "src/shared/productLink.ts": "4e5fa016019219791c6b112b1ad1719c77183a4071151822d6cbedccba82a070",
+    "src/styles/welcome.css": "d59793826b547087cf5ce58d5bd20e71a137f6a42a1719f210b6ede3e9492b2b",
+    "src/shared/SiteShell.tsx": "cdd33b45132b74502c062a1fbc82fb6495b30ea9a84b2463ce7b003d058ef191",
     "src/shared/ui.tsx": "4a3a743fe926d6cfe4bc478160ef3094743f4eb5c0982f780305e614997aabce",
     "src/shared/PortfolioCard.tsx": "a4c09199b9d1f3076220811323c3abb0a6a2672e1b9fcd9caa2a5bd063135da6",
     "src/shared/DesignLoop.tsx": "3d6f52bdc6f212ae0223d82a9b7f5fae99e87fa7815478ade5d65125ae33e465",
@@ -34,9 +38,9 @@
     "index.html": "a44a46f1be1ac25b284989f5a593517f4550f4383b7184797242cd80c84a2e3c",
     ".gitignore": "27150af9bc8d6dab2f721f2e193ac44249314dad3c3e5e17cfec351ceb344777",
     ".nvmrc": "f14b4987904bcb5814e4459a057ed4d20f58a633152288a761214dcd28780b56",
-    "README.md": "7957647994272f9dadcb47062317fbc22e1d91d6387d879c3781ffa1a4d1e9f6",
+    "README.md": "3a8d779d715a7501f696619033b8af3fc9b2c1dc956851083c75038bdd637b4d",
     ".github/workflows/pages.yml": "d6301873fffa4d81c0516d087912c5afd6afb21653990f348c198ae365c53b43",
-    "scripts/static.test.mjs": "f018493a47a546877afb8c4d6f622c847b178d64bc1d95eae43fa7d7139a563b",
+    "scripts/static.test.mjs": "d93de517417bc1dba6e3041324f273ffa594ef15702aa55f1d27c3f32edd7c8a",
     "scripts/site-access.mjs": "3d6618736cac9c7e06366dd186e4fa9c45432eaae106b1f5e4e1e067aa57d8e9"
   }
 }

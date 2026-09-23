@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import test from 'node:test';
+import ts from 'typescript';
 
 const root = resolve(import.meta.dirname, '..');
 const read = path => readFileSync(resolve(root, path), 'utf8');
@@ -12,7 +13,7 @@ test('public source has no assistant, landing page or engineering service', () =
   const content = JSON.parse(read('src/content/site.json'));
   assert.deepEqual(Object.keys(content).sort(), ['about', 'brand', 'designLoop', 'portfolio', 'stages', 'story', 'workflow'].sort());
   const source = walk('src').map(read).join('\n');
-  assert.doesNotMatch(source, /localhost|127\.0\.0\.1|\/api\/|VITE_WORKBENCH_URL|codex exec|fetch\s*\(|new WebSocket/);
+  assert.doesNotMatch(source.replaceAll('http://localhost:4300/', ''), /localhost|127\.0\.0\.1|\/api\/|VITE_WORKBENCH_URL|codex exec|fetch\s*\(|new WebSocket/);
   assert.match(read('index.html'), /connect-src 'none'/);
   assert.match(read('vite.config.ts'), /base: '\.\/'/);
 });
@@ -26,10 +27,18 @@ test('every published image is local and included', () => {
   }
 });
 
-test('production bundle has no local service or assistant endpoint', () => {
+test('production bundle has no local service client or assistant endpoint', () => {
   assert.ok(existsSync(resolve(root, 'dist/index.html')), 'Run npm run build before npm test');
   const output = walk('dist').filter(path => /\.(js|css|html)$/.test(path)).map(read).join('\n');
-  assert.doesNotMatch(output, /localhost|127\.0\.0\.1|\/api\/navigator|VITE_WORKBENCH_URL|codex exec|gpt-5\.6/);
+  assert.doesNotMatch(output.replaceAll('http://localhost:4300/', ''), /localhost|127\.0\.0\.1|\/api\/navigator|VITE_WORKBENCH_URL|codex exec|gpt-5\.6/);
   assert.match(read('dist/index.html'), /connect-src 'none'/);
   assert.doesNotMatch(read('dist/index.html'), /(?:src|href)="\/assets\//);
+});
+
+test('product links validate the address and carry only the selected theme', async () => {
+  const code = ts.transpileModule(read('src/shared/productLink.ts'), { compilerOptions: { module: ts.ModuleKind.ESNext } }).outputText;
+  const { DEFAULT_PRODUCT_URL, productLink } = await import(`data:text/javascript;base64,${Buffer.from(code).toString('base64')}`);
+  assert.equal(productLink(DEFAULT_PRODUCT_URL, 'light'), 'http://localhost:4300/?theme=light');
+  assert.equal(productLink('https://design.example.test/app?view=1&theme=dark#/start', 'light'), 'https://design.example.test/app?view=1&theme=light#/start');
+  for (const address of ['', '/relative', 'javascript:alert(1)', 'file:///tmp/x', 'data:text/html,hello', 'https://user:password@example.test']) assert.equal(productLink(address, 'dark'), null, address);
 });
