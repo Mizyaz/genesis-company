@@ -1,0 +1,52 @@
+/* Optional presentation layer. Colours and motion come from the site-wide controls. */
+.electric-brand { position: relative; display: inline-flex; isolation: isolate; max-width: 100%; }
+.electric-brand .brand { position: relative; }
+.electric-brand .brand > span {
+  background: linear-gradient(110deg, var(--text) 35%, var(--cyan) 47%, var(--text) 50%, var(--violet) 53%, var(--text) 65%);
+  background-size: 300% 100%; background-position: 100% 0;
+  background-clip: text; -webkit-background-clip: text; color: transparent;
+  animation: identity-wordmark 8s ease-in-out infinite;
+}
+.electric-brand .brand img { animation: identity-charge 8s ease-in-out infinite; }
+.electric-brand-traces { position: absolute; z-index: -1; left: -15%; top: -40%; width: 130%; height: 180%; overflow: visible; color: var(--cyan); pointer-events: none; }
+.identity-rail { stroke: currentColor; stroke-width: 1; opacity: .2; }
+.identity-signal { stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-dasharray: 9 91; animation: identity-current 7s linear var(--phase, 0s) infinite; }
+.electric-brand .identity-signal { filter: drop-shadow(0 0 3px var(--cyan)); }
+.identity-contact { stroke: currentColor; stroke-width: 1; fill: var(--page); opacity: .45; }
+.circuit-backdrop { position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; color: var(--cyan); opacity: .15; mask-image: radial-gradient(ellipse at 50% 40%, #0001 6%, #0009 56%, #000 100%); }
+.circuit-backdrop > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.circuit-backdrop .backdrop-chip { animation: identity-chip-drift var(--period, 36s) ease-in-out var(--phase, 0s) infinite; }
+.circuit-backdrop g:nth-child(even) > .backdrop-chip { color: var(--violet); }
+.circuit-backdrop .identity-rail { opacity: .5; }
+.circuit-backdrop .identity-signal { animation-duration: 18s; stroke-width: 1; }
+:root[data-theme="light"] .circuit-backdrop { opacity: .12; }
+.electric-brand[data-running="false"] .brand > *,
+.electric-brand[data-running="false"] .identity-signal,
+.circuit-backdrop[data-running="false"] .backdrop-chip,
+.circuit-backdrop[data-running="false"] .identity-signal { animation-play-state: paused; }
+@keyframes identity-wordmark {
+  0%, 10% { background-position: 100% 0; }
+  55%, 100% { background-position: 0% 0; }
+}
+@keyframes identity-charge {
+  0%, 65%, 100% { filter: drop-shadow(0 0 0 transparent); }
+  22%, 36% { filter: drop-shadow(0 0 8px color-mix(in srgb, var(--cyan) 38%, transparent)); }
+}
+@keyframes identity-current {
+  0% { stroke-dashoffset: 12; opacity: 0; }
+  10% { opacity: .65; }
+  55% { opacity: .65; }
+  68%, 100% { stroke-dashoffset: -100; opacity: 0; }
+}
+@keyframes identity-chip-drift {
+  0%, 100% { transform: translate(-8px, 12px) rotate(-2deg); }
+  50% { transform: translate(12px, -14px) rotate(2deg); }
+}
+@media (max-width: 600px) {
+  .electric-brand .brand-large { font-size: clamp(2rem, 8.8vw, 3.3rem); gap: 10px; }
+  .electric-brand .brand-large img { width: 48px; height: 54px; }
+}
+@media (forced-colors: active) {
+  .electric-brand .brand > span { background: none; color: CanvasText; }
+  .electric-brand-traces, .circuit-backdrop { display: none; }
+}
