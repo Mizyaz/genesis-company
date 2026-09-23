@@ -6,10 +6,10 @@ The home page offers Discover (company presentation) and Design (an explicit
 link to the visitor's own installation). All runtime assets are included here.
 Animations, theme and motion preferences run in the browser.
 
-Design opens a launch page with editable Connection settings. The default points
-to the local product assistant at `http://localhost:4300/`, not directly to the
-workbench. An SSH-forwarded or other HTTP/HTTPS product URL can be saved in the
-visitor's browser. Only an explicit Open GENESIS click opens that URL in a new
+Design first asks whether GENESIS is installed. No leads to the team's contact
+email; Yes asks which port to use. Only a port number (1 to 65535) is entered,
+never a URL. The port is remembered in the visitor's browser after opening the
+product. Only an explicit Open GENESIS click opens the loopback address in a new
 tab, with the selected theme. No availability probe, port scan, public LLM
 endpoint, prompt transfer, or backend request is made by this site. The actual
 assistant, model selection and CLI execution remain in the separate product.

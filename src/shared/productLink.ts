@@ -1,11 +1,9 @@
-export const DEFAULT_PRODUCT_URL = 'http://localhost:4300/';
-
 /** Navigation only. Never probes the target or forwards prompts/credentials. */
-export function productLink(address: string, theme: 'light' | 'dark'): string | null {
-  try {
-    const url = new URL(address.trim());
-    if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) return null;
-    url.searchParams.set('theme', theme);
-    return url.href;
-  } catch { return null; }
+export function productLink(port: string, theme: 'light' | 'dark'): string | null {
+  const value = port.trim();
+  if (!/^\d{1,5}$/.test(value) || Number(value) < 1 || Number(value) > 65535) return null;
+  const url = new URL('http://127.0.0.1');
+  url.port = String(Number(value));
+  url.searchParams.set('theme', theme);
+  return url.href;
 }

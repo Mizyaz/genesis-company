@@ -1,44 +1,51 @@
 import { useState } from 'react';
+import site from '../content/site.json';
 import { Icon } from '../shared/ui';
-import { DEFAULT_PRODUCT_URL, productLink } from '../shared/productLink';
+import { productLink } from '../shared/productLink';
 import '../styles/welcome.css';
 
-const storageKey = 'genesis.company.productAddress';
+const storageKey = 'genesis.company.productPort';
 
-/** Explicit link to the user's installation, not a client of its backend. */
+/** Installation choice first; only an explicit click opens the product. */
 export function ProductLaunch({ theme }: { theme: 'light' | 'dark' }) {
-  const [address, setAddress] = useState(() => {
-    try { return localStorage.getItem(storageKey) || DEFAULT_PRODUCT_URL; } catch { return DEFAULT_PRODUCT_URL; }
+  const [installed, setInstalled] = useState<boolean | null>(null);
+  const [port, setPort] = useState(() => {
+    try { return localStorage.getItem(storageKey) || ''; } catch { return ''; }
   });
-  const url = productLink(address, theme);
+  const url = productLink(port, theme);
+  const invalid = port.length > 0 && !url;
   const remember = () => {
-    try { localStorage.setItem(storageKey, address.trim()); } catch { /* Navigation still works without storage. */ }
-  };
-  const reset = () => {
-    setAddress(DEFAULT_PRODUCT_URL);
-    try { localStorage.removeItem(storageKey); } catch { /* Device-local preference is optional. */ }
+    try {
+      localStorage.setItem(storageKey, port.trim());
+      localStorage.removeItem('genesis.company.productAddress');
+    } catch { /* Navigation still works without storage. */ }
   };
   return <main id="main" className="welcome-page">
     <div className="landing-atmosphere" aria-hidden="true" />
     <section className="product-launch" aria-labelledby="product-heading">
       <a className="welcome-back" href="#/"><Icon name="arrow" /> Back</a>
       <p className="eyebrow">YOUR DESIGN ENVIRONMENT</p>
-      <h1 id="product-heading">Your next design.<br /><span className="gradient-text">Your own workspace.</span></h1>
-      <p className="welcome-intro">Open the assistant and workspace in your GENESIS installation.</p>
-      <div className="product-launch-action">
-        {url ? <a className="button button-primary" href={url} target="_blank" rel="noopener noreferrer" onClick={remember}>Open GENESIS <Icon name="diagonal" /></a>
-          : <button className="button button-primary" disabled>Open GENESIS <Icon name="diagonal" /></button>}
-        <p className="muted">Opens in a new tab. Your theme follows you.</p>
-      </div>
-      <details className="product-connection">
-        <summary>Connection settings <Icon name="sliders" /></summary>
-        <label htmlFor="product-address">GENESIS product address</label>
-        <input id="product-address" type="url" value={address} onChange={event => setAddress(event.target.value)} spellCheck={false} autoComplete="off" aria-invalid={!url} aria-describedby="product-address-help product-address-error" />
-        <p id="product-address-help">Use your local address or SSH-forwarded product URL. Saved in this browser when you open GENESIS.</p>
-        <p id="product-address-error" className="product-address-error" role="status">{!url && 'Enter a full HTTP or HTTPS URL without a username or password.'}</p>
-        <button className="welcome-text-button" type="button" onClick={reset}>Reset to local default</button>
-      </details>
-      <aside className="product-start-help"><Icon name="document" /><div><strong>Not running yet?</strong><p>Start your GENESIS installation, then open it above. If you use SSH, forward the product port and update the address in Connection settings.</p><small>This page does not check whether the application is running.</small></div></aside>
+      <h1 id="product-heading">Your next design.<br /><span className="gradient-text">Starts here.</span></h1>
+      <fieldset className="installation-choice">
+        <legend>Do you have GENESIS installed?</legend>
+        <div><button type="button" aria-pressed={installed === true} onClick={() => setInstalled(true)}>Yes</button><button type="button" aria-pressed={installed === false} onClick={() => setInstalled(false)}>No</button></div>
+      </fieldset>
+      {installed === true && <section className="product-next-step" aria-labelledby="product-port-label">
+        <label id="product-port-label" htmlFor="product-port">Which port?</label>
+        <p className="muted" id="product-port-help">Use the port shown when GENESIS starts.</p>
+        <div className="product-port-row">
+          <input id="product-port" type="text" inputMode="numeric" maxLength={5} placeholder="e.g. 4300" value={port} onChange={event => setPort(event.target.value)} autoComplete="off" spellCheck={false} aria-invalid={invalid} aria-describedby="product-port-help product-port-error" />
+          {url ? <a className="button button-primary" href={url} target="_blank" rel="noopener noreferrer" onClick={remember}>Open GENESIS <Icon name="diagonal" /></a>
+            : <button className="button button-primary" disabled>Open GENESIS <Icon name="diagonal" /></button>}
+        </div>
+        <p id="product-port-error" className="product-port-error" role="status">{invalid && 'Enter a port number between 1 and 65535.'}</p>
+        <small>Opens in a new tab with your selected theme.</small>
+      </section>}
+      {installed === false && <section className="product-next-step" aria-labelledby="product-contact-heading">
+        <h2 id="product-contact-heading">Let’s get you started.</h2>
+        <p className="muted">Contact us to get GENESIS.</p>
+        <a className="button button-primary" href={`mailto:${site.brand.email}?subject=Get%20GENESIS`}>Get in touch <Icon name="mail" /></a>
+      </section>}
       <a className="welcome-discover" href="#/explore">Discover GENESIS instead <Icon name="arrow" /></a>
     </section>
   </main>;
