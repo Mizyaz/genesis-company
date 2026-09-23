@@ -1,0 +1,193 @@
+{
+  "brand": {
+    "name": "GENESIS",
+    "descriptor": "Autonomous RFIC design engine",
+    "email": "islam.guven@uclouvain.be"
+  },
+  "stages": [
+    {
+      "title": "Specification",
+      "detail": "Define the circuit, frequency band and performance targets.",
+      "icon": "document"
+    },
+    {
+      "title": "Circuit synthesis",
+      "detail": "Organize the topology, devices and testbenches.",
+      "icon": "chip"
+    },
+    {
+      "title": "EM simulation",
+      "detail": "Bring the electromagnetic behavior into the design loop.",
+      "icon": "wave"
+    },
+    {
+      "title": "Optimization",
+      "detail": "Explore circuit and passive design choices together.",
+      "icon": "sliders"
+    },
+    {
+      "title": "Layout & verification",
+      "detail": "Connect physical design with DRC, LVS and extraction.",
+      "icon": "layers"
+    }
+  ],
+  "portfolio": [
+    {
+      "id": "spdt",
+      "number": "01",
+      "title": "D-band SPDT switch",
+      "kind": "Series-shunt architecture",
+      "band": "60–150 GHz",
+      "images": [
+        {
+          "src": "/assets/spdt.png",
+          "alt": "User-supplied full SPDT switch layout",
+          "label": "Full layout",
+          "fit": "cover",
+          "width": 2048,
+          "height": 1024,
+          "viewport": {
+            "x": 558,
+            "y": 46,
+            "width": 934,
+            "height": 932
+          }
+        },
+        {
+          "src": "/assets/spdt-detail.png",
+          "alt": "User-supplied close-up of the SPDT transistors and their connections",
+          "label": "Transistor detail",
+          "fit": "contain",
+          "width": 444,
+          "height": 473
+        }
+      ],
+      "description": "A switching circuit where active devices, passive matching and physical connections are designed as one system."
+    },
+    {
+      "id": "mixer",
+      "number": "02",
+      "title": "D-band passive mixer",
+      "kind": "Quadcore topology",
+      "band": "120–160 GHz",
+      "images": [
+        {
+          "src": "/assets/mixer.png",
+          "alt": "User-supplied quadcore mixer layout",
+          "label": "Full layout",
+          "fit": "contain",
+          "width": 739,
+          "height": 399
+        }
+      ],
+      "description": "Frequency conversion with circuit-level goals and transformer-based matching networks in the same design loop."
+    },
+    {
+      "id": "divider",
+      "number": "03",
+      "title": "Broadband power divider",
+      "kind": "Three-port · equal split",
+      "band": "20–120 GHz",
+      "images": [
+        {
+          "src": "/assets/divider.png",
+          "alt": "User-supplied compact three-port power divider layout",
+          "label": "Full layout",
+          "fit": "contain",
+          "width": 151,
+          "height": 179
+        }
+      ],
+      "description": "A broadband passive example that connects field behavior, geometry and verification."
+    }
+  ],
+  "designLoop": {
+    "left": {
+      "title": "RFIC expertise",
+      "icon": "chip",
+      "items": [
+        "Circuit design",
+        "EM knowledge",
+        "Silicon processes",
+        "Real-world constraints"
+      ]
+    },
+    "right": {
+      "title": "AI agents",
+      "icon": "spark",
+      "items": [
+        "Reasoning",
+        "Planning",
+        "Optimization",
+        "Learning"
+      ]
+    },
+    "outcome": "Autonomous RFIC design engine",
+    "caption": "Domain expertise meets autonomous intelligence."
+  },
+  "story": {
+    "eyebrow": "OUR STORY",
+    "headline": "Circuit designers.",
+    "headlineAccent": "Meet connected intelligence.",
+    "intro": "AI is changing how we work with software. GENESIS brings that connection to RFIC design, linking circuit designers with the tools they already use.",
+    "diagram": {
+      "designer": {
+        "title": "Circuit designers",
+        "detail": "Set the intent. Define the constraints. Make the engineering decisions.",
+        "compact": "Your intent."
+      },
+      "engine": {
+        "title": "AI-assisted orchestration",
+        "detail": "Translate intent into structured, tool-driven workflows.",
+        "compact": "Connected intelligence."
+      },
+      "tools": {
+        "title": "CAD tools",
+        "detail": "Build, simulate and verify with dedicated engineering tools.",
+        "compact": "Your tools."
+      },
+      "intent": "Design intent",
+      "workflow": "Structured workflows",
+      "feedback": "Results & feedback",
+      "assets": "PDKs · device models",
+      "environment": "Controlled engineering environment",
+      "caption": "Circuit designers and CAD tools, connected through GENESIS."
+    }
+  },
+  "workflow": {
+    "headline": "RF design.",
+    "headlineAccent": "From concept to layout.",
+    "intro": "Circuit design, EM simulation and optimization, connected from the first idea to physical verification."
+  },
+  "about": {
+    "eyebrow": "ABOUT US",
+    "headline": "Who are we?",
+    "intro": "RFIC research meets AI venture building.",
+    "people": [
+      {
+        "role": "AI & Deep-Tech Venture Architect",
+        "specialty": "Technology strategy · Venture building",
+        "description": "20+ years in technology strategy, venture building and AI-driven innovation, with experience in Silicon Valley and international networks.",
+        "image": "/assets/team-venture.webp",
+        "alt": "Venture architect portrait from the GENESIS overview",
+        "focus": [
+          "Strategy & execution",
+          "VC & partnerships",
+          "Global networks"
+        ]
+      },
+      {
+        "role": "PhD Researcher",
+        "specialty": "RFIC design automation · Multi-agent systems",
+        "description": "Research in RFIC design, machine learning and optimization, with a focus on autonomous design systems and advanced silicon technologies.",
+        "image": "/assets/team-research.webp",
+        "alt": "PhD researcher portrait from the GENESIS overview",
+        "focus": [
+          "RFIC & mmWave",
+          "AI agents & ML",
+          "System integration"
+        ]
+      }
+    ]
+  }
+}

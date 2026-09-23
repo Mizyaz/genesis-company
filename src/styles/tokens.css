@@ -1,0 +1,27 @@
+/* Brand contract: page modules use these tokens; no workbench CSS is imported. */
+:root {
+  color-scheme: dark;
+  --font-sans: Inter, "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, monospace;
+  --page: #041325; --surface: #091d32; --surface-raised: #0d253c;
+  --text: #f1f6fc; --muted: #9aacbf; --subtle: #6e87a0;
+  --border: #20364b; --border-soft: #142c42;
+  --cyan: #41dce8; --violet: #b08af4; --accent: #55ddec;
+  --glow: #1bbedc18; --error: #ffa7b9; --shadow: 0 20px 70px #0005;
+  --layout-filter: none; --layout-blend: screen;
+  --flow-cyan: #20dcef; --flow-violet: #a064ff; --flow-blue: #4285ff; --flow-highlight: #d6fcff;
+  --gradient: linear-gradient(105deg, var(--cyan) 10%, #6fb9ed 47%, var(--violet) 92%);
+  --radius: 12px; --content-width: 1240px;
+  font-family: var(--font-sans); font-size: 16px; line-height: 1.55;
+  font-synthesis: none; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --page: #f3f7fc; --surface: #fff; --surface-raised: #e9f0f8;
+  --text: #0b233c; --muted: #506780; --subtle: #5d7490;
+  --border: #c4d4e5; --border-soft: #dbe5ef;
+  --cyan: #007d97; --violet: #7846bf; --accent: #006b8a;
+  --glow: #149fcc0d; --error: #aa2851; --shadow: 0 20px 70px #183e6115;
+  --layout-filter: invert(1) hue-rotate(180deg); --layout-blend: multiply;
+  --flow-cyan: #08a9cf; --flow-violet: #9450e5; --flow-blue: #4272db; --flow-highlight: #eaffff;
+}
