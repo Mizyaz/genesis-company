@@ -32,6 +32,14 @@
 .product-port-row button:disabled { opacity: .5; }
 .product-next-step .product-port-error { color: var(--error); font-size: .8125rem; }
 .product-port-error:empty { display: none; }
+.product-next-step .product-connection-note { margin-top: 20px; color: var(--muted); font-size: .8125rem; line-height: 1.6; }
+.product-connection-help { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 14px; font-size: .8125rem; line-height: 1.65; color: var(--muted); }
+.product-connection-help summary { cursor: pointer; color: var(--cyan); }
+.product-connection-help summary:focus-visible { outline: 2px solid var(--cyan); outline-offset: 4px; }
+.product-connection-help ul { padding-left: 20px; margin: 16px 0; }
+.product-connection-help li + li { margin-top: 10px; }
+.product-connection-help strong { color: var(--text); font-weight: 550; }
+.product-connection-help a { color: var(--cyan); text-decoration: underline; text-underline-offset: 3px; }
 .welcome-discover { display: inline-flex; align-items: center; gap: 10px; margin-top: 16px; color: var(--cyan); font-size: .875rem; }
 .welcome-discover .icon { width: 16px; }
 @media (max-width: 600px) {

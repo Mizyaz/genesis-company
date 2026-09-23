@@ -9,12 +9,14 @@ const storageKey = 'genesis.company.productPort';
 /** Installation choice first; only an explicit click opens the product. */
 export function ProductLaunch({ theme }: { theme: 'light' | 'dark' }) {
   const [installed, setInstalled] = useState<boolean | null>(null);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [port, setPort] = useState(() => {
     try { return localStorage.getItem(storageKey) || ''; } catch { return ''; }
   });
   const url = productLink(port, theme);
   const invalid = port.length > 0 && !url;
   const remember = () => {
+    setHelpOpen(true);
     try {
       localStorage.setItem(storageKey, port.trim());
       localStorage.removeItem('genesis.company.productAddress');
@@ -40,6 +42,17 @@ export function ProductLaunch({ theme }: { theme: 'light' | 'dark' }) {
         </div>
         <p id="product-port-error" className="product-port-error" role="status">{invalid && 'Enter a port number between 1 and 65535.'}</p>
         <small>Opens in a new tab with your selected theme.</small>
+        <p className="product-connection-note">Using a remote server? Please connect your SSH tunnel first.</p>
+        <details className="product-connection-help" open={helpOpen} onToggle={event => setHelpOpen(event.currentTarget.open)}>
+          <summary>Can’t open GENESIS?</summary>
+          <ul>
+            <li><strong>Remote server:</strong> start GENESIS there, connect your SSH tunnel and keep it open. Enter the local forwarded port above.</li>
+            <li><strong>On this computer:</strong> start GENESIS and check its port. SSH is not required.</li>
+            <li><strong>Address not found:</strong> complete the <a href="https://github.com/Mizyaz/genesis-company#one-time-local-name-setup" target="_blank" rel="noopener noreferrer">one-time connection setup</a> on the computer running your browser.</li>
+            <li><strong>404 page:</strong> check that the port and page belong to GENESIS. A 404 is not an SSH connection check.</li>
+          </ul>
+          <p>Once ready, select Open GENESIS again.</p>
+        </details>
       </section>}
       {installed === false && <section className="product-next-step" aria-labelledby="product-contact-heading">
         <h2 id="product-contact-heading">Let’s get you started.</h2>
