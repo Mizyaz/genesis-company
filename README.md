@@ -9,10 +9,29 @@ Animations, theme and motion preferences run in the browser.
 Design first asks whether GENESIS is installed. No leads to the team's contact
 email; Yes asks which port to use. Only a port number (1 to 65535) is entered,
 never a URL. The port is remembered in the visitor's browser after opening the
-product. Only an explicit Open GENESIS click opens the loopback address in a new
+product. Only an explicit Open GENESIS click opens the configured local name in a new
 tab, with the selected theme. No availability probe, port scan, public LLM
 endpoint, prompt transfer, or backend request is made by this site. The actual
 assistant, model selection and CLI execution remain in the separate product.
+
+### One-time local name setup
+
+`connection.json` defines the friendly name, currently `genesis.test`. On the
+computer running your browser, from this checkout:
+
+```sh
+npm run connection:setup            # preview only
+npm run connection:setup -- --apply # local sudo, one /etc/hosts entry
+```
+
+This helper needs Node but no npm dependencies. It appends `127.0.0.1 genesis.test`
+only when missing and refuses conflicting mappings. On an SSH setup with a Mac
+browser, run it on the Mac, not the remote server. Keep your port forwarding.
+Open GENESIS then navigates to `http://genesis.test:<your port>`. No setup runs in
+the browser or during deployment, and the public site never tries to resolve or
+probe the name. The product must explicitly allow this hostname and origin while
+remaining bound to loopback. The companion local company app already does so.
+Remove only the `# GENESIS local connection` hosts entry to undo local setup.
 
 ## Run and build
 

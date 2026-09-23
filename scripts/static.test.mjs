@@ -3,6 +3,7 @@ import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import test from 'node:test';
 import ts from 'typescript';
+import { createRequire } from 'node:module';
 
 const root = resolve(import.meta.dirname, '..');
 const read = path => readFileSync(resolve(root, path), 'utf8');
@@ -13,7 +14,7 @@ test('public source has no assistant, landing page or engineering service', () =
   const content = JSON.parse(read('src/content/site.json'));
   assert.deepEqual(Object.keys(content).sort(), ['about', 'brand', 'designLoop', 'portfolio', 'stages', 'story', 'workflow'].sort());
   const source = walk('src').map(read).join('\n');
-  assert.doesNotMatch(source.replaceAll('http://127.0.0.1', ''), /localhost|127\.0\.0\.1|\/api\/|VITE_WORKBENCH_URL|codex exec|fetch\s*\(|new WebSocket/);
+  assert.doesNotMatch(source, /localhost|127\.0\.0\.1|\/api\/|VITE_WORKBENCH_URL|codex exec|fetch\s*\(|new WebSocket/);
   assert.match(read('index.html'), /connect-src 'none'/);
   assert.match(read('vite.config.ts'), /base: '\.\/'/);
 });
@@ -30,16 +31,19 @@ test('every published image is local and included', () => {
 test('production bundle has no local service client or assistant endpoint', () => {
   assert.ok(existsSync(resolve(root, 'dist/index.html')), 'Run npm run build before npm test');
   const output = walk('dist').filter(path => /\.(js|css|html)$/.test(path)).map(read).join('\n');
-  assert.doesNotMatch(output.replaceAll('http://127.0.0.1', ''), /localhost|127\.0\.0\.1|\/api\/navigator|VITE_WORKBENCH_URL|codex exec|gpt-5\.6/);
+  assert.doesNotMatch(output, /localhost|127\.0\.0\.1|\/api\/navigator|VITE_WORKBENCH_URL|codex exec|gpt-5\.6/);
   assert.match(read('dist/index.html'), /connect-src 'none'/);
   assert.doesNotMatch(read('dist/index.html'), /(?:src|href)="\/assets\//);
 });
 
 test('product links accept only a valid port and carry the selected theme', async () => {
-  const code = ts.transpileModule(read('src/shared/productLink.ts'), { compilerOptions: { module: ts.ModuleKind.ESNext } }).outputText;
-  const { productLink } = await import(`data:text/javascript;base64,${Buffer.from(code).toString('base64')}`);
-  assert.equal(productLink('4300', 'light'), 'http://127.0.0.1:4300/?theme=light');
-  assert.equal(productLink('65535', 'dark'), 'http://127.0.0.1:65535/?theme=dark');
-  assert.equal(productLink(' 1 ', 'dark'), 'http://127.0.0.1:1/?theme=dark');
+  const code = ts.transpileModule(read('src/shared/productLink.ts'), { compilerOptions: { module: ts.ModuleKind.CommonJS, esModuleInterop: true } }).outputText;
+  const exports = {};
+  new Function('require', 'exports', code)(createRequire(resolve(root, 'src/shared/productLink.ts')), exports);
+  const { productLink } = exports;
+  const { hostname } = JSON.parse(read('connection.json'));
+  assert.equal(productLink('4300', 'light'), `http://${hostname}:4300/?theme=light`);
+  assert.equal(productLink('65535', 'dark'), `http://${hostname}:65535/?theme=dark`);
+  assert.equal(productLink(' 1 ', 'dark'), `http://${hostname}:1/?theme=dark`);
   for (const port of ['', '0', '65536', '-1', '4.3', '1e3', 'abc', 'https://example.test', 'javascript:alert(1)']) assert.equal(productLink(port, 'dark'), null, port);
 });
