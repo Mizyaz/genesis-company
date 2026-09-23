@@ -10,7 +10,10 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "test": "node --test scripts/static.test.mjs"
+    "test": "node --test scripts/static.test.mjs",
+    "site:open": "node scripts/site-access.mjs open",
+    "site:close": "node scripts/site-access.mjs close",
+    "site:status": "node scripts/site-access.mjs status"
   },
   "dependencies": {
     "react": "18.3.1",

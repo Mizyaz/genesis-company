@@ -25,6 +25,24 @@ connections through `connect-src 'none'`.
 
 ## Hosting
 
+### Quick access switch
+
+With GitHub CLI installed and logged into the repository owner's account:
+
+```sh
+npm run site:open
+npm run site:close
+npm run site:status
+```
+
+`open` makes this repository and its Pages site public. `close` disables the Pages
+workflow, cancels any active publication, unpublishes the website and makes the
+repository private without deleting source or history. Closing is not a private
+website login screen. GitHub may take a minute to propagate the change, and
+previously downloaded copies cannot be revoked. These commands affect only
+`Mizyaz/genesis-company`; they run from any authenticated computer and are never
+part of the browser bundle. No connection to an engineering server is involved.
+
 GitHub Pages: select **GitHub Actions** as the Pages publishing source.
 The included workflow builds and deploys pushes to `main` on GitHub-hosted
 runners. It never contacts an engineering machine or a self-hosted runner.
