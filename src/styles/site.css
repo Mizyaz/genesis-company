@@ -139,7 +139,6 @@ img { display: block; max-width: 100%; }
 .portfolio-copy > .eyebrow { font-size: .625rem; color: var(--subtle); letter-spacing: .1em; }
 .portfolio-copy h3 { font-size: 1.25rem; font-weight: 550; letter-spacing: -.02em; margin: 10px 0 14px; }
 .portfolio-copy > p:last-child { color: var(--muted); font-size: .9375rem; line-height: 1.75; }
-.source-note { display: block; margin-top: 22px; color: var(--subtle); font-size: .75rem; }
 .approach-section { display: grid; grid-template-columns: 1fr 1fr; gap: 85px; align-items: center; }
 .design-loop { min-width: 0; text-align: center; container-type: inline-size; }
 .design-loop-graphic { position: relative; aspect-ratio: 600 / 440; isolation: isolate; }
@@ -169,9 +168,6 @@ img { display: block; max-width: 100%; }
   .loop-outcome { position: relative; inset: auto; grid-column: 1 / -1; min-height: 82px; }
   .loop-outcome::before { content: '↓'; position: absolute; bottom: calc(100% + 1px); color: var(--muted); }
 }
-.ecosystem-strip { margin: 10px auto 0; padding: 58px 48px; max-width: var(--content-width); border-block: 1px solid var(--border); text-align: center; }
-.ecosystem-strip h2 { margin: 16px 0; font-size: 2rem; font-weight: 550; letter-spacing: -.03em; }
-.ecosystem-strip > p:not(.eyebrow) { max-width: 800px; margin: auto; color: var(--muted); }
 .contact-section { text-align: center; padding-block: 105px; }
 .contact-section h2 { font-size: clamp(2.3rem, 5vw, 4.2rem); letter-spacing: -.04em; line-height: 1.2; font-weight: 550; margin-top: 25px; }
 .contact-actions { display: flex; justify-content: center; gap: 16px; margin: 38px 0 25px; }
@@ -254,8 +250,6 @@ img { display: block; max-width: 100%; }
   .layout-image { height: 270px; padding: 20px; }
   .portfolio-copy, .portfolio-top { padding: 24px; }
   .approach-section { grid-template-columns: 1fr; gap: 36px; }
-  .ecosystem-strip { padding: 45px 24px; margin-inline: 24px; }
-  .ecosystem-strip h2 { font-size: 1.7rem; }
   .contact-section { padding-block: 65px; }
   .contact-section h2 { font-size: clamp(2rem, 7vw, 2.6rem); }
   .contact-actions { flex-direction: column; align-items: center; }

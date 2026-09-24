@@ -33,7 +33,6 @@ export function Explore({ workbenchUrl }: { workbenchUrl?: string }) {
       </div>
       <DesignBridge content={site.story.diagram} brand={<Brand />} />
     </section>
-    <section className="ecosystem-strip"><p className="eyebrow">THE PATH FORWARD</p><h2>Designed for the path to silicon.</h2><p>PDK-aware design, prototyping, packaging and measured feedback form the next part of the loop. Our overview explores how the imec and IC-Link ecosystem could support that journey.</p><span className="source-note">Ecosystem pathway described in the deck, not a partnership announcement.</span></section>
     <section id="contact" className="content-section contact-section"><p className="eyebrow">LET’S BUILD WHAT COMES NEXT</p><h2>From design intent.<br /><span className="gradient-text">To silicon demonstration.</span></h2><div className="contact-actions"><a className="button button-primary" href={`mailto:${site.brand.email}?subject=GENESIS%20demo`}>Get in touch <Icon name="mail" /></a>{workbenchUrl && <a className="button button-secondary" href={workbenchUrl} target="_blank" rel="noopener noreferrer">Open workbench <Icon name="diagonal" /></a>}</div></section>
     <section id="about" className="content-section about-section">
       <div className="section-intro"><SectionHeading number="05" eyebrow={site.about.eyebrow}>{site.about.headline}</SectionHeading><p>{site.about.intro}</p></div>
