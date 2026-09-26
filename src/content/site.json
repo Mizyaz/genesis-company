@@ -165,6 +165,9 @@
     "intro": "RFIC research meets AI venture building.",
     "people": [
       {
+        "id": "mehmet-parlak",
+        "name": "Mehmet Parlak",
+        "scholar": "https://scholar.google.com/citations?user=F6vMw38AAAAJ",
         "role": "AI & Deep-Tech Venture Architect",
         "specialty": "Technology strategy · Venture building",
         "description": "20+ years in technology strategy, venture building and AI-driven innovation, with experience in Silicon Valley and international networks.",
@@ -177,6 +180,9 @@
         ]
       },
       {
+        "id": "islam-guven",
+        "name": "İslam Güven",
+        "scholar": "https://scholar.google.com/citations?user=TAQaab0AAAAJ",
         "role": "PhD Researcher",
         "specialty": "RFIC design automation · Multi-agent systems",
         "description": "Research in RFIC design, machine learning and optimization, with a focus on autonomous design systems and advanced silicon technologies.",

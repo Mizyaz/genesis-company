@@ -28,6 +28,34 @@ test('every published image is local and included', () => {
   }
 });
 
+test('publication records are attributable, deduplicated and exclude preprints', () => {
+  const people = JSON.parse(read('src/content/site.json')).about.people;
+  const papers = JSON.parse(read('src/content/publications.json'));
+  const authors = new Set(people.map(person => person.id));
+  assert.equal(authors.size, people.length);
+  for (const person of people) {
+    assert.ok(person.name);
+    assert.equal(new URL(person.scholar).hostname, 'scholar.google.com');
+    assert.ok(new URL(person.scholar).searchParams.get('user'));
+    assert.ok(papers.some(paper => paper.people.includes(person.id)));
+  }
+  assert.ok(papers.length > 0);
+  assert.equal(new Set(papers.map(paper => paper.id)).size, papers.length);
+  const dois = papers.map(paper => paper.doi.toLowerCase()).filter(Boolean);
+  assert.equal(new Set(dois).size, dois.length);
+  for (const paper of papers) {
+    assert.ok(paper.title && paper.authors && paper.venue, paper.id);
+    assert.ok(paper.people.length && paper.people.every(person => authors.has(person)), paper.id);
+    assert.ok(['Journal', 'Conference'].includes(paper.type), paper.id);
+    assert.ok(Number.isInteger(paper.year) && paper.year >= 1900 && paper.year <= new Date().getFullYear(), paper.id);
+    assert.ok(paper.keywords.length && paper.keywords.every(keyword => typeof keyword === 'string' && keyword.trim()), paper.id);
+    assert.ok(paper.summary === null || typeof paper.summary === 'string' && paper.summary.length > 40, paper.id);
+    assert.equal(new URL(paper.source).protocol, 'https:', paper.id);
+    if (paper.doi) assert.match(paper.doi, /^10\.\d{4,9}\/\S+$/, paper.id);
+    assert.doesNotMatch(JSON.stringify(paper), /arxiv|10\.48550|—/i, paper.id);
+  }
+});
+
 test('production bundle has no local service client or assistant endpoint', () => {
   assert.ok(existsSync(resolve(root, 'dist/index.html')), 'Run npm run build before npm test');
   const output = walk('dist').filter(path => /\.(js|css|html)$/.test(path)).map(read).join('\n');

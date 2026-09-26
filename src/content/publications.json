@@ -1,0 +1,621 @@
+[
+  {
+    "id": "hybrid-rf-2026",
+    "title": "Hybrid Evolutionary-Reinforcement Learning Synthesis of Wideband D-Band Three-Port Circuits",
+    "authors": "İslam Güven, Mehmet Parlak and Dimitri Lederer",
+    "people": [
+      "islam-guven",
+      "mehmet-parlak"
+    ],
+    "year": 2026,
+    "venue": "IEEE SMACD",
+    "type": "Conference",
+    "doi": "10.1109/SMACD70206.2026.11647853",
+    "keywords": [
+      "RF synthesis",
+      "CMA-ES",
+      "Reinforcement learning",
+      "D-band"
+    ],
+    "summary": "Combines evolutionary search, local bit-flip refinement and PPO to synthesize pixelated three-port passive circuits. Full-wave EM simulations guide the search without a precollected training set. D-band divider and balun examples examine simulation cost, gain balance and phase accuracy.",
+    "source": "https://doi.org/10.1109/SMACD70206.2026.11647853"
+  },
+  {
+    "id": "world-model-2026",
+    "title": "World Model-Based Reinforcement Learning for Sample-Efficient Wideband Pixelated Passive RF Circuit Synthesis",
+    "authors": "İslam Güven, Mehmet Parlak and Dimitri Lederer",
+    "people": [
+      "islam-guven",
+      "mehmet-parlak"
+    ],
+    "year": 2026,
+    "venue": "IEEE SMACD",
+    "type": "Conference",
+    "doi": "10.1109/SMACD70206.2026.11647844",
+    "keywords": [
+      "World models",
+      "RF synthesis",
+      "EM simulation"
+    ],
+    "summary": "A learned world model supports policy training between electromagnetic simulations of binary metal layouts. The approach uses imagined rollouts to reduce additional solver calls and evaluates the resulting design search on a wideband directional coupler.",
+    "source": "https://eurekamag.com/research/110/182/110182728.php"
+  },
+  {
+    "id": "bayesian-rf-2026",
+    "title": "Sample-Efficient Trust-Region Discrete Bayesian Optimization for Wideband Multi-Layer Pixelated Passive RF Circuits",
+    "authors": "İslam Güven, Mehmet Parlak and Dimitri Lederer",
+    "people": [
+      "islam-guven",
+      "mehmet-parlak"
+    ],
+    "year": 2026,
+    "venue": "International Microwave and Radar Conference (MIKON)",
+    "type": "Conference",
+    "doi": "10.23919/MIKON66970.2026.11577973",
+    "keywords": [
+      "Bayesian optimization",
+      "Pixelated passives",
+      "Multilayer layouts"
+    ],
+    "summary": "Uses a Gaussian-process model in Hamming space and a discrete trust region to search stacked binary metal layouts. Electromagnetic evaluations guide synthesis across different passive circuit types, layer counts and port configurations.",
+    "source": "https://edas.info/web/mrw-2026/program.html"
+  },
+  {
+    "id": "microwave-education-2026",
+    "title": "Rethinking Microwave Education and Circuit Design Through Machine Learning and Optimization",
+    "authors": "Mehmet Parlak, İslam Güven and Dimitri Lederer",
+    "people": [
+      "islam-guven",
+      "mehmet-parlak"
+    ],
+    "year": 2026,
+    "venue": "International Microwave and Radar Conference (MIKON)",
+    "type": "Conference",
+    "doi": "10.23919/MIKON66970.2026.11577889",
+    "keywords": [
+      "Microwave education",
+      "Machine learning",
+      "Circuit design"
+    ],
+    "summary": "Proposes teaching microwave circuits through specification-driven electromagnetic synthesis alongside analytical methods. Machine-learning inverse design and multi-objective optimization let students explore beyond predefined topologies while developing intuition about parasitics, process effects and wideband performance.",
+    "source": "https://edas.info/web/mrw-2026/program.html"
+  },
+  {
+    "id": "sustainable-uav-2026",
+    "title": "Sustainability-Aware Multi-Agent Reinforcement Learning for UAV Response and Monitoring with Joint Communication and Sensing",
+    "authors": "İslam Güven and Mehmet Parlak",
+    "people": [
+      "islam-guven",
+      "mehmet-parlak"
+    ],
+    "year": 2026,
+    "venue": "IEEE Conference on Artificial Intelligence (CAI)",
+    "type": "Conference",
+    "doi": "10.1109/CAI68641.2026.11536451",
+    "keywords": [
+      "Multi-agent learning",
+      "Joint sensing and communication",
+      "Energy"
+    ],
+    "summary": "Studies UAV monitoring policies that jointly choose movement and sensing-communication resources. The environment accounts for batteries, charging and emissions, while detection requires agreement between agents. Experiments compare learned resource allocation with fixed operating configurations.",
+    "source": "https://eurekamag.com/research/107/753/107753302.php"
+  },
+  {
+    "id": "medical-uav-2026",
+    "title": "Multi-Agent Reinforcement Learning for Time-Critical UAV Medical Supply Delivery with Dynamic Task Allocation",
+    "authors": "İslam Güven and Mehmet Parlak",
+    "people": [
+      "islam-guven",
+      "mehmet-parlak"
+    ],
+    "year": 2026,
+    "venue": "IEEE Conference on Artificial Intelligence (CAI)",
+    "type": "Conference",
+    "doi": "10.1109/CAI68641.2026.11536648",
+    "keywords": [
+      "Multi-agent learning",
+      "Task allocation",
+      "Medical logistics"
+    ],
+    "summary": "Coordinates UAV deliveries with changing urgency, locations and deadlines under partial information. The study compares PPO-based learning variants using clinic and hospital locations, examining how fleets can adapt task assignments as requests and operating conditions change.",
+    "source": "https://eurekamag.com/research/107/753/107753197.php"
+  },
+  {
+    "id": "ai-ic-survey-2025",
+    "title": "AI-Driven Integrated Circuit Design: A Survey of Techniques, Challenges, and Opportunities",
+    "authors": "İslam Güven, Mehmet Parlak, Dimitri Lederer and Christophe De Vleeschouwer",
+    "people": [
+      "islam-guven",
+      "mehmet-parlak"
+    ],
+    "year": 2025,
+    "venue": "IEEE Access",
+    "type": "Journal",
+    "doi": "10.1109/ACCESS.2025.3607865",
+    "keywords": [
+      "RFIC design",
+      "Design automation",
+      "Machine learning",
+      "Survey"
+    ],
+    "summary": "Reviews AI methods across analog and RFIC topology synthesis, sizing, layout and post-silicon tasks. It compares evolutionary search, Bayesian optimization, reinforcement learning, deep learning and language models, with attention to data efficiency and generalization.",
+    "source": "https://ieeexplore.ieee.org/abstract/document/11153923/authors"
+  },
+  {
+    "id": "priority-search-2025",
+    "title": "Priority-Aware Multi-UAV Search Path Planning with Evolutionary Algorithms and MARL",
+    "authors": "İslam Güven, Umut İlkbahar, Buse İnç and Evşen Yanmaz",
+    "people": [
+      "islam-guven"
+    ],
+    "year": 2025,
+    "venue": "IEEE Virtual Conference on Communications (VCC)",
+    "type": "Conference",
+    "doi": "10.1109/VCC67261.2025.11351167",
+    "keywords": [
+      "UAV search",
+      "Evolutionary algorithms",
+      "Multi-agent learning"
+    ],
+    "summary": "Compares evolutionary planners and multi-agent PPO for missions that balance coverage time, ground-station connectivity and urgent regions. A real-world risk map is used to examine the trade-off between computation cost and adaptive treatment of priority areas.",
+    "source": "https://rdmtest.aperta.ulakbim.gov.tr/records/9683"
+  },
+  {
+    "id": "cooperative-search-2025",
+    "title": "Cooperative Multi-Target Search with UAV Swarms: Evolutionary vs. Reinforcement Learning Strategies",
+    "authors": "Kadircan Kara, İslam Güven and Evşen Yanmaz",
+    "people": [
+      "islam-guven"
+    ],
+    "year": 2025,
+    "venue": "Modeling, Analysis and Simulation of Wireless and Mobile Systems (MSWiM)",
+    "type": "Conference",
+    "doi": "10.1109/MSWiM67937.2025.11308767",
+    "keywords": [
+      "UAV swarms",
+      "Evolutionary algorithms",
+      "Reinforcement learning"
+    ],
+    "summary": "Compares evolutionary algorithms with reinforcement learning for cooperative multi-target search by UAV teams. The study considers imperfect sensing and changing information, examining how search policies balance area coverage, network connectivity and revisit timing.",
+    "source": "https://eurekamag.com/research/104/487/104487912.php"
+  },
+  {
+    "id": "sensing-search-2025",
+    "title": "Sensing-Aware Cooperative Multi-UAV Search with Reinforcement Learning",
+    "authors": "İslam Güven and Evşen Yanmaz",
+    "people": [
+      "islam-guven"
+    ],
+    "year": 2025,
+    "venue": "IEEE PIMRC",
+    "type": "Conference",
+    "doi": "10.1109/PIMRC62392.2025.11275290",
+    "keywords": [
+      "Cooperative search",
+      "Sensing",
+      "Reinforcement learning"
+    ],
+    "summary": "Develops a cooperative search environment that models uncertain sensing and decentralized information sharing. Multi-agent PPO learns coordinated search policies, with experiments examining performance as the numbers of UAVs and targets change.",
+    "source": "https://labs.ozyegin.edu.tr/nas/paper-accepted-at-ieee-pimrc-2025/"
+  },
+  {
+    "id": "heterogeneous-uav-2025",
+    "title": "Adaptive Multi-UAV Coordination for Heterogeneous Target Search and Connect Missions Using Proximal Policy Optimization",
+    "authors": "İslam Güven and Evşen Yanmaz",
+    "people": [
+      "islam-guven"
+    ],
+    "year": 2025,
+    "venue": "IEEE VTC Spring",
+    "type": "Conference",
+    "doi": "10.1109/VTC2025-Spring65109.2025.11174683",
+    "keywords": [
+      "PPO",
+      "Heterogeneous agents",
+      "Connectivity"
+    ],
+    "summary": null,
+    "source": "https://doi.org/10.1109/VTC2025-Spring65109.2025.11174683"
+  },
+  {
+    "id": "coverage-2024",
+    "title": "Multi-objective path planning for multi-UAV connectivity and area coverage",
+    "authors": "İslam Güven and Evşen Yanmaz",
+    "people": [
+      "islam-guven"
+    ],
+    "year": 2024,
+    "venue": "Ad Hoc Networks",
+    "type": "Journal",
+    "doi": "10.1016/j.adhoc.2024.103520",
+    "keywords": [
+      "Multi-objective optimization",
+      "UAV networks",
+      "Connectivity"
+    ],
+    "summary": "Plans drone routes while balancing coverage time, connectivity to a ground station and the longest disconnected interval. Evolutionary optimization produces alternative trade-offs instead of a single weighted-sum solution, allowing mission priorities to guide the final choice.",
+    "source": "https://www.sciencedirect.com/science/article/pii/S1570870524001318"
+  },
+  {
+    "id": "dynamic-search-2024",
+    "title": "Dynamic Multi-UAV Path Planning for Multi-Target Search and Connectivity",
+    "authors": "Evşen Yanmaz, Hamid Majidi Balanji and İslam Güven",
+    "people": [
+      "islam-guven"
+    ],
+    "year": 2024,
+    "venue": "IEEE Transactions on Vehicular Technology",
+    "type": "Journal",
+    "doi": "10.1109/TVT.2024.3363840",
+    "keywords": [
+      "Path planning",
+      "Multi-target search",
+      "Relay networks"
+    ],
+    "summary": "Studies how search and relay UAVs can adapt their routes after discovering targets. Comparing fixed routes, added communication points and active replanning exposes a trade-off between faster detection and maintaining connectivity for timely information delivery.",
+    "source": "https://doi.org/10.1109/TVT.2024.3363840"
+  },
+  {
+    "id": "soi-lna-2024",
+    "title": "Millimeter-Wave Low Noise Amplifiers in SOI for 5G/6G Joint Communication and Sensing",
+    "authors": "Mehmet Parlak, Martin Rack, Lucas Nyssens, Théo Denis, Jean-Pierre Raskin and Dimitri Lederer",
+    "people": [
+      "mehmet-parlak"
+    ],
+    "year": 2024,
+    "venue": "International Radar Symposium (IRS)",
+    "type": "Conference",
+    "doi": "",
+    "keywords": [
+      "SOI",
+      "Low-noise amplifiers",
+      "Joint sensing and communication"
+    ],
+    "summary": null,
+    "source": "https://sites.uclouvain.be/RF-SOI-group/mehmet-parlak/"
+  },
+  {
+    "id": "quantum-dots-2024",
+    "title": "Environmental tests and reliability characterization of pixel-sized colloidal QDs for next-generation display technologies",
+    "authors": "Mehmet Parlak, H. İ. İlban, K. Karslı, Emre Ünal and Hilmi Volkan Demir",
+    "people": [
+      "mehmet-parlak"
+    ],
+    "year": 2024,
+    "venue": "Next Nanotechnology",
+    "type": "Journal",
+    "doi": "10.1016/j.nxnano.2024.100059",
+    "keywords": [
+      "Quantum dots",
+      "Display technology",
+      "Reliability"
+    ],
+    "summary": "Examines pixel-sized quantum-dot color converters under temperature cycling, thermal shock, humidity and cold exposure. Measurements compare light output and color before and after testing, identifying both thermal resilience and vulnerability to hot, humid conditions.",
+    "source": "https://www.sciencedirect.com/science/article/pii/S2949829524000202"
+  },
+  {
+    "id": "connected-search-2023",
+    "title": "Maintaining Connectivity for Multi-UAV Multi-Target Search Using Reinforcement Learning",
+    "authors": "İslam Güven and Evşen Yanmaz",
+    "people": [
+      "islam-guven"
+    ],
+    "year": 2023,
+    "venue": "ACM DIVANet",
+    "type": "Conference",
+    "doi": "10.1145/3616392.3623414",
+    "keywords": [
+      "Multi-agent learning",
+      "Search and rescue",
+      "Connectivity"
+    ],
+    "summary": "Uses multi-agent reinforcement learning for drone search missions that must preserve network connectivity. A convolutional model processes spatial histories and connection states, learning actions through missions with randomized target locations.",
+    "source": "https://labs.ozyegin.edu.tr/nas/paper-accepted-at-acm-divanet-2023/"
+  },
+  {
+    "id": "flyback-2023",
+    "title": "Design of Multiple-Output Flyback Converter with Independently Controlled Outputs for TV Power Supply",
+    "authors": "Ramazan Düzgün, Mehmet Parlak and İsmail Yılmazlar",
+    "people": [
+      "mehmet-parlak"
+    ],
+    "year": 2023,
+    "venue": "Electrical Machines, Drives and Power Systems (ELMA)",
+    "type": "Conference",
+    "doi": "10.1109/ELMA58392.2023.10202445",
+    "keywords": [
+      "Power electronics",
+      "Flyback converter",
+      "Output regulation"
+    ],
+    "summary": null,
+    "source": "https://doi.org/10.1109/ELMA58392.2023.10202445"
+  },
+  {
+    "id": "lpi-radar-2022",
+    "title": "Classifying LPI Radar Waveforms With Time-Frequency Transformations Using Multi-Stage CNN System",
+    "authors": "İslam Güven, Can Yağmur, Bahadır Karadaş and Mehmet Parlak",
+    "people": [
+      "islam-guven",
+      "mehmet-parlak"
+    ],
+    "year": 2022,
+    "venue": "International Radar Symposium (IRS)",
+    "type": "Conference",
+    "doi": "10.23919/IRS54158.2022.9904993",
+    "keywords": [
+      "Radar classification",
+      "Time-frequency analysis",
+      "CNN"
+    ],
+    "summary": null,
+    "source": "https://doi.org/10.23919/IRS54158.2022.9904993"
+  },
+  {
+    "id": "swarm-agriculture-2022",
+    "title": "Blockchain, AI and IoT Empowered Swarm Drones for Precision Agriculture Applications",
+    "authors": "İslam Güven and Mehmet Parlak",
+    "people": [
+      "islam-guven",
+      "mehmet-parlak"
+    ],
+    "year": 2022,
+    "venue": "IEEE iGETblockchain",
+    "type": "Conference",
+    "doi": "10.1109/iGETblockchain56591.2022.10087152",
+    "keywords": [
+      "Swarm drones",
+      "Precision agriculture",
+      "Blockchain"
+    ],
+    "summary": null,
+    "source": "https://doi.org/10.1109/iGETblockchain56591.2022.10087152"
+  },
+  {
+    "id": "vehicle-evidence-2022",
+    "title": "Tamper-Proof Evidence via Blockchain for Autonomous Vehicle Accident Monitoring",
+    "authors": "Mehmet Parlak, Nurkan Fatih Altunel, Utku Ayaz Akkaş and Emir Tarık Arıcı",
+    "people": [
+      "mehmet-parlak"
+    ],
+    "year": 2022,
+    "venue": "IEEE iGETblockchain",
+    "type": "Conference",
+    "doi": "10.1109/iGETblockchain56591.2022.10087067",
+    "keywords": [
+      "Autonomous vehicles",
+      "Blockchain",
+      "Evidence integrity"
+    ],
+    "summary": null,
+    "source": "https://doi.org/10.1109/iGETblockchain56591.2022.10087067"
+  },
+  {
+    "id": "grid-stability-2021",
+    "title": "EV-Integrated Power System Transient Stability Prediction Based on Imaging Time Series and Deep Neural Network",
+    "authors": "Tohid Behdadnia and Mehmet Parlak",
+    "people": [
+      "mehmet-parlak"
+    ],
+    "year": 2021,
+    "venue": "IEEE ITSC",
+    "type": "Conference",
+    "doi": "10.1109/ITSC48978.2021.9564623",
+    "keywords": [
+      "Power systems",
+      "Time-series imaging",
+      "Deep learning"
+    ],
+    "summary": "Encodes synchronized voltage measurements as images for a neural network that predicts grid instability. Hybrid simulation supplies realistic training data, and the study compares power-system behavior with and without electric-vehicle fast-charging stations.",
+    "source": "https://www.researchgate.net/publication/355600609_EV-Integrated_Power_System_Transient_Stability_Prediction_Based_on_Imaging_Time_Series_and_Deep_Neural_Network"
+  },
+  {
+    "id": "reconfig-radar-2015",
+    "title": "A Reconfigurable 50-Mb/s–1 Gb/s Pulse Compression Radar Signal Processor With Offset Calibration in 90-nm CMOS",
+    "authors": "Jun Li, Mehmet Parlak, Hirohito Mukai, Michiaki Matsuo and James F. Buckwalter",
+    "people": [
+      "mehmet-parlak"
+    ],
+    "year": 2015,
+    "venue": "IEEE Transactions on Microwave Theory and Techniques",
+    "type": "Journal",
+    "doi": "10.1109/TMTT.2014.2375177",
+    "keywords": [
+      "Pulse compression",
+      "Mixed-signal circuits",
+      "Calibration"
+    ],
+    "summary": "Presents a reconfigurable radar signal processor that combines mixed-signal calibration and bandwidth adaptation. The circuit targets improved receiver dynamic range while retaining low-power operation.",
+    "source": "https://www.researchgate.net/profile/Mehmet-Parlak"
+  },
+  {
+    "id": "passive-mixer-2013",
+    "title": "A Passive I/Q Millimeter-Wave Mixer and Switch in 45-nm CMOS SOI",
+    "authors": "Mehmet Parlak and James F. Buckwalter",
+    "people": [
+      "mehmet-parlak"
+    ],
+    "year": 2013,
+    "venue": "IEEE Transactions on Microwave Theory and Techniques",
+    "type": "Journal",
+    "doi": "10.1109/TMTT.2013.2238247",
+    "keywords": [
+      "Passive mixer",
+      "SPDT switch",
+      "CMOS SOI"
+    ],
+    "summary": "Investigates passive mmWave transmitter and receiver blocks in 45 nm SOI CMOS. Measured SPDT-switch and I/Q-mixer implementations illustrate the technology’s loss and linearity trade-offs.",
+    "source": "https://www.researchgate.net/profile/Mehmet-Parlak"
+  },
+  {
+    "id": "reconfig-radar-2013",
+    "title": "A 1Gb/s Reconfigurable Pulse Compression Radar Signal Processor in 90nm CMOS",
+    "authors": "Jun Li, Hirohito Mukai, Mehmet Parlak, Michiaki Matsuo and James F. Buckwalter",
+    "people": [
+      "mehmet-parlak"
+    ],
+    "year": 2013,
+    "venue": "IEEE CICC",
+    "type": "Conference",
+    "doi": "10.1109/CICC.2013.6658545",
+    "keywords": [
+      "Pulse compression",
+      "Baseband processing",
+      "CMOS"
+    ],
+    "summary": "Adapts radar processing bandwidth to target range using an analog correlator, a flash converter and a multi-range delay-locked loop. The design implements reconfigurable baseband processing in 90 nm CMOS.",
+    "source": "https://www.researchgate.net/profile/Mehmet-Parlak"
+  },
+  {
+    "id": "analog-radar-2012",
+    "title": "Analog Signal Processing for Pulse Compression Radar in 90-nm CMOS",
+    "authors": "Mehmet Parlak, Michiaki Matsuo and James F. Buckwalter",
+    "people": [
+      "mehmet-parlak"
+    ],
+    "year": 2012,
+    "venue": "IEEE Transactions on Microwave Theory and Techniques",
+    "type": "Journal",
+    "doi": "10.1109/TMTT.2012.2222433",
+    "keywords": [
+      "Analog processing",
+      "Pulse compression",
+      "Radar"
+    ],
+    "summary": "Implements radar pulse compression in analog baseband circuitry. By exploiting polyphase-code correlation before digitization, the design addresses receiver sensitivity and resolution while reducing demands on converter speed and precision.",
+    "source": "https://www.researchgate.net/publication/258656982_Analog_Signal_Processing_for_Pulse_Compression_Radar_in_90-nm_CMOS"
+  },
+  {
+    "id": "vga-2012",
+    "title": "A 6-bit Wideband Variable Gain Amplifier with Low Group Delay Variation in 90nm CMOS",
+    "authors": "Mehmet Parlak, Michiaki Matsuo and James F. Buckwalter",
+    "people": [
+      "mehmet-parlak"
+    ],
+    "year": 2012,
+    "venue": "IEEE SiRF",
+    "type": "Conference",
+    "doi": "10.1109/SiRF.2012.6160121",
+    "keywords": [
+      "Variable gain amplifier",
+      "Group delay",
+      "CMOS"
+    ],
+    "summary": "Develops a differential amplifier with 64 gain settings and limited group-delay variation between settings. The design addresses gain control in ranging and positioning receivers, where delay changes can degrade timing accuracy.",
+    "source": "https://www.researchgate.net/publication/254056217_A_6-bit_wideband_variable_gain_amplifier_with_low_group_delay_variation_in_90nm_CMOS"
+  },
+  {
+    "id": "spdt-2011",
+    "title": "A 2.5-dB Insertion Loss, DC-60 GHz CMOS SPDT Switch in 45-nm SOI",
+    "authors": "Mehmet Parlak and James F. Buckwalter",
+    "people": [
+      "mehmet-parlak"
+    ],
+    "year": 2011,
+    "venue": "IEEE CSICS",
+    "type": "Conference",
+    "doi": "10.1109/CSICS.2011.6062463",
+    "keywords": [
+      "SPDT switch",
+      "Broadband matching",
+      "CMOS SOI"
+    ],
+    "summary": "Implements a broadband transmit-receive switch using a series-shunt topology and input-output matching. The study evaluates SOI substrate isolation as part of a low-loss switching design spanning DC through mmWave frequencies.",
+    "source": "https://www.researchgate.net/publication/261452296_A_25-dB_insertion_loss_DC-60_GHz_CMOS_SPDT_switch_in_45-nm_SOI"
+  },
+  {
+    "id": "qband-lna-2011",
+    "title": "A 2.9-dB Noise Figure, Q-Band Millimeter-Wave CMOS SOI LNA",
+    "authors": "Mehmet Parlak and James F. Buckwalter",
+    "people": [
+      "mehmet-parlak"
+    ],
+    "year": 2011,
+    "venue": "IEEE CICC",
+    "type": "Conference",
+    "doi": "10.1109/CICC.2011.6055321",
+    "keywords": [
+      "Low-noise amplifier",
+      "Q-band",
+      "Noise matching"
+    ],
+    "summary": "Demonstrates a two-stage cascode LNA in 45 nm SOI CMOS operating across 43–53 GHz. Its matching design addresses noise and input power together, with measurements characterizing gain and noise figure.",
+    "source": "https://www.researchgate.net/publication/261048768_A_29-dB_noise_figure_Q-band_millimeter-wave_CMOS_SOI_LNA"
+  },
+  {
+    "id": "bidirectional-radar-2011",
+    "title": "Bidirectional Circuitry for Millimeter-Wave Pulse Compression Radar",
+    "authors": "Mehmet Parlak, James F. Buckwalter and Michiaki Matsuo",
+    "people": [
+      "mehmet-parlak"
+    ],
+    "year": 2011,
+    "venue": "IEEE RadarCon",
+    "type": "Conference",
+    "doi": "10.1109/RADAR.2011.5960698",
+    "keywords": [
+      "Bidirectional front end",
+      "W-band",
+      "Radar"
+    ],
+    "summary": "Combines a bidirectional W-band front end with analog radar preprocessing. Shared amplification, phase shifting and mixing support transmit and receive functions within the same circuit architecture.",
+    "source": "https://www.researchgate.net/profile/Mehmet-Parlak"
+  },
+  {
+    "id": "distributed-amplifier-2011",
+    "title": "A Low-Power Dual-Channel Distributed Amplifier for Multielement Receivers",
+    "authors": "Mehmet Parlak and James F. Buckwalter",
+    "people": [
+      "mehmet-parlak"
+    ],
+    "year": 2011,
+    "venue": "IEEE Transactions on Microwave Theory and Techniques",
+    "type": "Journal",
+    "doi": "10.1109/TMTT.2010.2097790",
+    "keywords": [
+      "Distributed amplifier",
+      "Receiver front end",
+      "Linearity"
+    ],
+    "summary": "Studies a two-channel distributed CMOS amplifier for linear receiver front ends. The analysis relates stage count and cutoff frequency to channel isolation, and examines reverse gain’s effects on noise and intermodulation.",
+    "source": "https://www.researchgate.net/publication/224209755_A_Low-Power_Dual-Channel_Distributed_Amplifier_for_Multielement_Receivers"
+  },
+  {
+    "id": "phase-shifter-2010",
+    "title": "A Low-Power, W-Band Phase Shifter in a 0.12 μm SiGe BiCMOS Process",
+    "authors": "Mehmet Parlak and James F. Buckwalter",
+    "people": [
+      "mehmet-parlak"
+    ],
+    "year": 2010,
+    "venue": "IEEE Microwave and Wireless Components Letters",
+    "type": "Journal",
+    "doi": "10.1109/LMWC.2010.2066552",
+    "keywords": [
+      "Phase shifter",
+      "W-band",
+      "SiGe BiCMOS"
+    ],
+    "summary": "Uses a varactor-loaded transmission line for analog phase control. Distributed gain compensates line losses, supporting phase adjustment over the W-band.",
+    "source": "https://www.researchgate.net/profile/Mehmet-Parlak"
+  },
+  {
+    "id": "bidirectional-amplifier-2010",
+    "title": "A 77-GHz to 90-GHz Bidirectional Amplifier for Half-Duplex Front-Ends",
+    "authors": "Joohwa Kim, Mehmet Parlak and James F. Buckwalter",
+    "people": [
+      "mehmet-parlak"
+    ],
+    "year": 2010,
+    "venue": "IEEE CICC",
+    "type": "Conference",
+    "doi": "10.1109/CICC.2010.5617386",
+    "keywords": [
+      "Bidirectional amplifier",
+      "W-band",
+      "Half duplex"
+    ],
+    "summary": "Amplifies waves in either direction using a constructive-wave architecture. The approach removes a separate transmit-receive switch and provides electronic tuning of the operating band.",
+    "source": "https://www.researchgate.net/profile/Mehmet-Parlak"
+  }
+]

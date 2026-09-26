@@ -5,6 +5,8 @@ import { DesignLoop } from '../shared/DesignLoop';
 import { DesignBridge } from '../shared/DesignBridge';
 import { Workflow } from '../shared/Workflow';
 import { TeamProfiles } from '../shared/TeamProfiles';
+import { Publications } from '../shared/Publications';
+import publications from '../content/publications.json';
 
 export function Explore({ workbenchUrl }: { workbenchUrl?: string }) {
   return <main id="main" className="explore-page">
@@ -37,6 +39,7 @@ export function Explore({ workbenchUrl }: { workbenchUrl?: string }) {
     <section id="about" className="content-section about-section">
       <div className="section-intro"><SectionHeading number="05" eyebrow={site.about.eyebrow}>{site.about.headline}</SectionHeading><p>{site.about.intro}</p></div>
       <TeamProfiles people={site.about.people} />
+      <Publications people={site.about.people} papers={publications} />
     </section>
   </main>;
 }
