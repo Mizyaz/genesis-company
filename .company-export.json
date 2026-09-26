@@ -1,15 +1,16 @@
 {
   "format": "genesis-company-public-v1",
   "files": {
-    "src/PublicApp.tsx": "bec6f21d67dd6f6e4d1c8423ca1507af640a3bac86c39f2e62adeaa55e33b4ec",
+    "src/PublicApp.tsx": "b3da3533b1ffa2313d51d47fd800637a6acda8e9c921b1a792e92855fd536ddc",
     "src/public.tsx": "768c039776eaf9b8d68b2a9a03cb141b79072e16d6bc9fad522d43e369b7c2b3",
     "src/vite-env.d.ts": "65996936fbb042915f7b74a200fcdde7e410f32a669b1ab9597cfaa4b0faddb5",
-    "src/pages/Explore.tsx": "27778b5dc17ed50a4e780d11378a49572636267a3ec694491709465adbae30b6",
+    "src/pages/Explore.tsx": "e2c3045e31d9ddc742eae066065f80c770489b3a935b950414c6f2674460263d",
+    "src/pages/Research.tsx": "bb7a5cc78a06b37f8bb630be9d7baa762c086752c7fec3736aa4871df9af9ef7",
     "src/pages/Welcome.tsx": "0a013ec5fcf3fc6ba2dbeb87a0a97abf3e83ff792f3f7e6647e317092509b81f",
     "src/pages/ProductLaunch.tsx": "d76c4e6d9502f373d5b61c3f41e1223af1d6d39d47214a1bfcc39175565fda39",
     "src/shared/productLink.ts": "56fad2713a100cbb9d81857ffaa923434607dfa7d9fca2f2dab02a2f13d322a5",
     "src/styles/welcome.css": "14e25c955c8e26b213b22b8ea334fdd5a086ec2f16db0e7df7644ffe253a2a0a",
-    "src/shared/SiteShell.tsx": "cdd33b45132b74502c062a1fbc82fb6495b30ea9a84b2463ce7b003d058ef191",
+    "src/shared/SiteShell.tsx": "a5ab1e3c0b8ed4148681d9f206bc5b7b1c8c3a0d86acf4a1aa63828b046d1e8b",
     "src/shared/ui.tsx": "4a3a743fe926d6cfe4bc478160ef3094743f4eb5c0982f780305e614997aabce",
     "src/shared/PortfolioCard.tsx": "f283c134d1e5c45533bd20c1834edee4a8fd0d7bc347df60eaebee7295eb6ee4",
     "src/shared/DesignLoop.tsx": "3d6f52bdc6f212ae0223d82a9b7f5fae99e87fa7815478ade5d65125ae33e465",
@@ -24,8 +25,8 @@
     "src/shared/image-viewer.css": "b92d20aebb7b3c2e0d9a7834b9d086bb5d052a29bb53cb868245dc1aba726f8e",
     "src/shared/PublicationActions.tsx": "5df260e071032cc9152e0d15e8db58053c9a2d9f02a2d75134a9e7779d300e3e",
     "src/shared/citations.ts": "edc51dad37a2d938c5210894d56f0737ae2fef5457987d5af0d57128ea2438a1",
-    "src/shared/Publications.tsx": "d566c29e5d64fd4a1e35cbd45e05f2e23659b486a528d8189a560ac727a3e0cb",
-    "src/styles/publications.css": "da1824252aa3ba75ecb2495308a0cdc53127704ef1bb0ab482bf8048aba15290",
+    "src/shared/Publications.tsx": "cbf1166ddfca77ebfd71f99b8f77a88527b23120366a61977050a886bd1d3de7",
+    "src/styles/publications.css": "d54451da8bd924f98a2cf05b8dcaae08e08c99cc6aaede9dc3a5afcc46652d90",
     "src/content/publications.json": "c76f621ad7d1940185f284de919fe70bbdb7185297941d72f8ee70d206bffced",
     "src/styles/tokens.css": "9f9b27c4f18f9a883066e61b2ce9847bedea93c2e123ffc25b31afa5f5f8128b",
     "src/styles/site.css": "0f67f09a22bfe77654c15c9453e822af626aba1a8fa84befc8f587f7a792d7f0",
@@ -52,7 +53,7 @@
     ".nvmrc": "f14b4987904bcb5814e4459a057ed4d20f58a633152288a761214dcd28780b56",
     "README.md": "ec2a470a5afd0723d6c0c705d0b4e4f2440add4ede67d08a41fed9c5e3bf1f0a",
     ".github/workflows/pages.yml": "d6301873fffa4d81c0516d087912c5afd6afb21653990f348c198ae365c53b43",
-    "scripts/static.test.mjs": "7a9457f62bd858c6dff3077e6bbf4c7bd9483f9abf70992d7213e9933c3c4ea2",
+    "scripts/static.test.mjs": "243fab283af958a3f08623585354730c47436a35f60ce78316e25c797c7831ff",
     "scripts/site-access.mjs": "3d6618736cac9c7e06366dd186e4fa9c45432eaae106b1f5e4e1e067aa57d8e9"
   }
 }

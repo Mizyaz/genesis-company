@@ -31,7 +31,7 @@ export function SiteShell({ children, explore, workbenchUrl, homeUrl = '#/', cap
       <span className="header-divider" />
       <span className="header-caption">{caption || (explore ? 'FROM SPECS TO SILICON' : 'RFIC DESIGN ASSISTANT')}</span>
       <nav aria-label="Main navigation">
-        {explore && <><a href="#/explore/workflow">Platform</a><a href="#/explore/portfolio">Designs</a></>}
+        {explore && <><a href="#/explore/workflow">Platform</a><a href="#/explore/portfolio">Designs</a><a href="#/publications">Research</a></>}
         <a className="about-link" href="#/explore/about">About us</a>
         {designUrl && <a className="workbench-link" href={designUrl}><span>Design</span><Icon name="diagonal" /></a>}
         {workbenchUrl && <a className="workbench-link" href={workbenchUrl} target="_blank" rel="noopener noreferrer" aria-label="Open workbench"><span>Open workbench</span><Icon name="diagonal" /></a>}

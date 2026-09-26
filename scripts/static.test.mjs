@@ -62,6 +62,18 @@ test('publication records are attributable, deduplicated and exclude preprints',
   }
 });
 
+test('research is a standalone route with a data-driven reader, not an About accordion', () => {
+  assert.match(read('src/PublicApp.tsx'), /route === '#\/publications'/);
+  assert.match(read('src/pages/Explore.tsx'), /href="#\/publications"/);
+  assert.doesNotMatch(read('src/pages/Explore.tsx'), /<Publications|research-toggle/);
+  assert.match(read('src/pages/Research.tsx'), /<main id="main"/);
+  assert.match(read('src/pages/Research.tsx'), /<Publications people=\{site.about.people\} papers=\{papers\}/);
+  const library = read('src/shared/Publications.tsx');
+  assert.doesNotMatch(library, /<details|<summary|setOpen|window.location/);
+  assert.match(library, /aria-controls="publication-reader"/);
+  assert.match(library, /<PublicationActions key=\{selected.id\}/);
+});
+
 test('production bundle has no local service client or assistant endpoint', () => {
   assert.ok(existsSync(resolve(root, 'dist/index.html')), 'Run npm run build before npm test');
   const output = walk('dist').filter(path => /\.(js|css|html)$/.test(path)).map(read).join('\n');
