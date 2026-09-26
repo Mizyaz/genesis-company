@@ -1,3 +1,4 @@
+import { useLanguage } from './Language';
 import { useEffect, useId, useRef, useState } from 'react';
 import { useMotion } from './MotionSettings';
 import '../styles/silicon-gate.css';
@@ -27,6 +28,7 @@ function DiePanel({ side }: { side: 'left' | 'right' }) {
 
 /** Presentation-only navigation gate. No probes or product imports. */
 export function SiliconGate() {
+  const { t } = useLanguage();
   const { enabled } = useMotion();
   const [transition, setTransition] = useState<Transition | null>(null);
   const timers = useRef<number[]>([]);
@@ -75,10 +77,10 @@ export function SiliconGate() {
     <DiePanel side="left" /><DiePanel side="right" /><div className="silicon-gate-seam" />
     <div className="silicon-gate-core">
       <div className="gate-chip"><svg viewBox="0 0 160 160"><path className="chip-leads" d="M0 52H44M0 80H44M0 108H44M116 52H160M116 80H160M116 108H160M52 0V44M80 0V44M108 0V44M52 116V160M80 116V160M108 116V160" /><rect className="chip-body" x="36" y="36" width="88" height="88" rx="12" /><rect className="chip-channel" x="52" y="52" width="56" height="56" rx="5" /><path className="chip-wave" d="M61 83H67L75 65L85 96L94 76H100" /></svg></div>
-      <span className="gate-brand">GENESIS</span><h2>{transition.title}<span className="gate-loading-dots">.</span></h2>
-      <p>{transition.handoff ? 'Entering your design environment' : 'Circuits. Fields. Possibility.'}</p><div className="gate-energy-track"><span /></div>
+      <span className="gate-brand">{t("GENESIS")}</span><h2>{t(transition.title)}<span className="gate-loading-dots">.</span></h2>
+      <p>{t(transition.handoff ? 'Entering your design environment' : 'Circuits. Fields. Possibility.')}</p><div className="gate-energy-track"><span /></div>
     </div>
-    <div className="gate-coordinate gate-coordinate-top">G / 01 <span>SILICON INTERFACE</span></div>
-    <div className="gate-coordinate gate-coordinate-bottom"><span>DESIGN WITHOUT LIMITS</span> GENESIS</div>
-  </div><span className="sr-only" role="status">{transition.title}</span></>;
+    <div className="gate-coordinate gate-coordinate-top">{t("G / 01")} <span>{t("SILICON INTERFACE")}</span></div>
+    <div className="gate-coordinate gate-coordinate-bottom"><span>{t("DESIGN WITHOUT LIMITS")}</span> {t("GENESIS")}</div>
+  </div><span className="sr-only" role="status">{t(transition.title)}</span></>;
 }

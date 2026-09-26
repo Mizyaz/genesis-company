@@ -1,3 +1,4 @@
+import { useLanguage } from './Language';
 import { useEffect, useId, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
@@ -20,6 +21,7 @@ function contain(frame: Frame): Frame {
 
 // Reused standalone image-window interaction model. Presentation only; no product imports.
 export function ImageViewer({ src, alt, title = 'Image view', caption, toolbar, viewport, mediaClassName = '', onClose }: ImageViewerProps) {
+  const { t } = useLanguage();
   const headingId = useId();
   const dialog = useRef<HTMLElement>(null);
   const stage = useRef<HTMLDivElement>(null);
@@ -130,8 +132,8 @@ export function ImageViewer({ src, alt, title = 'Image view', caption, toolbar, 
   return createPortal(<section className="image-viewer" role="dialog" aria-modal="false" aria-labelledby={headingId}
     ref={dialog} tabIndex={-1} style={{ left: frame.x, top: frame.y, width: frame.width, height: frame.height }}
     onKeyDown={(event) => { if (event.key === 'Escape') { event.stopPropagation(); onClose(); } }}>
-    <header className="image-viewer-title" tabIndex={0} aria-label="Move image window"
-      title="Drag to move · Arrow keys move the window"
+    <header className="image-viewer-title" tabIndex={0} aria-label={t("Move image window")}
+      title={t("Drag to move · Arrow keys move the window")}
       onPointerDown={(event) => startWindowDrag(event, 'move')} onPointerMove={moveWindow}
       onPointerUp={stopWindow} onPointerCancel={stopWindow} onLostPointerCapture={stopWindow}
       onKeyDown={(event) => {
@@ -140,20 +142,20 @@ export function ImageViewer({ src, alt, title = 'Image view', caption, toolbar, 
         setFrame((held) => contain({ ...held, x: held.x + (event.key === 'ArrowRight' ? step : event.key === 'ArrowLeft' ? -step : 0),
           y: held.y + (event.key === 'ArrowDown' ? step : event.key === 'ArrowUp' ? -step : 0) }));
       }}>
-      <strong id={headingId}>{title}</strong>
-      <button type="button" aria-label="Close image view" title="Close · Escape" onClick={onClose}>×</button>
+      <strong id={headingId}>{t(title)}</strong>
+      <button type="button" aria-label={t("Close image view")} title={t("Close · Escape")} onClick={onClose}>×</button>
     </header>
     <div className="image-viewer-tools">
       {toolbar}
-      <button type="button" onClick={fit} disabled={status !== 'ready'}>Fit</button>
+      <button type="button" onClick={fit} disabled={status !== 'ready'}>{t("Fit")}</button>
       <button type="button" onClick={() => zoom(1 / camera.current.scale)} disabled={status !== 'ready'}>100%</button>
-      <button type="button" aria-label="Zoom out" onClick={() => zoom(1 / 1.25)} disabled={status !== 'ready'}>−</button>
-      <output aria-label="Image zoom">{Math.round(view.scale * 100)}%</output>
-      <button type="button" aria-label="Zoom in" onClick={() => zoom(1.25)} disabled={status !== 'ready'}>+</button>
-      <span>Scroll to zoom · Press and drag to pan</span>
+      <button type="button" aria-label={t("Zoom out")} onClick={() => zoom(1 / 1.25)} disabled={status !== 'ready'}>−</button>
+      <output aria-label={t("Image zoom")}>{Math.round(view.scale * 100)}%</output>
+      <button type="button" aria-label={t("Zoom in")} onClick={() => zoom(1.25)} disabled={status !== 'ready'}>+</button>
+      <span>{t("Scroll to zoom · Press and drag to pan")}</span>
     </div>
     <div className={`image-viewer-stage${dragging ? ' is-dragging' : ''}`} ref={stage} tabIndex={0}
-      aria-label="Image pan and zoom" onDoubleClick={fit}
+      aria-label={t("Image pan and zoom")} onDoubleClick={fit}
       onKeyDown={(event) => {
         if (event.key === '+' || event.key === '=' || event.key === '-') { event.preventDefault(); zoom(event.key === '-' ? 1 / 1.25 : 1.25); }
         if (event.key === '0') { event.preventDefault(); fit(); }
@@ -193,11 +195,11 @@ export function ImageViewer({ src, alt, title = 'Image view', caption, toolbar, 
           }} onError={() => setStatus('error')} />
       </div>
       {status !== 'ready' && <p className="image-viewer-message" role={status === 'error' ? 'alert' : 'status'}>
-        {status === 'error' ? 'Could not load this image. Close and reopen to retry.' : 'Loading image…'}</p>}
+        {t(status === 'error' ? 'Could not load this image. Close and reopen to retry.' : 'Loading image…')}</p>}
     </div>
     <footer className="image-viewer-footer">
-      <small>{caption || 'Image view · changes here do not edit the source.'}</small>
-      <button type="button" className="image-viewer-resize" aria-label="Resize image window" title="Drag to resize · Arrow keys resize"
+      <small>{caption || t('Image view · changes here do not edit the source.')}</small>
+      <button type="button" className="image-viewer-resize" aria-label={t("Resize image window")} title={t("Drag to resize · Arrow keys resize")}
         onPointerDown={(event) => startWindowDrag(event, 'resize')} onPointerMove={moveWindow}
         onPointerUp={stopWindow} onPointerCancel={stopWindow} onLostPointerCapture={stopWindow}
         onKeyDown={(event) => {

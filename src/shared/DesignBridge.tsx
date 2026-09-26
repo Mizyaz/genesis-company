@@ -1,3 +1,4 @@
+import { useLanguage } from './Language';
 import { useEffect, useRef, type ReactNode } from 'react';
 import { Icon } from './ui';
 import { useVisibleMotion } from './MotionSettings';
@@ -39,6 +40,7 @@ function LockGlyph() {
 
 /** Presentation only: the same actor/flow diagram is used in compact and full form. */
 export function DesignBridge({ content, brand, compact = false }: { content: BridgeContent; brand: ReactNode; compact?: boolean }) {
+  const { t } = useLanguage();
   const { ref: root, enabled, running } = useVisibleMotion<HTMLElement>();
   const animations = useRef<Animation[]>([]);
 
@@ -68,23 +70,23 @@ export function DesignBridge({ content, brand, compact = false }: { content: Bri
   return <figure ref={root} className={`design-bridge ${compact ? 'design-bridge-compact' : ''}`} data-motion={running ? 'playing' : enabled ? 'offscreen' : 'paused'} aria-label={content.caption}>
     <div className="bridge-scene">
       <article className="bridge-actor bridge-designer">
-        {!compact && <><span className="bridge-actor-index">01 / HUMAN INTENT</span><ActorGlyph designer /></>}
+        {!compact && <><span className="bridge-actor-index">{t("01 / HUMAN INTENT")}</span><ActorGlyph designer /></>}
         <h3>{compact ? content.designer.compact : content.designer.title}</h3>
         {!compact && <p>{content.designer.detail}</p>}
       </article>
       <Connection label={content.intent} feedback={content.feedback} phase={0} />
       <article className="bridge-actor bridge-engine">
         <span className="bridge-halo" aria-hidden="true" />
-        {!compact && <span className="bridge-actor-index">02 / CONNECTED INTELLIGENCE</span>}
+        {!compact && <span className="bridge-actor-index">{t("02 / CONNECTED INTELLIGENCE")}</span>}
         {compact ? <h3>{content.engine.compact}</h3> : <><h3>{brand}</h3><p className="bridge-engine-role"><Icon name="spark" />{content.engine.title}</p><p>{content.engine.detail}</p></>}
       </article>
       <Connection label={content.workflow} feedback={content.feedback} phase={1} />
       <article className="bridge-actor bridge-tools">
-        {!compact && <><span className="bridge-actor-index">03 / ENGINEERING EXECUTION</span><ActorGlyph /></>}
+        {!compact && <><span className="bridge-actor-index">{t("03 / ENGINEERING EXECUTION")}</span><ActorGlyph /></>}
         <h3>{compact ? content.tools.compact : content.tools.title}</h3>
         {!compact && <><p>{content.tools.detail}</p><div className="bridge-private"><LockGlyph /><span><strong>{content.assets}</strong><small>{content.environment}</small></span></div></>}
       </article>
     </div>
-    {compact && <figcaption><a href="#/explore/story">Discover our story <Icon name="diagonal" /></a></figcaption>}
+    {compact && <figcaption><a href="#/explore/story">{t("Discover our story")} <Icon name="diagonal" /></a></figcaption>}
   </figure>;
 }

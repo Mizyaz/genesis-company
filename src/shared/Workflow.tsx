@@ -36,7 +36,7 @@ export function Workflow({ stages }: { stages: Stage[] }) {
     });
   }, [running, stages.length]);
   return <div ref={ref} className="workflow-track" data-motion={running ? 'playing' : 'paused'}>
-    {stages.map((stage, index) => <article key={stage.title} className="workflow-step">
+    {stages.map((stage, index) => <article key={stage.icon} className="workflow-step">
       <span className="workflow-glow" aria-hidden="true" /><span className="workflow-progress" aria-hidden="true" />
       <span className="step-number">{String(index + 1).padStart(2, '0')}</span><Icon name={stage.icon} /><h3>{stage.title}</h3><p>{stage.detail}</p>
     </article>)}

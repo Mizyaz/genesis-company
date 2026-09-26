@@ -5,11 +5,13 @@ import { ProductLaunch } from './pages/ProductLaunch';
 import { Research } from './pages/Research';
 import { SiteShell, useCompanyAppearance } from './shared/SiteShell';
 import { MotionProvider } from './shared/MotionSettings';
+import { useLanguage } from './shared/Language';
 import './styles/tokens.css';
 import './styles/site.css';
 
 /** Public entry point: presentation only, without product or assistant imports. */
 export function PublicApp() {
+  const { t } = useLanguage();
   const [route, setRoute] = useState(window.location.hash);
   const { theme, setTheme } = useCompanyAppearance();
   const explore = route.startsWith('#/explore');
@@ -21,7 +23,9 @@ export function PublicApp() {
     return () => window.removeEventListener('hashchange', change);
   }, []);
   useEffect(() => {
-    document.title = research ? 'Research & publications | GENESIS' : design ? 'Design | GENESIS' : explore ? 'Explore GENESIS | From specs to silicon' : 'GENESIS | Discover or design';
+    document.title = t(research ? 'Research & publications | GENESIS' : design ? 'Design | GENESIS' : explore ? 'Explore GENESIS | From specs to silicon' : 'GENESIS | Discover or design');
+  }, [research, design, explore, t]);
+  useEffect(() => {
     const section = route.split('/')[2];
     const timer = window.setTimeout(() => {
       if (section && ['workflow', 'portfolio', 'team', 'story', 'contact', 'about'].includes(section)) {

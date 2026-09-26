@@ -9,6 +9,41 @@ const root = resolve(import.meta.dirname, '..');
 const read = path => readFileSync(resolve(root, path), 'utf8');
 const walk = path => readdirSync(resolve(root, path), { withFileTypes: true }).flatMap(entry => entry.isDirectory() ? walk(`${path}/${entry.name}`) : [`${path}/${entry.name}`]);
 
+test('TR/ENG dictionary covers static labels, preserves technical identity and uses the supplied Scholar', () => {
+  const dictionary = JSON.parse(read('src/content/tr.json'));
+  const identity = new Set(['GENESIS', 'Google Scholar', 'DOI', 'BibTeX', 'G / 01']);
+  for (const path of walk('src').filter(path => path.endsWith('.tsx'))) {
+    const parsed = ts.createSourceFile(path, read(path), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+    const visit = node => {
+      if (ts.isCallExpression(node) && node.expression.getText(parsed) === 't' && node.arguments[0] && ts.isStringLiteral(node.arguments[0])) {
+        const label = node.arguments[0].text;
+        assert.ok(Object.hasOwn(dictionary, label) || identity.has(label), `${path}: ${label}`);
+      }
+      ts.forEachChild(node, visit);
+    };
+    visit(parsed);
+  }
+  for (const [english, turkish] of Object.entries(dictionary)) {
+    assert.equal(typeof turkish, 'string');
+    assert.doesNotMatch(turkish, /—/);
+    assert.deepEqual([...english.matchAll(/\{\w+\}/g)].map(m=>m[0]).sort(), [...turkish.matchAll(/\{\w+\}/g)].map(m=>m[0]).sort());
+  }
+  const code = ts.transpileModule(read('src/shared/Language.tsx'), { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true } }).outputText;
+  const exports = {}, require = createRequire(import.meta.url);
+  new Function('exports', 'require', code)(exports, id => id === '../content/tr.json' ? dictionary : require(id));
+  assert.equal(exports.translate('Open GENESIS', 'tr'), 'GENESIS’i aç');
+  assert.equal(exports.translate('Open GENESIS', 'en'), 'Open GENESIS');
+  assert.equal(exports.translate('unknown label', 'tr'), 'unknown label');
+  assert.equal(exports.translate('toString', 'tr'), 'toString');
+  assert.equal(exports.translate('{name} on Scholar', 'tr', {name:'İslam Güven'}), 'İslam Güven · Scholar');
+  const source = {id:'Design', title:'Design', href:'#/design', values:[12,{icon:'Research',detail:'Research'}]};
+  assert.deepEqual(exports.translateContent(source, text => exports.translate(text,'tr')), {id:'Design',title:'Tasarla',href:'#/design',values:[12,{icon:'Research',detail:'Yayınlar'}]});
+  assert.equal(source.title, 'Design');
+  const person = JSON.parse(read('src/content/site.json')).about.people.find(p=>p.id==='islam-guven');
+  assert.equal(new URL(person.scholar).searchParams.get('user'), 'p_KOMQwAAAAJ');
+  assert.match(read('src/public.tsx'), /<LanguageProvider>/);
+});
+
 test('silicon gate is shared, optional and presentation-only', () => {
   const gate = read('src/shared/SiliconGate.tsx');
   assert.equal((read('src/shared/SiteShell.tsx').match(/<SiliconGate\s*\/>/g) || []).length, 1);

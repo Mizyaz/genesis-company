@@ -1,3 +1,4 @@
+import { useLanguage } from './Language';
 import { useRef, useState } from 'react';
 import { Icon } from './ui';
 import { publicationUrl, type Publication } from './citations';
@@ -7,6 +8,7 @@ import '../styles/publications.css';
 type Researcher = { id: string; name: string; scholar: string };
 /** Reusable library and reading pane. Static inputs, no router or service dependency. */
 export function Publications({ people, papers }: { people: Researcher[]; papers: Publication[] }) {
+  const { t } = useLanguage();
   const [person, setPerson] = useState('all');
   const [query, setQuery] = useState('');
   const [kind, setKind] = useState('all');
@@ -29,38 +31,38 @@ export function Publications({ people, papers }: { people: Researcher[]; papers:
     });
   };
 
-  return <section className="research-library" aria-label="Publication library">
+  return <section className="research-library" aria-label={t("Publication library")}>
     <div className="research-filters">
-      <div className="research-people" role="group" aria-label="Filter publications by author">
-        {[{ id: 'all', name: 'Everyone' }, ...people].map(author => <button key={author.id} aria-pressed={person === author.id} onClick={() => setPerson(author.id)}>{author.name}<span>{papers.filter(p => author.id === 'all' || p.people.includes(author.id)).length}</span></button>)}
+      <div className="research-people" role="group" aria-label={t("Filter publications by author")}>
+        {[{ id: 'all', name: t('Everyone') }, ...people].map(author => <button key={author.id} aria-pressed={person === author.id} onClick={() => setPerson(author.id)}>{author.name}<span>{papers.filter(p => author.id === 'all' || p.people.includes(author.id)).length}</span></button>)}
       </div>
       <div className="research-search">
-        <label>Search publications<input type="search" value={query} placeholder="Title, keyword or author" onChange={event => setQuery(event.target.value)} /></label>
-        <label>Publication type<select value={kind} onChange={event => setKind(event.target.value)}><option value="all">All publications</option><option value="Journal">Journal articles</option><option value="Conference">Conference papers</option></select></label>
-        <label>Year<select value={year} onChange={event => setYear(event.target.value)}><option value="all">All years</option>{[...new Set(papers.map(paper => paper.year))].sort((a, b) => b - a).map(value => <option key={value} value={value}>{value}</option>)}</select></label>
+        <label>{t("Search publications")}<input type="search" value={query} placeholder={t("Title, keyword or author")} onChange={event => setQuery(event.target.value)} /></label>
+        <label>{t("Publication type")}<select value={kind} onChange={event => setKind(event.target.value)}><option value="all">{t("All publications")}</option><option value="Journal">{t("Journal articles")}</option><option value="Conference">{t("Conference papers")}</option></select></label>
+        <label>{t("Year")}<select value={year} onChange={event => setYear(event.target.value)}><option value="all">{t("All years")}</option>{[...new Set(papers.map(paper => paper.year))].sort((a, b) => b - a).map(value => <option key={value} value={value}>{value}</option>)}</select></label>
       </div>
     </div>
-    <div className="research-meta"><p role="status">{matching.length} {matching.length === 1 ? 'publication' : 'publications'} <span>· Newest first</span></p>{filtered && <button onClick={reset}>Clear filters <Icon name="close" /></button>}</div>
+    <div className="research-meta"><p role="status">{matching.length} {t(matching.length === 1 ? 'publication' : 'publications')} <span>{t("· Newest first")}</span></p>{filtered && <button onClick={reset}>{t("Clear filters")} <Icon name="close" /></button>}</div>
     {selected ? <div className="research-workspace">
-      <nav className="publication-list" aria-label="Publications">
+      <nav className="publication-list" aria-label={t("Publications")}>
         {matching.map(paper => <button className="publication-item" key={paper.id} aria-current={selected.id === paper.id ? 'true' : undefined} aria-controls="publication-reader" onClick={() => selectPaper(paper.id)}>
-          <span className="publication-item-meta"><span>{paper.year}</span><span>{paper.type}</span><Icon name="arrow" /></span>
+          <span className="publication-item-meta"><span>{paper.year}</span><span>{t(paper.type)}</span><Icon name="arrow" /></span>
           <span className="publication-item-title">{paper.title}</span><span className="publication-item-authors">{paper.authors}</span>
         </button>)}
       </nav>
       <article id="publication-reader" ref={reader} tabIndex={-1} className="publication-reader" aria-labelledby="publication-title">
-        <div className="publication-reader-meta"><span>{selected.type} · {selected.year}</span><Icon name="document" /></div>
+        <div className="publication-reader-meta"><span>{t(selected.type)} · {selected.year}</span><Icon name="document" /></div>
         <p className="publication-venue">{selected.venue}</p>
         <h2 id="publication-title">{selected.title}</h2>
         <p className="publication-authors">{selected.authors}</p>
-        <ul className="publication-keywords" aria-label="Editorial keywords">{selected.keywords.map(keyword => <li key={keyword}>{keyword}</li>)}</ul>
-        <section className="publication-abstract" aria-labelledby="abstract-heading"><h3 id="abstract-heading">Abstract summary</h3><p>{selected.summary ?? 'The abstract could not be verified for this record. Visit the publication record below.'}</p></section>
-        <div className="publication-links"><a className="button button-primary" href={publicationUrl(selected)} target="_blank" rel="noopener noreferrer">Read publication <Icon name="diagonal" /></a>{selected.summary && selected.source !== publicationUrl(selected) && <a href={selected.source} target="_blank" rel="noopener noreferrer">Abstract source <Icon name="diagonal" /></a>}</div>
+        <ul className="publication-keywords" aria-label={t("Editorial keywords")}>{selected.keywords.map(keyword => <li key={keyword}>{keyword}</li>)}</ul>
+        <section className="publication-abstract" aria-labelledby="abstract-heading"><h3 id="abstract-heading">{t("Abstract summary")}</h3><p lang={selected.summary ? 'en' : undefined}>{selected.summary ?? t('The abstract could not be verified for this record. Visit the publication record below.')}</p></section>
+        <div className="publication-links"><a className="button button-primary" href={publicationUrl(selected)} target="_blank" rel="noopener noreferrer">{t("Read publication")} <Icon name="diagonal" /></a>{selected.summary && selected.source !== publicationUrl(selected) && <a href={selected.source} target="_blank" rel="noopener noreferrer">{t("Abstract source")} <Icon name="diagonal" /></a>}</div>
         <PublicationActions key={selected.id} paper={selected} />
-        {selected.doi && <p className="publication-doi">DOI <span>{selected.doi}</span></p>}
+        {selected.doi && <p className="publication-doi">{t("DOI")} <span>{selected.doi}</span></p>}
       </article>
-    </div> : <div className="research-empty"><Icon name="document" /><h2>No matching publications</h2><p>Try another keyword, author or year.</p><button className="button button-secondary" onClick={reset}>Clear filters</button></div>}
-    <div className="research-sources"><span>More from our researchers</span>{people.map(author => <a key={author.id} href={author.scholar} target="_blank" rel="noopener noreferrer">{author.name} on Scholar <Icon name="diagonal" /></a>)}</div>
-    <p className="research-note">Abstracts are editorial summaries, not verbatim reproductions. Keywords are editorial topic labels. Publication links lead to the original records. Verified 26 September 2026.</p>
+    </div> : <div className="research-empty"><Icon name="document" /><h2>{t("No matching publications")}</h2><p>{t("Try another keyword, author or year.")}</p><button className="button button-secondary" onClick={reset}>{t("Clear filters")}</button></div>}
+    <div className="research-sources"><span>{t("More from our researchers")}</span>{people.map(author => <a key={author.id} href={author.scholar} target="_blank" rel="noopener noreferrer">{t('{name} on Scholar', { name: author.name })} <Icon name="diagonal" /></a>)}</div>
+    <p className="research-note">{t("Abstracts are editorial summaries, not verbatim reproductions. Keywords are editorial topic labels. Publication links lead to the original records. Verified 26 September 2026.")}</p>
   </section>;
 }
