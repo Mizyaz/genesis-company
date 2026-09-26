@@ -51,6 +51,12 @@ test('publication records are attributable, deduplicated and exclude preprints',
     assert.ok(paper.keywords.length && paper.keywords.every(keyword => typeof keyword === 'string' && keyword.trim()), paper.id);
     assert.ok(paper.summary === null || typeof paper.summary === 'string' && paper.summary.length > 40, paper.id);
     assert.equal(new URL(paper.source).protocol, 'https:', paper.id);
+    assert.ok(paper.citation.authors.length && paper.citation.authors.every(author => author.includes(', ')), paper.id);
+    assert.ok(paper.citation.venue, paper.id);
+    if (paper.openAccess) {
+      assert.equal(new URL(paper.openAccess.url).protocol, 'https:', paper.id);
+      assert.ok(paper.openAccess.source && paper.openAccess.version && paper.openAccess.verifiedOn, paper.id);
+    }
     if (paper.doi) assert.match(paper.doi, /^10\.\d{4,9}\/\S+$/, paper.id);
     assert.doesNotMatch(JSON.stringify(paper), /arxiv|10\.48550|—/i, paper.id);
   }
@@ -62,6 +68,42 @@ test('production bundle has no local service client or assistant endpoint', () =
   assert.doesNotMatch(output, /localhost|127\.0\.0\.1|\/api\/navigator|VITE_WORKBENCH_URL|codex exec|gpt-5\.6/);
   assert.match(read('dist/index.html'), /connect-src 'none'/);
   assert.doesNotMatch(read('dist/index.html'), /(?:src|href)="\/assets\//);
+});
+
+test('citation exports preserve authors, publication types and safe BibTeX fields', () => {
+  const code = ts.transpileModule(read('src/shared/citations.ts'), { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText;
+  const exports = {};
+  new Function('exports', code)(exports);
+  const { bibtex, citationText, publicationUrl } = exports;
+  const papers = JSON.parse(read('src/content/publications.json'));
+  for (const paper of papers) {
+    const bib = bibtex(paper);
+    assert.ok(bib.startsWith(paper.type === 'Journal' ? '@article{' : '@inproceedings{'), paper.id);
+    assert.ok(bib.includes('year = {' + paper.year + '}'), paper.id);
+    assert.match(bib, paper.type === 'Journal' ? /journal = \{/ : /booktitle = \{/, paper.id);
+    assert.ok(citationText(paper).includes(paper.title));
+    assert.ok(citationText(paper).endsWith(publicationUrl(paper)));
+    assert.doesNotMatch(bib, /undefined|null|doi = \{\}/, paper.id);
+    assert.equal(paper.citation.authors.length, paper.authors.split(/,\s*|\s+and\s+/).length, paper.id);
+  }
+  const survey = papers.find(paper => paper.id === 'ai-ic-survey-2025');
+  assert.ok(bibtex(survey).includes('De Vleeschouwer, Christophe'));
+  assert.ok(bibtex(survey).includes('167364--167389'));
+  const special = bibtex({ ...survey, title: 'A&B_50% {RF} #1', doi: '' });
+  assert.ok(special.includes('A\\&B\\_50\\% \\{RF\\} \\#1'));
+  assert.ok(special.includes('url = {' + survey.source + '}'));
+});
+
+test('layout viewports stay inside original images and viewer is product-independent', () => {
+  const content = JSON.parse(read('src/content/site.json'));
+  for (const item of content.portfolio) for (const image of item.images) {
+    const crop = image.viewport;
+    if (crop) {
+      assert.ok(crop.x >= 0 && crop.y >= 0 && crop.width > 0 && crop.height > 0);
+      assert.ok(crop.x + crop.width <= image.width && crop.y + crop.height <= image.height);
+    }
+  }
+  assert.doesNotMatch(read('src/shared/ImageViewer.tsx'), /from ['"].*(?:web\/|schematic|cadence|server)/i);
 });
 
 test('product links accept only a valid port and carry the selected theme', async () => {

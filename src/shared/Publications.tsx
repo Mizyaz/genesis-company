@@ -1,16 +1,10 @@
 import { useRef, useState } from 'react';
 import { Icon } from './ui';
+import { publicationUrl, type Publication } from './citations';
+import { PublicationActions } from './PublicationActions';
 import '../styles/publications.css';
 
 type Researcher = { id: string; name: string; scholar: string };
-type Publication = {
-  id: string; title: string; authors: string; people: string[]; year: number;
-  venue: string; type: string; doi: string; keywords: string[];
-  summary: string | null; source: string;
-};
-
-const publicationUrl = (paper: Publication) => paper.doi ? `https://doi.org/${paper.doi}` : paper.source;
-
 /** Static, supplied content only. No scholarly service or product connection. */
 export function Publications({ people, papers }: { people: Researcher[]; papers: Publication[] }) {
   const [open, setOpen] = useState(false);
@@ -45,6 +39,7 @@ export function Publications({ people, papers }: { people: Researcher[]; papers:
           <div className="publication-body"><p className="publication-venue">{paper.venue}</p><h4><a href={publicationUrl(paper)} target="_blank" rel="noopener noreferrer">{paper.title}<Icon name="diagonal" /></a></h4><p className="publication-authors">{paper.authors}</p>
             <ul className="publication-keywords" aria-label="Editorial keywords">{paper.keywords.map(keyword => <li key={keyword}>{keyword}</li>)}</ul>
             <details className="publication-abstract"><summary>Abstract {paper.summary ? 'summary' : '& source'}</summary>{paper.summary ? <p>{paper.summary}</p> : <p>The abstract could not be verified for this record. The publication record is linked below.</p>}<div className="publication-links"><a href={publicationUrl(paper)} target="_blank" rel="noopener noreferrer">{paper.doi ? 'Read publication' : 'Publication record'} <Icon name="diagonal" /></a>{paper.summary && paper.source !== publicationUrl(paper) && <a href={paper.source} target="_blank" rel="noopener noreferrer">Abstract source <Icon name="diagonal" /></a>}</div></details>
+            <PublicationActions paper={paper} />
           </div>
         </article>)}
       </div>
