@@ -307,7 +307,7 @@
       "Heterogeneous agents",
       "Connectivity"
     ],
-    "summary": null,
+    "summary": "Uses multi-agent PPO to coordinate search-and-rescue UAVs serving targets with different connectivity needs. A dynamic reward balances exploration, target detection and communication. Tests vary fleet size, target configuration and mission priorities to examine how a policy trained for one setting adapts.",
     "source": "https://doi.org/10.1109/VTC2025-Spring65109.2025.11174683",
     "citation": {
       "authors": [
@@ -392,8 +392,8 @@
       "Low-noise amplifiers",
       "Joint sensing and communication"
     ],
-    "summary": null,
-    "source": "https://sites.uclouvain.be/RF-SOI-group/mehmet-parlak/",
+    "summary": "Examines two silicon-on-insulator low-noise amplifiers for joint communication and sensing in 5G and 6G bands. The study considers the different bandwidth and linearity requirements of communication and radar, highlighting back-gate bias as a way to make a shared RF front-end reconfigurable.",
+    "source": "https://edas.info/web/mrw-2024/program.html",
     "citation": {
       "authors": [
         "Parlak, Mehmet",
@@ -480,7 +480,7 @@
       "Flyback converter",
       "Output regulation"
     ],
-    "summary": null,
+    "summary": "Presents a television power supply that independently controls multiple outputs from one flyback transformer. Directly supplying the LED backlight avoids an additional buck or boost stage, while a separate MOSFET regulates the system supply. Simulation and measurement evaluate efficiency, power density and component savings.",
     "source": "https://doi.org/10.1109/ELMA58392.2023.10202445",
     "citation": {
       "authors": [
@@ -509,7 +509,7 @@
       "Time-frequency analysis",
       "CNN"
     ],
-    "summary": null,
+    "summary": "Combines time-frequency representations with a modular, multi-stage CNN classifier for 18 radar waveform types. An initial classifier separates waveform groups before specialized processing stages. Experiments evaluate recognition across different noise levels, reporting 98.08% classification accuracy at a 10 dB signal-to-noise ratio.",
     "source": "https://doi.org/10.23919/IRS54158.2022.9904993",
     "citation": {
       "authors": [
@@ -539,7 +539,7 @@
       "Precision agriculture",
       "Blockchain"
     ],
-    "summary": null,
+    "summary": "Proposes a conceptual architecture combining blockchain, computer vision and drone swarms for precision agriculture. The framework considers drone-as-a-service operation and challenges including availability, flight-route conflicts, data authenticity and energy use. It adapts methods from other industries to agriculture-specific components.",
     "source": "https://doi.org/10.1109/iGETblockchain56591.2022.10087152",
     "citation": {
       "authors": [
@@ -565,7 +565,7 @@
       "Blockchain",
       "Evidence integrity"
     ],
-    "summary": null,
+    "summary": "Proposes a blockchain-based application for checking the origin and integrity of accident footage in autonomous-vehicle insurance claims. Smart contracts and a hybrid of centralized and decentralized data storage support evidence verification and a decentralized loss-adjustment workflow, addressing concerns about manipulated media.",
     "source": "https://doi.org/10.1109/iGETblockchain56591.2022.10087067",
     "citation": {
       "authors": [
