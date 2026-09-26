@@ -13,9 +13,11 @@
     "src/shared/SiteShell.tsx": "2a2ca4acce8e97728b6af998e2845b661dbb27189e5d2adb352c64a9daf91dbe",
     "src/shared/ui.tsx": "4a3a743fe926d6cfe4bc478160ef3094743f4eb5c0982f780305e614997aabce",
     "src/shared/PortfolioCard.tsx": "c88646e8d91e78b4b2612e8a881ffbe5246651e3bcff565523650de5476bdcdb",
-    "src/shared/DesignLoop.tsx": "3d6f52bdc6f212ae0223d82a9b7f5fae99e87fa7815478ade5d65125ae33e465",
+    "src/shared/DesignLoop.tsx": "480a6a98e70f9d20054e0c6a44e74849dd22a6213b1e0100c00be68fb5184193",
     "src/shared/EnergyFlow.tsx": "b43ebe7bde8c86c37b3c1971fd08d6db68832b3f523c3f4ada91964a6276d604",
-    "src/shared/DesignBridge.tsx": "f11085b7b95228a74e010281230408750f4e2db464d67b1b45ef9e5ec4163a2c",
+    "src/shared/DesignBridge.tsx": "2ac29a682a3ade2b5f763c5a72d99a04062e461048ebf25a06e3e39947be43dc",
+    "src/shared/CircuitArtwork.tsx": "12a3ad46b4b2ca188ab9f4956107bfb32d5575698a4d2f879e9bbe6c1f39003c",
+    "src/styles/circuit-artwork.css": "90657d45449221bde60d2db6af5741b7460c1e20e6cf7bb2809001b9cf21ee9f",
     "src/shared/CircuitIdentity.tsx": "855fe3a394655872455c9d0fb1d9fb5ac5be2a94f7fb95166b58e345a295c1f4",
     "src/styles/circuit-identity.css": "fa3e3fe8dbb2797f25fe706dc3c60a121077d0a4fcdaa9b97ad94501711f501e",
     "src/shared/SiliconGate.tsx": "c8cbe27f0761df58f1f7b7df56bcfada8386c075db7962c4b8a1ef02a0d12b22",
@@ -33,8 +35,8 @@
     "src/styles/publications.css": "a04d7808abd33138b6e008e3499a116dfe549ba3ed4c9d0b826c519c29fb07b6",
     "src/content/publications.json": "c76f621ad7d1940185f284de919fe70bbdb7185297941d72f8ee70d206bffced",
     "src/styles/tokens.css": "9f9b27c4f18f9a883066e61b2ce9847bedea93c2e123ffc25b31afa5f5f8128b",
-    "src/styles/site.css": "5d06212b80d28b33813583e32dbc53b620255f12b095d825644e9e2e6d616179",
-    "src/styles/design-bridge.css": "fe5e74a1d19d4c0f8db881e7a69d745e175eaae58b80468c636205aef7828096",
+    "src/styles/site.css": "698df8acc7679990147688c58f9e9d75237c7cdac6fc250636ce1d9208996747",
+    "src/styles/design-bridge.css": "57ab8e7c040b22146b6df6148923b2ec20bac91094c65de2b1e512995bc83f05",
     "connection.json": "9c4ecb376b662472b66ffe3628476322df5c094480ca33501e7fc09a887931a3",
     "scripts/local-name.mjs": "06ac31177f0d5862e98f1da7ccdbf1198b9d8728d7ac5825167ab3cd69dd07e8",
     "scripts/local-name.test.mjs": "41f7ced2b927cede6f00df027d94920825d83b9a55ed3e1c7dc7b294575b0c8d",
@@ -57,7 +59,7 @@
     ".nvmrc": "f14b4987904bcb5814e4459a057ed4d20f58a633152288a761214dcd28780b56",
     "README.md": "ec2a470a5afd0723d6c0c705d0b4e4f2440add4ede67d08a41fed9c5e3bf1f0a",
     ".github/workflows/pages.yml": "d6301873fffa4d81c0516d087912c5afd6afb21653990f348c198ae365c53b43",
-    "scripts/static.test.mjs": "8436b9f969cb09e0f9245087b2bd4567829a3d149c274934b4f2292b91ec799e",
+    "scripts/static.test.mjs": "07494f7a841d5f6224929ced287c4e77b8361c4ca4d2ee909bba1dc4b86c8913",
     "scripts/site-access.mjs": "3d6618736cac9c7e06366dd186e4fa9c45432eaae106b1f5e4e1e067aa57d8e9"
   }
 }

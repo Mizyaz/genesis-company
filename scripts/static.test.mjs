@@ -44,6 +44,26 @@ test('TR/ENG dictionary covers static labels, preserves technical identity and u
   assert.match(read('src/public.tsx'), /<LanguageProvider>/);
 });
 
+test('company diagrams share RF artwork instead of text cards and respect visible motion', () => {
+  const artwork = read('src/shared/CircuitArtwork.tsx');
+  const bridge = read('src/shared/DesignBridge.tsx');
+  const loop = read('src/shared/DesignLoop.tsx');
+  for (const kind of ['schematic', 'engine', 'layout']) assert.ok(artwork.includes(`kind === '${kind}'`));
+  assert.match(artwork, /circuit-mos/);
+  assert.match(artwork, /circuit-fingers/);
+  assert.match(artwork, /circuit-radio/);
+  for (const diagram of [bridge, loop]) {
+    assert.match(diagram, /import \{ CircuitArtwork \}/);
+    assert.match(diagram, /useVisibleMotion/);
+    assert.match(diagram, /running=\{running\}/);
+    assert.match(diagram, /className="sr-only"/);
+    assert.doesNotMatch(diagram, /<article|<ul|bridge-actor|loop-node-icon/);
+  }
+  assert.match(read('src/styles/circuit-artwork.css'), /prefers-reduced-motion: reduce/);
+  assert.match(read('src/styles/circuit-artwork.css'), /animation-play-state: running/);
+  assert.doesNotMatch(artwork, /from .*?(?:web\/|assistant)|fetch\s*\(/);
+});
+
 test('silicon gate is shared, optional and presentation-only', () => {
   const gate = read('src/shared/SiliconGate.tsx');
   assert.equal((read('src/shared/SiteShell.tsx').match(/<SiliconGate\s*\/>/g) || []).length, 1);
