@@ -17,7 +17,7 @@ export function DesignLoop({ content, brand }: { content: LoopContent; brand: Re
         <h3>{node.title}</h3>
         <span className="sr-only">{node.items.join('. ')}</span>
       </div>)}
-      <div className="loop-outcome">{brand}<p>{content.outcome}</p></div>
+      <div className="loop-outcome">{brand}<span className="sr-only">{content.outcome}</span></div>
     </div>
   </figure>;
 }

@@ -26,20 +26,17 @@ export function Explore({ workbenchUrl }: { workbenchUrl?: string }) {
       <div className="section-intro"><SectionHeading number="02" eyebrow={t('RFIC PORTFOLIO')}>{t("From individual blocks")}<br />{t("to")} <span className="gradient-text">{t("complete circuits.")}</span></SectionHeading><p>{t("RF switches, frequency converters and broadband passives for mmWave systems.")}</p></div>
       <div className="portfolio-grid">{site.portfolio.map(item => <PortfolioCard item={item} key={item.id} />)}</div>
     </section>
-    <section id="team" className="content-section approach-section">
-      <SectionHeading number="03" eyebrow={t('OUR APPROACH')}>{t("Two worlds.")}<br /><span className="gradient-text">{t("One loop.")}</span></SectionHeading>
-      <DesignLoop content={site.designLoop} brand={<Brand />} />
-    </section>
     <section id="story" className="content-section story-section">
+      <div id="team" aria-hidden="true" />
       <div className="section-intro">
-        <SectionHeading number="04" eyebrow={site.story.eyebrow}>{site.story.headline}<br /><span className="gradient-text">{site.story.headlineAccent}</span></SectionHeading>
+        <SectionHeading number="03" eyebrow={site.story.eyebrow}>{site.story.headline}<br /><span className="gradient-text">{site.story.headlineAccent}</span></SectionHeading>
         <div className="story-copy"><p>{site.story.intro}</p></div>
       </div>
-      <DesignBridge content={site.story.diagram} brand={<Brand />} />
+      <DesignBridge content={site.story.diagram} brand={<Brand />} center={<DesignLoop content={site.designLoop} brand={<Brand />} />} />
     </section>
     <section id="contact" className="content-section contact-section"><p className="eyebrow">{t("LET’S BUILD WHAT COMES NEXT")}</p><h2>{t("From design intent.")}<br /><span className="gradient-text">{t("To silicon demonstration.")}</span></h2><div className="contact-actions"><a className="button button-primary" href={`mailto:${site.brand.email}?subject=GENESIS%20demo`}>{t("Get in touch")} <Icon name="mail" /></a>{workbenchUrl && <a className="button button-secondary" href={workbenchUrl} data-genesis-handoff>{t("Open workbench")} <Icon name="diagonal" /></a>}</div></section>
     <section id="about" className="content-section about-section">
-      <div className="section-intro"><SectionHeading number="05" eyebrow={site.about.eyebrow}>{site.about.headline}</SectionHeading><p>{site.about.intro}</p></div>
+      <div className="section-intro"><SectionHeading number="04" eyebrow={site.about.eyebrow}>{site.about.headline}</SectionHeading><p>{site.about.intro}</p></div>
       <TeamProfiles people={site.about.people} />
       <a className="research-entry" href="#/publications"><span className="research-entry-mark"><Icon name="document" /></span><span><strong>{t("Research & publications")}</strong><span>{t("RF circuits. Optimization. Autonomous systems.")}</span></span><span className="research-entry-action" aria-hidden="true"><Icon name="arrow" /></span></a>
     </section>

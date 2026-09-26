@@ -48,10 +48,17 @@ test('company diagrams share RF artwork instead of text cards and respect visibl
   const artwork = read('src/shared/CircuitArtwork.tsx');
   const bridge = read('src/shared/DesignBridge.tsx');
   const loop = read('src/shared/DesignLoop.tsx');
-  for (const kind of ['schematic', 'engine', 'layout']) assert.ok(artwork.includes(`kind === '${kind}'`));
+  for (const kind of ['schematic', 'designer', 'engine', 'simulation']) assert.ok(artwork.includes(`kind === '${kind}'`));
   assert.match(artwork, /circuit-mos/);
-  assert.match(artwork, /circuit-fingers/);
+  assert.match(artwork, /designer-person/);
+  assert.match(artwork, /simulation-response/);
+  assert.doesNotMatch(artwork, /kind === 'layout'/);
   assert.match(artwork, /circuit-radio/);
+  const explore = read('src/pages/Explore.tsx');
+  assert.equal((explore.match(/<DesignLoop /g) || []).length, 1);
+  assert.match(explore, /center=\{<DesignLoop /);
+  assert.doesNotMatch(explore, /approach-section/);
+  assert.match(explore, /id="team"/); // Existing section links still land on the merged flow.
   for (const diagram of [bridge, loop]) {
     assert.match(diagram, /import \{ CircuitArtwork \}/);
     assert.match(diagram, /useVisibleMotion/);

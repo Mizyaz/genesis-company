@@ -3,6 +3,7 @@
 .story-copy { color: var(--muted); line-height: 1.85; max-width: 520px; }
 .design-bridge { container-type: inline-size; min-width: 0; }
 .bridge-scene { position: relative; isolation: isolate; display: grid; grid-template-columns: minmax(0, 1fr) 7% minmax(0, .85fr) 7% minmax(0, 1fr); align-items: center; padding: 32px 20px; background: radial-gradient(ellipse at center, var(--glow), transparent 65%); border-block: 1px solid var(--border-soft); }
+.design-bridge-merged .bridge-scene { grid-template-columns: minmax(0, 1fr) 4% minmax(0, 1.7fr) 4% minmax(0, 1fr); padding-inline: 0; }
 .bridge-station { min-width: 0; text-align: center; }
 .bridge-station > .circuit-artwork { width: 100%; }
 .bridge-caption { display: block; margin-top: 18px; color: var(--muted); font-size: .8rem; font-weight: 500; }
@@ -26,11 +27,18 @@
 .design-bridge-compact .bridge-brand .brand img { width: 19px; height: 20px; }
 .design-bridge-compact + .prompt-examples { margin-top: 25px; }
 @keyframes bridge-signal { to { stroke-dashoffset: -200; } }
+@container (min-width: 701px) and (max-width: 960px) {
+  .design-bridge-merged .bridge-scene { grid-template-columns: 1fr; justify-items: center; }
+  .design-bridge-merged .bridge-station { width: min(260px, 90%); }
+  .design-bridge-merged .bridge-synergy { width: min(440px, 100%); }
+  .design-bridge-merged .bridge-connection { margin: 10px 0; width: 60px; height: 40px; transform: rotate(90deg); }
+}
 @container (max-width: 700px) {
   .design-bridge:not(.design-bridge-compact) .bridge-scene { grid-template-columns: 1fr; justify-items: center; padding: 20px 0; }
   .design-bridge:not(.design-bridge-compact) .bridge-station { width: min(260px, 90%); }
   .design-bridge:not(.design-bridge-compact) .bridge-engine { width: min(185px, 70%); }
-  .design-bridge:not(.design-bridge-compact) .bridge-connection { margin: 0; width: 68px; height: 40px; transform: rotate(90deg); }
+  .design-bridge:not(.design-bridge-compact) .bridge-synergy { width: min(440px, 100%); }
+  .design-bridge:not(.design-bridge-compact) .bridge-connection { margin: 10px 0; width: 60px; height: 40px; transform: rotate(90deg); }
   .design-bridge:not(.design-bridge-compact) .bridge-caption, .design-bridge:not(.design-bridge-compact) .bridge-brand { margin-top: 4px; }
 }
 @container (max-width: 400px) {

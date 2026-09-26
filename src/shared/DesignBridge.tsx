@@ -22,16 +22,16 @@ function Connection() {
 }
 
 /** One RF visual, reused in the welcome and story sections. No product dependencies. */
-export function DesignBridge({ content, brand, compact = false }: { content: BridgeContent; brand: ReactNode; compact?: boolean }) {
+export function DesignBridge({ content, brand, center, compact = false }: { content: BridgeContent; brand: ReactNode; center?: ReactNode; compact?: boolean }) {
   const { t } = useLanguage();
   const { ref, running } = useVisibleMotion<HTMLElement>();
-  return <figure ref={ref} className={`design-bridge ${compact ? 'design-bridge-compact' : ''}`} data-motion={running ? 'playing' : 'paused'} aria-label={content.caption}>
+  return <figure ref={ref} className={`design-bridge ${compact ? 'design-bridge-compact' : ''} ${center ? 'design-bridge-merged' : ''}`} data-motion={running ? 'playing' : 'paused'} aria-label={content.caption}>
     <div className="bridge-scene">
-      <div className="bridge-station bridge-designer"><CircuitArtwork kind="schematic" running={running} /><span className="bridge-caption">{content.designer.title}</span></div>
+      <div className="bridge-station bridge-designer"><CircuitArtwork kind="designer" running={running} /><span className="bridge-caption">{content.designer.title}</span></div>
       <Connection />
-      <div className="bridge-station bridge-engine"><CircuitArtwork kind="engine" running={running} /><span className="bridge-brand">{brand}</span></div>
+      <div className={`bridge-station bridge-engine ${center ? 'bridge-synergy' : ''}`}>{center ?? <><CircuitArtwork kind="engine" running={running} /><span className="bridge-brand">{brand}</span></>}</div>
       <Connection />
-      <div className="bridge-station bridge-tools"><CircuitArtwork kind="layout" running={running} /><span className="bridge-caption">{content.tools.title}</span></div>
+      <div className="bridge-station bridge-tools"><CircuitArtwork kind="simulation" running={running} /><span className="bridge-caption">{content.tools.title}</span></div>
     </div>
     <span className="sr-only">{content.designer.detail} {content.engine.detail} {content.tools.detail} {content.assets}. {content.environment}.</span>
     {compact && <figcaption><a href="#/explore/story">{t('Discover our story')} <Icon name="diagonal" /></a></figcaption>}
