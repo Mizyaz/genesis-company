@@ -9,6 +9,20 @@ const root = resolve(import.meta.dirname, '..');
 const read = path => readFileSync(resolve(root, path), 'utf8');
 const walk = path => readdirSync(resolve(root, path), { withFileTypes: true }).flatMap(entry => entry.isDirectory() ? walk(`${path}/${entry.name}`) : [`${path}/${entry.name}`]);
 
+test('silicon gate is shared, optional and presentation-only', () => {
+  const gate = read('src/shared/SiliconGate.tsx');
+  assert.equal((read('src/shared/SiteShell.tsx').match(/<SiliconGate\s*\/>/g) || []).length, 1);
+  assert.match(gate, /useMotion\(\)/);
+  assert.match(gate, /prefers-reduced-motion: reduce/);
+  assert.match(gate, /event\.metaKey \|\| event\.ctrlKey/);
+  assert.match(gate, /pageKey\(target.hash\) === pageKey\(location.hash\)/);
+  assert.match(gate, /Loading your future/);
+  assert.match(gate, /removeEventListener\('hashchange'/);
+  assert.doesNotMatch(gate, /from .*?(?:web\/|recording|assistant)|fetch\s*\(/);
+  assert.match(read('src/pages/ProductLaunch.tsx'), /href=\{url\} data-genesis-handoff/);
+  assert.match(read('src/styles/silicon-gate.css'), /var\(--page\)/);
+});
+
 test('public source has no assistant, landing page or engineering service', () => {
   for (const path of ['src/App.tsx', 'src/main.tsx', 'src/pages/Landing.tsx', 'src/assistant', 'server', '.env']) assert.equal(existsSync(resolve(root, path)), false, path);
   const content = JSON.parse(read('src/content/site.json'));

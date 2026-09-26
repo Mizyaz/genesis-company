@@ -37,11 +37,11 @@ export function ProductLaunch({ theme }: { theme: 'light' | 'dark' }) {
         <p className="muted" id="product-port-help">Use the port shown when GENESIS starts.</p>
         <div className="product-port-row">
           <input id="product-port" type="text" inputMode="numeric" maxLength={5} placeholder="e.g. 4300" value={port} onChange={event => setPort(event.target.value)} autoComplete="off" spellCheck={false} aria-invalid={invalid} aria-describedby="product-port-help product-port-error" />
-          {url ? <a className="button button-primary" href={url} target="_blank" rel="noopener noreferrer" onClick={remember}>Open GENESIS <Icon name="diagonal" /></a>
+          {url ? <a className="button button-primary" href={url} data-genesis-handoff onClick={remember}>Open GENESIS <Icon name="diagonal" /></a>
             : <button className="button button-primary" disabled>Open GENESIS <Icon name="diagonal" /></button>}
         </div>
         <p id="product-port-error" className="product-port-error" role="status">{invalid && 'Enter a port number between 1 and 65535.'}</p>
-        <small>Opens in a new tab with your selected theme.</small>
+        <small>Continues with your selected theme. Cmd/Ctrl-click opens a new tab.</small>
         <p className="product-connection-note">Using a remote server? Please connect your SSH tunnel first.</p>
         <details className="product-connection-help" open={helpOpen} onToggle={event => setHelpOpen(event.currentTarget.open)}>
           <summary>Can’t open GENESIS?</summary>
