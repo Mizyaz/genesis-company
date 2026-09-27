@@ -98,9 +98,35 @@
           "height": 179
         }
       ],
-      "description": "A broadband passive example that connects field behavior, geometry and verification."
+      "description": "A broadband passive circuit shaped by geometry, EM simulation and verification."
     }
   ],
+  "services": {
+    "eyebrow": "WORK WITH GENESIS",
+    "title": "Provided services",
+    "intro": "Use the platform, get support for a silicon prototype or connect GENESIS to your own tools.",
+    "action": "Discuss your project",
+    "items": [
+      {
+        "id": "platform-membership",
+        "icon": "layers",
+        "title": "Software platform membership",
+        "description": "Access GENESIS for circuit design, simulation and optimization in one workspace."
+      },
+      {
+        "id": "silicon-demonstration",
+        "icon": "chip",
+        "title": "Silicon demonstration assistance",
+        "description": "Technical support with prototype planning, fabrication preparation and measurement."
+      },
+      {
+        "id": "specialised-integration",
+        "icon": "sliders",
+        "title": "Specialised integration",
+        "description": "Connect GENESIS to your CAD tools, automation scripts and existing design workflows."
+      }
+    ]
+  },
   "designLoop": {
     "left": {
       "title": "RFIC expertise",

@@ -28,7 +28,7 @@ export function PublicApp() {
   useEffect(() => {
     const section = route.split('/')[2];
     const timer = window.setTimeout(() => {
-      if (section && ['workflow', 'portfolio', 'team', 'story', 'contact', 'about'].includes(section)) {
+      if (section && ['workflow', 'portfolio', 'services', 'team', 'story', 'contact', 'about'].includes(section)) {
         document.getElementById(section)?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
       } else window.scrollTo({ top: 0 });
     }, 30);

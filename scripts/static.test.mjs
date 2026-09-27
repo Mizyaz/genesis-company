@@ -71,6 +71,24 @@ test('company diagrams share RF artwork instead of text cards and respect visibl
   assert.doesNotMatch(artwork, /from .*?(?:web\/|assistant)|fetch\s*\(/);
 });
 
+test('services precede the story, remain data-driven and have natural Turkish copy', () => {
+  const content = JSON.parse(read('src/content/site.json'));
+  const dictionary = JSON.parse(read('src/content/tr.json'));
+  assert.equal(content.services.items.length, 3);
+  assert.deepEqual(content.services.items.map(item => item.id), ['platform-membership', 'silicon-demonstration', 'specialised-integration']);
+  for (const copy of [content.services.eyebrow, content.services.title, content.services.intro, content.services.action, ...content.services.items.flatMap(item => [item.title, item.description])]) assert.ok(dictionary[copy], copy);
+  const page = read('src/pages/Explore.tsx');
+  assert.ok(page.indexOf('<Services ') < page.indexOf('<section id="story"'));
+  assert.match(page, /<Services content=\{site.services\}/);
+  assert.match(read('src/shared/Services.tsx'), /content.items.map/);
+  assert.doesNotMatch(read('src/shared/Services.tsx'), /fetch\s*\(|checkout|payment/);
+  assert.match(read('src/PublicApp.tsx'), /'services'/);
+  assert.equal(dictionary['From specs'], 'Fikirden');
+  assert.equal(dictionary['silicon.'], 'çipe.');
+  assert.doesNotMatch(Object.values(dictionary).join('\n'), /Hedeflerden|silikona|DEVRELER\. ALANLAR/i);
+  assert.match(read('src/styles/site.css'), /font-size: clamp\(2.75rem, 12vw, 4.6rem\)/);
+});
+
 test('silicon gate is shared, optional and presentation-only', () => {
   const gate = read('src/shared/SiliconGate.tsx');
   assert.equal((read('src/shared/SiteShell.tsx').match(/<SiliconGate\s*\/>/g) || []).length, 1);
@@ -88,7 +106,7 @@ test('silicon gate is shared, optional and presentation-only', () => {
 test('public source has no assistant, landing page or engineering service', () => {
   for (const path of ['src/App.tsx', 'src/main.tsx', 'src/pages/Landing.tsx', 'src/assistant', 'server', '.env']) assert.equal(existsSync(resolve(root, path)), false, path);
   const content = JSON.parse(read('src/content/site.json'));
-  assert.deepEqual(Object.keys(content).sort(), ['about', 'brand', 'designLoop', 'portfolio', 'stages', 'story', 'workflow'].sort());
+  assert.deepEqual(Object.keys(content).sort(), ['about', 'brand', 'designLoop', 'portfolio', 'services', 'stages', 'story', 'workflow'].sort());
   const source = walk('src').map(read).join('\n');
   assert.doesNotMatch(source, /localhost|127\.0\.0\.1|\/api\/|VITE_WORKBENCH_URL|codex exec|fetch\s*\(|new WebSocket/);
   assert.match(read('index.html'), /connect-src 'none'/);

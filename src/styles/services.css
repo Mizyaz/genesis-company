@@ -1,0 +1,15 @@
+.services-section { border-top: 1px solid var(--border-soft); }
+.services-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
+.service-card { --service-accent: var(--cyan); min-width: 0; padding: 30px; border: 1px solid var(--border); border-radius: var(--radius); background: radial-gradient(ellipse at top left, color-mix(in srgb, var(--service-accent) 7%, transparent), transparent 65%), var(--surface); }
+.service-card:nth-child(2) { --service-accent: var(--violet); }
+.service-symbol { display: flex; align-items: center; gap: 18px; color: var(--service-accent); margin-bottom: 28px; }
+.service-symbol .icon { width: 36px; height: 36px; }
+.service-symbol span { width: 56px; height: 1px; background: linear-gradient(90deg, var(--service-accent), transparent); }
+.service-card h3 { font-size: 1.2rem; font-weight: 550; line-height: 1.4; margin-bottom: 14px; text-wrap: balance; }
+.service-card p { font-size: .9375rem; line-height: 1.8; color: var(--muted); }
+.services-contact { margin-top: 28px; }
+@media (max-width: 850px) {
+  .services-grid { grid-template-columns: 1fr; gap: 16px; }
+  .service-card { padding: 24px; }
+  .service-symbol { margin-bottom: 18px; }
+}

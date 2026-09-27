@@ -96,8 +96,8 @@ img { display: block; max-width: 100%; }
 .company-hero { position: relative; isolation: isolate; overflow: hidden; min-height: 700px; padding: 95px max(6vw, calc((100vw - var(--content-width)) / 2)); display: flex; flex-direction: column; justify-content: center; }
 .company-hero-image { position: absolute; inset: 0 0 0 30%; background: url('/assets/hero-metal.webp') right center / cover no-repeat; opacity: .85; z-index: -2; mask-image: linear-gradient(90deg, transparent, #000 32%); }
 .company-hero::after { position: absolute; content: ''; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(90deg, var(--page) 3%, transparent 85%), linear-gradient(0deg, var(--page), transparent 25%); }
-.company-hero-copy { max-width: 650px; }
-.company-hero h1 { font-size: clamp(3.5rem, 7.8vw, 7.8rem); line-height: 1.04; font-weight: 620; letter-spacing: -.055em; margin: 24px 0; }
+.company-hero-copy { width: 100%; max-width: 650px; min-width: 0; }
+.company-hero h1 { font-size: clamp(3.5rem, 7.8vw, 7.8rem); line-height: 1.04; font-weight: 620; letter-spacing: -.055em; margin: 24px 0; overflow-wrap: break-word; }
 .company-hero-copy > p:not(.eyebrow) { font-size: 1.25rem; color: var(--muted); line-height: 1.65; }
 .company-hero .button { margin-top: 34px; }
 .button { display: inline-flex; align-items: center; gap: 20px; justify-content: center; padding: 15px 23px; border: 1px solid var(--border); border-radius: 8px; font-size: .9375rem; font-weight: 550; transition: transform .2s, background .2s, border-color .2s; }
@@ -234,12 +234,12 @@ img { display: block; max-width: 100%; }
   .company-hero { min-height: 610px; padding: 60px 25px; }
   .company-hero-image { inset: 0 -30% 0 10%; opacity: .48; }
   .company-hero-copy > .eyebrow { font-size: .625rem; }
-  .company-hero h1 { font-size: 4.6rem; }
+  .company-hero h1 { font-size: clamp(2.75rem, 12vw, 4.6rem); }
   .company-hero-copy > p:not(.eyebrow) { font-size: 1.05rem; }
   .hero-index { gap: 18px; font-size: .625rem; margin-top: 58px; }
   .content-section { padding: 60px 24px; }
   .section-intro { grid-template-columns: 1fr; gap: 24px; margin-bottom: 32px; }
-  .section-heading h2 { font-size: 2.25rem; }
+  .section-heading h2 { font-size: clamp(1.75rem, 8vw, 2.25rem); overflow-wrap: break-word; }
   .workflow-track { grid-template-columns: 1fr; }
   .workflow-step { padding: 22px 24px 22px 75px; border: 1px solid var(--border); border-top: 0; }
   .workflow-step:nth-child(n+4) { border-top: 0; }

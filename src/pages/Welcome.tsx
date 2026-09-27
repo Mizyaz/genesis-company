@@ -13,7 +13,7 @@ export function Welcome() {
     <div className="landing-atmosphere" aria-hidden="true" />
     <CircuitBackdrop />
     <section className="welcome-content" aria-labelledby="welcome-heading">
-      <p className="eyebrow">{t("CIRCUITS. FIELDS. INTELLIGENCE.")}</p>
+      <p className="eyebrow">{t("RF DESIGN. SIMULATION. AI.")}</p>
       <h1 id="welcome-heading"><ElectricBrand /></h1>
       <p className="welcome-tagline">{t("Generative Evolution of Silicon Intelligent Systems")}</p>
       <p className="welcome-intro">{t("Explore what we build. Or start your next design.")}</p>
