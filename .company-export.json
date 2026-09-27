@@ -9,7 +9,7 @@
     "src/pages/Welcome.tsx": "7c0abf8a79d065ae0db19bbc50d03f15c665f4a3003780dcb900e8851b86bda7",
     "src/pages/ProductLaunch.tsx": "122b1a3a0bf440cce19e4a491ec9b4220d808d6d58af5a3c4b9a74035559fa71",
     "src/shared/productLink.ts": "56fad2713a100cbb9d81857ffaa923434607dfa7d9fca2f2dab02a2f13d322a5",
-    "src/styles/welcome.css": "97bc248969853a7db20acd37c66f5bc381a9eb1f13140d20bdb6d542ba8f50e2",
+    "src/styles/welcome.css": "0af60ca00ad95a86824565361e5a98e6517ca041fe95d6cd779657426e2bee45",
     "src/shared/SiteShell.tsx": "2a2ca4acce8e97728b6af998e2845b661dbb27189e5d2adb352c64a9daf91dbe",
     "src/shared/ui.tsx": "bbd61a8cd21c9d09cc3d87a001803736e75c985537968302bf31a8a327ea9248",
     "src/shared/PortfolioCard.tsx": "c88646e8d91e78b4b2612e8a881ffbe5246651e3bcff565523650de5476bdcdb",
