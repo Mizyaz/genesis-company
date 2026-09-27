@@ -2,15 +2,16 @@ import { useId, useRef, useState, type KeyboardEvent } from 'react';
 import { ActionLink, Icon, SectionHeading } from './ui';
 import { CircuitArtwork } from './CircuitArtwork';
 import { useVisibleMotion } from './MotionSettings';
+import { MembershipValue, type MembershipContent } from './MembershipValue';
 import '../styles/services.css';
 
 type ServicesContent = {
   eyebrow: string; title: string; intro: string; action: string;
-  scopeLabel: string;
+  scopeLabel: string; membership: MembershipContent;
   items: {
     id: string; icon: string; label: string; title: string; description: string;
-    headline: string; note: string; visualLabel: string; stages: string[];
-    features: { icon: string; title: string; detail: string }[];
+    headline: string; note: string; visualLabel: string; scopeLabel?: string;
+    features: { icon: string; title: string; detail: string; unit?: string }[];
   }[];
 };
 
@@ -22,13 +23,6 @@ function ServiceVisual({ item }: { item: ServicesContent['items'][number] }) {
     <div className="service-visual-heading"><span className="service-live-dot" /><span>GENESIS</span><span>{item.visualLabel}</span></div>
     <div className="service-artboard" aria-hidden="true">
       <div className="service-aura" />
-      {item.id === 'platform-membership' && <>
-        <div className="service-workspace">
-          <div className="service-window-bar"><i /><i /><i /><span>RF / LC / MOS</span></div>
-          <div className="service-workspace-body"><div className="service-tool-rail"><Icon name="switch" /><Icon name="wave" /><Icon name="sliders" /></div><CircuitArtwork kind="schematic" running={running} /></div>
-        </div>
-        <div className="service-result"><CircuitArtwork kind="simulation" running={running} /></div>
-      </>}
       {item.id === 'silicon-demonstration' && <svg className="service-wafer" viewBox="0 0 480 320" fill="none">
         <defs><clipPath id={clip}><circle cx="155" cy="140" r="105" /></clipPath></defs>
         <circle className="service-wafer-base" cx="155" cy="140" r="105" />
@@ -55,7 +49,6 @@ function ServiceVisual({ item }: { item: ServicesContent['items'][number] }) {
         {['switch', 'wave', 'sliders', 'document'].map((icon, i) => <div className={`service-connector service-connector-${i}`} key={icon}><Icon name={icon} /><span>{['CAD', 'EM', 'CLI', 'JSON'][i]}</span></div>)}
       </>}
     </div>
-    <figcaption className="service-stages">{item.stages.map((stage, i) => <span key={stage} style={{ animationDelay: `${i * 1.6}s` }}><i />{stage}</span>)}</figcaption>
   </figure>;
 }
 
@@ -84,9 +77,9 @@ export function Services({ content, contactHref }: { content: ServicesContent; c
     <div className="service-panel" role="tabpanel" id={`${prefix}-panel`} aria-labelledby={`${prefix}-tab-${selected}`} tabIndex={0}>
       <div className="service-overview">
         <div className="service-copy"><p className="eyebrow">{item.title}</p><h3>{item.headline}</h3><p>{item.description}</p><ActionLink href={contactHref} icon="mail">{content.action}</ActionLink></div>
-        <ServiceVisual key={item.id} item={item} />
+        {item.id === 'platform-membership' ? <MembershipValue content={content.membership} /> : <ServiceVisual key={item.id} item={item} />}
       </div>
-      <div className="service-scope"><p className="eyebrow">{content.scopeLabel}</p><ul>{item.features.map(feature => <li key={feature.title}><Icon name={feature.icon} /><div><h4>{feature.title}</h4><p>{feature.detail}</p></div></li>)}</ul></div>
+      <div className="service-scope"><p className="eyebrow">{item.scopeLabel ?? content.scopeLabel}</p><ul>{item.features.map(feature => <li key={feature.title}><Icon name={feature.icon} /><div><h4>{feature.title}</h4>{feature.unit && <span className="service-billing-unit">{feature.unit}</span>}<p>{feature.detail}</p></div></li>)}</ul></div>
       <p className="service-note"><Icon name="document" />{item.note}</p>
     </div>
   </section>;

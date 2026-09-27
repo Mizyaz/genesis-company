@@ -1,0 +1,36 @@
+.membership-value { min-width: 0; overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+.membership-choices { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-bottom: 1px solid var(--border); }
+.membership-choices button { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding: 18px 14px; background: transparent; border: 0; border-bottom: 2px solid transparent; text-align: left; font: 500 .77rem/1.55 var(--font-sans); color: var(--muted); }
+.membership-choices button + button { border-left: 1px solid var(--border-soft); }
+.membership-choices button .icon { color: var(--cyan); width: 20px; height: 20px; }
+.membership-choices button[aria-pressed='true'] { border-bottom-color: var(--cyan); background: var(--glow); color: var(--text); }
+.membership-choices button:hover { background: var(--surface-raised); }
+.membership-diagram { padding: 22px 8px 6px; background: radial-gradient(ellipse at 50% 50%, var(--glow), transparent 70%); }
+.membership-diagram svg { display: block; width: 100%; stroke-linecap: round; stroke-linejoin: round; }
+.membership-connection { stroke: var(--border); stroke-width: 1.5; }
+.membership-flow { stroke: var(--cyan); stroke-width: 2; stroke-dasharray: 7 93; filter: drop-shadow(0 0 4px var(--cyan)); animation: membership-flow 4.8s linear infinite paused; }
+.membership-circuit { stroke: var(--cyan); stroke-width: 1.5; }
+.membership-circuit rect { fill: var(--surface); stroke: var(--border); }
+.membership-circuit circle { fill: var(--cyan); stroke: none; }
+.membership-capacitor { stroke: var(--violet); }
+.membership-variant { stroke: var(--violet); stroke-width: 2; opacity: .5; }
+.membership-plot rect { fill: var(--surface-raised); stroke: var(--border); }
+.membership-axis { stroke: var(--border); stroke-width: .5; }
+.membership-response { stroke: var(--cyan); stroke-width: 1.5; }
+.membership-response.secondary { stroke: var(--violet); }
+.membership-scan { stroke: var(--cyan); stroke-width: .6; opacity: .45; animation: membership-scan 4s linear infinite paused; }
+.membership-brief > path:first-child { fill: var(--surface-raised); stroke: var(--border); }
+.membership-brief > path:last-child { stroke: var(--cyan); stroke-width: 1.5; }
+.membership-labels { fill: var(--muted); font: 10px var(--font-sans); text-anchor: middle; }
+.membership-arrow, .membership-controls { stroke: var(--cyan); stroke-width: 1.5; }
+.membership-records rect { fill: var(--surface); stroke: var(--border); }.membership-records path { stroke: var(--violet); stroke-width: 1.5; }
+.membership-saved { fill: var(--surface); stroke: var(--cyan); }.membership-check { stroke: var(--cyan); stroke-width: 1.8; }
+.membership-value figcaption { padding: 20px 24px 24px; border-top: 1px solid var(--border-soft); }
+.membership-value figcaption strong { font-size: .95rem; font-weight: 550; }
+.membership-value figcaption p { color: var(--muted); font-size: .85rem; line-height: 1.8; margin-top: 8px; min-height: 5.4em; }
+.membership-value[data-active='true'] :is(.membership-flow, .membership-scan) { animation-play-state: running; }
+@keyframes membership-flow { to { stroke-dashoffset: -100; } }
+@keyframes membership-scan { to { transform: translateX(75px); } }
+@media (max-width: 850px) { .membership-value { width: 100%; max-width: 580px; justify-self: center; } }
+@media (max-width: 400px) { .membership-choices button { font-size: .7rem; padding: 14px 10px; }.membership-value figcaption { padding: 18px; } }
+@media (prefers-reduced-motion: reduce) { .membership-value :is(.membership-flow, .membership-scan) { animation: none !important; } }

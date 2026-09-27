@@ -107,38 +107,75 @@
     "intro": "Use the platform, get support for a silicon prototype or connect GENESIS to your own tools.",
     "action": "Discuss your project",
     "scopeLabel": "Service scope",
+    "membership": {
+      "label": "What membership changes for your team",
+      "benefits": [
+        {
+          "id": "explore",
+          "icon": "switch",
+          "title": "Explore more options",
+          "detail": "Use the same specifications to evaluate different circuit and passive choices. Compare their responses before committing to a design.",
+          "labels": [
+            "Specifications",
+            "Design candidates",
+            "Compare responses"
+          ]
+        },
+        {
+          "id": "iterate",
+          "icon": "sliders",
+          "title": "Reduce manual repetition",
+          "detail": "Connect variable updates, simulation and evaluation in a repeatable loop. Your team can focus on engineering decisions instead of repeating tool operations.",
+          "labels": [
+            "Repeatable design loop",
+            "Update variables",
+            "Evaluate results"
+          ]
+        },
+        {
+          "id": "reuse",
+          "icon": "document",
+          "title": "Reuse design knowledge",
+          "detail": "Keep configurations, run history and reusable blocks connected. Build on earlier work so the next project starts with knowledge, not an empty workspace.",
+          "labels": [
+            "Earlier work",
+            "Reuse",
+            "Next design"
+          ]
+        }
+      ]
+    },
     "items": [
       {
         "id": "platform-membership",
         "icon": "layers",
         "label": "Platform",
         "title": "Software platform membership",
-        "headline": "Your RF design workspace.",
-        "description": "Access GENESIS for circuit design, simulation and optimization in one workspace.",
+        "headline": "Engineering throughput. Not just software.",
+        "description": "Explore more design options, spend less time on manual iterations and carry design knowledge into your next project.",
         "visualLabel": "WORKSPACE",
-        "stages": [
-          "Design",
-          "Simulate",
-          "Optimize"
-        ],
+        "scopeLabel": "How access and usage are structured",
         "features": [
           {
-            "icon": "switch",
-            "title": "Build the circuit",
-            "detail": "Define schematics, reusable blocks and testbenches in the same project."
+            "icon": "layers",
+            "title": "Software subscription",
+            "unit": "€ / seat / year",
+            "detail": "Annual access to the GENESIS platform, licensed per user."
           },
           {
-            "icon": "wave",
-            "title": "Simulate and compare",
-            "detail": "Inspect RF responses and compare circuit and electromagnetic simulation results."
+            "icon": "chip",
+            "title": "Compute & EM usage",
+            "unit": "€ / compute hour",
+            "detail": "Cloud or on-premise compute credits, accounted for separately from platform access."
           },
           {
             "icon": "sliders",
-            "title": "Optimize and revisit",
-            "detail": "Set performance goals, explore design variables and return to earlier iterations."
+            "title": "Enterprise deployments",
+            "unit": "€ / project",
+            "detail": "Custom integration and support, scoped around your tools and environment."
           }
         ],
-        "note": "Membership scope, deployment and access are agreed with your team."
+        "note": "Strategic partnerships: joint development and licensing, with milestones and royalties. Contact us to define the scope and pricing."
       },
       {
         "id": "silicon-demonstration",
@@ -148,11 +185,6 @@
         "headline": "Take your design to silicon.",
         "description": "Technical support with prototype planning, fabrication preparation and measurement.",
         "visualLabel": "PROTOTYPE",
-        "stages": [
-          "Prepare",
-          "Prototype",
-          "Measure"
-        ],
         "features": [
           {
             "icon": "document",
@@ -180,11 +212,6 @@
         "headline": "Your tools. Working together.",
         "description": "Connect GENESIS to your CAD tools, automation scripts and existing design workflows.",
         "visualLabel": "CONNECTED TOOLS",
-        "stages": [
-          "Connect",
-          "Automate",
-          "Verify"
-        ],
         "features": [
           {
             "icon": "layers",

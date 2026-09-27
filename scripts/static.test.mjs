@@ -76,10 +76,10 @@ test('services precede the story, remain data-driven and have natural Turkish co
   const dictionary = JSON.parse(read('src/content/tr.json'));
   assert.equal(content.services.items.length, 3);
   assert.deepEqual(content.services.items.map(item => item.id), ['platform-membership', 'silicon-demonstration', 'specialised-integration']);
-  for (const copy of [content.services.eyebrow, content.services.title, content.services.intro, content.services.action, content.services.scopeLabel, ...content.services.items.flatMap(item => [item.label, item.title, item.headline, item.description, item.note, item.visualLabel, ...item.stages, ...item.features.flatMap(feature => [feature.title, feature.detail])])]) assert.ok(dictionary[copy], copy);
+  for (const copy of [content.services.eyebrow, content.services.title, content.services.intro, content.services.action, content.services.scopeLabel, ...content.services.items.flatMap(item => [item.label, item.title, item.headline, item.description, item.note, item.visualLabel, item.scopeLabel, ...item.features.flatMap(feature => [feature.title, feature.detail, feature.unit])])].filter(Boolean)) assert.ok(dictionary[copy], copy);
   for (const item of content.services.items) {
     assert.equal(item.features.length, 3);
-    assert.equal(item.stages.length, 3);
+    assert.equal(item.stages, undefined);
   }
   const page = read('src/pages/Explore.tsx');
   assert.ok(page.indexOf('<Services ') < page.indexOf('<section id="story"'));
@@ -91,6 +91,25 @@ test('services precede the story, remain data-driven and have natural Turkish co
   assert.equal(dictionary['silicon.'], 'çipe.');
   assert.doesNotMatch(Object.values(dictionary).join('\n'), /Hedeflerden|silikona|DEVRELER\. ALANLAR/i);
   assert.match(read('src/styles/site.css'), /font-size: clamp\(2.75rem, 12vw, 4.6rem\)/);
+});
+
+test('membership explains customer value and preserves the deck business model without invented prices', () => {
+  const {services} = JSON.parse(read('src/content/site.json'));
+  const dictionary = JSON.parse(read('src/content/tr.json'));
+  assert.deepEqual(services.membership.benefits.map(item => item.id), ['explore','iterate','reuse']);
+  for (const copy of [services.membership.label, ...services.membership.benefits.flatMap(item => [item.title, item.detail, ...item.labels])]) assert.ok(dictionary[copy], copy);
+  assert.deepEqual(services.items[0].features.map(item => item.unit), ['€ / seat / year', '€ / compute hour', '€ / project']);
+  assert.match(services.items[0].note, /milestones and royalties/);
+  assert.doesNotMatch(JSON.stringify(services), /€\s*\d|\d+\s*%/);
+  const membership = read('src/shared/MembershipValue.tsx');
+  assert.match(membership, /aria-pressed=\{selected === i\}/);
+  assert.match(membership, /data-benefit=\{benefit.id\}/);
+  assert.match(membership, /useVisibleMotion<HTMLElement>/);
+  assert.match(membership, /aria-live="polite"/);
+  assert.doesNotMatch(membership, /fetch\s*\(|setInterval|setTimeout/);
+  assert.doesNotMatch(read('src/shared/Services.tsx'), /service-stages|service-workspace/);
+  assert.doesNotMatch(read('src/styles/services.css'), /service-stages|service-stage|service-workspace/);
+  assert.match(read('src/styles/membership-value.css'), /prefers-reduced-motion: reduce/);
 });
 
 test('services share contact actions, support keyboard tabs and animate only when visible', () => {

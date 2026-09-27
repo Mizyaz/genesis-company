@@ -21,25 +21,13 @@
 .service-live-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--cyan); }
 .service-artboard { position: relative; aspect-ratio: 1.5; isolation: isolate; background-image: linear-gradient(var(--border-soft) 1px, transparent 1px), linear-gradient(90deg, var(--border-soft) 1px, transparent 1px); background-size: 30px 30px; }
 .service-aura { position: absolute; z-index: -1; inset: 5%; background: radial-gradient(ellipse at 25% 40%, color-mix(in srgb, var(--cyan) 14%, transparent), transparent 65%), radial-gradient(ellipse at 75% 60%, color-mix(in srgb, var(--violet) 12%, transparent), transparent 60%); filter: blur(20px); animation: service-atmosphere 6s ease-in-out infinite paused; }
-.service-workspace { position: absolute; width: 78%; left: 7%; top: 9%; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--surface); box-shadow: var(--shadow); transform: perspective(1000px) rotateY(-7deg) rotateX(4deg); }
-.service-window-bar { display: flex; align-items: center; gap: 4px; padding: 9px 12px; border-bottom: 1px solid var(--border-soft); }
-.service-window-bar i { width: 4px; height: 4px; border-radius: 50%; background: var(--subtle); opacity: .6; }
-.service-window-bar span { margin-left: auto; color: var(--subtle); font: .55rem var(--font-mono); }
-.service-workspace-body { display: flex; }
-.service-workspace-body > .circuit-artwork { width: calc(100% - 30px); }
-.service-tool-rail { display: flex; flex-direction: column; gap: 18px; padding: 15px 7px; border-right: 1px solid var(--border-soft); color: var(--subtle); }
-.service-tool-rail .icon { width: 16px; height: 16px; }
-.service-result { position: absolute; width: 51%; right: 4%; bottom: 0; filter: drop-shadow(0 8px 10px var(--glow)); }
-.service-stages { display: flex; position: relative; padding: 17px 18px; border-top: 1px solid var(--border-soft); background: var(--surface); }
-.service-stages span { flex: 1; display: flex; justify-content: center; align-items: center; gap: 8px; min-width: 0; color: var(--muted); font-size: .7rem; animation: service-stage 4.8s ease-in-out infinite paused; }
-.service-stages span + span { border-left: 1px solid var(--border); }
-.service-stages i { width: 4px; height: 4px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
 .service-scope { margin-top: 38px; padding: 28px 0 0; border-top: 1px solid var(--border); }
 .service-scope > .eyebrow { font-size: .65rem; }
 .service-scope ul { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px; list-style: none; margin: 22px 0 0; padding: 0; }
 .service-scope li { display: flex; align-items: flex-start; gap: 12px; min-width: 0; }
 .service-scope li > .icon { color: var(--cyan); width: 19px; height: 19px; margin-top: 2px; }
 .service-scope h4 { margin: 0 0 9px; font-size: .95rem; font-weight: 600; line-height: 1.4; }
+.service-billing-unit { display: block; color: var(--cyan); font: .8rem var(--font-mono); margin: 0 0 12px; }
 .service-scope li p { color: var(--muted); font-size: .85rem; line-height: 1.75; }
 .service-note { display: flex; align-items: flex-start; gap: 10px; color: var(--subtle); font-size: .75rem; line-height: 1.7; margin-top: 28px; }
 .service-note .icon { width: 16px; height: 16px; margin-top: 2px; }
@@ -61,9 +49,8 @@
 .service-connector .icon { width: 28px; height: 28px; }
 .service-connector span { font: .6rem var(--font-mono); color: var(--muted); letter-spacing: .1em; }
 .service-connector-0 { top: 8%; left: 5%; }.service-connector-1 { top: 8%; right: 5%; }.service-connector-2 { bottom: 8%; left: 5%; }.service-connector-3 { bottom: 8%; right: 5%; }
-.service-visual[data-active='true'] :is(.service-aura, .service-stages span, .service-die, .service-wafer-scan, .service-probe-tip, .service-signal) { animation-play-state: running; }
+.service-visual[data-active='true'] :is(.service-aura, .service-die, .service-wafer-scan, .service-probe-tip, .service-signal) { animation-play-state: running; }
 @keyframes service-atmosphere { 50% { opacity: .45; transform: scale(.9); } }
-@keyframes service-stage { 0%, 15%, 100% { color: var(--muted); } 30%, 45% { color: var(--cyan); } }
 @keyframes service-die { 50% { opacity: .35; } }
 @keyframes service-scan { to { transform: translateY(216px); } }
 @keyframes service-signal { to { stroke-dashoffset: -100; } }
@@ -80,8 +67,7 @@
 @media (max-width: 400px) {
   .service-tabs button { font-size: .75rem; }
   .service-visual-heading { padding: 14px 12px; font-size: .55rem; gap: 6px; }
-  .service-stages { padding: 14px 6px; }.service-stages span { font-size: .6rem; gap: 5px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .service-visual :is(.service-aura, .service-stages span, .service-die, .service-wafer-scan, .service-probe-tip, .service-signal) { animation: none !important; }
+  .service-visual :is(.service-aura, .service-die, .service-wafer-scan, .service-probe-tip, .service-signal) { animation: none !important; }
 }
