@@ -13,7 +13,7 @@ export function DesignLoop({ content, brand }: { content: LoopContent; brand: Re
     <div className="design-loop-graphic">
       <EnergyFlow paused={!enabled} />
       {[content.left, content.right].map((node, index) => <div key={index} className={`loop-node ${index === 0 ? 'loop-node-left' : 'loop-node-right'}`}>
-        <CircuitArtwork kind={index === 0 ? 'schematic' : 'engine'} running={running} />
+        {index === 0 ? <CircuitArtwork kind="schematic" running={running} /> : <div className="loop-candidate-space" aria-hidden="true" />}
         <h3>{node.title}</h3>
         <span className="sr-only">{node.items.join('. ')}</span>
       </div>)}

@@ -72,6 +72,27 @@ test('company diagrams share RF artwork instead of text cards and respect visibl
   assert.doesNotMatch(artwork, /from .*?(?:web\/|assistant)|fetch\s*\(/);
 });
 
+test('story flow uses fixed circuits and selection, retaining visibility and theme controls', () => {
+  const flow = read('src/shared/EnergyFlow.tsx');
+  assert.doesNotMatch(flow, /ringPoint|const rings|ribbon|strand/);
+  assert.match(flow, /const leftFeed: Point\[\]/);
+  assert.match(flow, /const rightFeed: Point\[\]/);
+  assert.match(flow, /const active = selected \? 1/);
+  assert.match(flow, /IntersectionObserver/);
+  assert.match(flow, /document\.hidden \|\| paused/);
+  assert.match(flow, /attributeFilter: \['data-theme', 'style', 'class'\]/);
+  assert.doesNotMatch(read('src/styles/site.css'), /\.design-loop-energy\s*\{\s*display:\s*none/);
+});
+
+test('welcome expansion is a responsive signature attached to the wordmark', () => {
+  const welcome = read('src/pages/Welcome.tsx');
+  assert.match(welcome, /className="welcome-identity"/);
+  assert.match(welcome, /className="welcome-signature"/);
+  assert.match(welcome, /Generative Evolution of Silicon Intelligent Systems/);
+  assert.doesNotMatch(welcome, /welcome-tagline/);
+  assert.match(read('src/styles/welcome.css'), /\.welcome-identity \{ flex-direction: column; align-items: flex-end/);
+});
+
 test('services precede the story, remain data-driven and have natural Turkish copy', () => {
   const content = JSON.parse(read('src/content/site.json'));
   const dictionary = JSON.parse(read('src/content/tr.json'));

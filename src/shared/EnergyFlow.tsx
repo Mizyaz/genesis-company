@@ -1,142 +1,120 @@
 import { useEffect, useRef } from 'react';
 
-type Palette = { cyan: string; violet: string; blue: string; highlight: string; surface: string; light: boolean };
+type Palette = { cyan: string; violet: string; blue: string; surface: string; light: boolean };
+type Point = [number, number];
 const TAU = Math.PI * 2;
-const rings = [{ x: 180, y: 160, phase: 0, direction: 1 }, { x: 420, y: 160, phase: 2.1, direction: -1 }];
+const cycleSeconds = 5.4;
+const leftFeed: Point[] = [[250, 258], [250, 278], [264, 292], [282, 292]];
+const rightFeed: Point[] = [[350, 258], [350, 278], [336, 292], [318, 292]];
+const output: Point[] = [[300, 310], [300, 334]];
 
-/** FUNCTIONS: ringPoint / drawEnergy render only flow geometry, never diagram text. */
-function ringPoint(index: number, angle: number, time: number, ribbon = 0): [number, number] {
-  const ring = rings[index];
-  const phase = time * ring.direction + ring.phase;
-  const radius = 132 + ribbon * 1.15
-    + Math.sin(angle * 3 - phase * 1.1 + ribbon * .25) * 3.5
-    + Math.sin(angle * 7 + phase * .8 + ribbon * .39) * 2.1
-    + Math.cos(angle * 13 - phase * .45 + ribbon * .2) * .8;
-  return [ring.x + Math.cos(angle) * radius, ring.y + Math.sin(angle) * radius];
-}
-
+/** FUNCTIONS: drawEnergy paints fixed circuit geometry; only signals and selection move. */
 function drawEnergy(ctx: CanvasRenderingContext2D, width: number, height: number, ratio: number, time: number, palette: Palette) {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, width * ratio, height * ratio);
   ctx.setTransform(width * ratio / 600, 0, 0, height * ratio / 440, 0, 0);
   ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  const cycle = time % cycleSeconds;
 
+  function line(points: Point[], color: string, opacity = 1, thickness = 1) {
+    ctx.save(); ctx.strokeStyle = color; ctx.globalAlpha = opacity; ctx.lineWidth = thickness;
+    ctx.beginPath();
+    points.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y));
+    ctx.stroke(); ctx.restore();
+  }
   function glow(x: number, y: number, radius: number, color: string, opacity: number) {
     ctx.save();
     const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
     gradient.addColorStop(0, color); gradient.addColorStop(1, 'transparent');
     ctx.fillStyle = gradient; ctx.globalAlpha = opacity;
-    ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2);
-    ctx.restore();
+    ctx.fillRect(x - radius, y - radius, radius * 2, radius * 2); ctx.restore();
   }
-  function trace(index: number, offset: number, start = 0, length = TAU) {
-    ctx.beginPath();
-    const steps = Math.ceil(length / TAU * 150);
-    for (let step = 0; step <= steps; step++) {
-      const [x, y] = ringPoint(index, start + length * step / steps, time, offset);
-      if (step === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  function terminal(x: number, y: number, color: string, opacity = .7) {
+    ctx.save(); ctx.fillStyle = palette.surface; ctx.strokeStyle = color;
+    ctx.globalAlpha = opacity; ctx.lineWidth = 1.3;
+    ctx.beginPath(); ctx.arc(x, y, 2.8, 0, TAU); ctx.fill(); ctx.stroke(); ctx.restore();
+  }
+  function pulse(points: Point[], progress: number, color: string) {
+    if (progress < 0 || progress > 1) return;
+    const lengths = points.slice(1).map(([x, y], i) => Math.hypot(x - points[i][0], y - points[i][1]));
+    let remaining = progress * lengths.reduce((a, b) => a + b, 0);
+    for (let i = 0; i < lengths.length; i++) {
+      if (remaining <= lengths[i]) {
+        const fraction = remaining / lengths[i];
+        const [ax, ay] = points[i], [bx, by] = points[i + 1];
+        const x = ax + (bx - ax) * fraction, y = ay + (by - ay) * fraction;
+        const tail = Math.max(0, fraction - 14 / lengths[i]);
+        line([[ax + (bx - ax) * tail, ay + (by - ay) * tail], [x, y]], color, 1, 2.5);
+        glow(x, y, 10, color, .4);
+        terminal(x, y, color, 1);
+        return;
+      }
+      remaining -= lengths[i];
     }
   }
 
-  for (let index = 0; index < rings.length; index++) {
-    const { x, y, direction } = rings[index];
-    const primary = index === 0 ? palette.cyan : palette.violet;
-    const secondary = index === 0 ? palette.blue : palette.cyan;
-    glow(x, y, 173, primary, palette.light ? .07 : .12);
-    const gradient = ctx.createLinearGradient(x - 130, y - 125, x + 130, y + 125);
-    gradient.addColorStop(0, primary); gradient.addColorStop(.45, primary); gradient.addColorStop(.78, secondary); gradient.addColorStop(1, primary);
-
-    // Soft volumetric envelope; the individually moving filaments remain crisp.
-    ctx.save(); ctx.strokeStyle = gradient;
-    ctx.globalAlpha = palette.light ? .12 : .19;
-    ctx.lineWidth = 11; ctx.shadowColor = primary; ctx.shadowBlur = 18;
-    trace(index, 0); ctx.stroke(); ctx.restore();
-
-    for (let ribbon = -5; ribbon <= 5; ribbon++) {
-      ctx.save(); ctx.strokeStyle = gradient;
-      ctx.globalAlpha = (ribbon % 3 === 0 ? .73 : .27) * (palette.light ? .95 : 1);
-      ctx.lineWidth = ribbon === 0 ? 1.65 : .65;
-      trace(index, ribbon); ctx.stroke(); ctx.restore();
+  // Stable, chamfered circuit regions, not deforming energy rings.
+  [28, 330].forEach((x, i) => {
+    const color = i ? palette.violet : palette.cyan;
+    const frame: Point[] = [[x + 14, 36], [x + 228, 36], [x + 242, 50], [x + 242, 260],
+      [x + 228, 274], [x + 14, 274], [x, 260], [x, 50], [x + 14, 36]];
+    line(frame, color, palette.light ? .26 : .32);
+    line([[x, 77], [x, 50], [x + 14, 36], [x + 46, 36]], color, .85, 1.5);
+    line([[x + 196, 274], [x + 228, 274], [x + 242, 260], [x + 242, 231]], color, .85, 1.5);
+    for (let column = 0; column < 8; column++) {
+      for (let row = 0; row < 7; row++) {
+        ctx.save(); ctx.fillStyle = color; ctx.globalAlpha = .10;
+        ctx.fillRect(x + 22 + column * 28, 53 + row * 29, 1, 1); ctx.restore();
+      }
     }
-    // Travelling ribbons curve around each field, with opposing circulation.
-    for (let trail = 0; trail < 4; trail++) {
-      const head = time * .32 * direction + trail * TAU / 4 + index * .7;
-      const bright = ctx.createLinearGradient(...ringPoint(index, head - .72, time), ...ringPoint(index, head, time));
-      bright.addColorStop(0, 'transparent'); bright.addColorStop(.8, primary); bright.addColorStop(1, palette.highlight);
-      ctx.save(); ctx.strokeStyle = bright; ctx.lineWidth = 2.5; ctx.globalAlpha = .9;
-      ctx.shadowColor = primary; ctx.shadowBlur = 8;
-      trace(index, Math.sin(time * .5 + trail) * 3, head - .72, .72); ctx.stroke(); ctx.restore();
+  });
+
+  // Three illustrative alternatives share one selection clock. No measured data.
+  const selected = cycle >= 1.8;
+  const active = selected ? 1 : Math.floor(cycle / .6);
+  for (let row = 0; row < 3; row++) {
+    const y = 82 + row * 46;
+    const opacity = row === active ? 1 : selected ? .23 : .42;
+    const color = row === active && selected ? palette.cyan : palette.violet;
+    line([[361, y], [387, y]], color, opacity, 1.4);
+    // A capacitor, tunable branch and its response make alternatives recognisable.
+    line([[387, y - 9], [387, y + 9]], color, opacity, 1.8);
+    line([[394, y - 9], [394, y + 9]], color, opacity, 1.8);
+    line([[394, y], [414, y], [414, y + 11], [427, y + 11], [427, y - 11], [414, y - 11]], color, opacity, 1.4);
+    line([[414, y - 15], [414, y + 15]], color, opacity, 1.4);
+    line([[427, y - 11], [440, y - 11]], color, opacity, 1.4);
+    terminal(361, y, color, opacity);
+    line([[456, y - 16], [456, y + 17], [516, y + 17]], palette.blue, .18);
+    const response: Point[] = [];
+    for (let i = 0; i <= 28; i++) {
+      const notch = Math.exp(-(((i - (12 + row * 2)) / (3.7 + row)) ** 2));
+      response.push([458 + i * 2, y - 8 + notch * (14 + row * 4)]);
     }
-    for (let particle = 0; particle < 15; particle++) {
-      const angle = time * (.17 + (particle % 3) * .045) * direction + particle * 2.399 + index;
-      const [px, py] = ringPoint(index, angle, time, Math.sin(particle * 9.7) * 5.5);
-      const size = particle % 5 === 0 ? 1.9 : .8;
-      glow(px, py, size * 5, primary, .35);
-      ctx.save(); ctx.globalAlpha = .5 + .35 * Math.sin(time + particle) ** 2;
-      ctx.fillStyle = particle % 5 === 0 ? palette.highlight : primary;
-      ctx.beginPath(); ctx.arc(px, py, size, 0, TAU); ctx.fill(); ctx.restore();
+    line(response, color, opacity, 1.6);
+    if (row === active) {
+      glow(530, y, 13, color, .17);
+      if (selected) line([[526, y], [530, y + 4], [537, y - 5]], color, 1, 2);
+      else terminal(531, y, color, 1);
     }
   }
 
-  // One clock: charge the +, release its light, then illuminate GENESIS.
-  const cycle = time % 3.6;
-  const charge = cycle < .9 ? Math.sin(cycle / .9 * Math.PI) ** 2 : 0;
-  const arrival = cycle > 2.1 && cycle < 3 ? Math.sin((cycle - 2.1) / .9 * Math.PI) ** 2 : 0;
-  glow(300, 160, 38 + charge * 22, palette.cyan, .16 + charge * .45);
-  glow(305, 163, 26 + charge * 10, palette.violet, .13 + charge * .22);
-  for (let strand = 0; strand < 6; strand++) {
-    ctx.save();
-    const gradient = ctx.createLinearGradient(290, 182, 310, 338);
-    gradient.addColorStop(0, strand % 2 ? palette.violet : palette.cyan);
-    gradient.addColorStop(.9, strand % 2 ? palette.cyan : palette.violet);
-    gradient.addColorStop(1, 'transparent');
-    ctx.strokeStyle = gradient; ctx.globalAlpha = strand % 2 ? .38 : .6;
-    ctx.lineWidth = strand % 3 ? .85 : 1.4; ctx.beginPath();
-    for (let step = 0; step <= 70; step++) {
-      const fraction = step / 70;
-      const envelope = Math.sin(fraction * Math.PI) * 8 + 1;
-      const x = 300 + Math.sin(fraction * 10 - time * 1.8 + strand * TAU / 6) * envelope;
-      const y = 185 + fraction * 151;
-      if (step === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-    }
-    ctx.stroke(); ctx.restore();
-  }
-  for (let particle = 0; particle < 5; particle++) {
-    const fraction = (time * .18 + particle / 5) % 1;
-    const x = 300 + Math.sin(fraction * 10 - time * 1.8) * (Math.sin(fraction * Math.PI) * 8 + 1);
-    const y = 185 + fraction * 151;
-    glow(x, y, 8, palette.cyan, .45);
-    ctx.save(); ctx.fillStyle = palette.highlight; ctx.globalAlpha = Math.sin(fraction * Math.PI);
-    ctx.beginPath(); ctx.arc(x, y, 1.6, 0, TAU); ctx.fill(); ctx.restore();
-  }
-  // Keep the junction and its travelling + in the same canvas/animation clock.
-  ctx.save();
-  ctx.fillStyle = palette.surface; ctx.globalAlpha = .88;
-  ctx.beginPath(); ctx.arc(300, 160, 22, 0, TAU); ctx.fill();
-  ctx.strokeStyle = palette.cyan; ctx.globalAlpha = .35 + charge * .6;
-  ctx.lineWidth = 1 + charge; ctx.stroke();
-  ctx.globalAlpha = 1; ctx.strokeStyle = palette.light ? palette.cyan : palette.highlight;
-  ctx.lineWidth = 1.8 + charge * 1.5; ctx.shadowColor = palette.cyan; ctx.shadowBlur = 6 + charge * 24;
-  const arm = 9 + charge * 2;
-  ctx.beginPath(); ctx.moveTo(300 - arm, 160); ctx.lineTo(300 + arm, 160);
-  ctx.moveTo(300, 160 - arm); ctx.lineTo(300, 160 + arm); ctx.stroke(); ctx.restore();
-
-  if (cycle >= .8 && cycle <= 2.3) {
-    const progress = (cycle - .8) / 1.5;
-    const x = 300 + Math.sin(progress * TAU) * 4;
-    const y = 160 + progress * 176;
-    const tail = ctx.createLinearGradient(x, Math.max(160, y - 40), x, y);
-    tail.addColorStop(0, 'transparent'); tail.addColorStop(1, palette.cyan);
-    ctx.save(); ctx.strokeStyle = tail; ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.moveTo(x, Math.max(160, y - 40)); ctx.lineTo(x, y); ctx.stroke();
-    glow(x, y, 19, palette.cyan, .6);
-    ctx.strokeStyle = palette.light ? palette.cyan : palette.highlight;
-    ctx.lineWidth = 2; ctx.shadowColor = palette.cyan; ctx.shadowBlur = 14;
-    const size = 7 - progress * 3;
-    ctx.beginPath(); ctx.moveTo(x - size, y); ctx.lineTo(x + size, y);
-    ctx.moveTo(x, y - size); ctx.lineTo(x, y + size); ctx.stroke(); ctx.restore();
-  }
-  glow(300, 334, 32 + arrival * 30, palette.cyan, .12 + arrival * .5);
+  // RF knowledge and the chosen candidate converge, then charge GENESIS.
+  line(leftFeed, palette.cyan, .55, 1.4);
+  line(rightFeed, palette.violet, .55, 1.4);
+  line(output, palette.cyan, .5, 1.4);
+  pulse(leftFeed, (cycle - 1.8) / .75, palette.cyan);
+  pulse(rightFeed, (cycle - 1.8) / .75, palette.violet);
+  const charge = cycle > 2.45 && cycle < 3.25 ? Math.sin((cycle - 2.45) / .8 * Math.PI) ** 2 : 0;
+  glow(300, 292, 24, palette.cyan, .08 + charge * .4);
+  ctx.save(); ctx.fillStyle = palette.surface;
+  ctx.beginPath(); ctx.arc(300, 292, 18, 0, TAU); ctx.fill(); ctx.restore();
+  const junction: Point[] = [[300, 274], [318, 292], [300, 310], [282, 292], [300, 274]];
+  line(junction, palette.cyan, .45 + charge * .5, 1.2);
+  line([[292, 292], [308, 292]], palette.cyan, .85 + charge * .15, 1.7 + charge);
+  line([[300, 284], [300, 300]], palette.cyan, .85 + charge * .15, 1.7 + charge);
+  pulse(output, (cycle - 3.1) / .65, palette.cyan);
+  const arrival = cycle > 3.5 && cycle < 4.5 ? Math.sin((cycle - 3.5) * Math.PI) ** 2 : 0;
+  glow(300, 334, 26, palette.cyan, arrival * .45);
 }
 
 /** Transparent visual layer. The owner controls playback; visibility gates rendering. */
@@ -155,7 +133,7 @@ export function EnergyFlow({ paused }: { paused: boolean }) {
       const style = getComputedStyle(element!);
       palette = {
         cyan: style.getPropertyValue('--flow-cyan').trim(), violet: style.getPropertyValue('--flow-violet').trim(),
-        blue: style.getPropertyValue('--flow-blue').trim(), highlight: style.getPropertyValue('--flow-highlight').trim(),
+        blue: style.getPropertyValue('--flow-blue').trim(),
         surface: style.getPropertyValue('--surface').trim(),
         light: document.documentElement.dataset.theme === 'light',
       };

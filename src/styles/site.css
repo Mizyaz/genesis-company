@@ -152,25 +152,17 @@ img { display: block; max-width: 100%; }
 .design-loop { min-width: 0; text-align: center; container-type: inline-size; }
 .design-loop-graphic { position: relative; aspect-ratio: 600 / 440; isolation: isolate; }
 .design-loop-energy { position: absolute; width: 100%; height: 100%; inset: 0; pointer-events: none; }
-.loop-node { position: absolute; top: 11%; width: 34%; height: 51%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.loop-node-left { left: 13%; --node-accent: var(--cyan); }
-.loop-node-right { right: 13%; --node-accent: var(--violet); }
-.loop-node .circuit-artwork { width: 96%; max-height: 72%; }
+.loop-node { position: absolute; top: 14%; width: 34%; height: 44%; display: flex; flex-direction: column; align-items: center; justify-content: space-between; }
+.loop-node-left { left: 8%; --node-accent: var(--cyan); }
+.loop-node-right { right: 8%; --node-accent: var(--violet); }
+.loop-node .circuit-artwork, .loop-candidate-space { width: 100%; aspect-ratio: 320 / 224; flex-shrink: 0; }
 .loop-node .circuit-label { display: none; }
 .loop-node h3 { font-size: clamp(.875rem, 3cqw, 1.125rem); font-weight: 550; color: var(--text); margin-bottom: 8px; }
 .loop-outcome { position: absolute; left: 19%; right: 19%; top: 76%; bottom: 1%; border: 1px solid transparent; border-radius: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(var(--surface), var(--surface)) padding-box, linear-gradient(110deg, var(--flow-cyan), color-mix(in srgb, var(--flow-cyan) 30%, var(--border)), var(--flow-violet)) border-box; box-shadow: 0 -4px 28px color-mix(in srgb, var(--flow-cyan) 9%, transparent), 0 8px 25px color-mix(in srgb, var(--flow-violet) 6%, transparent); }
 .loop-outcome .brand { font-size: clamp(1.125rem, 4cqw, 1.65rem); gap: 9px; }
 .loop-outcome .brand img { width: clamp(26px, 6cqw, 35px); height: clamp(29px, 7cqw, 38px); }
 @container (max-width: 430px) {
-  .loop-node { top: 9%; height: 56%; }
-  .loop-node h3 { font-size: .875rem; line-height: 1.2; margin-bottom: 6px; }
-}
-@container (max-width: 260px) {
-  .design-loop-graphic { aspect-ratio: auto; display: grid; grid-template-columns: 1fr 1fr; gap: 22px 12px; }
-  .design-loop-energy { display: none; }
-  .loop-node { position: static; width: auto; height: auto; padding: 8px 0; }
-  .loop-outcome { position: relative; inset: auto; grid-column: 1 / -1; min-height: 82px; }
-  .loop-outcome::before { content: '↓'; position: absolute; bottom: calc(100% + 1px); color: var(--muted); }
+  .loop-node h3 { font-size: clamp(.75rem, 3.8cqw, .875rem); line-height: 1.2; margin-bottom: 0; }
 }
 .contact-section { text-align: center; padding-block: 105px; }
 .contact-section h2 { font-size: clamp(2.3rem, 5vw, 4.2rem); letter-spacing: -.04em; line-height: 1.2; font-weight: 550; margin-top: 25px; }
