@@ -2,7 +2,7 @@ import { useLanguage, useTranslatedContent } from '../shared/Language';
 import siteContent from '../content/site.json';
 import { Brand, Icon } from '../shared/ui';
 import { DesignBridge } from '../shared/DesignBridge';
-import { CircuitBackdrop, ElectricBrand } from '../shared/CircuitIdentity';
+import { CircuitBackdrop, BrandIntro } from '../shared/CircuitIdentity';
 import '../styles/welcome.css';
 
 /** Public gateway. No product state or assistant transport is imported. */
@@ -14,10 +14,7 @@ export function Welcome() {
     <CircuitBackdrop />
     <section className="welcome-content" aria-labelledby="welcome-heading">
       <p className="eyebrow">{t("RF DESIGN. SIMULATION. AI.")}</p>
-      <div className="welcome-identity">
-        <h1 id="welcome-heading"><ElectricBrand /></h1>
-        <p className="welcome-signature" lang="en">{t("Generative Evolution of Silicon Intelligent Systems")}</p>
-      </div>
+      <BrandIntro headingId="welcome-heading" />
       <p className="welcome-intro">{t("Explore what we build. Or start your next design.")}</p>
       <div className="welcome-choices">
         <a className="welcome-choice" href="#/explore"><Icon name="wave" /><span><strong>{t("Discover")}</strong><small>{t("Our approach, our circuits, our story.")}</small></span><Icon name="arrow" /></a>

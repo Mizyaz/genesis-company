@@ -6,10 +6,10 @@
     "src/vite-env.d.ts": "65996936fbb042915f7b74a200fcdde7e410f32a669b1ab9597cfaa4b0faddb5",
     "src/pages/Explore.tsx": "c9a3d6cd93ab5b5b806c261933857c51e0d9a34ae7e719150312986e87a97dbb",
     "src/pages/Research.tsx": "2efb11a2b15985426b3eb6accad3dcb17af444cfcaac700e1fbc655c4cd82f46",
-    "src/pages/Welcome.tsx": "7c0abf8a79d065ae0db19bbc50d03f15c665f4a3003780dcb900e8851b86bda7",
+    "src/pages/Welcome.tsx": "f44bafab6d789a3e679392974c127a2c1ce5669d4ad6f2f4889b26227b6892f1",
     "src/pages/ProductLaunch.tsx": "122b1a3a0bf440cce19e4a491ec9b4220d808d6d58af5a3c4b9a74035559fa71",
     "src/shared/productLink.ts": "56fad2713a100cbb9d81857ffaa923434607dfa7d9fca2f2dab02a2f13d322a5",
-    "src/styles/welcome.css": "0af60ca00ad95a86824565361e5a98e6517ca041fe95d6cd779657426e2bee45",
+    "src/styles/welcome.css": "f29cfd915592e3fda0e62af661a5e4cc5b604bd90ae8d1ebaecff2e583113a67",
     "src/shared/SiteShell.tsx": "2a2ca4acce8e97728b6af998e2845b661dbb27189e5d2adb352c64a9daf91dbe",
     "src/shared/ui.tsx": "bbd61a8cd21c9d09cc3d87a001803736e75c985537968302bf31a8a327ea9248",
     "src/shared/PortfolioCard.tsx": "c88646e8d91e78b4b2612e8a881ffbe5246651e3bcff565523650de5476bdcdb",
@@ -18,8 +18,8 @@
     "src/shared/DesignBridge.tsx": "b2e0c1492693aa08a3ce458a918a5e9a4182ca6bb1e5d13fa68b9688d6d61b72",
     "src/shared/CircuitArtwork.tsx": "83463e657dd3faa8dbb95df5779d54e5df17dcc470a1d3fa4c764aa3c1dba835",
     "src/styles/circuit-artwork.css": "ae4f60e23887a5b930242cd904ff5838fff38f23e936ccbe7ec42a573667d8a3",
-    "src/shared/CircuitIdentity.tsx": "855fe3a394655872455c9d0fb1d9fb5ac5be2a94f7fb95166b58e345a295c1f4",
-    "src/styles/circuit-identity.css": "fa3e3fe8dbb2797f25fe706dc3c60a121077d0a4fcdaa9b97ad94501711f501e",
+    "src/shared/CircuitIdentity.tsx": "4fef2d208530f83c2eaf27e4f2a45404c5f3c7cdaf45fbde717fd65ea2f31a45",
+    "src/styles/circuit-identity.css": "1605675d02cef84442eff782e10a7fcb0a91c88ffcb1f135b27c9149a7342291",
     "src/shared/SiliconGate.tsx": "85e6dec5ccec70a4416f5157d0c7ea6cd419d4b455bb16a91cf398792f7fa66c",
     "src/styles/silicon-gate.css": "cba27ed3ffaa0911598fc02843cdcea5d6d5d423ebd53b32c5686e8f10ecb3eb",
     "src/shared/Language.tsx": "053d49f0c1029a63aea894bd276b7890986e6a1acf89015d9fad36971b0bfd3b",
@@ -63,7 +63,7 @@
     ".nvmrc": "f14b4987904bcb5814e4459a057ed4d20f58a633152288a761214dcd28780b56",
     "README.md": "ec2a470a5afd0723d6c0c705d0b4e4f2440add4ede67d08a41fed9c5e3bf1f0a",
     ".github/workflows/pages.yml": "d6301873fffa4d81c0516d087912c5afd6afb21653990f348c198ae365c53b43",
-    "scripts/static.test.mjs": "5445a6d61a8c9d9b4759c343a692165dec84c5c4c89577d0f7e4c0a4673d7345",
+    "scripts/static.test.mjs": "8a484db676a319dd75cc5d675480afc26bfc411041964bfe41ced84214f3247e",
     "scripts/site-access.mjs": "3d6618736cac9c7e06366dd186e4fa9c45432eaae106b1f5e4e1e067aa57d8e9"
   }
 }

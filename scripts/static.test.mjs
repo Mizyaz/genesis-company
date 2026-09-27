@@ -84,13 +84,19 @@ test('story flow uses fixed circuits and selection, retaining visibility and the
   assert.doesNotMatch(read('src/styles/site.css'), /\.design-loop-energy\s*\{\s*display:\s*none/);
 });
 
-test('welcome expansion is a responsive signature attached to the wordmark', () => {
+test('welcome uses the shared, single-line brand entrance with readable acronym emphasis', () => {
   const welcome = read('src/pages/Welcome.tsx');
-  assert.match(welcome, /className="welcome-identity"/);
-  assert.match(welcome, /className="welcome-signature"/);
-  assert.match(welcome, /Generative Evolution of Silicon Intelligent Systems/);
-  assert.doesNotMatch(welcome, /welcome-tagline/);
-  assert.match(read('src/styles/welcome.css'), /\.welcome-identity \{ flex-direction: column; align-items: flex-end/);
+  const identity = read('src/shared/CircuitIdentity.tsx');
+  const css = read('src/styles/circuit-identity.css');
+  assert.match(welcome, /<BrandIntro headingId="welcome-heading"/);
+  assert.match(identity, /aria-label="Generative Evolution of Silicon Intelligent Systems"/);
+  assert.equal([...identity.matchAll(/<strong>([A-Za-z]+)<\/strong>/g)].map(match => match[1]).join('').toUpperCase(), 'GENESIS');
+  assert.match(identity, /if \(!enabled\) setEntered\(true\)/);
+  assert.match(identity, /onAnimationEnd/);
+  assert.match(css, /white-space: nowrap/);
+  assert.match(css, /identity-signature-arrive .65s ease-out 1.25s/);
+  assert.match(css, /data-running="false"/);
+  assert.doesNotMatch(welcome + read('src/styles/welcome.css'), /welcome-tagline|welcome-signature|welcome-identity/);
 });
 
 test('services precede the story, remain data-driven and have natural Turkish copy', () => {

@@ -1,4 +1,4 @@
-import { useId, type CSSProperties } from 'react';
+import { useEffect, useId, useState, type CSSProperties } from 'react';
 import { Brand } from './ui';
 import { useVisibleMotion } from './MotionSettings';
 import '../styles/circuit-identity.css';
@@ -16,13 +16,27 @@ export function ElectricBrand() {
   return <span ref={ref} className="electric-brand" data-running={running}>
     <svg className="electric-brand-traces" viewBox="0 0 706 180" fill="none" aria-hidden="true">
       {wordmarkTraces.map((d, index) => <g key={d} style={{ '--phase': `${index * -1.7}s` } as CSSProperties}>
-        <path className="identity-rail" d={d} />
+        <path className="identity-rail" d={d} pathLength="100" />
         <path className="identity-signal" d={d} pathLength="100" />
       </g>)}
       {[[326, 146], [464, 28], [150, 160], [302, 38]].map(([cx, cy]) => <circle className="identity-contact" key={`${cx}-${cy}`} cx={cx} cy={cy} r="2.8" />)}
     </svg>
     <Brand large />
   </span>;
+}
+
+/** One entrance sequence for the wordmark and its name. Stopping reveals all text. */
+export function BrandIntro({ headingId }: { headingId: string }) {
+  const { ref, enabled, running } = useVisibleMotion<HTMLDivElement>();
+  const [entered, setEntered] = useState(!enabled);
+  useEffect(() => { if (!enabled) setEntered(true); }, [enabled]);
+  return <div ref={ref} className="brand-intro" data-entering={enabled && !entered} data-running={running}>
+    <h1 id={headingId}><ElectricBrand /></h1>
+    <p className="brand-signature" lang="en" aria-label="Generative Evolution of Silicon Intelligent Systems"
+      onAnimationEnd={event => { if (event.animationName === 'identity-signature-arrive') setEntered(true); }}>
+      <strong>Gen</strong>erative <strong>E</strong>volution of <strong>S</strong>ilicon <strong>I</strong>ntelligent <strong>S</strong>ystems
+    </p>
+  </div>;
 }
 
 const chips = [
