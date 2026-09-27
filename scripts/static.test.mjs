@@ -76,7 +76,11 @@ test('services precede the story, remain data-driven and have natural Turkish co
   const dictionary = JSON.parse(read('src/content/tr.json'));
   assert.equal(content.services.items.length, 3);
   assert.deepEqual(content.services.items.map(item => item.id), ['platform-membership', 'silicon-demonstration', 'specialised-integration']);
-  for (const copy of [content.services.eyebrow, content.services.title, content.services.intro, content.services.action, ...content.services.items.flatMap(item => [item.title, item.description])]) assert.ok(dictionary[copy], copy);
+  for (const copy of [content.services.eyebrow, content.services.title, content.services.intro, content.services.action, content.services.scopeLabel, ...content.services.items.flatMap(item => [item.label, item.title, item.headline, item.description, item.note, item.visualLabel, ...item.stages, ...item.features.flatMap(feature => [feature.title, feature.detail])])]) assert.ok(dictionary[copy], copy);
+  for (const item of content.services.items) {
+    assert.equal(item.features.length, 3);
+    assert.equal(item.stages.length, 3);
+  }
   const page = read('src/pages/Explore.tsx');
   assert.ok(page.indexOf('<Services ') < page.indexOf('<section id="story"'));
   assert.match(page, /<Services content=\{site.services\}/);
@@ -87,6 +91,28 @@ test('services precede the story, remain data-driven and have natural Turkish co
   assert.equal(dictionary['silicon.'], 'çipe.');
   assert.doesNotMatch(Object.values(dictionary).join('\n'), /Hedeflerden|silikona|DEVRELER\. ALANLAR/i);
   assert.match(read('src/styles/site.css'), /font-size: clamp\(2.75rem, 12vw, 4.6rem\)/);
+});
+
+test('services share contact actions, support keyboard tabs and animate only when visible', () => {
+  const services = read('src/shared/Services.tsx');
+  assert.match(services, /role="tablist"/);
+  assert.match(services, /role="tabpanel"/);
+  for (const key of ['ArrowLeft', 'ArrowRight', 'Home', 'End']) assert.ok(services.includes(key));
+  assert.match(services, /aria-selected=\{selected === i\}/);
+  assert.match(services, /useVisibleMotion<HTMLElement>/);
+  assert.match(services, /data-active=\{running\}/);
+  assert.match(services, /running=\{running\}/);
+  for (const path of ['src/shared/Services.tsx', 'src/pages/Explore.tsx', 'src/pages/ProductLaunch.tsx']) {
+    assert.match(read(path), /<ActionLink [^>]*icon="mail"/);
+    assert.doesNotMatch(read(path), /className="text-link services-contact"/);
+  }
+  assert.match(read('src/shared/ui.tsx'), /export function ActionLink/);
+  assert.match(read('src/styles/site.css'), /background: var\(--button-fill\)/);
+  const styles = read('src/styles/services.css');
+  assert.match(styles, /prefers-reduced-motion: reduce/);
+  assert.match(styles, /data-active='true'/);
+  assert.doesNotMatch(styles, /\.button(?:-primary|-secondary)?\s*\{[^}]*background:/);
+  assert.doesNotMatch(services, /setInterval|setTimeout/); // Service choice never advances while someone reads.
 });
 
 test('silicon gate is shared, optional and presentation-only', () => {

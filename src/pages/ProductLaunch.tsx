@@ -1,7 +1,7 @@
 import { useLanguage } from '../shared/Language';
 import { useState } from 'react';
 import site from '../content/site.json';
-import { Icon } from '../shared/ui';
+import { ActionLink, Icon } from '../shared/ui';
 import { productLink } from '../shared/productLink';
 import '../styles/welcome.css';
 
@@ -59,7 +59,7 @@ export function ProductLaunch({ theme }: { theme: 'light' | 'dark' }) {
       {installed === false && <section className="product-next-step" aria-labelledby="product-contact-heading">
         <h2 id="product-contact-heading">{t("Let’s get you started.")}</h2>
         <p className="muted">{t("Contact us to get GENESIS.")}</p>
-        <a className="button button-primary" href={`mailto:${site.brand.email}?subject=Get%20GENESIS`}>{t("Get in touch")} <Icon name="mail" /></a>
+        <ActionLink href={`mailto:${site.brand.email}?subject=Get%20GENESIS`} icon="mail">{t("Get in touch")}</ActionLink>
       </section>}
       <a className="welcome-discover" href="#/explore">{t("Discover GENESIS instead")} <Icon name="arrow" /></a>
     </section>

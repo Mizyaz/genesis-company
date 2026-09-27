@@ -1,15 +1,87 @@
+/* Feature layout only. Typography, colors, actions and motion settings belong to the site. */
 .services-section { border-top: 1px solid var(--border-soft); }
-.services-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
-.service-card { --service-accent: var(--cyan); min-width: 0; padding: 30px; border: 1px solid var(--border); border-radius: var(--radius); background: radial-gradient(ellipse at top left, color-mix(in srgb, var(--service-accent) 7%, transparent), transparent 65%), var(--surface); }
-.service-card:nth-child(2) { --service-accent: var(--violet); }
-.service-symbol { display: flex; align-items: center; gap: 18px; color: var(--service-accent); margin-bottom: 28px; }
-.service-symbol .icon { width: 36px; height: 36px; }
-.service-symbol span { width: 56px; height: 1px; background: linear-gradient(90deg, var(--service-accent), transparent); }
-.service-card h3 { font-size: 1.2rem; font-weight: 550; line-height: 1.4; margin-bottom: 14px; text-wrap: balance; }
-.service-card p { font-size: .9375rem; line-height: 1.8; color: var(--muted); }
-.services-contact { margin-top: 28px; }
+.service-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-bottom: 1px solid var(--border); }
+.service-tabs button { position: relative; display: flex; align-items: center; gap: 14px; min-width: 0; padding: 24px 22px; border: 0; background: transparent; text-align: left; color: var(--muted); font: 500 .95rem var(--font-sans); transition: color .2s, background .2s; }
+.service-tabs button::after { content: ''; position: absolute; inset: auto 0 -1px; height: 3px; background: var(--gradient); opacity: 0; }
+.service-tabs button[aria-selected='true'] { color: var(--text); background: linear-gradient(0deg, var(--glow), transparent); }
+.service-tabs button[aria-selected='true']::after { opacity: 1; }
+.service-tabs button:hover { background: var(--glow); color: var(--text); }
+.service-tabs .icon { color: var(--cyan); }
+.service-tab-number { margin-left: auto; color: var(--subtle); font: .65rem var(--font-mono); }
+.service-panel { padding-top: 40px; }
+.service-overview { display: grid; grid-template-columns: .9fr 1.1fr; gap: clamp(30px, 5vw, 72px); align-items: center; }
+.service-copy { min-width: 0; }
+.service-copy > .eyebrow { color: var(--cyan); font-size: .65rem; letter-spacing: .12em; }
+.service-copy h3 { margin: 18px 0; max-width: 15ch; font-size: clamp(2rem, 3.3vw, 3.3rem); font-weight: 550; line-height: 1.1; letter-spacing: -.04em; text-wrap: balance; }
+.service-copy > p:not(.eyebrow) { color: var(--muted); font-size: .98rem; line-height: 1.8; max-width: 44ch; }
+.service-copy .button { margin-top: 26px; }
+.service-visual { position: relative; overflow: hidden; min-width: 0; border: 1px solid var(--border); border-radius: var(--radius); background: linear-gradient(140deg, var(--surface), var(--surface-raised)); }
+.service-visual-heading { display: flex; align-items: center; gap: 9px; padding: 17px 20px; font: .65rem var(--font-mono); letter-spacing: .09em; color: var(--muted); border-bottom: 1px solid var(--border-soft); }
+.service-visual-heading > span:last-child { margin-left: auto; letter-spacing: .04em; }
+.service-live-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--cyan); }
+.service-artboard { position: relative; aspect-ratio: 1.5; isolation: isolate; background-image: linear-gradient(var(--border-soft) 1px, transparent 1px), linear-gradient(90deg, var(--border-soft) 1px, transparent 1px); background-size: 30px 30px; }
+.service-aura { position: absolute; z-index: -1; inset: 5%; background: radial-gradient(ellipse at 25% 40%, color-mix(in srgb, var(--cyan) 14%, transparent), transparent 65%), radial-gradient(ellipse at 75% 60%, color-mix(in srgb, var(--violet) 12%, transparent), transparent 60%); filter: blur(20px); animation: service-atmosphere 6s ease-in-out infinite paused; }
+.service-workspace { position: absolute; width: 78%; left: 7%; top: 9%; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--surface); box-shadow: var(--shadow); transform: perspective(1000px) rotateY(-7deg) rotateX(4deg); }
+.service-window-bar { display: flex; align-items: center; gap: 4px; padding: 9px 12px; border-bottom: 1px solid var(--border-soft); }
+.service-window-bar i { width: 4px; height: 4px; border-radius: 50%; background: var(--subtle); opacity: .6; }
+.service-window-bar span { margin-left: auto; color: var(--subtle); font: .55rem var(--font-mono); }
+.service-workspace-body { display: flex; }
+.service-workspace-body > .circuit-artwork { width: calc(100% - 30px); }
+.service-tool-rail { display: flex; flex-direction: column; gap: 18px; padding: 15px 7px; border-right: 1px solid var(--border-soft); color: var(--subtle); }
+.service-tool-rail .icon { width: 16px; height: 16px; }
+.service-result { position: absolute; width: 51%; right: 4%; bottom: 0; filter: drop-shadow(0 8px 10px var(--glow)); }
+.service-stages { display: flex; position: relative; padding: 17px 18px; border-top: 1px solid var(--border-soft); background: var(--surface); }
+.service-stages span { flex: 1; display: flex; justify-content: center; align-items: center; gap: 8px; min-width: 0; color: var(--muted); font-size: .7rem; animation: service-stage 4.8s ease-in-out infinite paused; }
+.service-stages span + span { border-left: 1px solid var(--border); }
+.service-stages i { width: 4px; height: 4px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+.service-scope { margin-top: 38px; padding: 28px 0 0; border-top: 1px solid var(--border); }
+.service-scope > .eyebrow { font-size: .65rem; }
+.service-scope ul { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px; list-style: none; margin: 22px 0 0; padding: 0; }
+.service-scope li { display: flex; align-items: flex-start; gap: 12px; min-width: 0; }
+.service-scope li > .icon { color: var(--cyan); width: 19px; height: 19px; margin-top: 2px; }
+.service-scope h4 { margin: 0 0 9px; font-size: .95rem; font-weight: 600; line-height: 1.4; }
+.service-scope li p { color: var(--muted); font-size: .85rem; line-height: 1.75; }
+.service-note { display: flex; align-items: flex-start; gap: 10px; color: var(--subtle); font-size: .75rem; line-height: 1.7; margin-top: 28px; }
+.service-note .icon { width: 16px; height: 16px; margin-top: 2px; }
+.service-wafer, .service-connectors { width: 100%; height: 100%; stroke-linecap: round; stroke-linejoin: round; }
+.service-wafer-base { fill: var(--surface); stroke: var(--cyan); }
+.service-wafer-rim { stroke: var(--border); stroke-dasharray: 2 7; }
+.service-die { fill: color-mix(in srgb, var(--cyan) 8%, var(--surface)); stroke: color-mix(in srgb, var(--cyan) 40%, var(--border)); stroke-width: .8; animation: service-die 4s ease-in-out infinite paused; }
+.service-wafer-scan { stroke: var(--cyan); stroke-width: 2; filter: drop-shadow(0 0 8px var(--cyan)); animation: service-scan 4s ease-in-out infinite paused; }
+.service-prototype { fill: var(--surface); stroke: var(--violet); stroke-width: 1.5; }
+.service-prototype > rect:first-child { fill: var(--surface-raised); stroke: var(--border); }
+.service-probe { stroke: var(--muted); stroke-width: 3; }
+.service-probe-tip { fill: var(--cyan); filter: drop-shadow(0 0 5px var(--cyan)); animation: service-die 3s ease-in-out infinite paused; }
+.service-measured-wave { stroke: var(--violet); stroke-width: 1.5; }
+.service-signal-base { stroke: var(--border); stroke-width: 1.5; }
+.service-signal { stroke: var(--cyan); stroke-width: 2; stroke-dasharray: 7 93; filter: drop-shadow(0 0 5px var(--cyan)); animation: service-signal 4s linear infinite paused; }
+.service-connectors { position: absolute; inset: 0; }
+.service-integration-core { position: absolute; width: 63%; left: 18.5%; top: 17%; }
+.service-connector { position: absolute; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px; width: 19%; aspect-ratio: 1; border: 1px solid var(--border); border-radius: 9px; background: var(--surface); box-shadow: 0 8px 30px var(--glow); color: var(--cyan); }
+.service-connector .icon { width: 28px; height: 28px; }
+.service-connector span { font: .6rem var(--font-mono); color: var(--muted); letter-spacing: .1em; }
+.service-connector-0 { top: 8%; left: 5%; }.service-connector-1 { top: 8%; right: 5%; }.service-connector-2 { bottom: 8%; left: 5%; }.service-connector-3 { bottom: 8%; right: 5%; }
+.service-visual[data-active='true'] :is(.service-aura, .service-stages span, .service-die, .service-wafer-scan, .service-probe-tip, .service-signal) { animation-play-state: running; }
+@keyframes service-atmosphere { 50% { opacity: .45; transform: scale(.9); } }
+@keyframes service-stage { 0%, 15%, 100% { color: var(--muted); } 30%, 45% { color: var(--cyan); } }
+@keyframes service-die { 50% { opacity: .35; } }
+@keyframes service-scan { to { transform: translateY(216px); } }
+@keyframes service-signal { to { stroke-dashoffset: -100; } }
 @media (max-width: 850px) {
-  .services-grid { grid-template-columns: 1fr; gap: 16px; }
-  .service-card { padding: 24px; }
-  .service-symbol { margin-bottom: 18px; }
+  .service-tabs button { flex-direction: column; justify-content: center; padding: 18px 8px; gap: 10px; font-size: .8rem; text-align: center; line-height: 1.5; }
+  .service-tab-number { display: none; }
+  .service-overview { grid-template-columns: 1fr; gap: 30px; }
+  .service-copy h3 { max-width: 24ch; font-size: clamp(1.9rem, 6vw, 2.8rem); }
+  .service-copy > p:not(.eyebrow) { max-width: none; }
+  .service-visual { width: 100%; max-width: 580px; justify-self: center; }
+  .service-scope ul { grid-template-columns: 1fr; gap: 22px; }
+  .service-scope li p { max-width: 65ch; }
+}
+@media (max-width: 400px) {
+  .service-tabs button { font-size: .75rem; }
+  .service-visual-heading { padding: 14px 12px; font-size: .55rem; gap: 6px; }
+  .service-stages { padding: 14px 6px; }.service-stages span { font-size: .6rem; gap: 5px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .service-visual :is(.service-aura, .service-stages span, .service-die, .service-wafer-scan, .service-probe-tip, .service-signal) { animation: none !important; }
 }

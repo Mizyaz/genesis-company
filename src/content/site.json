@@ -106,24 +106,103 @@
     "title": "Provided services",
     "intro": "Use the platform, get support for a silicon prototype or connect GENESIS to your own tools.",
     "action": "Discuss your project",
+    "scopeLabel": "Service scope",
     "items": [
       {
         "id": "platform-membership",
         "icon": "layers",
+        "label": "Platform",
         "title": "Software platform membership",
-        "description": "Access GENESIS for circuit design, simulation and optimization in one workspace."
+        "headline": "Your RF design workspace.",
+        "description": "Access GENESIS for circuit design, simulation and optimization in one workspace.",
+        "visualLabel": "WORKSPACE",
+        "stages": [
+          "Design",
+          "Simulate",
+          "Optimize"
+        ],
+        "features": [
+          {
+            "icon": "switch",
+            "title": "Build the circuit",
+            "detail": "Define schematics, reusable blocks and testbenches in the same project."
+          },
+          {
+            "icon": "wave",
+            "title": "Simulate and compare",
+            "detail": "Inspect RF responses and compare circuit and electromagnetic simulation results."
+          },
+          {
+            "icon": "sliders",
+            "title": "Optimize and revisit",
+            "detail": "Set performance goals, explore design variables and return to earlier iterations."
+          }
+        ],
+        "note": "Membership scope, deployment and access are agreed with your team."
       },
       {
         "id": "silicon-demonstration",
         "icon": "chip",
+        "label": "Silicon support",
         "title": "Silicon demonstration assistance",
-        "description": "Technical support with prototype planning, fabrication preparation and measurement."
+        "headline": "Take your design to silicon.",
+        "description": "Technical support with prototype planning, fabrication preparation and measurement.",
+        "visualLabel": "PROTOTYPE",
+        "stages": [
+          "Prepare",
+          "Prototype",
+          "Measure"
+        ],
+        "features": [
+          {
+            "icon": "document",
+            "title": "Prototype planning",
+            "detail": "Define what the prototype needs to demonstrate and identify process and test requirements."
+          },
+          {
+            "icon": "chip",
+            "title": "Fabrication preparation",
+            "detail": "Review design requirements and prepare the technical handoff for fabrication."
+          },
+          {
+            "icon": "wave",
+            "title": "Measurement support",
+            "detail": "Plan the measurements and compare bench results with the simulation models."
+          }
+        ],
+        "note": "Fabrication, packaging and lab access are scoped separately for each project."
       },
       {
         "id": "specialised-integration",
         "icon": "sliders",
+        "label": "Integration",
         "title": "Specialised integration",
-        "description": "Connect GENESIS to your CAD tools, automation scripts and existing design workflows."
+        "headline": "Your tools. Working together.",
+        "description": "Connect GENESIS to your CAD tools, automation scripts and existing design workflows.",
+        "visualLabel": "CONNECTED TOOLS",
+        "stages": [
+          "Connect",
+          "Automate",
+          "Verify"
+        ],
+        "features": [
+          {
+            "icon": "layers",
+            "title": "CAD and solver workflows",
+            "detail": "Connect supported design tools and solvers through explicit configurations and runners."
+          },
+          {
+            "icon": "sliders",
+            "title": "Your automation",
+            "detail": "Bring existing scripts and design routines into a repeatable workflow."
+          },
+          {
+            "icon": "document",
+            "title": "Deployment on your terms",
+            "detail": "Define data boundaries, tool access and validation around your own environment."
+          }
+        ],
+        "note": "Integration scope depends on your toolchain, licenses and deployment requirements."
       }
     ]
   },

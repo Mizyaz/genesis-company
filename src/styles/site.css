@@ -102,8 +102,8 @@ img { display: block; max-width: 100%; }
 .company-hero .button { margin-top: 34px; }
 .button { display: inline-flex; align-items: center; gap: 20px; justify-content: center; padding: 15px 23px; border: 1px solid var(--border); border-radius: 8px; font-size: .9375rem; font-weight: 550; transition: transform .2s, background .2s, border-color .2s; }
 .button:hover { transform: translateY(-2px); border-color: var(--cyan); }
-.button-primary { color: #031f2b; background: #5cdce7; border-color: #5cdce7; }
-.button-primary:hover { background: #87eaf2; }
+.button-primary { color: var(--button-text); background: var(--button-fill); border-color: var(--button-fill); }
+.button-primary:hover { background: var(--button-hover); }
 .button-secondary { background: var(--surface); }
 .button .icon { width: 19px; height: 19px; }
 .hero-index { display: flex; flex-wrap: wrap; gap: 34px; margin-top: 72px; color: var(--subtle); font-size: .6875rem; letter-spacing: .15em; }

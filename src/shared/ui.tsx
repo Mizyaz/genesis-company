@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { AnchorHTMLAttributes, ReactNode } from 'react';
 
 const paths: Record<string, ReactNode> = {
   arrow: <path d="M5 12h14m-6-6 6 6-6 6" />,
@@ -20,6 +20,10 @@ const paths: Record<string, ReactNode> = {
 };
 export function Icon({ name, className = '' }: { name: string; className?: string }) {
   return <svg className={`icon ${className}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name] ?? paths.spark}</svg>;
+}
+/** Shared action contract. Features supply the destination and label, not a new button style. */
+export function ActionLink({ variant = 'primary', icon = 'arrow', className = '', children, ...props }: AnchorHTMLAttributes<HTMLAnchorElement> & { variant?: 'primary' | 'secondary'; icon?: string }) {
+  return <a {...props} className={`button button-${variant} ${className}`.trim()}>{children}<Icon name={icon} /></a>;
 }
 export function Brand({ large = false }: { large?: boolean }) {
   return <span className={`brand ${large ? 'brand-large' : ''}`}><img src={assetUrl('/assets/brand-mark.webp')} alt="" /><span>GENESIS</span></span>;

@@ -8,6 +8,7 @@
   --border: #20364b; --border-soft: #142c42;
   --cyan: #41dce8; --violet: #b08af4; --accent: #55ddec;
   --glow: #1bbedc18; --error: #ffa7b9; --shadow: 0 20px 70px #0005;
+  --button-fill: #5cdce7; --button-hover: #87eaf2; --button-text: #031f2b;
   --layout-filter: none; --layout-blend: screen;
   --flow-cyan: #20dcef; --flow-violet: #a064ff; --flow-blue: #4285ff; --flow-highlight: #d6fcff;
   --gradient: linear-gradient(105deg, var(--cyan) 10%, #6fb9ed 47%, var(--violet) 92%);
