@@ -76,7 +76,7 @@ test('services precede the story, remain data-driven and have natural Turkish co
   const dictionary = JSON.parse(read('src/content/tr.json'));
   assert.equal(content.services.items.length, 3);
   assert.deepEqual(content.services.items.map(item => item.id), ['platform-membership', 'silicon-demonstration', 'specialised-integration']);
-  for (const copy of [content.services.eyebrow, content.services.title, content.services.intro, content.services.action, content.services.scopeLabel, ...content.services.items.flatMap(item => [item.label, item.title, item.headline, item.description, item.note, item.visualLabel, item.scopeLabel, ...item.features.flatMap(feature => [feature.title, feature.detail, feature.unit])])].filter(Boolean)) assert.ok(dictionary[copy], copy);
+  for (const copy of [content.services.eyebrow, content.services.title, content.services.intro, content.services.action, content.services.scopeLabel, ...content.services.items.flatMap(item => [item.label, item.title, item.headline, item.description, item.note, item.visualLabel, item.scopeLabel, item.action, ...item.features.flatMap(feature => [feature.title, feature.detail, feature.unit])])].filter(Boolean)) assert.ok(dictionary[copy], copy);
   for (const item of content.services.items) {
     assert.equal(item.features.length, 3);
     assert.equal(item.stages, undefined);
@@ -93,23 +93,29 @@ test('services precede the story, remain data-driven and have natural Turkish co
   assert.match(read('src/styles/site.css'), /font-size: clamp\(2.75rem, 12vw, 4.6rem\)/);
 });
 
-test('membership explains customer value and preserves the deck business model without invented prices', () => {
+test('subscription distinguishes software access, customer resources and separate services without invented terms', () => {
   const {services} = JSON.parse(read('src/content/site.json'));
   const dictionary = JSON.parse(read('src/content/tr.json'));
-  assert.deepEqual(services.membership.benefits.map(item => item.id), ['explore','iterate','reuse']);
-  for (const copy of [services.membership.label, ...services.membership.benefits.flatMap(item => [item.title, item.detail, ...item.labels])]) assert.ok(dictionary[copy], copy);
-  assert.deepEqual(services.items[0].features.map(item => item.unit), ['€ / seat / year', '€ / compute hour', '€ / project']);
-  assert.match(services.items[0].note, /milestones and royalties/);
-  assert.doesNotMatch(JSON.stringify(services), /€\s*\d|\d+\s*%/);
-  const membership = read('src/shared/MembershipValue.tsx');
-  assert.match(membership, /aria-pressed=\{selected === i\}/);
-  assert.match(membership, /data-benefit=\{benefit.id\}/);
-  assert.match(membership, /useVisibleMotion<HTMLElement>/);
-  assert.match(membership, /aria-live="polite"/);
-  assert.doesNotMatch(membership, /fetch\s*\(|setInterval|setTimeout/);
+  const subscription = services.subscription;
+  assert.deepEqual(subscription.parts.map(item => item.id), ['software', 'environment', 'services']);
+  assert.equal(subscription.setup.steps.length, 3);
+  for (const copy of [subscription.label, subscription.teamLabel, subscription.term, subscription.hint, subscription.setup.title, ...subscription.parts.flatMap(item => [item.title, item.status, item.detail, ...item.items]), ...subscription.setup.steps.flatMap(step => [step.title, step.detail])]) assert.ok(dictionary[copy], copy);
+  assert.equal(services.items[0].features[0].unit, 'Per-user annual license');
+  assert.match(subscription.parts[1].items.join(' '), /CAD and solver licenses.*PDK access.*Compute/);
+  assert.match(services.items[0].note, /not bundled into the software license/);
+  assert.doesNotMatch(JSON.stringify(services), /€\s*\d|\d+\s*%|24\/7|unlimited|guaranteed|—/i);
+  const component = read('src/shared/SubscriptionOverview.tsx');
+  assert.match(component, /aria-pressed=\{selected === i\}/);
+  assert.match(component, /data-part=\{part.id\}/);
+  assert.match(component, /useVisibleMotion<HTMLElement>/);
+  assert.match(component, /aria-live="polite"/);
+  assert.doesNotMatch(component, /fetch\s*\(|setInterval|setTimeout/);
+  assert.equal(services.membership, undefined);
+  assert.equal(existsSync(resolve(root, 'src/shared/MembershipValue.tsx')), false);
+  assert.equal(existsSync(resolve(root, 'src/styles/membership-value.css')), false);
   assert.doesNotMatch(read('src/shared/Services.tsx'), /service-stages|service-workspace/);
   assert.doesNotMatch(read('src/styles/services.css'), /service-stages|service-stage|service-workspace/);
-  assert.match(read('src/styles/membership-value.css'), /prefers-reduced-motion: reduce/);
+  assert.match(read('src/styles/subscription-overview.css'), /prefers-reduced-motion: reduce/);
 });
 
 test('services share contact actions, support keyboard tabs and animate only when visible', () => {

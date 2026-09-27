@@ -2,15 +2,15 @@ import { useId, useRef, useState, type KeyboardEvent } from 'react';
 import { ActionLink, Icon, SectionHeading } from './ui';
 import { CircuitArtwork } from './CircuitArtwork';
 import { useVisibleMotion } from './MotionSettings';
-import { MembershipValue, type MembershipContent } from './MembershipValue';
+import { SubscriptionOverview, SubscriptionStart, type SubscriptionContent } from './SubscriptionOverview';
 import '../styles/services.css';
 
 type ServicesContent = {
   eyebrow: string; title: string; intro: string; action: string;
-  scopeLabel: string; membership: MembershipContent;
+  scopeLabel: string; subscription: SubscriptionContent;
   items: {
     id: string; icon: string; label: string; title: string; description: string;
-    headline: string; note: string; visualLabel: string; scopeLabel?: string;
+    headline: string; note: string; visualLabel: string; scopeLabel?: string; action?: string;
     features: { icon: string; title: string; detail: string; unit?: string }[];
   }[];
 };
@@ -76,11 +76,12 @@ export function Services({ content, contactHref }: { content: ServicesContent; c
     </div>
     <div className="service-panel" role="tabpanel" id={`${prefix}-panel`} aria-labelledby={`${prefix}-tab-${selected}`} tabIndex={0}>
       <div className="service-overview">
-        <div className="service-copy"><p className="eyebrow">{item.title}</p><h3>{item.headline}</h3><p>{item.description}</p><ActionLink href={contactHref} icon="mail">{content.action}</ActionLink></div>
-        {item.id === 'platform-membership' ? <MembershipValue content={content.membership} /> : <ServiceVisual key={item.id} item={item} />}
+        <div className="service-copy"><p className="eyebrow">{item.title}</p><h3>{item.headline}</h3><p>{item.description}</p><ActionLink href={contactHref} icon="mail">{item.action ?? content.action}</ActionLink></div>
+        {item.id === 'platform-membership' ? <SubscriptionOverview content={content.subscription} /> : <ServiceVisual key={item.id} item={item} />}
       </div>
       <div className="service-scope"><p className="eyebrow">{item.scopeLabel ?? content.scopeLabel}</p><ul>{item.features.map(feature => <li key={feature.title}><Icon name={feature.icon} /><div><h4>{feature.title}</h4>{feature.unit && <span className="service-billing-unit">{feature.unit}</span>}<p>{feature.detail}</p></div></li>)}</ul></div>
       <p className="service-note"><Icon name="document" />{item.note}</p>
+      {item.id === 'platform-membership' && <SubscriptionStart content={content.subscription.setup} />}
     </div>
   </section>;
 }

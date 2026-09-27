@@ -9,6 +9,8 @@ const paths: Record<string, ReactNode> = {
   switch: <><path d="M4 12h6l6-6h4M16 18h4M10 12l3 3" /><circle cx="3" cy="12" r="1" /><circle cx="21" cy="6" r="1" /><circle cx="21" cy="18" r="1" /></>,
   layers: <><path d="m3 8 9-5 9 5-9 5-9-5Zm0 5 9 5 9-5M3 18l9 5 9-5" /></>,
   chip: <><rect x="6" y="6" width="12" height="12" rx="2" /><path d="M9 2v4m6-4v4M9 18v4m6-4v4M2 9h4m-4 6h4m12-6h4m-4 6h4M10 10h4v4h-4Z" /></>,
+  users: <><circle cx="9" cy="7" r="3" /><path d="M3 21v-3a6 6 0 0 1 12 0v3M16 4a3 3 0 0 1 0 6m1 4a5 5 0 0 1 4 5v2" /></>,
+  server: <><rect x="3" y="3" width="18" height="7" rx="2" /><rect x="3" y="14" width="18" height="7" rx="2" /><path d="M7 6.5h.01M7 17.5h.01M13 6.5h4m-4 11h4" /></>,
   document: <><path d="M6 3h8l4 4v14H6V3Zm8 0v5h4M9 12h6m-6 4h6" /></>,
   sliders: <><path d="M4 6h16M4 12h16M4 18h16M8 3v6m8 0v6M10 15v6" /></>,
   sun: <><circle cx="12" cy="12" r="4" /><path d="M12 1v2m0 18v2M1 12h2m18 0h2M4 4l2 2m12 12 2 2M4 20l2-2M18 6l2-2" /></>,

@@ -107,75 +107,97 @@
     "intro": "Use the platform, get support for a silicon prototype or connect GENESIS to your own tools.",
     "action": "Discuss your project",
     "scopeLabel": "Service scope",
-    "membership": {
-      "label": "What membership changes for your team",
-      "benefits": [
+    "subscription": {
+      "label": "How your subscription fits together",
+      "teamLabel": "Your design team",
+      "term": "Annual · per user",
+      "hint": "Select a part to see its scope.",
+      "parts": [
         {
-          "id": "explore",
-          "icon": "switch",
-          "title": "Explore more options",
-          "detail": "Use the same specifications to evaluate different circuit and passive choices. Compare their responses before committing to a design.",
-          "labels": [
-            "Specifications",
-            "Design candidates",
-            "Compare responses"
+          "id": "software",
+          "icon": "chip",
+          "title": "GENESIS software",
+          "status": "Subscription scope",
+          "detail": "Your subscription licenses the agreed GENESIS modules for your team. It is software access, not a chip design delivered on your behalf.",
+          "items": [
+            "Design, simulation and optimization modules selected for your team.",
+            "Access for the users and license term stated in your offer.",
+            "Documentation, software updates and product support as specified in your subscription."
           ]
         },
         {
-          "id": "iterate",
+          "id": "environment",
+          "icon": "server",
+          "title": "Your environment",
+          "status": "Customer-provided",
+          "detail": "GENESIS works with your design tools and infrastructure. Their licenses and access rights are separate from the software subscription.",
+          "items": [
+            "Compatible CAD and solver licenses.",
+            "Authorized PDK access and device models.",
+            "Compute and storage in your environment, or hosting agreed separately."
+          ]
+        },
+        {
+          "id": "services",
           "icon": "sliders",
-          "title": "Reduce manual repetition",
-          "detail": "Connect variable updates, simulation and evaluation in a repeatable loop. Your team can focus on engineering decisions instead of repeating tool operations.",
-          "labels": [
-            "Repeatable design loop",
-            "Update variables",
-            "Evaluate results"
-          ]
-        },
-        {
-          "id": "reuse",
-          "icon": "document",
-          "title": "Reuse design knowledge",
-          "detail": "Keep configurations, run history and reusable blocks connected. Build on earlier work so the next project starts with knowledge, not an empty workspace.",
-          "labels": [
-            "Earlier work",
-            "Reuse",
-            "Next design"
+          "title": "Additional services",
+          "status": "Separate scope",
+          "detail": "Need help beyond using the software? Engineering work and additional resources are scoped separately, so you know what each engagement covers.",
+          "items": [
+            "Custom tool integration, deployment and training.",
+            "Managed compute or EM resources, where agreed.",
+            "Prototype planning, fabrication preparation and measurement support."
           ]
         }
-      ]
+      ],
+      "setup": {
+        "title": "How you get started",
+        "steps": [
+          {
+            "title": "Agree the scope",
+            "detail": "We confirm your users, modules, toolchain and subscription terms before you commit."
+          },
+          {
+            "title": "Prepare your environment",
+            "detail": "We review compatibility and the installation requirements. You arrange the required tool licenses, PDK access and infrastructure."
+          },
+          {
+            "title": "Set up your first project",
+            "detail": "Software delivery, access setup and onboarding follow the scope agreed with your team."
+          }
+        ]
+      }
     },
     "items": [
       {
         "id": "platform-membership",
         "icon": "layers",
-        "label": "Platform",
-        "title": "Software platform membership",
-        "headline": "Engineering throughput. Not just software.",
-        "description": "Explore more design options, spend less time on manual iterations and carry design knowledge into your next project.",
+        "label": "Software",
+        "title": "Software subscription",
+        "headline": "GENESIS access for your design team.",
+        "description": "License GENESIS annually, per user, for use in your design environment. Choose the software modules your team needs, with access, delivery and support defined before you start.",
         "visualLabel": "WORKSPACE",
-        "scopeLabel": "How access and usage are structured",
+        "action": "Request subscription details",
+        "scopeLabel": "Access, delivery and support",
         "features": [
           {
-            "icon": "layers",
-            "title": "Software subscription",
-            "unit": "€ / seat / year",
-            "detail": "Annual access to the GENESIS platform, licensed per user."
+            "icon": "users",
+            "title": "User access",
+            "unit": "Per-user annual license",
+            "detail": "Your offer lists the enabled modules, number of users and license term. Third-party CAD and solver licenses are not included."
           },
           {
-            "icon": "chip",
-            "title": "Compute & EM usage",
-            "unit": "€ / compute hour",
-            "detail": "Cloud or on-premise compute credits, accounted for separately from platform access."
+            "icon": "document",
+            "title": "Software delivery",
+            "detail": "Installation requirements, documentation and access to software releases are defined for your supported environment."
           },
           {
             "icon": "sliders",
-            "title": "Enterprise deployments",
-            "unit": "€ / project",
-            "detail": "Custom integration and support, scoped around your tools and environment."
+            "title": "Product support",
+            "detail": "Support channels, availability and onboarding are agreed in your subscription. Circuit design consulting is a separate service."
           }
         ],
-        "note": "Strategic partnerships: joint development and licensing, with milestones and royalties. Contact us to define the scope and pricing."
+        "note": "We confirm the price, included modules, update policy and support terms in your offer. Compute, custom integration and fabrication are not bundled into the software license."
       },
       {
         "id": "silicon-demonstration",

@@ -1,0 +1,39 @@
+/* Subscription presentation uses the site tokens, controls and visible-motion policy. */
+.subscription-overview { min-width: 0; overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+.subscription-team { display: flex; align-items: center; gap: 10px; padding: 18px 22px; border-bottom: 1px solid var(--border-soft); font-size: .8rem; color: var(--muted); }
+.subscription-team > .icon { color: var(--cyan); width: 20px; height: 20px; }
+.subscription-team > span:last-child { margin-left: auto; font: .65rem var(--font-mono); text-align: right; }
+.subscription-network { position: relative; height: 270px; background: radial-gradient(ellipse at 50% 30%, var(--glow), transparent 65%); }
+.subscription-connections { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.subscription-connections circle { fill: var(--cyan); }
+.subscription-trace { stroke: var(--border); stroke-width: 1.5; }
+.subscription-signal { stroke: var(--cyan); stroke-width: 2; stroke-dasharray: 7 93; filter: drop-shadow(0 0 4px var(--cyan)); animation: subscription-signal 4.8s linear infinite paused; }
+.subscription-node { position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; min-height: 110px; padding: 14px 10px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface); color: var(--text); font-family: var(--font-sans); text-align: center; transition: border-color .2s, box-shadow .2s; }
+.subscription-node .icon { color: var(--cyan); width: 28px; height: 28px; }
+.subscription-node strong { font-size: .87rem; font-weight: 550; line-height: 1.35; }
+.subscription-node > span { color: var(--muted); font-size: .65rem; line-height: 1.4; }
+.subscription-node:hover, .subscription-node[aria-pressed='true'] { border-color: var(--cyan); box-shadow: 0 0 0 3px var(--glow); }
+.subscription-node[aria-pressed='true'] { background: color-mix(in srgb, var(--cyan) 4%, var(--surface)); }
+.subscription-node-0 { top: 16px; left: 24%; width: 52%; }
+.subscription-node-1 { bottom: 5px; left: 4%; width: 43%; }
+.subscription-node-2 { bottom: 5px; right: 4%; width: 43%; }
+.subscription-node-2 .icon { color: var(--violet); }
+.subscription-hint { text-align: center; color: var(--subtle); font-size: .7rem; padding: 13px 18px 18px; }
+.subscription-detail { padding: 23px 26px 26px; border-top: 1px solid var(--border-soft); min-height: 278px; }
+.subscription-status { display: inline-block; padding: 3px 8px; border: 1px solid var(--border); border-radius: 4px; color: var(--cyan); font: .63rem var(--font-mono); background: var(--glow); }
+.subscription-detail h4 { margin: 13px 0 8px; font-size: 1.05rem; font-weight: 550; }
+.subscription-detail > p { color: var(--muted); font-size: .85rem; line-height: 1.75; }
+.subscription-detail ul { margin: 15px 0 0; padding-left: 17px; color: var(--muted); font-size: .8rem; line-height: 1.65; }
+.subscription-detail li + li { margin-top: 7px; }.subscription-detail li::marker { color: var(--cyan); }
+.subscription-start { border-top: 1px solid var(--border-soft); margin-top: 32px; padding-top: 26px; }
+.subscription-start > h4 { margin: 0 0 22px; font-size: 1rem; font-weight: 550; }
+.subscription-start ol { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px; margin: 0; padding: 0; list-style: none; }
+.subscription-start li { display: flex; align-items: flex-start; gap: 13px; min-width: 0; }
+.subscription-start li > span { color: var(--cyan); font: .7rem var(--font-mono); border: 1px solid var(--border); border-radius: 50%; padding: 7px; line-height: 1; }
+.subscription-start h5 { font-size: .85rem; font-weight: 550; margin: 0 0 8px; line-height: 1.4; }
+.subscription-start li p { color: var(--muted); font-size: .8rem; line-height: 1.75; }
+.subscription-overview[data-active='true'] .subscription-signal { animation-play-state: running; }
+@keyframes subscription-signal { to { stroke-dashoffset: -100; } }
+@media (max-width: 850px) { .subscription-overview { width: 100%; max-width: 580px; justify-self: center; }.subscription-start ol { grid-template-columns: 1fr; gap: 22px; } }
+@media (max-width: 400px) { .subscription-team { padding: 16px 14px; gap: 8px; font-size: .73rem; }.subscription-team > span:last-child { font-size: .58rem; max-width: 45%; }.subscription-detail { padding: 20px; }.subscription-node strong { font-size: .75rem; }.subscription-node > span { font-size: .6rem; } }
+@media (prefers-reduced-motion: reduce) { .subscription-signal { animation: none !important; } }
