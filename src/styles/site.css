@@ -106,9 +106,6 @@ img { display: block; max-width: 100%; }
 .button-primary:hover { background: var(--button-hover); }
 .button-secondary { background: var(--surface); }
 .button .icon { width: 19px; height: 19px; }
-.hero-index { display: flex; flex-wrap: wrap; gap: 34px; margin-top: 72px; color: var(--subtle); font-size: .6875rem; letter-spacing: .15em; }
-.hero-index span { padding-left: 13px; border-left: 2px solid var(--cyan); }
-.hero-index span:last-child { border-color: var(--violet); }
 .content-section { max-width: calc(var(--content-width) + 96px); margin: auto; padding: 90px 48px; }
 .section-intro { display: grid; grid-template-columns: 1.35fr 1fr; gap: 80px; align-items: end; margin-bottom: 52px; }
 .section-intro > p { color: var(--muted); font-size: 1rem; max-width: 480px; line-height: 1.8; }
@@ -127,7 +124,12 @@ img { display: block; max-width: 100%; }
 .workflow-step p { color: var(--muted); font-size: .875rem; line-height: 1.7; }
 .loop-note { display: flex; gap: 14px; align-items: center; margin-top: 25px; font-size: .875rem; }
 .loop-note > .icon { color: var(--cyan); width: 18px; height: 18px; }
-.loop-note > .muted { margin-left: auto; }
+.story-section { border-top: 1px solid var(--border-soft); }
+.story-narrative { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(32px, 5vw, 72px); align-items: center; }
+.story-narrative > div { min-width: 0; }
+.story-copy { color: var(--muted); line-height: 1.85; margin-top: 28px; font-size: .95rem; }
+.story-copy p + p { margin-top: 20px; }
+@media (max-width: 850px) { .story-narrative { grid-template-columns: 1fr; }.story-narrative > .design-loop { width: 100%; max-width: 580px; justify-self: center; } }
 .portfolio-section { border-top: 1px solid var(--border-soft); }
 .portfolio-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
 .portfolio-card { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); overflow: hidden; transition: border-color .2s, transform .2s; }
@@ -200,7 +202,6 @@ img { display: block; max-width: 100%; }
   .portfolio-copy, .portfolio-top { padding: 18px; }
   .layout-image { height: 200px; padding: 10px; }
   .loop-note { flex-wrap: wrap; }
-  .loop-note > .muted { margin-left: 32px; }
 }
 @media (max-width: 700px) {
   .site-header { min-height: 70px; padding: 16px 20px; gap: 12px; }
@@ -236,7 +237,6 @@ img { display: block; max-width: 100%; }
   .company-hero-copy > .eyebrow { font-size: .625rem; }
   .company-hero h1 { font-size: clamp(2.75rem, 12vw, 4.6rem); }
   .company-hero-copy > p:not(.eyebrow) { font-size: 1.05rem; }
-  .hero-index { gap: 18px; font-size: .625rem; margin-top: 58px; }
   .content-section { padding: 60px 24px; }
   .section-intro { grid-template-columns: 1fr; gap: 24px; margin-bottom: 32px; }
   .section-heading h2 { font-size: clamp(1.75rem, 8vw, 2.25rem); overflow-wrap: break-word; }
@@ -246,7 +246,7 @@ img { display: block; max-width: 100%; }
   .workflow-step > .icon { position: absolute; left: 22px; top: 15px; width: 25px; height: 25px; margin-top: 10px; }
   .step-number { right: 14px; top: 10px; }
   .workflow-step h3 { margin-bottom: 8px; }
-  .loop-note { font-size: .8125rem; gap: 9px; } .loop-note > .muted { margin-left: 27px; }
+  .loop-note { font-size: .8125rem; gap: 9px; }
   .portfolio-grid { grid-template-columns: 1fr; gap: 24px; }
   .layout-image { height: 270px; padding: 20px; }
   .portfolio-copy, .portfolio-top { padding: 24px; }

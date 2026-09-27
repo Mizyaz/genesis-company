@@ -110,7 +110,6 @@
     "subscription": {
       "label": "Subscription details",
       "teamLabel": "Your design team",
-      "term": "Annual · per user",
       "hint": "Select a part to see its scope.",
       "flow": {
         "label": "Where GENESIS fits",
@@ -183,7 +182,7 @@
         "label": "Software",
         "title": "Software subscription",
         "headline": "GENESIS access for your design team.",
-        "description": "License GENESIS annually, per user, for use in your design environment. Choose the software modules your team needs, with access, delivery and support defined before you start.",
+        "description": "Give your team access to GENESIS in your design environment. Your subscription specifies the modules, licensed users, software delivery and support you receive.",
         "visualLabel": "WORKSPACE",
         "action": "Request subscription details",
         "scopeLabel": "Access, delivery and support",
@@ -191,8 +190,7 @@
           {
             "icon": "users",
             "title": "User access",
-            "unit": "Per-user annual license",
-            "detail": "Your offer lists the enabled modules, number of users and license term. Third-party CAD and solver licenses are not included."
+            "detail": "Each license gives one user access to the selected GENESIS modules for one year. Your offer defines the modules and user count; CAD and solver licenses are separate."
           },
           {
             "icon": "document",
@@ -307,9 +305,12 @@
   },
   "story": {
     "eyebrow": "OUR STORY",
-    "headline": "Circuit designers.",
-    "headlineAccent": "Meet connected intelligence.",
-    "intro": "AI is changing how we work with software. GENESIS brings that connection to RFIC design, linking circuit designers with the tools they already use.",
+    "headline": "Why we’re building GENESIS.",
+    "intro": "We bring together RFIC research and experience in building AI products. Our shared aim is to connect the parts of the design process that too often happen in isolation.",
+    "paragraphs": [
+      "Changing a circuit is only one part of the job. Engineers also need to prepare the next simulation, compare it with earlier runs and check what the change means for the physical design.",
+      "We are building GENESIS so that this process does not need to be reconstructed with every iteration. Engineers should be able to focus on the circuit, and carry the settings and results of earlier work into their next design."
+    ],
     "diagram": {
       "designer": {
         "title": "Circuit designers",

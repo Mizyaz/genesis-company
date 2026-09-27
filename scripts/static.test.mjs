@@ -56,9 +56,10 @@ test('company diagrams share RF artwork instead of text cards and respect visibl
   assert.match(artwork, /circuit-radio/);
   const explore = read('src/pages/Explore.tsx');
   assert.equal((explore.match(/<DesignLoop /g) || []).length, 1);
-  assert.match(explore, /center=\{<DesignLoop /);
+  assert.match(explore, /className="story-narrative"/);
+  assert.doesNotMatch(explore, /<DesignBridge /); // The subscription already explains designer / GENESIS / tools.
   assert.doesNotMatch(explore, /approach-section/);
-  assert.match(explore, /id="team"/); // Existing section links still land on the merged flow.
+  assert.match(explore, /id="team"/); // Existing approach links still reach the story illustration.
   for (const diagram of [bridge, loop]) {
     assert.match(diagram, /import \{ CircuitArtwork \}/);
     assert.match(diagram, /useVisibleMotion/);
@@ -91,6 +92,10 @@ test('services precede the story, remain data-driven and have natural Turkish co
   assert.equal(dictionary['silicon.'], 'çipe.');
   assert.doesNotMatch(Object.values(dictionary).join('\n'), /Hedeflerden|silikona|DEVRELER\. ALANLAR/i);
   assert.match(read('src/styles/site.css'), /font-size: clamp\(2.75rem, 12vw, 4.6rem\)/);
+  for (const copy of [content.story.headline, content.story.intro, ...content.story.paragraphs]) assert.ok(dictionary[copy], copy);
+  assert.equal(content.story.paragraphs.length, 2);
+  assert.match(page, /site.story.paragraphs.map/);
+  assert.doesNotMatch(page, /hero-index|Reason\. Simulate\. Learn\. Refine\./);
 });
 
 test('subscription distinguishes software access, customer resources and separate services without invented terms', () => {
@@ -99,8 +104,11 @@ test('subscription distinguishes software access, customer resources and separat
   const subscription = services.subscription;
   assert.deepEqual(subscription.parts.map(item => item.id), ['software', 'environment', 'services']);
   assert.equal(subscription.setup.steps.length, 3);
-  for (const copy of [subscription.label, subscription.teamLabel, subscription.term, subscription.hint, subscription.setup.title, ...Object.values(subscription.flow), ...subscription.parts.flatMap(item => [item.title, item.status, item.detail, ...item.items]), ...subscription.setup.steps.flatMap(step => [step.title, step.detail])]) assert.ok(dictionary[copy], copy);
-  assert.equal(services.items[0].features[0].unit, 'Per-user annual license');
+  for (const copy of [subscription.label, subscription.teamLabel, subscription.hint, subscription.setup.title, ...Object.values(subscription.flow), ...subscription.parts.flatMap(item => [item.title, item.status, item.detail, ...item.items]), ...subscription.setup.steps.flatMap(step => [step.title, step.detail])]) assert.ok(dictionary[copy], copy);
+  assert.equal(subscription.term, undefined);
+  assert.equal(services.items[0].features[0].unit, undefined);
+  assert.match(services.items[0].features[0].detail, /one user access.*for one year/);
+  assert.doesNotMatch(JSON.stringify(services), /Annual · per user|Per-user annual license/);
   assert.match(subscription.parts[1].items.join(' '), /CAD and solver licenses.*PDK access.*Compute/);
   assert.match(services.items[0].note, /not bundled into the software license/);
   assert.doesNotMatch(JSON.stringify(services), /€\s*\d|\d+\s*%|24\/7|unlimited|guaranteed|—/i);

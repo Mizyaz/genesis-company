@@ -5,7 +5,7 @@ import { useVisibleMotion } from './MotionSettings';
 import '../styles/subscription-overview.css';
 
 export type SubscriptionContent = {
-  label: string; teamLabel: string; term: string; hint: string;
+  label: string; teamLabel: string; hint: string;
   flow: { label: string; designer: string; genesis: string; toolsLabel: string; tools: string; feedback: string };
   parts: { id: string; icon: string; title: string; status: string; detail: string; items: string[] }[];
   setup: { title: string; steps: { title: string; detail: string }[] };
@@ -26,7 +26,7 @@ export function SubscriptionOverview({ content }: { content: SubscriptionContent
   const part = content.parts[selected] ?? content.parts[0];
   return <figure className="subscription-overview" data-active={running} data-part={part.id} aria-label={content.label}>
     <section ref={ref} className="subscription-role" aria-label={content.flow.label}>
-      <div className="subscription-heading"><h4>{content.flow.label}</h4><span>{content.term}</span></div>
+      <div className="subscription-heading"><h4>{content.flow.label}</h4></div>
       <div className="subscription-flow">
         <div className="subscription-actor"><CircuitArtwork kind="designer" running={running} /><div><h5>{content.teamLabel}</h5><p>{content.flow.designer}</p></div></div>
         <FlowConnection />
