@@ -11,6 +11,7 @@ type ServicesContent = {
   items: {
     id: string; icon: string; label: string; title: string; description: string;
     headline: string; note: string; visualLabel: string; scopeLabel?: string; action?: string;
+    connections?: { icon: string; label: string }[];
     features: { icon: string; title: string; detail: string; unit?: string }[];
   }[];
 };
@@ -46,7 +47,7 @@ function ServiceVisual({ item }: { item: ServicesContent['items'][number] }) {
       {item.id === 'specialised-integration' && <>
         <svg className="service-connectors" viewBox="0 0 480 320" fill="none"><path className="service-signal-base" d="M75 70h82l45 63M405 70h-82l-45 63M75 250h82l45-63M405 250h-82l-45-63" /><path className="service-signal" pathLength="100" d="M75 70h82l45 63M405 70h-82l-45 63M75 250h82l45-63M405 250h-82l-45-63" /></svg>
         <div className="service-integration-core"><CircuitArtwork kind="engine" running={running} /></div>
-        {['switch', 'wave', 'sliders', 'document'].map((icon, i) => <div className={`service-connector service-connector-${i}`} key={icon}><Icon name={icon} /><span>{['CAD', 'EM', 'CLI', 'JSON'][i]}</span></div>)}
+        {item.connections?.map((connection, i) => <div className={`service-connector service-connector-${i}`} key={connection.icon}><Icon name={connection.icon} /><span>{connection.label}</span></div>)}
       </>}
     </div>
   </figure>;
@@ -75,7 +76,7 @@ export function Services({ content, contactHref }: { content: ServicesContent; c
       </button>)}
     </div>
     <div className="service-panel" role="tabpanel" id={`${prefix}-panel`} aria-labelledby={`${prefix}-tab-${selected}`} tabIndex={0}>
-      <div className="service-overview">
+      <div className="service-overview" data-kind={item.id}>
         <div className="service-copy"><p className="eyebrow">{item.title}</p><h3>{item.headline}</h3><p>{item.description}</p><ActionLink href={contactHref} icon="mail">{item.action ?? content.action}</ActionLink></div>
         {item.id === 'platform-membership' ? <SubscriptionOverview content={content.subscription} /> : <ServiceVisual key={item.id} item={item} />}
       </div>

@@ -108,10 +108,18 @@
     "action": "Discuss your project",
     "scopeLabel": "Service scope",
     "subscription": {
-      "label": "How your subscription fits together",
+      "label": "Subscription details",
       "teamLabel": "Your design team",
       "term": "Annual · per user",
       "hint": "Select a part to see its scope.",
+      "flow": {
+        "label": "Where GENESIS fits",
+        "designer": "You set the requirements and choose what moves forward.",
+        "genesis": "Prepares design iterations, runs your tools and compares the results.",
+        "toolsLabel": "Your design tools",
+        "tools": "Your CAD and simulation tools calculate circuit behavior.",
+        "feedback": "GENESIS brings the results back for your next decision."
+      },
       "parts": [
         {
           "id": "software",
@@ -232,23 +240,41 @@
         "label": "Integration",
         "title": "Specialised integration",
         "headline": "Your tools. Working together.",
-        "description": "Connect GENESIS to your CAD tools, automation scripts and existing design workflows.",
+        "description": "Bring your design tools, device libraries and established processes into one connected workflow.",
         "visualLabel": "CONNECTED TOOLS",
+        "connections": [
+          {
+            "icon": "switch",
+            "label": "CAD tools"
+          },
+          {
+            "icon": "wave",
+            "label": "EM solvers"
+          },
+          {
+            "icon": "layers",
+            "label": "Device libraries"
+          },
+          {
+            "icon": "sliders",
+            "label": "Your workflows"
+          }
+        ],
         "features": [
           {
             "icon": "layers",
             "title": "CAD and solver workflows",
-            "detail": "Connect supported design tools and solvers through explicit configurations and runners."
+            "detail": "Connect supported design and simulation tools so each step can build on the previous results."
           },
           {
             "icon": "sliders",
-            "title": "Your automation",
-            "detail": "Bring existing scripts and design routines into a repeatable workflow."
+            "title": "Your way of working",
+            "detail": "Keep your established design practices while GENESIS coordinates the repeated work between tools."
           },
           {
             "icon": "document",
             "title": "Deployment on your terms",
-            "detail": "Define data boundaries, tool access and validation around your own environment."
+            "detail": "Agree where your data stays, who can access it and how the setup fits your environment."
           }
         ],
         "note": "Integration scope depends on your toolchain, licenses and deployment requirements."

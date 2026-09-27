@@ -1,30 +1,37 @@
-/* Subscription presentation uses the site tokens, controls and visible-motion policy. */
-.subscription-overview { min-width: 0; overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
-.subscription-team { display: flex; align-items: center; gap: 10px; padding: 18px 22px; border-bottom: 1px solid var(--border-soft); font-size: .8rem; color: var(--muted); }
-.subscription-team > .icon { color: var(--cyan); width: 20px; height: 20px; }
-.subscription-team > span:last-child { margin-left: auto; font: .65rem var(--font-mono); text-align: right; }
-.subscription-network { position: relative; height: 270px; background: radial-gradient(ellipse at 50% 30%, var(--glow), transparent 65%); }
-.subscription-connections { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-.subscription-connections circle { fill: var(--cyan); }
-.subscription-trace { stroke: var(--border); stroke-width: 1.5; }
-.subscription-signal { stroke: var(--cyan); stroke-width: 2; stroke-dasharray: 7 93; filter: drop-shadow(0 0 4px var(--cyan)); animation: subscription-signal 4.8s linear infinite paused; }
-.subscription-node { position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; min-height: 110px; padding: 14px 10px; border: 1px solid var(--border); border-radius: 9px; background: var(--surface); color: var(--text); font-family: var(--font-sans); text-align: center; transition: border-color .2s, box-shadow .2s; }
-.subscription-node .icon { color: var(--cyan); width: 28px; height: 28px; }
-.subscription-node strong { font-size: .87rem; font-weight: 550; line-height: 1.35; }
-.subscription-node > span { color: var(--muted); font-size: .65rem; line-height: 1.4; }
-.subscription-node:hover, .subscription-node[aria-pressed='true'] { border-color: var(--cyan); box-shadow: 0 0 0 3px var(--glow); }
-.subscription-node[aria-pressed='true'] { background: color-mix(in srgb, var(--cyan) 4%, var(--surface)); }
-.subscription-node-0 { top: 16px; left: 24%; width: 52%; }
-.subscription-node-1 { bottom: 5px; left: 4%; width: 43%; }
-.subscription-node-2 { bottom: 5px; right: 4%; width: 43%; }
-.subscription-node-2 .icon { color: var(--violet); }
-.subscription-hint { text-align: center; color: var(--subtle); font-size: .7rem; padding: 13px 18px 18px; }
-.subscription-detail { padding: 23px 26px 26px; border-top: 1px solid var(--border-soft); min-height: 278px; }
-.subscription-status { display: inline-block; padding: 3px 8px; border: 1px solid var(--border); border-radius: 4px; color: var(--cyan); font: .63rem var(--font-mono); background: var(--glow); }
-.subscription-detail h4 { margin: 13px 0 8px; font-size: 1.05rem; font-weight: 550; }
-.subscription-detail > p { color: var(--muted); font-size: .85rem; line-height: 1.75; }
-.subscription-detail ul { margin: 15px 0 0; padding-left: 17px; color: var(--muted); font-size: .8rem; line-height: 1.65; }
-.subscription-detail li + li { margin-top: 7px; }.subscription-detail li::marker { color: var(--cyan); }
+/* Roles and subscription terms are separate. Shared artwork, theme and motion stay site-owned. */
+.subscription-overview { min-width: 0; }
+.subscription-role { padding: clamp(20px, 3vw, 40px); border: 1px solid var(--border); border-radius: var(--radius); background: radial-gradient(ellipse at 50% 35%, var(--glow), transparent 65%), var(--surface); }
+.subscription-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 26px; }
+.subscription-heading h4, .subscription-scope-heading h4 { margin: 0; font-size: .95rem; font-weight: 550; }
+.subscription-heading > span { color: var(--muted); font: .7rem var(--font-mono); text-align: right; }
+.subscription-flow { display: grid; grid-template-columns: minmax(0, 1fr) 60px minmax(0, 1.25fr) 60px minmax(0, 1fr); gap: 8px; align-items: center; }
+.subscription-actor { min-width: 0; padding: 18px 12px; text-align: center; }
+.subscription-actor .circuit-artwork { max-width: 240px; margin: 0 auto 20px; }
+.subscription-actor h5 { margin: 0 0 10px; font-size: 1.05rem; font-weight: 550; }
+.subscription-actor p { color: var(--muted); font-size: .85rem; line-height: 1.7; max-width: 30ch; margin: auto; }
+.subscription-genesis { border: 1px solid color-mix(in srgb, var(--cyan) 40%, var(--border)); border-radius: var(--radius); background: color-mix(in srgb, var(--surface) 80%, transparent); box-shadow: 0 12px 40px var(--glow); }
+.subscription-genesis h5 { letter-spacing: .09em; font-size: 1.3rem; }
+.subscription-genesis p { color: var(--text); }
+.subscription-connection svg { display: block; width: 100%; height: auto; }
+.subscription-trace { stroke: var(--border); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+.subscription-signal { stroke: var(--cyan); stroke-width: 2; stroke-dasharray: 14 86; filter: drop-shadow(0 0 4px var(--cyan)); vector-effect: non-scaling-stroke; animation: subscription-signal 4.8s linear infinite paused; }
+.subscription-feedback { position: relative; margin: 24px auto 0; width: 78%; padding-top: 34px; text-align: center; }
+.subscription-feedback > svg { position: absolute; top: 0; left: 0; width: 100%; height: 32px; }
+.subscription-feedback .subscription-signal { stroke: var(--violet); animation-delay: -2.4s; }
+.subscription-feedback > span { display: inline-flex; align-items: center; gap: 9px; color: var(--muted); font-size: .8rem; line-height: 1.6; padding-top: 12px; }
+.subscription-feedback .icon { transform: rotate(180deg); color: var(--violet); }
+.subscription-scope-heading { margin: 28px 0 16px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 20px; }
+.subscription-scope-heading p { font-size: .75rem; color: var(--muted); }
+.subscription-choices { display: flex; flex-wrap: wrap; gap: 10px; }
+.subscription-choice { display: inline-flex; align-items: center; justify-content: center; gap: 9px; padding: 12px 16px; border: 1px solid var(--border); border-radius: 7px; background: var(--surface); color: var(--muted); font: .82rem var(--font-sans); line-height: 1.5; transition: border-color .2s, background .2s; }
+.subscription-choice .icon { width: 17px; height: 17px; }
+.subscription-choice:hover, .subscription-choice[aria-pressed='true'] { border-color: var(--cyan); color: var(--text); background: var(--glow); }
+.subscription-detail { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; padding: 26px 0 0; }
+.subscription-status { color: var(--cyan); font: .68rem var(--font-mono); }
+.subscription-detail h4 { margin: 10px 0 8px; font-size: 1.05rem; font-weight: 550; }
+.subscription-detail p { color: var(--muted); font-size: .85rem; line-height: 1.75; }
+.subscription-detail ul { margin: 0; padding: 4px 0 0 18px; color: var(--muted); font-size: .85rem; line-height: 1.7; align-self: center; }
+.subscription-detail li + li { margin-top: 9px; }.subscription-detail li::marker { color: var(--cyan); }
 .subscription-start { border-top: 1px solid var(--border-soft); margin-top: 32px; padding-top: 26px; }
 .subscription-start > h4 { margin: 0 0 22px; font-size: 1rem; font-weight: 550; }
 .subscription-start ol { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px; margin: 0; padding: 0; list-style: none; }
@@ -34,6 +41,24 @@
 .subscription-start li p { color: var(--muted); font-size: .8rem; line-height: 1.75; }
 .subscription-overview[data-active='true'] .subscription-signal { animation-play-state: running; }
 @keyframes subscription-signal { to { stroke-dashoffset: -100; } }
-@media (max-width: 850px) { .subscription-overview { width: 100%; max-width: 580px; justify-self: center; }.subscription-start ol { grid-template-columns: 1fr; gap: 22px; } }
-@media (max-width: 400px) { .subscription-team { padding: 16px 14px; gap: 8px; font-size: .73rem; }.subscription-team > span:last-child { font-size: .58rem; max-width: 45%; }.subscription-detail { padding: 20px; }.subscription-node strong { font-size: .75rem; }.subscription-node > span { font-size: .6rem; } }
+@media (max-width: 850px) {
+  .subscription-start ol { grid-template-columns: 1fr; gap: 22px; }
+  .subscription-flow { grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1.25fr) 28px minmax(0, 1fr); gap: 0; }
+  .subscription-actor { padding: 16px 8px; }
+}
+@media (max-width: 650px) {
+  .subscription-heading { align-items: start; }.subscription-heading > span { max-width: 42%; font-size: .62rem; }
+  .subscription-flow { grid-template-columns: 1fr; }
+  .subscription-actor { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 14px; align-items: center; text-align: left; padding: 16px 12px; }
+  .subscription-actor .circuit-artwork { margin: 0; }.subscription-actor p { max-width: none; margin: 0; font-size: .8rem; }
+  .subscription-actor h5 { font-size: .95rem; }.subscription-genesis h5 { font-size: 1.15rem; }
+  .subscription-connection { display: flex; align-items: center; justify-content: center; height: 45px; }.subscription-connection svg { width: 45px; transform: rotate(90deg); }
+  .subscription-feedback { margin-top: 18px; width: 100%; padding-top: 0; }.subscription-feedback > svg { display: none; }
+  .subscription-feedback > span { align-items: start; text-align: left; }.subscription-feedback .icon { transform: rotate(-90deg); margin-top: 3px; }
+  .subscription-choices { gap: 8px; }.subscription-choice { flex: 1 1 130px; font-size: .75rem; padding: 11px 9px; }
+  .subscription-detail { grid-template-columns: 1fr; gap: 16px; }
+}
+@media (max-width: 380px) {
+  .subscription-role { padding: 18px 12px; }.subscription-actor { grid-template-columns: 72px minmax(0, 1fr); gap: 9px; padding: 14px 8px; }
+}
 @media (prefers-reduced-motion: reduce) { .subscription-signal { animation: none !important; } }

@@ -76,7 +76,7 @@ test('services precede the story, remain data-driven and have natural Turkish co
   const dictionary = JSON.parse(read('src/content/tr.json'));
   assert.equal(content.services.items.length, 3);
   assert.deepEqual(content.services.items.map(item => item.id), ['platform-membership', 'silicon-demonstration', 'specialised-integration']);
-  for (const copy of [content.services.eyebrow, content.services.title, content.services.intro, content.services.action, content.services.scopeLabel, ...content.services.items.flatMap(item => [item.label, item.title, item.headline, item.description, item.note, item.visualLabel, item.scopeLabel, item.action, ...item.features.flatMap(feature => [feature.title, feature.detail, feature.unit])])].filter(Boolean)) assert.ok(dictionary[copy], copy);
+  for (const copy of [content.services.eyebrow, content.services.title, content.services.intro, content.services.action, content.services.scopeLabel, ...content.services.items.flatMap(item => [item.label, item.title, item.headline, item.description, item.note, item.visualLabel, item.scopeLabel, item.action, ...(item.connections ?? []).map(connection => connection.label), ...item.features.flatMap(feature => [feature.title, feature.detail, feature.unit])])].filter(Boolean)) assert.ok(dictionary[copy], copy);
   for (const item of content.services.items) {
     assert.equal(item.features.length, 3);
     assert.equal(item.stages, undefined);
@@ -99,7 +99,7 @@ test('subscription distinguishes software access, customer resources and separat
   const subscription = services.subscription;
   assert.deepEqual(subscription.parts.map(item => item.id), ['software', 'environment', 'services']);
   assert.equal(subscription.setup.steps.length, 3);
-  for (const copy of [subscription.label, subscription.teamLabel, subscription.term, subscription.hint, subscription.setup.title, ...subscription.parts.flatMap(item => [item.title, item.status, item.detail, ...item.items]), ...subscription.setup.steps.flatMap(step => [step.title, step.detail])]) assert.ok(dictionary[copy], copy);
+  for (const copy of [subscription.label, subscription.teamLabel, subscription.term, subscription.hint, subscription.setup.title, ...Object.values(subscription.flow), ...subscription.parts.flatMap(item => [item.title, item.status, item.detail, ...item.items]), ...subscription.setup.steps.flatMap(step => [step.title, step.detail])]) assert.ok(dictionary[copy], copy);
   assert.equal(services.items[0].features[0].unit, 'Per-user annual license');
   assert.match(subscription.parts[1].items.join(' '), /CAD and solver licenses.*PDK access.*Compute/);
   assert.match(services.items[0].note, /not bundled into the software license/);
@@ -109,6 +109,10 @@ test('subscription distinguishes software access, customer resources and separat
   assert.match(component, /data-part=\{part.id\}/);
   assert.match(component, /useVisibleMotion<HTMLElement>/);
   assert.match(component, /aria-live="polite"/);
+  for (const kind of ['designer', 'engine', 'simulation']) assert.ok(component.includes(`kind="${kind}"`));
+  assert.match(component, /<section ref=\{ref\} className="subscription-role"/);
+  assert.match(component, /className="subscription-feedback"/);
+  assert.doesNotMatch(JSON.stringify(services) + read('src/shared/Services.tsx'), /\bCLI\b|\bJSON\b|configurations and runners/);
   assert.doesNotMatch(component, /fetch\s*\(|setInterval|setTimeout/);
   assert.equal(services.membership, undefined);
   assert.equal(existsSync(resolve(root, 'src/shared/MembershipValue.tsx')), false);

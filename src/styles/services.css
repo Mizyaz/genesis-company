@@ -15,6 +15,12 @@
 .service-copy h3 { margin: 18px 0; max-width: 15ch; font-size: clamp(2rem, 3.3vw, 3.3rem); font-weight: 550; line-height: 1.1; letter-spacing: -.04em; text-wrap: balance; }
 .service-copy > p:not(.eyebrow) { color: var(--muted); font-size: .98rem; line-height: 1.8; max-width: 44ch; }
 .service-copy .button { margin-top: 26px; }
+.service-overview[data-kind='platform-membership'] { grid-template-columns: 1fr; gap: 36px; }
+.service-overview[data-kind='platform-membership'] .service-copy { display: grid; grid-template-columns: 1fr 1fr; column-gap: clamp(30px, 5vw, 72px); align-items: start; }
+.service-overview[data-kind='platform-membership'] .service-copy > .eyebrow { grid-column: 1 / -1; }
+.service-overview[data-kind='platform-membership'] .service-copy h3 { grid-column: 1; grid-row: 2 / 4; max-width: 20ch; }
+.service-overview[data-kind='platform-membership'] .service-copy > p:not(.eyebrow) { grid-column: 2; margin-top: 18px; max-width: none; }
+.service-overview[data-kind='platform-membership'] .service-copy .button { grid-column: 2; justify-self: start; }
 .service-visual { position: relative; overflow: hidden; min-width: 0; border: 1px solid var(--border); border-radius: var(--radius); background: linear-gradient(140deg, var(--surface), var(--surface-raised)); }
 .service-visual-heading { display: flex; align-items: center; gap: 9px; padding: 17px 20px; font: .65rem var(--font-mono); letter-spacing: .09em; color: var(--muted); border-bottom: 1px solid var(--border-soft); }
 .service-visual-heading > span:last-child { margin-left: auto; letter-spacing: .04em; }
@@ -45,9 +51,9 @@
 .service-signal { stroke: var(--cyan); stroke-width: 2; stroke-dasharray: 7 93; filter: drop-shadow(0 0 5px var(--cyan)); animation: service-signal 4s linear infinite paused; }
 .service-connectors { position: absolute; inset: 0; }
 .service-integration-core { position: absolute; width: 63%; left: 18.5%; top: 17%; }
-.service-connector { position: absolute; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px; width: 19%; aspect-ratio: 1; border: 1px solid var(--border); border-radius: 9px; background: var(--surface); box-shadow: 0 8px 30px var(--glow); color: var(--cyan); }
+.service-connector { position: absolute; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 6px; width: 22%; min-height: 82px; padding: 8px 3px; aspect-ratio: 1; border: 1px solid var(--border); border-radius: 9px; background: var(--surface); box-shadow: 0 8px 30px var(--glow); color: var(--cyan); }
 .service-connector .icon { width: 28px; height: 28px; }
-.service-connector span { font: .6rem var(--font-mono); color: var(--muted); letter-spacing: .1em; }
+.service-connector span { font: .65rem var(--font-sans); color: var(--muted); line-height: 1.3; text-align: center; padding: 0 3px; }
 .service-connector-0 { top: 8%; left: 5%; }.service-connector-1 { top: 8%; right: 5%; }.service-connector-2 { bottom: 8%; left: 5%; }.service-connector-3 { bottom: 8%; right: 5%; }
 .service-visual[data-active='true'] :is(.service-aura, .service-die, .service-wafer-scan, .service-probe-tip, .service-signal) { animation-play-state: running; }
 @keyframes service-atmosphere { 50% { opacity: .45; transform: scale(.9); } }
@@ -58,6 +64,7 @@
   .service-tabs button { flex-direction: column; justify-content: center; padding: 18px 8px; gap: 10px; font-size: .8rem; text-align: center; line-height: 1.5; }
   .service-tab-number { display: none; }
   .service-overview { grid-template-columns: 1fr; gap: 30px; }
+  .service-overview[data-kind='platform-membership'] .service-copy { display: block; }
   .service-copy h3 { max-width: 24ch; font-size: clamp(1.9rem, 6vw, 2.8rem); }
   .service-copy > p:not(.eyebrow) { max-width: none; }
   .service-visual { width: 100%; max-width: 580px; justify-self: center; }
@@ -67,6 +74,8 @@
 @media (max-width: 400px) {
   .service-tabs button { font-size: .75rem; }
   .service-visual-heading { padding: 14px 12px; font-size: .55rem; gap: 6px; }
+  .service-visual[data-kind='specialised-integration'] .service-artboard { aspect-ratio: 1.1; }
+  .service-connector span { font-size: .6rem; padding: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   .service-visual :is(.service-aura, .service-die, .service-wafer-scan, .service-probe-tip, .service-signal) { animation: none !important; }
