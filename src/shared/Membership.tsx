@@ -23,7 +23,7 @@ export function Membership({ content, email }: { content: MembershipContent; ema
       </div>
       <p className="tier-pitch">{tier.pitch}</p>
       <ul className="tier-features">{tier.features.map(feature => <li key={feature}><Icon name="check" />{feature}</li>)}</ul>
-      <ActionLink variant={tier.id === 'pro' ? 'primary' : 'secondary'} href={`mailto:${email}?subject=${encodeURIComponent(`GENESIS ${tier.title}`)}`} icon={tier.id === 'demo' ? 'play' : 'mail'}>{tier.action}</ActionLink>
+      <ActionLink variant={tier.id === 'pro' ? 'primary' : 'secondary'} href={`mailto:${email}?subject=${encodeURIComponent(`GENESIS ${tier.title}`)}`} icon={tier.id === 'demo' ? 'calendar' : 'mail'}>{tier.action}</ActionLink>
     </li>)}</ul>
     <p className="membership-note"><Icon name="document" />{content.note}</p>
     <ServiceFaq content={content.faq} contactHref={`mailto:${email}?subject=GENESIS%20question`} />
