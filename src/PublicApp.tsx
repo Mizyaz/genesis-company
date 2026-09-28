@@ -3,6 +3,7 @@ import { Explore } from './pages/Explore';
 import { Welcome } from './pages/Welcome';
 import { ProductLaunch } from './pages/ProductLaunch';
 import { Research } from './pages/Research';
+import { About } from './pages/About';
 import { SiteShell, useCompanyAppearance } from './shared/SiteShell';
 import { MotionProvider } from './shared/MotionSettings';
 import { useLanguage } from './shared/Language';
@@ -16,6 +17,7 @@ export function PublicApp() {
   const { theme, setTheme } = useCompanyAppearance();
   const explore = route.startsWith('#/explore');
   const research = route === '#/publications';
+  const about = route === '#/about';
   const design = route === '#/design';
   useEffect(() => {
     const change = () => setRoute(window.location.hash);
@@ -23,18 +25,19 @@ export function PublicApp() {
     return () => window.removeEventListener('hashchange', change);
   }, []);
   useEffect(() => {
-    document.title = t(research ? 'Research & publications | GENESIS' : design ? 'Design | GENESIS' : explore ? 'Explore GENESIS | From specs to silicon' : 'GENESIS | Discover or design');
-  }, [research, design, explore, t]);
+    document.title = t(research ? 'Research & publications | GENESIS' : about ? 'About us | GENESIS' : design ? 'Design | GENESIS' : explore ? 'Explore GENESIS | From specs to silicon' : 'GENESIS | Discover or design');
+  }, [research, about, design, explore, t]);
   useEffect(() => {
     const section = route.split('/')[2];
     const timer = window.setTimeout(() => {
-      if (section && ['workflow', 'portfolio', 'services', 'faq', 'team', 'story', 'contact', 'about'].includes(section)) {
-        document.getElementById(section)?.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
-      } else window.scrollTo({ top: 0 });
+      const target = section && ['membership', 'portfolio', 'workflow', 'services', 'faq', 'team', 'story', 'contact'].includes(section) ? document.getElementById(section) : null;
+      if (target instanceof HTMLDetailsElement) target.open = true; // A link to the questions opens them.
+      if (target) target.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+      else window.scrollTo({ top: 0 });
     }, 30);
     return () => clearTimeout(timer);
-  }, [route, explore, design, research]);
-  return <MotionProvider><SiteShell explore={explore || research} caption="FROM SPECS TO SILICON" designUrl={design ? undefined : '#/design'} theme={theme} onThemeChange={setTheme}>
-    {research ? <Research /> : explore ? <Explore /> : design ? <ProductLaunch theme={theme} /> : <Welcome />}
+  }, [route, explore, design, research, about]);
+  return <MotionProvider><SiteShell explore={explore || research || about} caption="FROM SPECS TO SILICON" designUrl={design ? undefined : '#/design'} theme={theme} onThemeChange={setTheme}>
+    {research ? <Research /> : about ? <About /> : explore ? <Explore /> : design ? <ProductLaunch theme={theme} /> : <Welcome />}
   </SiteShell></MotionProvider>;
 }

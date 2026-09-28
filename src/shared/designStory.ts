@@ -2,11 +2,12 @@
 export type Flow = 'target' | 'jobs' | 'results' | 'review';
 export type Frame = { step: number; design: number; drawn: number; flow?: Flow; judged?: boolean; met?: boolean; ms: number };
 
-// Each design: pixelated input and output matching networks ('#' is metal) and the transistor size.
+// Each design: the transistor size and the matching-network elements GENESIS chose, drawn as schematic symbols:
+// inductor turns (l1 in series at the input, l2 shunt at the output) and capacitor plate widths (c1 shunt, c2 series).
 export const designs = [
-  { input: ['#..#.', '.##..', '#.#.#', '..##.'], output: ['.#..#', '#.##.', '..#.#', '.#...'], size: '6 × 1 µm' },
-  { input: ['##...', '.###.', '..#..', '.##..'], output: ['..##.', '.###.', '##...', '.#...'], size: '12 × 1 µm' },
-  { input: ['###..', '..##.', '..##.', '###..'], output: ['..###', '.##..', '.##..', '..###'], size: '8 × 1 µm' },
+  { size: '6 × 1 µm', l1: 3, c1: 10, c2: 10, l2: 2 },
+  { size: '12 × 1 µm', l1: 5, c1: 16, c2: 16, l2: 4 },
+  { size: '8 × 1 µm', l1: 4, c1: 13, c2: 13, l2: 3 },
 ];
 
 export const band = { start: 0.2, end: 0.85 };

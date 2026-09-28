@@ -19,7 +19,7 @@ function DesignerArt() {
   return <svg className="story-art" viewBox="0 0 160 100" aria-hidden="true">
     <rect className="art-screen" x="56" y="8" width="96" height="62" rx="6" />
     <g className="art-spec"><path d="M68 24h40M68 36h52M68 48h34M68 60h46" /><circle cx="128" cy="24" r="2.5" /><circle cx="134" cy="36" r="2.5" /><circle cx="116" cy="48" r="2.5" /><circle cx="128" cy="60" r="2.5" /></g>
-    <path className="art-wire" d="M104 70v10M88 80h32M4 94h152" />
+    <path className="art-wire" d="M104 70v20M88 90h32M4 94h152" />
     <g className="art-person">
       <rect x="32" y="56" width="10" height="12" rx="3" />
       <path d="M12 94c0-17 11-27 25-27s25 10 25 27Z" />
@@ -29,24 +29,33 @@ function DesignerArt() {
   </svg>;
 }
 
-/** One amplifier stage: input matching network, transistor and output matching network. */
-export function CircuitArt({ design }: { design: number }) {
+// Schematic symbols shared by the design loop and the story scene: coils and ground in SVG path syntax.
+export const coil = (x: number, y: number, turns: number, span: number) =>
+  `M${x} ${y}` + `c0-7 ${span / turns} -7 ${span / turns} 0`.repeat(turns);
+export const verticalCoil = (x: number, y: number, turns: number, span: number) =>
+  `M${x} ${y}` + `c7 0 7 ${span / turns} 0 ${span / turns}`.repeat(turns);
+export const ground = (x: number, y: number) => `M${x - 6} ${y}h12M${x - 3.5} ${y + 3}h7M${x - 1} ${y + 6}h2`;
+
+/** One amplifier stage as a schematic: series inductor and shunt capacitor at the input, the transistor,
+ * series capacitor and shunt inductor at the output. The elements change size with every design GENESIS prepares. */
+function CircuitArt({ design }: { design: number }) {
   const current = designs[Math.max(design, 0)];
-  const block = (cells: string[], left: number) => cells.flatMap((row, r) => [...row].map((cell, c) =>
-    <rect key={`${left}-${r}-${c}`} className="story-pixel" data-on={design >= 0 && cell === '#'} style={{ transitionDelay: `${(r + c) * 30}ms` }}
-      x={left + c * 8 + .6} y={34.6 + r * 8} width="6.8" height="6.8" rx="1" />));
+  const c1 = current.c1 / 2, c2 = current.c2 / 2;
   return <svg className="story-art" viewBox="0 0 200 100" aria-hidden="true">
-    <path className="art-wire" d="M14 50H24M64 50H86M92 40H108V50H118M92 60H104V76M97 76h14M100 80h8M103 84h2M158 50H186M97 57l3 3-3 3" />
-    <path className="art-device" d="M86 38V62M92 35V65" />
-    <rect className="art-block" x="24" y="34" width="40" height="32" rx="2" /><rect className="art-block" x="118" y="34" width="40" height="32" rx="2" />
-    {block(current.input, 24)}{block(current.output, 118)}
-    <circle className="art-port" cx="10" cy="50" r="4" /><circle className="art-port" cx="190" cy="50" r="4" />
-    {design >= 0 && <text className="art-label" x="100" y="26" textAnchor="middle">W {current.size}</text>}
+    <path className="art-wire" d={`M14 50H22M46 50H86M60 50v7M60 61v7M92 40H112M116 40H186M140 40v5M140 63v5M92 60H100V70${ground(60, 68)}${ground(140, 68)}${ground(100, 70)}`} />
+    <path className="art-device" d="M86 38V62M92 35V65" /><path className="art-wire" d="M97 57l3 3-3 3" />
+    <g className="art-sized" key={design} data-on={design >= 0}>
+      <path d={coil(22, 50, current.l1, 24)} />
+      <path d={`M${60 - c1} 57h${current.c1}M${60 - c1} 61h${current.c1}M112 ${40 - c2}v${current.c2}M116 ${40 - c2}v${current.c2}`} />
+      <path d={verticalCoil(140, 45, current.l2, 18)} />
+    </g>
+    <circle className="art-port" cx="10" cy="50" r="4" /><circle className="art-port" cx="190" cy="40" r="4" />
+    {design >= 0 && <text className="art-label" x="100" y="24" textAnchor="middle">W {current.size}</text>}
   </svg>;
 }
 
 /** Gain target and every simulated response so far; the newest curve is judged against the target. */
-export function Response({ frame }: { frame: Frame }) {
+function Response({ frame }: { frame: Frame }) {
   const left = x(band.start), right = x(band.end), limit = y(limitDb);
   const hatch = `story-hatch-${useId().replace(/:/g, '')}`;
   return <svg className="story-art story-chart" viewBox="0 0 220 120" aria-hidden="true">

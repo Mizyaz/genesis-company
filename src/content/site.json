@@ -105,19 +105,91 @@
       "description": "A broadband passive circuit shaped by geometry, EM simulation and verification."
     }
   ],
-  "services": {
-    "eyebrow": "WORK WITH GENESIS",
-    "title": "Provided services",
-    "intro": "Use the platform, get support for a silicon prototype or connect GENESIS to your own tools.",
-    "action": "Discuss your project",
-    "scopeLabel": "Service scope",
+  "membership": {
+    "eyebrow": "GENESIS MEMBERSHIP",
+    "headline": "Your RF design environment,",
+    "headlineAccent": "as an annual membership.",
+    "intro": "GENESIS works between your design team and your CAD tools. It sizes devices, synthesizes matching networks and passive structures, runs your circuit and EM simulations and compares every result with your target. Your team sets the goals and makes the decisions.",
+    "plan": {
+      "title": "Membership at a glance",
+      "terms": [
+        {
+          "label": "License",
+          "value": "Per user, for one year"
+        },
+        {
+          "label": "Price",
+          "value": "Confirmed in your offer"
+        }
+      ],
+      "included": {
+        "title": "Included",
+        "items": [
+          "The GENESIS modules agreed for your team",
+          "Software updates and documentation",
+          "Product support and onboarding"
+        ]
+      },
+      "provided": {
+        "title": "You provide",
+        "items": [
+          "Compatible Cadence and EM solver licenses",
+          "PDK access and device models",
+          "A Linux server in your environment"
+        ]
+      },
+      "steps": {
+        "title": "How it starts",
+        "items": [
+          "We agree users and modules",
+          "You prepare your environment",
+          "Your first project starts"
+        ]
+      },
+      "action": "Request a membership offer",
+      "note": "Custom integration, managed compute, circuit design consulting and fabrication are scoped separately."
+    },
+    "visualLabel": "DESIGN LOOP",
+    "modulesTitle": "What GENESIS does",
+    "modules": [
+      {
+        "icon": "grid",
+        "title": "Passive synthesis",
+        "detail": "Pixel layouts for baluns, dividers, couplers, filters and other N-port structures, each checked with your EM solver."
+      },
+      {
+        "icon": "sliders",
+        "title": "Optimization",
+        "detail": "Evolutionary, Bayesian and reinforcement-learning search, parallel simulations, Pareto trade-offs and GDS export."
+      },
+      {
+        "icon": "chip",
+        "title": "Active circuits",
+        "detail": "Your Cadence schematics with Spectre S-parameter, noise, harmonic-balance and stability analyses, tuned toward your targets."
+      },
+      {
+        "icon": "switch",
+        "title": "Composer",
+        "detail": "Active stages and passive structures on one canvas, exported to Cadence as a library with testbenches."
+      },
+      {
+        "icon": "spark",
+        "title": "Design assistant",
+        "detail": "Describe the design; the assistant sets up the right tool and can run the optimization for you."
+      },
+      {
+        "icon": "document",
+        "title": "Results and scripting",
+        "detail": "Every run keeps its settings, responses and GDS files. The same steps also run from Python."
+      }
+    ],
     "faq": {
       "title": "Frequently asked questions",
-      "intro": "Short answers about the subscription, your tools and our services. If your question is not here, write to us.",
+      "intro": "Short answers about the membership, your tools and our services. If your question is not here, write to us.",
       "action": "Ask a question",
       "items": [
         {
-          "question": "What does the software subscription include?",
+          "question": "What does the membership include?",
           "answer": "Access to the GENESIS modules agreed for your team, for the users and license term in your offer, with documentation, software updates and product support. It is software access, not a chip design delivered on your behalf."
         },
         {
@@ -134,10 +206,10 @@
         },
         {
           "question": "What do we need to provide?",
-          "answer": "Compatible CAD and solver licenses, authorized PDK access and device models, and compute and storage in your environment. These stay separate from the GENESIS subscription."
+          "answer": "Compatible CAD and solver licenses, authorized PDK access and device models, and compute and storage in your environment. These stay separate from the GENESIS membership."
         },
         {
-          "question": "What is not included in the subscription?",
+          "question": "What is not included in the membership?",
           "answer": "Custom tool integration, deployment and training, managed compute or EM resources, circuit design consulting and fabrication. Each is scoped separately, so you know what every engagement covers."
         },
         {
@@ -146,58 +218,22 @@
         },
         {
           "question": "What support do we get?",
-          "answer": "Documentation, access to software releases and product support for your supported environment. Support channels, availability and onboarding are agreed in your subscription."
+          "answer": "Documentation, access to software releases and product support for your supported environment. Support channels, availability and onboarding are agreed in your membership."
         },
         {
           "question": "How do we get started?",
           "answer": "First we agree your users, modules, toolchain and terms. Then we review compatibility and installation requirements while you arrange the tool licenses, PDK access and infrastructure. Delivery, access and onboarding follow the agreed scope."
         }
       ]
-    },
+    }
+  },
+  "services": {
+    "eyebrow": "ADDITIONAL SERVICES",
+    "title": "Support beyond the software.",
+    "intro": "Get support for a silicon prototype or connect GENESIS to your own tools. Each service is scoped separately.",
+    "action": "Discuss your project",
+    "scopeLabel": "Service scope",
     "items": [
-      {
-        "id": "platform-membership",
-        "icon": "layers",
-        "label": "Software",
-        "title": "Software subscription",
-        "headline": "Your RF and mmWave design environment.",
-        "description": "GENESIS works between your design team and your CAD tools. It sizes devices, synthesizes matching networks and passive structures, runs your circuit and EM simulations and compares every result with your target. Your team sets the goals and makes the decisions.",
-        "visualLabel": "DESIGN LOOP",
-        "action": "Request subscription details",
-        "scopeLabel": "What GENESIS does",
-        "features": [
-          {
-            "icon": "grid",
-            "title": "Passive synthesis",
-            "detail": "Pixel layouts for baluns, dividers, couplers, filters and other N-port structures, each checked with your EM solver."
-          },
-          {
-            "icon": "sliders",
-            "title": "Optimization",
-            "detail": "Evolutionary, Bayesian and reinforcement-learning search, parallel simulations, Pareto trade-offs and GDS export."
-          },
-          {
-            "icon": "chip",
-            "title": "Active circuits",
-            "detail": "Your Cadence schematics with Spectre S-parameter, noise, harmonic-balance and stability analyses, tuned toward your targets."
-          },
-          {
-            "icon": "switch",
-            "title": "Composer",
-            "detail": "Active stages and passive structures on one canvas, exported to Cadence as a library with testbenches."
-          },
-          {
-            "icon": "spark",
-            "title": "Design assistant",
-            "detail": "Describe the design; the assistant sets up the right tool and can run the optimization for you."
-          },
-          {
-            "icon": "document",
-            "title": "Results and scripting",
-            "detail": "Every run keeps its settings, responses and GDS files. The same steps also run from Python."
-          }
-        ]
-      },
       {
         "id": "silicon-demonstration",
         "icon": "chip",
@@ -282,11 +318,11 @@
   },
   "story": {
     "eyebrow": "OUR STORY",
-    "headline": "Why we’re building GENESIS.",
-    "intro": "We bring together RFIC research and experience in building AI products. Our shared aim is to connect the parts of the design process that too often happen in isolation.",
+    "headline": "How GENESIS started.",
+    "intro": "GENESIS grew out of our own work: RFIC research on one side, building AI products on the other.",
     "paragraphs": [
-      "Changing a circuit is only one part of the job. Engineers also need to prepare the next simulation, compare it with earlier runs and check what the change means for the physical design.",
-      "We are building GENESIS so that this process does not need to be reconstructed with every iteration. Engineers should be able to focus on the circuit, and carry the settings and results of earlier work into their next design."
+      "In RF design, a new idea often takes shape quickly. The time goes into everything around it: preparing the next simulation, comparing it with the last run, checking what the change does to the layout, and then doing it all again.",
+      "We kept asking why that loop still had to be run by hand. GENESIS is our answer: the engineer sets the goal and makes the decisions, and GENESIS carries the repetitive work between the tools, taking what each design taught us into the next one."
     ],
     "loop": {
       "caption": "Your design team, GENESIS and your CAD tools in one design loop.",
@@ -350,27 +386,15 @@
       ],
       "note": "Illustration of the loop, not measured data."
     },
-    "pillars": {
+    "scene": {
       "caption": "Domain expertise meets autonomous intelligence.",
-      "left": {
+      "expertise": {
         "title": "RFIC expertise",
-        "icon": "chip",
-        "items": [
-          "Circuit design",
-          "EM knowledge",
-          "Silicon processes",
-          "Real-world constraints"
-        ]
+        "detail": "Circuit design, EM knowledge, silicon processes and real-world constraints."
       },
-      "right": {
+      "agents": {
         "title": "AI agents",
-        "icon": "spark",
-        "items": [
-          "Reasoning",
-          "Planning",
-          "Optimization",
-          "Learning"
-        ]
+        "detail": "Reasoning, planning, optimization and learning."
       },
       "outcome": "Autonomous RFIC design engine"
     }
@@ -386,21 +410,6 @@
     "intro": "RFIC research meets AI venture building.",
     "people": [
       {
-        "id": "mehmet-parlak",
-        "name": "Mehmet Parlak",
-        "scholar": "https://scholar.google.com/citations?user=F6vMw38AAAAJ",
-        "role": "AI & Deep-Tech Venture Architect",
-        "specialty": "Technology strategy · Venture building",
-        "description": "20+ years in technology strategy, venture building and AI-driven innovation, with experience in Silicon Valley and international networks.",
-        "image": "/assets/team-venture.webp",
-        "alt": "Portrait of Mehmet Parlak",
-        "focus": [
-          "Strategy & execution",
-          "VC & partnerships",
-          "Global networks"
-        ]
-      },
-      {
         "id": "islam-guven",
         "name": "İslam Güven",
         "scholar": "https://scholar.google.com/citations?user=p_KOMQwAAAAJ",
@@ -413,6 +422,21 @@
           "RFIC & mmWave",
           "AI agents & ML",
           "System integration"
+        ]
+      },
+      {
+        "id": "mehmet-parlak",
+        "name": "Mehmet Parlak",
+        "scholar": "https://scholar.google.com/citations?user=F6vMw38AAAAJ",
+        "role": "AI & Deep-Tech Venture Architect",
+        "specialty": "Technology strategy · Venture building",
+        "description": "20+ years in technology strategy, venture building and AI-driven innovation, with experience in Silicon Valley and international networks.",
+        "image": "/assets/team-venture.webp",
+        "alt": "Portrait of Mehmet Parlak",
+        "focus": [
+          "Strategy & execution",
+          "VC & partnerships",
+          "Global networks"
         ]
       }
     ]

@@ -1,6 +1,6 @@
 /* Feature layout only. Typography, colors, actions and motion settings belong to the site. */
 .services-section { border-top: 1px solid var(--border-soft); }
-.service-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-bottom: 1px solid var(--border); }
+.service-tabs { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); border-bottom: 1px solid var(--border); }
 .service-tabs button { position: relative; display: flex; align-items: center; gap: 14px; min-width: 0; padding: 24px 22px; border: 0; background: transparent; text-align: left; color: var(--muted); font: 500 .95rem var(--font-sans); transition: color .2s, background .2s; }
 .service-tabs button::after { content: ''; position: absolute; inset: auto 0 -1px; height: 3px; background: var(--gradient); opacity: 0; }
 .service-tabs button[aria-selected='true'] { color: var(--text); background: linear-gradient(0deg, var(--glow), transparent); }
@@ -21,7 +21,7 @@
 .service-live-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--cyan); }
 .service-artboard { position: relative; aspect-ratio: 1.5; }
 .service-loop { padding: 18px 16px 14px; }
-.service-loop .design-story { margin: 0 auto; }
+.service-loop .design-story { width: 100%; margin: 0 auto; } /* Sized by its frame: the figure's own size is contained. */
 .service-scope { margin-top: 38px; padding: 28px 0 0; border-top: 1px solid var(--border); }
 .service-scope > .eyebrow { font-size: .65rem; }
 .service-scope ul { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px; list-style: none; margin: 22px 0 0; padding: 0; }
@@ -33,9 +33,16 @@
 .service-note { display: flex; align-items: flex-start; gap: 10px; color: var(--subtle); font-size: .75rem; line-height: 1.7; margin-top: 28px; }
 .service-note .icon { width: 16px; height: 16px; margin-top: 2px; }
 
-/* Questions: the offer's details, one short answer each, closed until asked. */
-.service-faq { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: clamp(30px, 5vw, 72px); align-items: start; margin-top: 56px; padding-top: 40px; border-top: 1px solid var(--border); scroll-margin-top: 90px; }
-.faq-intro h3 { margin: 0 0 14px; font-size: clamp(1.5rem, 2.4vw, 2.1rem); font-weight: 550; line-height: 1.15; letter-spacing: -.03em; }
+/* Questions: folded as one block; inside, one short answer each, closed until asked. */
+.service-faq { margin-top: 48px; border-block: 1px solid var(--border); scroll-margin-top: 90px; }
+.faq-summary { display: flex; align-items: center; gap: 12px; padding: 22px 4px; cursor: pointer; list-style: none; font-size: clamp(1.1rem, 2vw, 1.45rem); font-weight: 550; letter-spacing: -.02em; line-height: 1.3; }
+.faq-summary::-webkit-details-marker { display: none; }
+.faq-summary:hover { color: var(--cyan); }
+.faq-summary:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; border-radius: 4px; }
+.faq-count { flex: none; padding: 2px 8px; border: 1px solid var(--border); border-radius: 20px; font: .72rem var(--font-mono); letter-spacing: 0; color: var(--cyan); }
+.faq-summary .icon { flex: none; margin-left: auto; width: 20px; height: 20px; color: var(--subtle); transition: transform .25s, color .2s; }
+.service-faq[open] > .faq-summary .icon { transform: rotate(180deg); color: var(--cyan); }
+.faq-body { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: clamp(30px, 5vw, 72px); align-items: start; padding: 6px 0 30px; }
 .faq-intro p { color: var(--muted); font-size: .92rem; line-height: 1.75; max-width: 36ch; }
 .faq-intro .button { margin-top: 22px; }
 .faq-list { border-top: 1px solid var(--border-soft); }
@@ -55,12 +62,12 @@
 .silicon-die-picked { fill: color-mix(in srgb, var(--cyan) 40%, var(--surface)); stroke: var(--cyan); stroke-width: 1.4; }
 .silicon-zoom { fill: none; stroke: var(--cyan); stroke-width: 1; stroke-opacity: .55; }
 .silicon-closeup { fill: var(--surface); stroke: var(--cyan); stroke-width: 1.2; }
-.silicon-metal { fill: var(--cyan); fill-opacity: .8; }
+.silicon-metal { fill: none; stroke: var(--cyan); stroke-width: 2.2; stroke-linejoin: miter; }
+.silicon-underpass { fill: none; stroke: var(--violet); stroke-width: 1.4; }
+.silicon-via { fill: var(--violet); }
 .silicon-pad { fill: var(--surface-raised); stroke: var(--muted); stroke-width: 1; }
-.silicon-block { fill: none; stroke: color-mix(in srgb, var(--cyan) 35%, var(--border)); stroke-width: .8; }
 .silicon-device { fill: color-mix(in srgb, var(--violet) 22%, var(--surface)); stroke: var(--violet); stroke-width: 1; }
 .silicon-fingers { fill: none; stroke: var(--violet); stroke-width: 1.4; }
-.silicon-feed { fill: none; stroke: var(--cyan); stroke-width: 2; }
 .silicon-probes path { fill: none; stroke: var(--muted); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 .silicon-probes circle { fill: var(--cyan); filter: drop-shadow(0 0 4px var(--cyan)); }
 .silicon-flow, .silicon-axis { fill: none; stroke: var(--subtle); stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; }
@@ -109,7 +116,8 @@
   .service-visual { width: 100%; max-width: 580px; justify-self: center; }
   .service-scope ul { grid-template-columns: 1fr; gap: 22px; }
   .service-scope li p { max-width: 65ch; }
-  .service-faq { grid-template-columns: 1fr; gap: 20px; margin-top: 44px; padding-top: 32px; }
+  .service-faq { margin-top: 40px; }
+  .faq-body { grid-template-columns: minmax(0, 1fr); gap: 20px; }
   .faq-intro p { max-width: 60ch; }
   .faq-list summary { padding: 16px 2px; font-size: .92rem; }
 }
@@ -123,6 +131,6 @@
   .service-loop { padding: 14px 10px 10px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .faq-list summary .icon { transition: none; }
+  :is(.faq-list summary, .faq-summary) .icon { transition: none; }
   .service-visual :is(.silicon-sweep, .silicon-measured, .integration-link, .integration-tool, .integration-actions > span) { animation: none !important; }
 }

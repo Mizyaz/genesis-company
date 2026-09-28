@@ -54,9 +54,12 @@ test('the design loop tells one story: your team, GENESIS and your CAD tools des
   const { designs, meetsTarget, failingPath, timeline } = story;
   assert.ok(designs.length >= 2);
   for (const design of designs) {
-    for (const cells of [design.input, design.output]) assert.ok(cells.length === 4 && cells.every(row => /^[.#]{5}$/.test(row)));
     assert.match(design.size, /µm$/);
+    // Drawn as schematic symbols, not pixels: whole inductor turns and capacitor plate widths that fit the drawing.
+    for (const turns of [design.l1, design.l2]) assert.ok(Number.isInteger(turns) && turns >= 2 && turns <= 6);
+    for (const plate of [design.c1, design.c2]) assert.ok(plate >= 8 && plate <= 18);
   }
+  assert.equal(new Set(designs.map(design => `${design.l1}-${design.c1}-${design.c2}-${design.l2}-${design.size}`)).size, designs.length, 'every iteration changes the circuit');
   designs.forEach((_, i) => assert.equal(meetsTarget(i), i === designs.length - 1, `design ${i}`));
   designs.slice(0, -1).forEach((_, i) => assert.match(failingPath(i), /^M/, `design ${i} shows where it misses the target`));
   assert.equal(failingPath(designs.length - 1), '');
@@ -78,21 +81,39 @@ test('the design loop tells one story: your team, GENESIS and your CAD tools des
   assert.match(component, /timeline\[final\]/); // Stopped or reduced motion shows the finished loop.
   assert.match(component, /<dl className="story-spec">/);
   assert.doesNotMatch(component, /fetch\s*\(|setInterval/);
+  assert.doesNotMatch(component, /story-pixel/);
   assert.match(read('src/pages/Welcome.tsx'), /<DesignStory storyLink content=\{site.story.loop\}/);
-  // The software tab shows the bridge as its visual; the story section joins RFIC expertise and AI agents in GENESIS.
-  assert.match(read('src/shared/Services.tsx'), /<DesignStory content=\{loop\}/);
+  // The membership shows the bridge next to its terms.
+  assert.match(read('src/shared/Membership.tsx'), /<DesignStory content=\{loop\}/);
   // Every appearance says it is an illustration and gives screen readers the five steps in words.
   assert.match(component, /story-now-note">\{content.note\}/);
   assert.match(component, /<ol className="sr-only">\{content.steps.map/);
   const explore = read('src/pages/Explore.tsx');
-  assert.match(explore, /<Services content=\{site.services\} loop=\{site.story.loop\}/);
-  assert.match(explore, /<DesignPillars content=\{site.story.pillars\}/);
+  assert.match(explore, /<Membership content=\{site.membership\} loop=\{site.story.loop\}/);
   assert.match(explore, /className="story-narrative"/);
   assert.match(explore, /id="team"/); // Existing approach links still reach the story illustration.
-  assert.doesNotMatch(read('src/shared/DesignPillars.tsx'), /useVisibleMotion|setTimeout|setInterval/);
-  const css = read('src/styles/design-story.css');
-  assert.match(css, /prefers-reduced-motion: reduce/);
-  assert.match(css, /data-motion="off"/);
+  for (const path of ['src/styles/design-story.css', 'src/styles/story-scene.css']) {
+    assert.match(read(path), /prefers-reduced-motion: reduce/);
+    assert.match(read(path), /data-motion="off"/);
+  }
+});
+
+test('our story is an animated scene with a designer, AI agents and GENESIS, not a list of words', () => {
+  const { story } = JSON.parse(read('src/content/site.json'));
+  const dictionary = JSON.parse(read('src/content/tr.json'));
+  const scene = read('src/shared/StoryScene.tsx');
+  assert.match(read('src/pages/Explore.tsx'), /<StoryScene content=\{site.story.scene\} brand=\{<Brand \/>\} \/>/);
+  assert.equal(existsSync(resolve(root, 'src/shared/DesignPillars.tsx')), false);
+  assert.match(scene, /className="art-person"/); // The designer is a person at the workstation.
+  assert.match(scene, /coil\(/); // Circuits are drawn with schematic symbols.
+  assert.match(scene, /useVisibleMotion/);
+  assert.match(scene, /enabled \? index : final/); // Stopped or reduced motion shows the finished scene.
+  assert.doesNotMatch(scene, /fetch\s*\(|setInterval|<ul/);
+  // Only the two titles and the outcome are visible; the details are for screen readers.
+  assert.equal((scene.match(/className="scene-title"/g) || []).length, 2);
+  assert.equal((scene.match(/className="sr-only"/g) || []).length, 2);
+  for (const copy of [story.scene.caption, story.scene.outcome, ...['expertise', 'agents'].flatMap(key => [story.scene[key].title, story.scene[key].detail])]) assert.ok(dictionary[copy], copy);
+  assert.match(read('src/styles/site.css'), /\.story-narrative \{ display: grid; grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/); // Wide text never widens the page.
 });
 
 test('welcome uses the shared, single-line brand entrance with readable acronym emphasis', () => {
@@ -112,24 +133,24 @@ test('welcome uses the shared, single-line brand entrance with readable acronym 
   assert.doesNotMatch(welcome + identity + css, /CircuitBackdrop|identity-signal|chip-drift/);
 });
 
-test('services precede the story, remain data-driven and have natural Turkish copy', () => {
+test('Explore opens with the membership, then the portfolio; services stay data-driven with natural Turkish copy', () => {
   const content = JSON.parse(read('src/content/site.json'));
   const dictionary = JSON.parse(read('src/content/tr.json'));
-  assert.equal(content.services.items.length, 3);
-  assert.deepEqual(content.services.items.map(item => item.id), ['platform-membership', 'silicon-demonstration', 'specialised-integration']);
+  assert.deepEqual(content.services.items.map(item => item.id), ['silicon-demonstration', 'specialised-integration']);
   for (const copy of [content.services.eyebrow, content.services.title, content.services.intro, content.services.action, content.services.scopeLabel, ...content.services.items.flatMap(item => [item.label, item.title, item.headline, item.description, item.note, item.visualLabel, item.scopeLabel, item.action, ...(item.connections ?? []).flatMap(connection => [connection.label, connection.action]), ...(item.legend ?? []), ...item.features.flatMap(feature => [feature.title, feature.detail, feature.unit])])].filter(Boolean)) assert.ok(dictionary[copy], copy);
   for (const item of content.services.items) {
     assert.ok(item.features.length >= 3 && item.features.every(feature => feature.icon && feature.title && feature.detail), item.id);
     assert.equal(item.stages, undefined);
   }
-  // The software tab says what the application does, module by module.
-  assert.ok(content.services.items[0].features.length >= 5);
   const page = read('src/pages/Explore.tsx');
-  assert.ok(page.indexOf('<Services ') < page.indexOf('<section id="story"'));
+  const order = ['<section className="company-hero"', '<Membership ', '<section id="portfolio"', '<section id="workflow"', '<Services ', '<section id="story"', '<section id="contact"'].map(marker => page.indexOf(marker));
+  assert.ok(order.every((position, i) => position >= 0 && (i === 0 || position > order[i - 1])), `section order ${order}`);
+  assert.match(page, /href="#\/explore\/membership"/); // The hero leads straight to the membership.
+  assert.doesNotMatch(page, /id="about"|TeamProfiles/); // About us is a page of its own.
   assert.match(page, /<Services content=\{site.services\}/);
   assert.match(read('src/shared/Services.tsx'), /content.items.map/);
   assert.doesNotMatch(read('src/shared/Services.tsx'), /fetch\s*\(|checkout|payment/);
-  assert.match(read('src/PublicApp.tsx'), /'services'/);
+  assert.match(read('src/PublicApp.tsx'), /'membership', 'portfolio', 'workflow', 'services'/);
   assert.equal(dictionary['From specs'], 'Fikirden');
   assert.equal(dictionary['silicon.'], 'çipe.');
   assert.doesNotMatch(Object.values(dictionary).join('\n'), /Hedeflerden|silikona|DEVRELER\. ALANLAR/i);
@@ -140,37 +161,60 @@ test('services precede the story, remain data-driven and have natural Turkish co
   assert.doesNotMatch(page, /hero-index|Reason\. Simulate\. Learn\. Refine\./);
 });
 
-test('questions about the offer are answered in a closed FAQ, in the terms of the offer', () => {
-  const {services} = JSON.parse(read('src/content/site.json'));
+test('the membership states its terms plainly; further questions are folded until opened', () => {
+  const {membership, services} = JSON.parse(read('src/content/site.json'));
   const dictionary = JSON.parse(read('src/content/tr.json'));
-  const {faq} = services;
+  const {plan, faq} = membership;
+  // At a glance: license and price, what is included, what you provide and how it starts.
+  assert.deepEqual(plan.terms.map(term => term.label), ['License', 'Price']);
+  assert.match(plan.terms[0].value, /per user.*one year/i);
+  assert.match(plan.terms[1].value, /offer/);
+  assert.ok(plan.included.items.length >= 3 && plan.provided.items.length >= 3 && plan.steps.items.length === 3);
+  assert.match(plan.provided.items.join(' '), /Cadence.*licenses.*PDK.*Linux server/);
+  assert.match(plan.note, /scoped separately/);
+  assert.ok(membership.modules.length >= 5 && membership.modules.every(module => module.icon && module.title && module.detail.length > 60));
   assert.ok(faq.items.length >= 6);
   for (const item of faq.items) {
     assert.match(item.question, /\?$/);
     assert.ok(item.answer.length > 60, item.question);
   }
-  for (const copy of [faq.title, faq.intro, faq.action, ...faq.items.flatMap(item => [item.question, item.answer])]) assert.ok(dictionary[copy], copy);
+  const copy = [membership.eyebrow, membership.headline, membership.headlineAccent, membership.intro, membership.visualLabel, membership.modulesTitle, plan.title, plan.action, plan.note,
+    ...plan.terms.flatMap(term => [term.label, term.value]), ...['included', 'provided', 'steps'].flatMap(key => [plan[key].title, ...plan[key].items]),
+    ...membership.modules.flatMap(module => [module.title, module.detail]), faq.title, faq.intro, faq.action, ...faq.items.flatMap(item => [item.question, item.answer])];
+  for (const text of copy) assert.ok(dictionary[text], text);
   const answers = faq.items.map(item => item.answer).join('\n');
   assert.match(answers, /one user access to the selected GENESIS modules for one year/);
   assert.match(answers, /software access, not a chip design/);
   assert.match(answers, /CAD and solver licenses.*PDK access.*compute/);
-  assert.match(answers, /scoped separately/);
   assert.match(answers, /own Linux server/);
-  assert.doesNotMatch(JSON.stringify(services), /€\s*\d|\d+\s*%|24\/7|unlimited|guaranteed|—/i);
-  assert.doesNotMatch(JSON.stringify(services), /\bCLI\b|\bJSON\b|configurations and runners/);
-  const component = read('src/shared/ServiceFaq.tsx');
-  assert.match(component, /<details key=\{item.question\} name=/); // Native disclosure, one open at a time.
-  assert.doesNotMatch(component, /\bopen\b|fetch\s*\(|setInterval|setTimeout/); // Closed until asked.
-  assert.match(component, /id="faq"/);
-  assert.match(read('src/PublicApp.tsx'), /'services', 'faq'/);
-  const services_ = read('src/shared/Services.tsx');
-  assert.ok(services_.indexOf('role="tabpanel"') < services_.indexOf('<ServiceFaq'), 'questions follow the service details');
-  // The long subscription panel stays replaced by the tab's scope list and the questions.
+  assert.doesNotMatch(JSON.stringify({membership, services}), /€\s*\d|\d+\s*%|24\/7|unlimited|guaranteed|—/i);
+  assert.doesNotMatch(JSON.stringify({membership, services}), /\bCLI\b|\bJSON\b|configurations and runners|subscription/i);
+  const component = read('src/shared/Membership.tsx');
+  assert.match(component, /id="membership"/);
+  assert.ok(component.indexOf('membership-plan') < component.indexOf('<ServiceFaq'), 'the terms come before the questions');
+  assert.doesNotMatch(component, /fetch\s*\(|setInterval|setTimeout|checkout|payment/);
+  const faqComponent = read('src/shared/ServiceFaq.tsx');
+  assert.match(faqComponent, /<details id="faq" className="service-faq">/); // The whole block is folded.
+  assert.match(faqComponent, /<details key=\{item.question\} name=/); // Native disclosure, one answer at a time.
+  assert.doesNotMatch(faqComponent, /\bopen\b|fetch\s*\(|setInterval|setTimeout/); // Closed until asked.
+  assert.match(read('src/PublicApp.tsx'), /target instanceof HTMLDetailsElement\) target.open = true/); // A link to #/explore/faq opens it.
   assert.equal(services.subscription, undefined);
-  assert.equal(services.membership, undefined);
+  assert.equal(services.faq, undefined);
   for (const path of ['src/shared/SubscriptionOverview.tsx', 'src/styles/subscription-overview.css', 'src/shared/MembershipValue.tsx', 'src/styles/membership-value.css']) assert.equal(existsSync(resolve(root, path)), false, path);
-  assert.doesNotMatch(services_, /service-stages|service-workspace|SubscriptionStart/);
+  assert.doesNotMatch(read('src/shared/Services.tsx'), /service-stages|service-workspace|SubscriptionStart|DesignStory|ServiceFaq/);
   assert.doesNotMatch(read('src/styles/services.css'), /service-stages|service-stage|service-workspace/);
+});
+
+test('the header fits one row on phones: navigation and settings open from a menu button', () => {
+  const shell = read('src/shared/SiteShell.tsx');
+  assert.match(shell, /className="icon-button menu-toggle" type="button" aria-expanded=\{menuOpen\} aria-controls=\{navId\}/);
+  assert.match(shell, /event.key === 'Escape'/);
+  assert.match(shell, /addEventListener\('hashchange', close\)/);
+  assert.match(shell, /href="#\/about"/);
+  assert.match(shell, /href="#\/explore\/membership"/);
+  const css = read('src/styles/site.css');
+  assert.match(css, /\.site-header\[data-menu='open'\] nav \{ display: flex; \}/);
+  assert.doesNotMatch(css, /\.site-header \{ flex-wrap: wrap; \}/);
 });
 
 test('services share contact actions, support keyboard tabs and animate only when visible', () => {
@@ -211,7 +255,7 @@ test('silicon gate is shared, optional and presentation-only', () => {
 test('public source has no assistant, landing page or engineering service', () => {
   for (const path of ['src/App.tsx', 'src/main.tsx', 'src/pages/Landing.tsx', 'src/assistant', 'server', '.env']) assert.equal(existsSync(resolve(root, path)), false, path);
   const content = JSON.parse(read('src/content/site.json'));
-  assert.deepEqual(Object.keys(content).sort(), ['about', 'brand', 'portfolio', 'services', 'stages', 'story', 'workflow'].sort());
+  assert.deepEqual(Object.keys(content).sort(), ['about', 'brand', 'membership', 'portfolio', 'services', 'stages', 'story', 'workflow'].sort());
   const source = walk('src').map(read).join('\n');
   assert.doesNotMatch(source, /localhost|127\.0\.0\.1|\/api\/|VITE_WORKBENCH_URL|codex exec|fetch\s*\(|new WebSocket/);
   assert.match(read('index.html'), /connect-src 'none'/);
@@ -269,9 +313,15 @@ test('publication records are attributable, deduplicated and exclude preprints',
   }
 });
 
-test('research is a standalone route with a data-driven reader, not an About accordion', () => {
+test('About us and research are pages of their own; İslam Güven leads the team', () => {
   assert.match(read('src/PublicApp.tsx'), /route === '#\/publications'/);
-  assert.match(read('src/pages/Explore.tsx'), /href="#\/publications"/);
+  assert.match(read('src/PublicApp.tsx'), /route === '#\/about'/);
+  const about = read('src/pages/About.tsx');
+  assert.match(about, /<main id="main" className="about-page">/);
+  assert.match(about, /<TeamProfiles people=\{site.about.people\} \/>/);
+  assert.match(about, /href="#\/publications"/);
+  assert.match(read('src/pages/Research.tsx'), /href="#\/about"/);
+  assert.equal(JSON.parse(read('src/content/site.json')).about.people[0].id, 'islam-guven');
   assert.doesNotMatch(read('src/pages/Explore.tsx'), /<Publications|research-toggle/);
   assert.match(read('src/pages/Research.tsx'), /<main id="main"/);
   assert.match(read('src/pages/Research.tsx'), /<Publications people=\{site.about.people\} papers=\{papers\}/);
