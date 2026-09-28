@@ -114,6 +114,10 @@
     "subscription": {
       "label": "Subscription details",
       "hint": "Select a part to see its scope.",
+      "bridge": {
+        "title": "Where GENESIS fits",
+        "intro": "Your team sets the target and makes the decisions. Your CAD tools run the simulations. GENESIS does the work in between."
+      },
       "modules": {
         "title": "What GENESIS does",
         "intro": "GENESIS runs on your own Linux server, next to your Cadence tools and licenses. Your engineers use it in the browser.",
@@ -121,32 +125,32 @@
           {
             "icon": "grid",
             "title": "Passive synthesis",
-            "detail": "Draw the pixel area, place the ports and set S-parameter goals. GENESIS searches layouts for baluns, power dividers, couplers, filters and other N-port structures, and checks each candidate with your EM solver."
+            "detail": "Pixel layouts for baluns, dividers, couplers, filters and other N-port structures, each checked with your EM solver."
           },
           {
             "icon": "sliders",
             "title": "Optimization",
-            "detail": "Choose evolutionary, Bayesian or reinforcement-learning search, run many EM simulations in parallel, compare the trade-offs on a Pareto front and download the best layout as GDS."
+            "detail": "Evolutionary, Bayesian and reinforcement-learning search, parallel simulations, Pareto trade-offs and GDS export."
           },
           {
             "icon": "chip",
             "title": "Active circuits",
-            "detail": "Open a Cadence schematic, set its design variables and run Spectre analyses such as S-parameters, noise, harmonic balance and stability. Tune the variables toward S-parameter targets."
+            "detail": "Your Cadence schematics with Spectre S-parameter, noise, harmonic-balance and stability analyses, tuned toward your targets."
           },
           {
             "icon": "switch",
             "title": "Composer",
-            "detail": "Place active stages and passive structures on one canvas, connect their ports, run each block and export the design to Cadence as a library with testbenches."
+            "detail": "Active stages and passive structures on one canvas, exported to Cadence as a library with testbenches."
           },
           {
             "icon": "spark",
             "title": "Design assistant",
-            "detail": "Describe what you want to design. The assistant opens the right tool with a first setup and can start and follow an optimization for you."
+            "detail": "Describe the design; the assistant sets up the right tool and can run the optimization for you."
           },
           {
             "icon": "document",
             "title": "Results and scripting",
-            "detail": "Every run keeps its settings, responses and GDS files, so you can compare runs and continue from earlier work. What you do in the interface can also be run from Python."
+            "detail": "Every run keeps its settings, responses and GDS files. The same steps also run from Python."
           }
         ]
       },
@@ -327,47 +331,90 @@
       "We are building GENESIS so that this process does not need to be reconstructed with every iteration. Engineers should be able to focus on the circuit, and carry the settings and results of earlier work into their next design."
     ],
     "loop": {
-      "caption": "The GENESIS design loop: from your target to a layout that meets it.",
-      "target": {
-        "title": "Your target",
-        "items": [
-          "Frequency band",
-          "Loss limit",
-          "Port positions"
+      "caption": "Your design team, GENESIS and your CAD tools in one design loop.",
+      "designer": {
+        "title": "Your design team",
+        "spec": [
+          {
+            "label": "Band",
+            "value": "110–170 GHz"
+          },
+          {
+            "label": "Gain",
+            "value": "≥ 15 dB"
+          },
+          {
+            "label": "Noise figure",
+            "value": "≤ 7 dB"
+          },
+          {
+            "label": "Input match",
+            "value": "≤ −10 dB"
+          }
         ]
       },
-      "candidate": "Candidate",
-      "best": "Best candidate",
-      "response": "Response",
-      "solver": {
-        "title": "Your EM solver",
-        "running": "Simulating…",
-        "outside": "Outside the target",
+      "engine": {
+        "iteration": "Iteration",
+        "best": "Best design"
+      },
+      "tools": {
+        "title": "Your CAD tools",
+        "chips": [
+          "Circuit",
+          "EM",
+          "Layout"
+        ],
+        "running": "Circuit + EM simulation…",
+        "below": "Below the target",
         "met": "Target met"
       },
       "steps": [
         {
-          "title": "Set the target",
-          "detail": "You define the frequency band, the allowed loss and where the ports sit."
+          "title": "Your team sets the target",
+          "detail": "Band, gain, noise figure and matching for the circuit you need."
         },
         {
-          "title": "GENESIS proposes a layout",
-          "detail": "It generates a candidate geometry for your process."
+          "title": "GENESIS prepares the design",
+          "detail": "It sizes the devices and synthesizes the matching networks for your topology."
         },
         {
-          "title": "Your EM solver checks it",
-          "detail": "A full-wave simulation returns the real response."
+          "title": "Your CAD tools simulate it",
+          "detail": "Circuit simulation for the devices, EM simulation for the passives."
         },
         {
-          "title": "Compare and refine",
-          "detail": "GENESIS learns from the gap and proposes a better candidate."
+          "title": "GENESIS compares and refines",
+          "detail": "It checks every result against the target and prepares the next iteration."
         },
         {
-          "title": "Target met",
-          "detail": "The best candidate moves on to layout and verification."
+          "title": "You review and decide",
+          "detail": "The best design and its results come back to you for layout and verification."
         }
       ],
       "note": "Illustration of the loop, not measured data."
+    },
+    "pillars": {
+      "caption": "Domain expertise meets autonomous intelligence.",
+      "left": {
+        "title": "RFIC expertise",
+        "icon": "chip",
+        "items": [
+          "Circuit design",
+          "EM knowledge",
+          "Silicon processes",
+          "Real-world constraints"
+        ]
+      },
+      "right": {
+        "title": "AI agents",
+        "icon": "spark",
+        "items": [
+          "Reasoning",
+          "Planning",
+          "Optimization",
+          "Learning"
+        ]
+      },
+      "outcome": "Autonomous RFIC design engine"
     }
   },
   "workflow": {

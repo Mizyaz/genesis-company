@@ -47,30 +47,46 @@ test('TR/ENG dictionary covers static labels, preserves technical identity and u
   assert.match(read('src/public.tsx'), /<LanguageProvider>/);
 });
 
-test('the design loop tells one story: every candidate is judged and only the last meets the target', () => {
+test('the design loop tells one story: your team, GENESIS and your CAD tools design one circuit until it meets the target', () => {
   const code = ts.transpileModule(read('src/shared/designStory.ts'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText;
   const story = {};
   new Function('exports', code)(story);
-  const { candidates, meetsTarget, failingPath, timeline } = story;
-  assert.ok(candidates.length >= 2);
-  for (const layout of candidates) assert.ok(layout.length === 9 && layout.every(row => /^[.#]{9}$/.test(row)));
-  candidates.forEach((_, i) => assert.equal(meetsTarget(i), i === candidates.length - 1, `candidate ${i}`));
-  candidates.slice(0, -1).forEach((_, i) => assert.match(failingPath(i), /^M/, `candidate ${i} shows where it misses the target`));
-  assert.equal(failingPath(candidates.length - 1), '');
+  const { designs, meetsTarget, failingPath, timeline } = story;
+  assert.ok(designs.length >= 2);
+  for (const design of designs) {
+    for (const cells of [design.input, design.output]) assert.ok(cells.length === 4 && cells.every(row => /^[.#]{5}$/.test(row)));
+    assert.match(design.size, /µm$/);
+  }
+  designs.forEach((_, i) => assert.equal(meetsTarget(i), i === designs.length - 1, `design ${i}`));
+  designs.slice(0, -1).forEach((_, i) => assert.match(failingPath(i), /^M/, `design ${i} shows where it misses the target`));
+  assert.equal(failingPath(designs.length - 1), '');
   assert.deepEqual([timeline[0].step, timeline.at(-1).step], [1, 5]);
-  assert.ok(timeline.at(-1).met && timeline.slice(0, -1).every(frame => !frame.met));
+  // Every design goes to the tools and its results come back to GENESIS; only then does the best one go back to the team.
+  const flows = timeline.map(frame => frame.flow).filter(Boolean);
+  assert.deepEqual(flows, ['target', ...designs.flatMap(() => ['jobs', 'results']), 'review']);
+  const firstMet = timeline.findIndex(frame => frame.met);
+  assert.equal(timeline[firstMet].design, designs.length - 1);
+  assert.ok(timeline.slice(firstMet).every(frame => frame.met));
   assert.ok(timeline.every(frame => frame.ms >= 1000), 'each step stays long enough to read');
   const { story: content } = JSON.parse(read('src/content/site.json'));
   assert.equal(content.loop.steps.length, Math.max(...timeline.map(frame => frame.step)));
+  // Whole circuits, not only EM: devices go to circuit simulation, passives to EM, the result on to layout.
+  assert.deepEqual(content.loop.tools.chips, ['Circuit', 'EM', 'Layout']);
+  assert.ok(content.loop.designer.spec.length >= 3 && content.loop.designer.spec.every(row => row.label && row.value));
   const component = read('src/shared/DesignStory.tsx');
   assert.match(component, /useVisibleMotion/);
   assert.match(component, /timeline\[final\]/); // Stopped or reduced motion shows the finished loop.
+  assert.match(component, /<dl className="story-spec">/);
   assert.doesNotMatch(component, /fetch\s*\(|setInterval/);
   assert.match(read('src/pages/Welcome.tsx'), /<DesignStory compact content=\{site.story.loop\}/);
+  // The software tab shows the whole bridge; the story section joins RFIC expertise and AI agents in GENESIS.
+  assert.match(read('src/shared/SubscriptionOverview.tsx'), /<DesignStory content=\{loop\}/);
   const explore = read('src/pages/Explore.tsx');
-  assert.match(explore, /<DesignStory content=\{site.story.loop\}/);
+  assert.match(explore, /<Services content=\{site.services\} loop=\{site.story.loop\}/);
+  assert.match(explore, /<DesignPillars content=\{site.story.pillars\}/);
   assert.match(explore, /className="story-narrative"/);
   assert.match(explore, /id="team"/); // Existing approach links still reach the story illustration.
+  assert.doesNotMatch(read('src/shared/DesignPillars.tsx'), /useVisibleMotion|setTimeout|setInterval/);
   const css = read('src/styles/design-story.css');
   assert.match(css, /prefers-reduced-motion: reduce/);
   assert.match(css, /data-motion="off"/);
@@ -125,7 +141,7 @@ test('subscription distinguishes software access, customer resources and separat
   const subscription = services.subscription;
   assert.deepEqual(subscription.parts.map(item => item.id), ['software', 'environment', 'services']);
   assert.equal(subscription.setup.steps.length, 3);
-  for (const copy of [subscription.label, subscription.hint, subscription.setup.title, subscription.modules.title, subscription.modules.intro, ...subscription.modules.items.flatMap(item => [item.title, item.detail]), ...subscription.parts.flatMap(item => [item.title, item.status, item.detail, ...item.items]), ...subscription.setup.steps.flatMap(step => [step.title, step.detail])]) assert.ok(dictionary[copy], copy);
+  for (const copy of [subscription.label, subscription.hint, subscription.bridge.title, subscription.bridge.intro, subscription.setup.title, subscription.modules.title, subscription.modules.intro, ...subscription.modules.items.flatMap(item => [item.title, item.detail]), ...subscription.parts.flatMap(item => [item.title, item.status, item.detail, ...item.items]), ...subscription.setup.steps.flatMap(step => [step.title, step.detail])]) assert.ok(dictionary[copy], copy);
   // The subscription names what the application does, module by module.
   assert.ok(subscription.modules.items.length >= 5 && subscription.modules.items.every(item => item.icon && item.title && item.detail.length > 60));
   assert.equal(subscription.term, undefined);
@@ -140,6 +156,7 @@ test('subscription distinguishes software access, customer resources and separat
   assert.match(component, /data-part=\{part.id\}/);
   assert.match(component, /aria-live="polite"/);
   assert.match(component, /content.modules.items.map/);
+  assert.ok(component.indexOf('subscription-bridge') < component.indexOf('subscription-modules')); // Where GENESIS fits comes first.
   assert.doesNotMatch(JSON.stringify(services) + read('src/shared/Services.tsx'), /\bCLI\b|\bJSON\b|configurations and runners/);
   assert.doesNotMatch(component, /fetch\s*\(|setInterval|setTimeout/);
   assert.equal(services.membership, undefined);

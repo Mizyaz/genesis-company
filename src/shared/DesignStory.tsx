@@ -2,46 +2,69 @@ import { useEffect, useId, useState, type ReactNode } from 'react';
 import { useLanguage } from './Language';
 import { useVisibleMotion } from './MotionSettings';
 import { Icon } from './ui';
-import { band, candidates, chart, curvePath, failingPath, limitDb, ports, timeline, x, y, type Frame } from './designStory';
+import { band, chart, curvePath, designs, failingPath, limitDb, timeline, x, y, type Frame } from './designStory';
 import '../styles/design-story.css';
 
 export type StoryContent = {
-  caption: string; note: string; candidate: string; best: string; response: string;
-  target: { title: string; items: string[] };
-  solver: { title: string; running: string; outside: string; met: string };
+  caption: string; note: string;
+  designer: { title: string; spec: { label: string; value: string }[] };
+  engine: { iteration: string; best: string };
+  tools: { title: string; chips: string[]; running: string; below: string; met: string };
   steps: { title: string; detail: string }[];
 };
 const final = timeline.length - 1;
 
-/** Pixelated candidate between three ports; pixels switch as GENESIS proposes the next layout. */
-function Layout({ candidate }: { candidate: number }) {
-  return <svg className="story-layout" viewBox="0 0 132 132" aria-hidden="true">
-    {ports.map(port => {
-      const py = 26 + port.row * 10, edge = port.side === 'left' ? 21 : 111, end = port.side === 'left' ? 7 : 125;
-      return <g className="story-port" key={`${port.side}-${port.row}`}><path d={`M${edge} ${py}H${end}`} /><circle cx={end} cy={py} r="3.5" /></g>;
-    })}
-    <rect className="story-layout-frame" x="21" y="21" width="90" height="90" rx="2" />
-    <g className="story-pixels">{candidates[Math.max(candidate, 0)].flatMap((row, r) => [...row].map((cell, c) =>
-      <rect key={`${r}-${c}`} className="story-pixel" data-on={candidate >= 0 && cell === '#'} style={{ transitionDelay: `${(r + c) * 24}ms` }}
-        x={22.1 + c * 10} y={22.1 + r * 10} width="7.8" height="7.8" rx="1" />))}</g>
+/** A designer at the workstation, seen from behind: the person who sets the target and decides. */
+function DesignerArt() {
+  return <svg className="story-art" viewBox="0 0 160 100" aria-hidden="true">
+    <rect className="art-screen" x="56" y="8" width="96" height="62" rx="6" />
+    <g className="art-spec"><path d="M68 24h40M68 36h52M68 48h34M68 60h46" /><circle cx="128" cy="24" r="2.5" /><circle cx="134" cy="36" r="2.5" /><circle cx="116" cy="48" r="2.5" /><circle cx="128" cy="60" r="2.5" /></g>
+    <path className="art-wire" d="M104 70v10M88 80h32M4 94h152" />
+    <g className="art-person">
+      <rect x="32" y="56" width="10" height="12" rx="3" />
+      <path d="M12 94c0-17 11-27 25-27s25 10 25 27Z" />
+      <circle cx="37" cy="46" r="12" />
+      <path className="art-hair" d="M25 45a12 12 0 0 1 24 0c-3-4-7-6-12-6s-9 2-12 6Z" />
+    </g>
   </svg>;
 }
 
-/** Target mask and every simulated response so far; the newest curve is judged against the mask. */
-function Response({ frame }: { frame: Frame }) {
+/** One amplifier stage: input matching network, transistor and output matching network. */
+export function CircuitArt({ design }: { design: number }) {
+  const current = designs[Math.max(design, 0)];
+  const block = (cells: string[], left: number) => cells.flatMap((row, r) => [...row].map((cell, c) =>
+    <rect key={`${left}-${r}-${c}`} className="story-pixel" data-on={design >= 0 && cell === '#'} style={{ transitionDelay: `${(r + c) * 30}ms` }}
+      x={left + c * 8 + .6} y={34.6 + r * 8} width="6.8" height="6.8" rx="1" />));
+  return <svg className="story-art" viewBox="0 0 200 100" aria-hidden="true">
+    <path className="art-wire" d="M14 50H24M64 50H86M92 40H108V50H118M92 60H104V76M97 76h14M100 80h8M103 84h2M158 50H186M97 57l3 3-3 3" />
+    <path className="art-device" d="M86 38V62M92 35V65" />
+    <rect className="art-block" x="24" y="34" width="40" height="32" rx="2" /><rect className="art-block" x="118" y="34" width="40" height="32" rx="2" />
+    {block(current.input, 24)}{block(current.output, 118)}
+    <circle className="art-port" cx="10" cy="50" r="4" /><circle className="art-port" cx="190" cy="50" r="4" />
+    {design >= 0 && <text className="art-label" x="100" y="26" textAnchor="middle">W {current.size}</text>}
+  </svg>;
+}
+
+/** Gain target and every simulated response so far; the newest curve is judged against the target. */
+export function Response({ frame }: { frame: Frame }) {
   const left = x(band.start), right = x(band.end), limit = y(limitDb);
   const hatch = `story-hatch-${useId().replace(/:/g, '')}`;
-  return <svg className="story-chart" viewBox="0 0 220 120" aria-hidden="true">
+  return <svg className="story-art story-chart" viewBox="0 0 220 120" aria-hidden="true">
     <defs><pattern id={hatch} width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0V6" /></pattern></defs>
     <g className="story-mask"><rect x={left} y={limit} width={right - left} height={chart.bottom - limit} fill={`url(#${hatch})`} /><path d={`M${left} ${limit}H${right}`} /></g>
     <path className="story-axis" d={`M${chart.left} ${chart.top - 4}V${chart.bottom}H${chart.right + 4}`} />
-    {candidates.slice(0, frame.drawn).map((_, i) => <path key={i} d={curvePath(i)} pathLength="1"
+    {designs.slice(0, frame.drawn).map((_, i) => <path key={i} d={curvePath(i)} pathLength="1"
       className={`story-curve ${i < frame.drawn - 1 ? 'is-earlier' : frame.met ? 'is-met' : 'is-current'}`} />)}
-    {frame.judged && !frame.met && <path className="story-fail" d={failingPath(frame.candidate)} />}
+    {frame.judged && !frame.met && <path className="story-fail" d={failingPath(frame.design)} />}
   </svg>;
 }
 
-/** One design loop told in five steps. Illustrative data; motion pauses offscreen and when stopped. */
+/** Two rails between stations: the upper carries work forward, the lower brings results back. */
+function Link({ forward, back }: { forward: boolean; back: boolean }) {
+  return <span className="story-link" aria-hidden="true"><span className="story-rail" data-on={forward} /><span className="story-rail story-rail-back" data-on={back} /></span>;
+}
+
+/** Designer, GENESIS and CAD tools in one loop, told in five steps. Motion pauses offscreen and when stopped. */
 export function DesignStory({ content, brand, compact = false }: { content: StoryContent; brand: ReactNode; compact?: boolean }) {
   const { t } = useLanguage();
   const { ref, enabled, running } = useVisibleMotion<HTMLElement>();
@@ -56,27 +79,32 @@ export function DesignStory({ content, brand, compact = false }: { content: Stor
     return () => window.clearTimeout(timer);
   }, [index, running]);
   const frame = enabled ? timeline[index] : timeline[final];
-  const status = frame.met ? content.solver.met : frame.judged ? content.solver.outside : frame.step === 3 ? content.solver.running : '';
+  const engine = frame.design < 0 ? '' : frame.met ? content.engine.best : `${content.engine.iteration} ${frame.design + 1}`;
+  const tools = frame.met ? content.tools.met : frame.judged ? content.tools.below : frame.step === 3 ? content.tools.running : '';
   return <figure ref={ref} className={`design-story${compact ? ' design-story-compact' : ''}`} aria-label={content.caption}
-    data-motion={enabled ? 'on' : 'off'} data-step={frame.step} data-flow={frame.flow} data-met={Boolean(frame.met)}>
+    data-motion={enabled ? 'on' : 'off'} data-step={frame.step} data-met={Boolean(frame.met)}>
     <div className="story-scene" key={cycle}>
-      <div className="story-card story-target" data-active={frame.step === 1}>
-        <span className="story-card-title"><Icon name="document" />{content.target.title}</span>
-        <ul>{content.target.items.map(item => <li key={item}><span className="story-check"><Icon name="check" /></span>{item}</li>)}</ul>
+      <div className="story-card story-designer" data-active={frame.step === 1 || frame.step === 5}>
+        <span className="story-card-title"><Icon name="users" />{content.designer.title}</span>
+        <DesignerArt />
+        <dl className="story-spec">{content.designer.spec.map(row => <div key={row.label}>
+          <dt>{row.label}</dt><dd>{row.value}</dd><span className="story-check"><Icon name="check" /></span>
+        </div>)}</dl>
       </div>
-      <span className="story-link story-link-spec" aria-hidden="true" />
-      <div className="story-card story-engine" data-active={frame.step === 2}>
+      <Link forward={frame.flow === 'target'} back={frame.flow === 'review'} />
+      <div className="story-card story-engine" data-active={frame.step === 2 || frame.step === 4}>
         <span className="story-card-title">{brand}</span>
-        <Layout candidate={frame.candidate} />
-        <span className="story-card-status">{frame.candidate < 0 ? '' : frame.met ? content.best : `${content.candidate} ${frame.candidate + 1}`}</span>
+        <CircuitArt design={frame.design} />
+        <span className="story-card-status">{engine}</span>
       </div>
-      <span className="story-link story-link-layout" aria-hidden="true" />
-      <div className="story-card story-solver" data-active={frame.step >= 3}>
-        <span className="story-card-title"><Icon name="wave" />{content.solver.title}</span>
+      <Link forward={frame.flow === 'jobs'} back={frame.flow === 'results'} />
+      <div className="story-card story-tools" data-active={frame.step === 3}>
+        <span className="story-card-title"><Icon name="layers" />{content.tools.title}</span>
+        <span className="story-chips">{content.tools.chips.map((chip, i) =>
+          <span key={chip} data-on={i < 2 ? frame.step === 3 : Boolean(frame.met)}>{chip}</span>)}</span>
         <Response frame={frame} />
-        <span className="story-card-status">{status}</span>
+        <span className="story-card-status">{tools}</span>
       </div>
-      <span className="story-return" aria-hidden="true"><span>{content.response}</span></span>
     </div>
     {compact ? <figcaption className="story-now">
       <span className="story-now-step"><span>{frame.step} / {content.steps.length}</span> {content.steps[frame.step - 1].title}</span>

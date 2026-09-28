@@ -2,7 +2,8 @@ import { useId, useRef, useState, type CSSProperties, type KeyboardEvent } from 
 import { ActionLink, Brand, Icon, SectionHeading } from './ui';
 import { useVisibleMotion } from './MotionSettings';
 import { SubscriptionOverview, SubscriptionStart, type SubscriptionContent } from './SubscriptionOverview';
-import { candidates, curvePath, response, x, y } from './designStory';
+import { curvePath, designs, response, x, y } from './designStory';
+import type { StoryContent } from './DesignStory';
 import '../styles/services.css';
 
 type ServicesContent = {
@@ -18,13 +19,13 @@ type ServicesContent = {
 };
 
 // Illustrative measured points, slightly below the simulated curve as bench losses usually are.
-const measured = response(candidates.length - 1, 13).slice(1, -1).map((point, i) => ({ f: point.f, db: point.db - 0.18 - 0.12 * Math.sin(i * 1.7) }));
+const measured = response(designs.length - 1, 13).slice(1, -1).map((point, i) => ({ f: point.f, db: point.db - 0.5 - 0.3 * Math.sin(i * 1.7) }));
 
-/** From wafer to measurement: the loop's final layout, probed and compared with its simulation. */
+/** From wafer to measurement: the loop's final amplifier, probed on its pads and compared with its simulation. */
 function SiliconStory({ legend }: { legend: string[] }) {
   const clip = `service-wafer-${useId().replace(/:/g, '')}`;
   const plot = { left: 250, right: 452, top: 196, bottom: 292 };
-  const layout = candidates[candidates.length - 1];
+  const final = designs[designs.length - 1];
   return <svg className="silicon-story" viewBox="0 0 480 320" aria-hidden="true">
     <defs><clipPath id={clip}><circle cx="112" cy="168" r="86" /></clipPath></defs>
     <circle className="silicon-wafer" cx="112" cy="168" r="88" />
@@ -33,14 +34,17 @@ function SiliconStory({ legend }: { legend: string[] }) {
     <rect className="silicon-die silicon-die-picked" x="124" y="132" width="20" height="20" rx="2" />
     <path className="silicon-zoom" d="M144 132L232 36M144 152L232 156" />
     <rect className="silicon-closeup" x="232" y="36" width="120" height="120" rx="6" />
-    {layout.flatMap((row, r) => [...row].map((cell, c) => cell === '#' &&
-      <rect key={`${r}-${c}`} className="silicon-metal" x={248 + c * 10} y={52 + r * 10} width="8" height="8" rx="1" />))}
-    {[[236, 92], [340, 62], [340, 122]].map(([px, py]) => <rect key={`${px}-${py}`} className="silicon-pad" x={px} y={py} width="8" height="8" rx="1" />)}
-    <g className="silicon-probes"><path d="M200 12H222L240 88" /><path d="M392 12H362L344 58" /><circle cx="240" cy="92" r="3" /><circle cx="344" cy="62" r="3" /></g>
+    {[245, 300].map(left => <rect key={left} className="silicon-block" x={left} y="82" width="35" height="28" rx="1.5" />)}
+    {[final.input, final.output].flatMap((cells, block) => cells.flatMap((row, r) => [...row].map((cell, c) => cell === '#' &&
+      <rect key={`${block}-${r}-${c}`} className="silicon-metal" x={245.5 + block * 55 + c * 7} y={82.5 + r * 7} width="6" height="6" rx="1" />)))}
+    <rect className="silicon-device" x="282" y="86" width="16" height="20" rx="1" /><path className="silicon-fingers" d="M286 86v20M290 86v20M294 86v20" />
+    <path className="silicon-feed" d="M244 96h1M280 96h2M298 96h2M335 96h3" />
+    {[236, 338].map(px => <rect key={px} className="silicon-pad" x={px} y="92" width="8" height="8" rx="1" />)}
+    <g className="silicon-probes"><path d="M200 12H222L240 90" /><path d="M392 12H362L342 90" /><circle cx="240" cy="94" r="3" /><circle cx="342" cy="94" r="3" /></g>
     <path className="silicon-flow" d="M292 156V182m-5-6 5 6 5-6" />
     <path className="silicon-axis" d="M250 186V292H452" />
     <path className="silicon-sweep" d="M250 190V292" />
-    <path className="silicon-simulated" d={curvePath(candidates.length - 1, plot)} />
+    <path className="silicon-simulated" d={curvePath(designs.length - 1, plot)} />
     {measured.map(point => <circle key={point.f} className="silicon-measured" style={{ '--delay': (0.6 + 3 * point.f).toFixed(2) } as CSSProperties} cx={x(point.f, plot)} cy={y(point.db, plot)} r="3" />)}
     <g className="silicon-legend"><path d="M250 308h16" /><text x="272" y="311">{legend[0]}</text><circle cx="358" cy="308" r="3" /><text x="368" y="311">{legend[1]}</text></g>
   </svg>;
@@ -72,7 +76,7 @@ function ServiceVisual({ item }: { item: ServicesContent['items'][number] }) {
 }
 
 /** Presentation only. Configured service details share actions, artwork and motion with the site. */
-export function Services({ content, contactHref }: { content: ServicesContent; contactHref: string }) {
+export function Services({ content, loop, contactHref }: { content: ServicesContent; loop: StoryContent; contactHref: string }) {
   const [selected, setSelected] = useState(0);
   const tabs = useRef<(HTMLButtonElement | null)[]>([]);
   const prefix = `services-${useId().replace(/:/g, '')}`;
@@ -96,7 +100,7 @@ export function Services({ content, contactHref }: { content: ServicesContent; c
     <div className="service-panel" role="tabpanel" id={`${prefix}-panel`} aria-labelledby={`${prefix}-tab-${selected}`} tabIndex={0}>
       <div className="service-overview" data-kind={item.id}>
         <div className="service-copy"><p className="eyebrow">{item.title}</p><h3>{item.headline}</h3><p>{item.description}</p><ActionLink href={contactHref} icon="mail">{item.action ?? content.action}</ActionLink></div>
-        {item.id === 'platform-membership' ? <SubscriptionOverview content={content.subscription} /> : <ServiceVisual key={item.id} item={item} />}
+        {item.id === 'platform-membership' ? <SubscriptionOverview content={content.subscription} loop={loop} /> : <ServiceVisual key={item.id} item={item} />}
       </div>
       <div className="service-scope"><p className="eyebrow">{item.scopeLabel ?? content.scopeLabel}</p><ul>{item.features.map(feature => <li key={feature.title}><Icon name={feature.icon} /><div><h4>{feature.title}</h4>{feature.unit && <span className="service-billing-unit">{feature.unit}</span>}<p>{feature.detail}</p></div></li>)}</ul></div>
       <p className="service-note"><Icon name="document" />{item.note}</p>

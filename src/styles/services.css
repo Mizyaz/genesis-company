@@ -46,6 +46,10 @@
 .silicon-closeup { fill: var(--surface); stroke: var(--cyan); stroke-width: 1.2; }
 .silicon-metal { fill: var(--cyan); fill-opacity: .8; }
 .silicon-pad { fill: var(--surface-raised); stroke: var(--muted); stroke-width: 1; }
+.silicon-block { fill: none; stroke: color-mix(in srgb, var(--cyan) 35%, var(--border)); stroke-width: .8; }
+.silicon-device { fill: color-mix(in srgb, var(--violet) 22%, var(--surface)); stroke: var(--violet); stroke-width: 1; }
+.silicon-fingers { fill: none; stroke: var(--violet); stroke-width: 1.4; }
+.silicon-feed { fill: none; stroke: var(--cyan); stroke-width: 2; }
 .silicon-probes path { fill: none; stroke: var(--muted); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 .silicon-probes circle { fill: var(--cyan); filter: drop-shadow(0 0 4px var(--cyan)); }
 .silicon-flow, .silicon-axis { fill: none; stroke: var(--subtle); stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; }
