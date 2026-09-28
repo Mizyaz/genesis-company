@@ -2,7 +2,7 @@ import { useLanguage, useTranslatedContent } from '../shared/Language';
 import siteContent from '../content/site.json';
 import { ActionLink, Brand, Icon, SectionHeading } from '../shared/ui';
 import { PortfolioCard } from '../shared/PortfolioCard';
-import { DesignStory } from '../shared/DesignStory';
+import { DesignPillars } from '../shared/DesignPillars';
 import { Workflow } from '../shared/Workflow';
 import { TeamProfiles } from '../shared/TeamProfiles';
 import { Services } from '../shared/Services';
@@ -25,7 +25,7 @@ export function Explore({ workbenchUrl }: { workbenchUrl?: string }) {
       <div className="section-intro"><SectionHeading number="02" eyebrow={t('RFIC PORTFOLIO')}>{t("From individual blocks")}<br />{t("to")} <span className="gradient-text">{t("complete circuits.")}</span></SectionHeading><p>{t("RF switches, frequency converters and broadband passives for mmWave systems.")}</p></div>
       <div className="portfolio-grid">{site.portfolio.map(item => <PortfolioCard item={item} key={item.id} />)}</div>
     </section>
-    <Services content={site.services} contactHref={`mailto:${site.brand.email}?subject=GENESIS%20services`} />
+    <Services content={site.services} loop={site.story.loop} contactHref={`mailto:${site.brand.email}?subject=GENESIS%20services`} />
     <section id="story" className="content-section story-section">
       <div id="team" aria-hidden="true" />
       <div className="story-narrative">
@@ -33,7 +33,7 @@ export function Explore({ workbenchUrl }: { workbenchUrl?: string }) {
           <SectionHeading number="04" eyebrow={site.story.eyebrow}>{site.story.headline}</SectionHeading>
           <div className="story-copy"><p>{site.story.intro}</p>{site.story.paragraphs.map(paragraph => <p key={paragraph}>{paragraph}</p>)}</div>
         </div>
-        <DesignStory content={site.story.loop} brand={<Brand />} />
+        <DesignPillars content={site.story.pillars} brand={<Brand />} />
       </div>
     </section>
     <section id="contact" className="content-section contact-section"><p className="eyebrow">{t("LET’S BUILD WHAT COMES NEXT")}</p><h2>{t("From design intent.")}<br /><span className="gradient-text">{t("To silicon demonstration.")}</span></h2><div className="contact-actions"><ActionLink href={`mailto:${site.brand.email}?subject=GENESIS%20demo`} icon="mail">{t("Get in touch")}</ActionLink>{workbenchUrl && <ActionLink variant="secondary" href={workbenchUrl} icon="diagonal" data-genesis-handoff>{t("Open workbench")}</ActionLink>}</div></section>

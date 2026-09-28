@@ -1,23 +1,30 @@
 import { useId, useState } from 'react';
-import { Icon } from './ui';
+import { Brand, Icon } from './ui';
+import { DesignStory, type StoryContent } from './DesignStory';
 import '../styles/subscription-overview.css';
 
 export type SubscriptionContent = {
   label: string; hint: string;
+  bridge: { title: string; intro: string };
   modules: { title: string; intro: string; items: { icon: string; title: string; detail: string }[] };
   parts: { id: string; icon: string; title: string; status: string; detail: string; items: string[] }[];
   setup: { title: string; steps: { title: string; detail: string }[] };
 };
 
-/** What the software does, then the offer boundary. This is not an account, licensing or purchasing client. */
-export function SubscriptionOverview({ content }: { content: SubscriptionContent }) {
+/** Where GENESIS sits between your team and your tools, what it does, then the offer boundary. Not an account, licensing or purchasing client. */
+export function SubscriptionOverview({ content, loop }: { content: SubscriptionContent; loop: StoryContent }) {
   const [selected, setSelected] = useState(0);
+  const bridgeId = `subscription-bridge-${useId().replace(/:/g, '')}`;
   const modulesId = `subscription-modules-${useId().replace(/:/g, '')}`;
   const detailId = `subscription-${useId().replace(/:/g, '')}`;
   const part = content.parts[selected] ?? content.parts[0];
   return <div className="subscription-overview" data-part={part.id}>
+    <section className="subscription-bridge" aria-labelledby={bridgeId}>
+      <div className="subscription-section-heading"><h4 id={bridgeId}>{content.bridge.title}</h4><p>{content.bridge.intro}</p></div>
+      <DesignStory content={loop} brand={<Brand />} />
+    </section>
     <section className="subscription-modules" aria-labelledby={modulesId}>
-      <div className="subscription-modules-heading"><h4 id={modulesId}>{content.modules.title}</h4><p>{content.modules.intro}</p></div>
+      <div className="subscription-section-heading"><h4 id={modulesId}>{content.modules.title}</h4><p>{content.modules.intro}</p></div>
       <ul>{content.modules.items.map(module => <li key={module.title}>
         <span className="subscription-module-icon"><Icon name={module.icon} /></span>
         <div><h5>{module.title}</h5><p>{module.detail}</p></div>

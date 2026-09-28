@@ -1,9 +1,10 @@
-/* What the software does, then what the subscription covers. Theme and typography stay site-owned. */
+/* Where GENESIS fits, what the software does, then what the subscription covers. Theme and typography stay site-owned. */
 .subscription-overview { min-width: 0; }
-.subscription-modules { padding: clamp(20px, 3vw, 36px); border: 1px solid var(--border); border-radius: var(--radius); background: radial-gradient(ellipse at 50% 0%, var(--glow), transparent 70%), var(--surface); }
-.subscription-modules-heading { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 12px 40px; align-items: baseline; margin-bottom: 26px; }
-.subscription-modules-heading h4, .subscription-scope-heading h4 { margin: 0; font-size: .95rem; font-weight: 550; }
-.subscription-modules-heading p { color: var(--muted); font-size: .85rem; line-height: 1.7; }
+.subscription-bridge, .subscription-modules { padding: clamp(20px, 3vw, 36px); border: 1px solid var(--border); border-radius: var(--radius); background: radial-gradient(ellipse at 50% 0%, var(--glow), transparent 70%), var(--surface); }
+.subscription-bridge { margin-bottom: 20px; }
+.subscription-section-heading { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 12px 40px; align-items: baseline; margin-bottom: 26px; }
+.subscription-section-heading h4, .subscription-scope-heading h4 { margin: 0; font-size: .95rem; font-weight: 550; }
+.subscription-section-heading p { color: var(--muted); font-size: .85rem; line-height: 1.7; }
 .subscription-modules ul { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; margin: 0; padding: 0; list-style: none; border: 1px solid var(--border-soft); border-radius: 10px; overflow: hidden; background: var(--border-soft); }
 .subscription-modules li { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 14px; align-items: start; min-width: 0; padding: 22px 20px; background: var(--surface); }
 .subscription-module-icon { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid color-mix(in srgb, var(--cyan) 35%, var(--border)); border-radius: 8px; color: var(--cyan); background: var(--glow); }
@@ -32,14 +33,15 @@
 .subscription-start li p { color: var(--muted); font-size: .8rem; line-height: 1.75; }
 @media (max-width: 1000px) { .subscription-modules ul { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 850px) {
-  .subscription-modules-heading { grid-template-columns: 1fr; }
+  .subscription-section-heading { grid-template-columns: 1fr; }
   .subscription-start ol { grid-template-columns: 1fr; gap: 22px; }
 }
 @media (max-width: 650px) {
+  :is(.subscription-bridge, .subscription-modules) { padding: 18px 14px; }
   .subscription-modules ul { grid-template-columns: 1fr; }
   .subscription-modules li { padding: 18px 16px; }
   .subscription-choices { gap: 8px; }
   .subscription-choice { flex: 1 1 130px; font-size: .75rem; padding: 11px 9px; }
   .subscription-detail { grid-template-columns: 1fr; gap: 16px; }
 }
-@media (max-width: 380px) { .subscription-modules { padding: 18px 12px; } }
+@media (max-width: 380px) { :is(.subscription-bridge, .subscription-modules) { padding: 18px 12px; } }
