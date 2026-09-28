@@ -15,17 +15,13 @@
 .service-copy h3 { margin: 18px 0; max-width: 15ch; font-size: clamp(2rem, 3.3vw, 3.3rem); font-weight: 550; line-height: 1.1; letter-spacing: -.04em; text-wrap: balance; }
 .service-copy > p:not(.eyebrow) { color: var(--muted); font-size: .98rem; line-height: 1.8; max-width: 44ch; }
 .service-copy .button { margin-top: 26px; }
-.service-overview[data-kind='platform-membership'] { grid-template-columns: 1fr; gap: 36px; }
-.service-overview[data-kind='platform-membership'] .service-copy { display: grid; grid-template-columns: 1fr 1fr; column-gap: clamp(30px, 5vw, 72px); align-items: start; }
-.service-overview[data-kind='platform-membership'] .service-copy > .eyebrow { grid-column: 1 / -1; }
-.service-overview[data-kind='platform-membership'] .service-copy h3 { grid-column: 1; grid-row: 2 / 4; max-width: 20ch; }
-.service-overview[data-kind='platform-membership'] .service-copy > p:not(.eyebrow) { grid-column: 2; margin-top: 18px; max-width: none; }
-.service-overview[data-kind='platform-membership'] .service-copy .button { grid-column: 2; justify-self: start; }
 .service-visual { position: relative; overflow: hidden; min-width: 0; border: 1px solid var(--border); border-radius: var(--radius); background: radial-gradient(ellipse at 50% 55%, var(--glow), transparent 70%), linear-gradient(140deg, var(--surface), var(--surface-raised)); }
 .service-visual-heading { display: flex; align-items: center; gap: 9px; padding: 17px 20px; font: .65rem var(--font-mono); letter-spacing: .09em; color: var(--muted); border-bottom: 1px solid var(--border-soft); }
 .service-visual-heading > span:last-child { margin-left: auto; letter-spacing: .04em; }
 .service-live-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--cyan); }
 .service-artboard { position: relative; aspect-ratio: 1.5; }
+.service-loop { padding: 18px 16px 14px; }
+.service-loop .design-story { margin: 0 auto; }
 .service-scope { margin-top: 38px; padding: 28px 0 0; border-top: 1px solid var(--border); }
 .service-scope > .eyebrow { font-size: .65rem; }
 .service-scope ul { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px; list-style: none; margin: 22px 0 0; padding: 0; }
@@ -36,6 +32,21 @@
 .service-scope li p { color: var(--muted); font-size: .85rem; line-height: 1.75; }
 .service-note { display: flex; align-items: flex-start; gap: 10px; color: var(--subtle); font-size: .75rem; line-height: 1.7; margin-top: 28px; }
 .service-note .icon { width: 16px; height: 16px; margin-top: 2px; }
+
+/* Questions: the offer's details, one short answer each, closed until asked. */
+.service-faq { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: clamp(30px, 5vw, 72px); align-items: start; margin-top: 56px; padding-top: 40px; border-top: 1px solid var(--border); scroll-margin-top: 90px; }
+.faq-intro h3 { margin: 0 0 14px; font-size: clamp(1.5rem, 2.4vw, 2.1rem); font-weight: 550; line-height: 1.15; letter-spacing: -.03em; }
+.faq-intro p { color: var(--muted); font-size: .92rem; line-height: 1.75; max-width: 36ch; }
+.faq-intro .button { margin-top: 22px; }
+.faq-list { border-top: 1px solid var(--border-soft); }
+.faq-list details { border-bottom: 1px solid var(--border-soft); }
+.faq-list summary { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 18px 4px; cursor: pointer; list-style: none; font-size: .98rem; font-weight: 550; line-height: 1.45; transition: color .2s; }
+.faq-list summary::-webkit-details-marker { display: none; }
+.faq-list summary:hover, .faq-list details[open] summary { color: var(--cyan); }
+.faq-list summary:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; border-radius: 4px; }
+.faq-list summary .icon { flex: none; width: 18px; height: 18px; color: var(--subtle); transition: transform .25s, color .2s; }
+.faq-list details[open] summary .icon { transform: rotate(180deg); color: var(--cyan); }
+.faq-list details p { margin: 0; padding: 0 4px 20px; max-width: 68ch; color: var(--muted); font-size: .9rem; line-height: 1.75; }
 
 /* Silicon support: a die from the wafer, probed on its pads, measured against its simulation. */
 .silicon-story, .integration-story > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -93,12 +104,14 @@
   .service-tabs button { flex-direction: column; justify-content: center; padding: 18px 8px; gap: 10px; font-size: .8rem; text-align: center; line-height: 1.5; }
   .service-tab-number { display: none; }
   .service-overview { grid-template-columns: 1fr; gap: 30px; }
-  .service-overview[data-kind='platform-membership'] .service-copy { display: block; }
   .service-copy h3 { max-width: 24ch; font-size: clamp(1.9rem, 6vw, 2.8rem); }
   .service-copy > p:not(.eyebrow) { max-width: none; }
   .service-visual { width: 100%; max-width: 580px; justify-self: center; }
   .service-scope ul { grid-template-columns: 1fr; gap: 22px; }
   .service-scope li p { max-width: 65ch; }
+  .service-faq { grid-template-columns: 1fr; gap: 20px; margin-top: 44px; padding-top: 32px; }
+  .faq-intro p { max-width: 60ch; }
+  .faq-list summary { padding: 16px 2px; font-size: .92rem; }
 }
 @media (max-width: 400px) {
   .service-tabs button { font-size: .75rem; }
@@ -107,7 +120,9 @@
   .integration-tool span { font-size: .58rem; }
   .integration-hub .brand { font-size: .62rem; }
   .integration-actions { font-size: .5rem; }
+  .service-loop { padding: 14px 10px 10px; }
 }
 @media (prefers-reduced-motion: reduce) {
+  .faq-list summary .icon { transition: none; }
   .service-visual :is(.silicon-sweep, .silicon-measured, .integration-link, .integration-tool, .integration-actions > span) { animation: none !important; }
 }

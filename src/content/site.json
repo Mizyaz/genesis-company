@@ -111,17 +111,61 @@
     "intro": "Use the platform, get support for a silicon prototype or connect GENESIS to your own tools.",
     "action": "Discuss your project",
     "scopeLabel": "Service scope",
-    "subscription": {
-      "label": "Subscription details",
-      "hint": "Select a part to see its scope.",
-      "bridge": {
-        "title": "Where GENESIS fits",
-        "intro": "Your team sets the target and makes the decisions. Your CAD tools run the simulations. GENESIS does the work in between."
-      },
-      "modules": {
-        "title": "What GENESIS does",
-        "intro": "GENESIS runs on your own Linux server, next to your Cadence tools and licenses. Your engineers use it in the browser.",
-        "items": [
+    "faq": {
+      "title": "Frequently asked questions",
+      "intro": "Short answers about the subscription, your tools and our services. If your question is not here, write to us.",
+      "action": "Ask a question",
+      "items": [
+        {
+          "question": "What does the software subscription include?",
+          "answer": "Access to the GENESIS modules agreed for your team, for the users and license term in your offer, with documentation, software updates and product support. It is software access, not a chip design delivered on your behalf."
+        },
+        {
+          "question": "How is GENESIS licensed and priced?",
+          "answer": "Each license gives one user access to the selected GENESIS modules for one year. The price depends on the modules and the number of users; we confirm it in your offer, together with the update policy and support terms."
+        },
+        {
+          "question": "Which tools does GENESIS work with?",
+          "answer": "Cadence Virtuoso and Spectre for circuit simulation, and your EM solver for passive structures. Other tools and in-house flows can be connected as a separate integration project."
+        },
+        {
+          "question": "Where does GENESIS run, and where does our data stay?",
+          "answer": "GENESIS runs on your own Linux server, next to your Cadence tools and licenses, and your engineers use it in the browser. Where your data stays and who can access it is agreed for your setup; hosting can be arranged separately."
+        },
+        {
+          "question": "What do we need to provide?",
+          "answer": "Compatible CAD and solver licenses, authorized PDK access and device models, and compute and storage in your environment. These stay separate from the GENESIS subscription."
+        },
+        {
+          "question": "What is not included in the subscription?",
+          "answer": "Custom tool integration, deployment and training, managed compute or EM resources, circuit design consulting and fabrication. Each is scoped separately, so you know what every engagement covers."
+        },
+        {
+          "question": "Can you help us take a design to silicon?",
+          "answer": "Yes, as a separate service: prototype planning, fabrication preparation and measurement support. Fabrication, packaging and lab access are scoped for each project."
+        },
+        {
+          "question": "What support do we get?",
+          "answer": "Documentation, access to software releases and product support for your supported environment. Support channels, availability and onboarding are agreed in your subscription."
+        },
+        {
+          "question": "How do we get started?",
+          "answer": "First we agree your users, modules, toolchain and terms. Then we review compatibility and installation requirements while you arrange the tool licenses, PDK access and infrastructure. Delivery, access and onboarding follow the agreed scope."
+        }
+      ]
+    },
+    "items": [
+      {
+        "id": "platform-membership",
+        "icon": "layers",
+        "label": "Software",
+        "title": "Software subscription",
+        "headline": "Your RF and mmWave design environment.",
+        "description": "GENESIS works between your design team and your CAD tools. It sizes devices, synthesizes matching networks and passive structures, runs your circuit and EM simulations and compares every result with your target. Your team sets the goals and makes the decisions.",
+        "visualLabel": "DESIGN LOOP",
+        "action": "Request subscription details",
+        "scopeLabel": "What GENESIS does",
+        "features": [
           {
             "icon": "grid",
             "title": "Passive synthesis",
@@ -153,92 +197,6 @@
             "detail": "Every run keeps its settings, responses and GDS files. The same steps also run from Python."
           }
         ]
-      },
-      "parts": [
-        {
-          "id": "software",
-          "icon": "chip",
-          "title": "GENESIS software",
-          "status": "Subscription scope",
-          "detail": "Your subscription licenses the agreed GENESIS modules for your team. It is software access, not a chip design delivered on your behalf.",
-          "items": [
-            "Design, simulation and optimization modules selected for your team.",
-            "Access for the users and license term stated in your offer.",
-            "Documentation, software updates and product support as specified in your subscription."
-          ]
-        },
-        {
-          "id": "environment",
-          "icon": "server",
-          "title": "Your environment",
-          "status": "Customer-provided",
-          "detail": "GENESIS works with your design tools and infrastructure. Their licenses and access rights are separate from the software subscription.",
-          "items": [
-            "Compatible CAD and solver licenses.",
-            "Authorized PDK access and device models.",
-            "Compute and storage in your environment, or hosting agreed separately."
-          ]
-        },
-        {
-          "id": "services",
-          "icon": "sliders",
-          "title": "Additional services",
-          "status": "Separate scope",
-          "detail": "Need help beyond using the software? Engineering work and additional resources are scoped separately, so you know what each engagement covers.",
-          "items": [
-            "Custom tool integration, deployment and training.",
-            "Managed compute or EM resources, where agreed.",
-            "Prototype planning, fabrication preparation and measurement support."
-          ]
-        }
-      ],
-      "setup": {
-        "title": "How you get started",
-        "steps": [
-          {
-            "title": "Agree the scope",
-            "detail": "We confirm your users, modules, toolchain and subscription terms before you commit."
-          },
-          {
-            "title": "Prepare your environment",
-            "detail": "We review compatibility and the installation requirements. You arrange the required tool licenses, PDK access and infrastructure."
-          },
-          {
-            "title": "Set up your first project",
-            "detail": "Software delivery, access setup and onboarding follow the scope agreed with your team."
-          }
-        ]
-      }
-    },
-    "items": [
-      {
-        "id": "platform-membership",
-        "icon": "layers",
-        "label": "Software",
-        "title": "Software subscription",
-        "headline": "Your RF and mmWave design environment.",
-        "description": "GENESIS brings passive synthesis, optimization, active circuit simulation and a design assistant into one environment. Your subscription gives your team access to the modules and support agreed in your offer.",
-        "visualLabel": "WORKSPACE",
-        "action": "Request subscription details",
-        "scopeLabel": "Access, delivery and support",
-        "features": [
-          {
-            "icon": "users",
-            "title": "User access",
-            "detail": "Each license gives one user access to the selected GENESIS modules for one year. Your offer defines the modules and user count; CAD and solver licenses are separate."
-          },
-          {
-            "icon": "document",
-            "title": "Software delivery",
-            "detail": "Installation requirements, documentation and access to software releases are defined for your supported environment."
-          },
-          {
-            "icon": "sliders",
-            "title": "Product support",
-            "detail": "Support channels, availability and onboarding are agreed in your subscription. Circuit design consulting is a separate service."
-          }
-        ],
-        "note": "We confirm the price, included modules, update policy and support terms in your offer. Compute, custom integration and fabrication are not bundled into the software license."
       },
       {
         "id": "silicon-demonstration",

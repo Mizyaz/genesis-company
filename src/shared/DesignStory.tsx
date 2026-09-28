@@ -65,7 +65,7 @@ function Link({ forward, back }: { forward: boolean; back: boolean }) {
 }
 
 /** Designer, GENESIS and CAD tools in one loop, told in five steps. Motion pauses offscreen and when stopped. */
-export function DesignStory({ content, brand, compact = false }: { content: StoryContent; brand: ReactNode; compact?: boolean }) {
+export function DesignStory({ content, brand, storyLink = false }: { content: StoryContent; brand: ReactNode; storyLink?: boolean }) {
   const { t } = useLanguage();
   const { ref, enabled, running } = useVisibleMotion<HTMLElement>();
   const [index, setIndex] = useState(0);
@@ -81,7 +81,7 @@ export function DesignStory({ content, brand, compact = false }: { content: Stor
   const frame = enabled ? timeline[index] : timeline[final];
   const engine = frame.design < 0 ? '' : frame.met ? content.engine.best : `${content.engine.iteration} ${frame.design + 1}`;
   const tools = frame.met ? content.tools.met : frame.judged ? content.tools.below : frame.step === 3 ? content.tools.running : '';
-  return <figure ref={ref} className={`design-story${compact ? ' design-story-compact' : ''}`} aria-label={content.caption}
+  return <figure ref={ref} className="design-story" aria-label={content.caption}
     data-motion={enabled ? 'on' : 'off'} data-step={frame.step} data-met={Boolean(frame.met)}>
     <div className="story-scene" key={cycle}>
       <div className="story-card story-designer" data-active={frame.step === 1 || frame.step === 5}>
@@ -106,13 +106,11 @@ export function DesignStory({ content, brand, compact = false }: { content: Stor
         <span className="story-card-status">{tools}</span>
       </div>
     </div>
-    {compact ? <figcaption className="story-now">
-      <span className="story-now-step"><span>{frame.step} / {content.steps.length}</span> {content.steps[frame.step - 1].title}</span>
-      <a href="#/explore/story">{t('Discover our story')} <Icon name="diagonal" /></a>
-    </figcaption> : <figcaption>
-      <ol className="story-steps">{content.steps.map((step, i) => <li key={step.title} aria-current={enabled && i + 1 === frame.step ? 'step' : undefined}>
-        <strong>{step.title}</strong><span>{step.detail}</span></li>)}</ol>
-      <p className="story-note">{content.note}</p>
-    </figcaption>}
+    <figcaption className="story-now">
+      <span className="story-now-step" aria-hidden="true"><span>{frame.step} / {content.steps.length}</span> {content.steps[frame.step - 1].title}</span>
+      {storyLink && <a href="#/explore/story">{t('Discover our story')} <Icon name="diagonal" /></a>}
+      <span className="story-now-note">{content.note}</span>
+    </figcaption>
+    <ol className="sr-only">{content.steps.map(step => <li key={step.title}>{step.title}: {step.detail}</li>)}</ol>
   </figure>;
 }

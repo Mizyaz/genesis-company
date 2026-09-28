@@ -1,5 +1,5 @@
 /* Designer, GENESIS and CAD tools in one loop: target -> design -> simulation -> compare -> decision. */
-.design-story { min-width: 0; container-type: inline-size; text-align: left; }
+.design-story { min-width: 0; max-width: 720px; margin: 28px auto 0; container-type: inline-size; text-align: left; }
 .story-scene { --link: clamp(16px, 6cqw, 48px); display: grid; grid-template-columns: minmax(0, 1fr) var(--link) minmax(0, 1fr) var(--link) minmax(0, 1fr); }
 .story-card { position: relative; display: flex; flex-direction: column; gap: 10px; min-width: 0; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius); background: color-mix(in srgb, var(--surface) 90%, transparent); transition: border-color .45s, box-shadow .45s; }
 .story-card[data-active="true"] { border-color: color-mix(in srgb, var(--cyan) 75%, var(--border)); box-shadow: 0 0 0 1px color-mix(in srgb, var(--cyan) 22%, transparent), 0 12px 32px color-mix(in srgb, var(--cyan) 10%, transparent); }
@@ -63,24 +63,13 @@
 .story-rail[data-on="true"]::before { animation: story-travel .9s ease-in-out .3s both; }
 .story-rail-back[data-on="true"]::before { animation-name: story-travel-back; }
 
-/* Steps: the same story in words, the current one highlighted while the loop plays. */
-.story-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 6px; margin: 18px 0 0; padding: 0; list-style: none; counter-reset: story-step; }
-.story-steps li { counter-increment: story-step; display: grid; align-content: start; gap: 4px; padding: 10px 12px; border-top: 2px solid var(--border-soft); transition: background .35s, border-color .35s, opacity .35s; }
-.story-steps li::before { content: counter(story-step, decimal-leading-zero); font-family: var(--font-mono); font-size: .68rem; color: var(--subtle); }
-.story-steps strong { font-size: .85rem; font-weight: 600; color: var(--text); line-height: 1.35; }
-.story-steps span { font-size: .78rem; line-height: 1.55; color: var(--muted); }
-.design-story[data-motion="on"] .story-steps li { opacity: .55; }
-.design-story[data-motion="on"] .story-steps li[aria-current="step"] { opacity: 1; border-top-color: var(--cyan); background: color-mix(in srgb, var(--cyan) 7%, transparent); }
-.story-steps li[aria-current="step"]::before { color: var(--cyan); }
-.story-note { margin-top: 10px; font-size: .7rem; color: var(--subtle); }
-
-/* Compact version for the landing pages: one caption line instead of the step list. */
-.design-story-compact { max-width: 720px; margin: 28px auto 0; }
+/* Caption: the current step, an optional link to the story and what the figure is. The steps in words are for screen readers. */
 .story-now { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px; margin-top: 14px; font-size: .75rem; color: var(--muted); }
 .story-now-step > span { margin-right: 6px; font-family: var(--font-mono); color: var(--cyan); }
 .story-now a { color: var(--subtle); }
 .story-now a:hover { color: var(--cyan); }
 .story-now .icon { width: 12px; height: 12px; margin-left: 3px; }
+.story-now-note { flex-basis: 100%; text-align: center; font-size: .68rem; color: var(--subtle); }
 
 @keyframes story-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
 @keyframes story-fade { from { opacity: 0; } to { opacity: 1; } }
@@ -91,14 +80,11 @@
   .story-card-title, .story-card-title .brand { font-size: .66rem; }
   .story-card-title > .icon { display: none; }
   .story-spec { font-size: .6rem; gap: 4px; }
-  .story-spec > div { grid-template-columns: minmax(0, 1fr) 12px; padding: 4px 6px; }
-  .story-spec dd { display: none; }
+  .story-spec > div { grid-template-columns: minmax(0, 1fr) auto 12px; gap: 5px; padding: 3px 6px; }
+  .story-spec dd { font-size: .56rem; }
   .story-check { width: 12px; height: 12px; }
   .story-chips > span { font-size: .52rem; padding: 1px 5px; }
   .story-card-status { font-size: .58rem; white-space: normal; line-height: 1.25; min-height: 2.5em; }
-  .story-steps li { grid-template-columns: 2.2em minmax(0, 1fr); column-gap: 6px; }
-  .story-steps li::before { grid-row: span 2; padding-top: .2em; }
-  .story-steps li > * { grid-column: 2; }
 }
 @container (max-width: 440px) {
   .story-card-title { align-items: flex-start; min-height: 2.4em; line-height: 1.2; white-space: normal; }

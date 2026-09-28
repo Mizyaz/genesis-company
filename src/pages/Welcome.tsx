@@ -19,7 +19,7 @@ export function Welcome() {
         <a className="welcome-choice" href="#/explore"><Icon name="wave" /><span><strong>{t("Discover")}</strong><small>{t("Our approach, our circuits, our story.")}</small></span><Icon name="arrow" /></a>
         <a className="welcome-choice welcome-choice-design" href="#/design"><Icon name="chip" /><span><strong>{t("Design")}</strong><small>{t("Open your GENESIS design environment.")}</small></span><Icon name="arrow" /></a>
       </div>
-      <DesignStory compact content={site.story.loop} brand={<Brand />} />
+      <DesignStory storyLink content={site.story.loop} brand={<Brand />} />
     </section>
   </main>;
 }
