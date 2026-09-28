@@ -1,17 +1,17 @@
 import { useId, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react';
 import { ActionLink, Brand, Icon, SectionHeading } from './ui';
 import { useVisibleMotion } from './MotionSettings';
-import { SubscriptionOverview, SubscriptionStart, type SubscriptionContent } from './SubscriptionOverview';
+import { ServiceFaq, type FaqContent } from './ServiceFaq';
+import { DesignStory, type StoryContent } from './DesignStory';
 import { curvePath, designs, response, x, y } from './designStory';
-import type { StoryContent } from './DesignStory';
 import '../styles/services.css';
 
 type ServicesContent = {
   eyebrow: string; title: string; intro: string; action: string;
-  scopeLabel: string; subscription: SubscriptionContent;
+  scopeLabel: string; faq: FaqContent;
   items: {
     id: string; icon: string; label: string; title: string; description: string;
-    headline: string; note: string; visualLabel: string; scopeLabel?: string; action?: string;
+    headline: string; note?: string; visualLabel: string; scopeLabel?: string; action?: string;
     legend?: string[];
     connections?: { icon: string; label: string; action: string }[];
     features: { icon: string; title: string; detail: string; unit?: string }[];
@@ -64,14 +64,15 @@ function IntegrationStory({ connections }: { connections: NonNullable<ServicesCo
 }
 
 /** A conceptual product illustration, not a live CAD session or measured result. */
-function ServiceVisual({ item }: { item: ServicesContent['items'][number] }) {
+function ServiceVisual({ item, loop }: { item: ServicesContent['items'][number]; loop: StoryContent }) {
   const { ref, enabled, running } = useVisibleMotion<HTMLElement>();
   return <figure ref={ref} className="service-visual" data-active={running} data-motion={enabled ? 'on' : 'off'} data-kind={item.id}>
     <div className="service-visual-heading"><span className="service-live-dot" /><span>GENESIS</span><span>{item.visualLabel}</span></div>
-    <div className="service-artboard">
-      {item.id === 'silicon-demonstration' && <SiliconStory legend={item.legend ?? []} />}
-      {item.id === 'specialised-integration' && item.connections && <IntegrationStory connections={item.connections} />}
-    </div>
+    {item.id === 'platform-membership' ? <div className="service-loop"><DesignStory content={loop} brand={<Brand />} /></div>
+      : <div className="service-artboard">
+        {item.id === 'silicon-demonstration' && <SiliconStory legend={item.legend ?? []} />}
+        {item.id === 'specialised-integration' && item.connections && <IntegrationStory connections={item.connections} />}
+      </div>}
   </figure>;
 }
 
@@ -100,11 +101,11 @@ export function Services({ content, loop, contactHref }: { content: ServicesCont
     <div className="service-panel" role="tabpanel" id={`${prefix}-panel`} aria-labelledby={`${prefix}-tab-${selected}`} tabIndex={0}>
       <div className="service-overview" data-kind={item.id}>
         <div className="service-copy"><p className="eyebrow">{item.title}</p><h3>{item.headline}</h3><p>{item.description}</p><ActionLink href={contactHref} icon="mail">{item.action ?? content.action}</ActionLink></div>
-        {item.id === 'platform-membership' ? <SubscriptionOverview content={content.subscription} loop={loop} /> : <ServiceVisual key={item.id} item={item} />}
+        <ServiceVisual key={item.id} item={item} loop={loop} />
       </div>
       <div className="service-scope"><p className="eyebrow">{item.scopeLabel ?? content.scopeLabel}</p><ul>{item.features.map(feature => <li key={feature.title}><Icon name={feature.icon} /><div><h4>{feature.title}</h4>{feature.unit && <span className="service-billing-unit">{feature.unit}</span>}<p>{feature.detail}</p></div></li>)}</ul></div>
-      <p className="service-note"><Icon name="document" />{item.note}</p>
-      {item.id === 'platform-membership' && <SubscriptionStart content={content.subscription.setup} />}
+      {item.note && <p className="service-note"><Icon name="document" />{item.note}</p>}
     </div>
+    <ServiceFaq content={content.faq} contactHref={contactHref} />
   </section>;
 }

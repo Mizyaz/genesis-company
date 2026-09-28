@@ -78,9 +78,12 @@ test('the design loop tells one story: your team, GENESIS and your CAD tools des
   assert.match(component, /timeline\[final\]/); // Stopped or reduced motion shows the finished loop.
   assert.match(component, /<dl className="story-spec">/);
   assert.doesNotMatch(component, /fetch\s*\(|setInterval/);
-  assert.match(read('src/pages/Welcome.tsx'), /<DesignStory compact content=\{site.story.loop\}/);
-  // The software tab shows the whole bridge; the story section joins RFIC expertise and AI agents in GENESIS.
-  assert.match(read('src/shared/SubscriptionOverview.tsx'), /<DesignStory content=\{loop\}/);
+  assert.match(read('src/pages/Welcome.tsx'), /<DesignStory storyLink content=\{site.story.loop\}/);
+  // The software tab shows the bridge as its visual; the story section joins RFIC expertise and AI agents in GENESIS.
+  assert.match(read('src/shared/Services.tsx'), /<DesignStory content=\{loop\}/);
+  // Every appearance says it is an illustration and gives screen readers the five steps in words.
+  assert.match(component, /story-now-note">\{content.note\}/);
+  assert.match(component, /<ol className="sr-only">\{content.steps.map/);
   const explore = read('src/pages/Explore.tsx');
   assert.match(explore, /<Services content=\{site.services\} loop=\{site.story.loop\}/);
   assert.match(explore, /<DesignPillars content=\{site.story.pillars\}/);
@@ -116,9 +119,11 @@ test('services precede the story, remain data-driven and have natural Turkish co
   assert.deepEqual(content.services.items.map(item => item.id), ['platform-membership', 'silicon-demonstration', 'specialised-integration']);
   for (const copy of [content.services.eyebrow, content.services.title, content.services.intro, content.services.action, content.services.scopeLabel, ...content.services.items.flatMap(item => [item.label, item.title, item.headline, item.description, item.note, item.visualLabel, item.scopeLabel, item.action, ...(item.connections ?? []).flatMap(connection => [connection.label, connection.action]), ...(item.legend ?? []), ...item.features.flatMap(feature => [feature.title, feature.detail, feature.unit])])].filter(Boolean)) assert.ok(dictionary[copy], copy);
   for (const item of content.services.items) {
-    assert.equal(item.features.length, 3);
+    assert.ok(item.features.length >= 3 && item.features.every(feature => feature.icon && feature.title && feature.detail), item.id);
     assert.equal(item.stages, undefined);
   }
+  // The software tab says what the application does, module by module.
+  assert.ok(content.services.items[0].features.length >= 5);
   const page = read('src/pages/Explore.tsx');
   assert.ok(page.indexOf('<Services ') < page.indexOf('<section id="story"'));
   assert.match(page, /<Services content=\{site.services\}/);
@@ -135,36 +140,37 @@ test('services precede the story, remain data-driven and have natural Turkish co
   assert.doesNotMatch(page, /hero-index|Reason\. Simulate\. Learn\. Refine\./);
 });
 
-test('subscription distinguishes software access, customer resources and separate services without invented terms', () => {
+test('questions about the offer are answered in a closed FAQ, in the terms of the offer', () => {
   const {services} = JSON.parse(read('src/content/site.json'));
   const dictionary = JSON.parse(read('src/content/tr.json'));
-  const subscription = services.subscription;
-  assert.deepEqual(subscription.parts.map(item => item.id), ['software', 'environment', 'services']);
-  assert.equal(subscription.setup.steps.length, 3);
-  for (const copy of [subscription.label, subscription.hint, subscription.bridge.title, subscription.bridge.intro, subscription.setup.title, subscription.modules.title, subscription.modules.intro, ...subscription.modules.items.flatMap(item => [item.title, item.detail]), ...subscription.parts.flatMap(item => [item.title, item.status, item.detail, ...item.items]), ...subscription.setup.steps.flatMap(step => [step.title, step.detail])]) assert.ok(dictionary[copy], copy);
-  // The subscription names what the application does, module by module.
-  assert.ok(subscription.modules.items.length >= 5 && subscription.modules.items.every(item => item.icon && item.title && item.detail.length > 60));
-  assert.equal(subscription.term, undefined);
-  assert.equal(services.items[0].features[0].unit, undefined);
-  assert.match(services.items[0].features[0].detail, /one user access.*for one year/);
-  assert.doesNotMatch(JSON.stringify(services), /Annual · per user|Per-user annual license/);
-  assert.match(subscription.parts[1].items.join(' '), /CAD and solver licenses.*PDK access.*Compute/);
-  assert.match(services.items[0].note, /not bundled into the software license/);
+  const {faq} = services;
+  assert.ok(faq.items.length >= 6);
+  for (const item of faq.items) {
+    assert.match(item.question, /\?$/);
+    assert.ok(item.answer.length > 60, item.question);
+  }
+  for (const copy of [faq.title, faq.intro, faq.action, ...faq.items.flatMap(item => [item.question, item.answer])]) assert.ok(dictionary[copy], copy);
+  const answers = faq.items.map(item => item.answer).join('\n');
+  assert.match(answers, /one user access to the selected GENESIS modules for one year/);
+  assert.match(answers, /software access, not a chip design/);
+  assert.match(answers, /CAD and solver licenses.*PDK access.*compute/);
+  assert.match(answers, /scoped separately/);
+  assert.match(answers, /own Linux server/);
   assert.doesNotMatch(JSON.stringify(services), /€\s*\d|\d+\s*%|24\/7|unlimited|guaranteed|—/i);
-  const component = read('src/shared/SubscriptionOverview.tsx');
-  assert.match(component, /aria-pressed=\{selected === i\}/);
-  assert.match(component, /data-part=\{part.id\}/);
-  assert.match(component, /aria-live="polite"/);
-  assert.match(component, /content.modules.items.map/);
-  assert.ok(component.indexOf('subscription-bridge') < component.indexOf('subscription-modules')); // Where GENESIS fits comes first.
-  assert.doesNotMatch(JSON.stringify(services) + read('src/shared/Services.tsx'), /\bCLI\b|\bJSON\b|configurations and runners/);
-  assert.doesNotMatch(component, /fetch\s*\(|setInterval|setTimeout/);
+  assert.doesNotMatch(JSON.stringify(services), /\bCLI\b|\bJSON\b|configurations and runners/);
+  const component = read('src/shared/ServiceFaq.tsx');
+  assert.match(component, /<details key=\{item.question\} name=/); // Native disclosure, one open at a time.
+  assert.doesNotMatch(component, /\bopen\b|fetch\s*\(|setInterval|setTimeout/); // Closed until asked.
+  assert.match(component, /id="faq"/);
+  assert.match(read('src/PublicApp.tsx'), /'services', 'faq'/);
+  const services_ = read('src/shared/Services.tsx');
+  assert.ok(services_.indexOf('role="tabpanel"') < services_.indexOf('<ServiceFaq'), 'questions follow the service details');
+  // The long subscription panel stays replaced by the tab's scope list and the questions.
+  assert.equal(services.subscription, undefined);
   assert.equal(services.membership, undefined);
-  assert.equal(existsSync(resolve(root, 'src/shared/MembershipValue.tsx')), false);
-  assert.equal(existsSync(resolve(root, 'src/styles/membership-value.css')), false);
-  assert.doesNotMatch(read('src/shared/Services.tsx'), /service-stages|service-workspace/);
+  for (const path of ['src/shared/SubscriptionOverview.tsx', 'src/styles/subscription-overview.css', 'src/shared/MembershipValue.tsx', 'src/styles/membership-value.css']) assert.equal(existsSync(resolve(root, path)), false, path);
+  assert.doesNotMatch(services_, /service-stages|service-workspace|SubscriptionStart/);
   assert.doesNotMatch(read('src/styles/services.css'), /service-stages|service-stage|service-workspace/);
-  assert.doesNotMatch(read('src/styles/subscription-overview.css'), /animation/);
 });
 
 test('services share contact actions, support keyboard tabs and animate only when visible', () => {
