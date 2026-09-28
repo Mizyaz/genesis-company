@@ -79,6 +79,9 @@ Cloudflare Pages: connect this repository, production branch `main`, build
 command `npm run build`, output directory `dist`, Node 22. No function, Worker,
 API token in the site, or engineering-server access is required.
 
+Link previews (Open Graph) use absolute `https://mizyaz.github.io/genesis-company/`
+URLs in `index.html`. If the site moves, update them in the source project.
+
 ## Source and updates
 
 The editable source remains in the main project's `company-web` directory.
@@ -98,6 +101,6 @@ Contact uses an email link. Theme and motion preferences are stored only in the
 visitor's browser. No analytics or online model is connected.
 
 Presentation images and role profiles were supplied by the GENESIS team.
-Original layout images remain unchanged; preview cropping and theme treatment
-are display-only. Public repository visibility does not grant a license to
+Original layout images remain unchanged; the lighter card previews, preview
+cropping and theme treatment are display-only. Public repository visibility does not grant a license to
 redistribute the layout images or other company materials.

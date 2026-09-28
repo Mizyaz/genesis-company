@@ -32,7 +32,7 @@ export function useLanguage() {
   return language;
 }
 
-const identityKeys = new Set(['id', 'name', 'icon', 'src', 'href', 'url', 'image', 'scholar', 'email', 'band', 'number', 'fit']);
+const identityKeys = new Set(['id', 'name', 'icon', 'src', 'preview', 'href', 'url', 'image', 'scholar', 'email', 'band', 'number', 'fit']);
 /** Localize presentation content only. IDs, URLs and technical values are unchanged. */
 export function translateContent<T>(content: T, t: Translate): T {
   const visit = (value: unknown): unknown => typeof value === 'string' ? t(value)

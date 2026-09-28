@@ -10,7 +10,7 @@
 .welcome-choice > .icon:last-child { margin-left: auto; color: var(--choice-accent); width: 18px; }
 .welcome-choice strong { display: block; font-size: 1.4rem; font-weight: 550; }
 .welcome-choice small { display: block; margin-top: 7px; color: var(--muted); font-size: .8125rem; line-height: 1.6; }
-.welcome-content .design-bridge { max-width: 650px; margin: 32px auto 0; }
+.welcome-content .design-story { margin-top: 32px; }
 .product-launch { width: min(620px, 100%); }
 .welcome-back { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: .8125rem; margin-bottom: 32px; }
 .welcome-back .icon { transform: rotate(180deg); width: 16px; }

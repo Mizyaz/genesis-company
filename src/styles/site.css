@@ -129,7 +129,7 @@ img { display: block; max-width: 100%; }
 .story-narrative > div { min-width: 0; }
 .story-copy { color: var(--muted); line-height: 1.85; margin-top: 28px; font-size: .95rem; }
 .story-copy p + p { margin-top: 20px; }
-@media (max-width: 850px) { .story-narrative { grid-template-columns: 1fr; }.story-narrative > .design-loop { width: 100%; max-width: 580px; justify-self: center; } }
+@media (max-width: 850px) { .story-narrative { grid-template-columns: 1fr; }.story-narrative > .design-story { width: 100%; max-width: 620px; justify-self: center; } }
 .portfolio-section { border-top: 1px solid var(--border-soft); }
 .portfolio-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
 .portfolio-card { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); overflow: hidden; transition: border-color .2s, transform .2s; }
@@ -149,21 +149,6 @@ img { display: block; max-width: 100%; }
 .portfolio-copy > .eyebrow { font-size: .625rem; color: var(--subtle); letter-spacing: .1em; }
 .portfolio-copy h3 { font-size: 1.25rem; font-weight: 550; letter-spacing: -.02em; margin: 10px 0 14px; }
 .portfolio-copy > p:last-child { color: var(--muted); font-size: .9375rem; line-height: 1.75; }
-.design-loop { min-width: 0; text-align: center; container-type: inline-size; }
-.design-loop-graphic { position: relative; aspect-ratio: 600 / 440; isolation: isolate; }
-.design-loop-energy { position: absolute; width: 100%; height: 100%; inset: 0; pointer-events: none; }
-.loop-node { position: absolute; top: 14%; width: 34%; height: 44%; display: flex; flex-direction: column; align-items: center; justify-content: space-between; }
-.loop-node-left { left: 8%; --node-accent: var(--cyan); }
-.loop-node-right { right: 8%; --node-accent: var(--violet); }
-.loop-node .circuit-artwork, .loop-candidate-space { width: 100%; aspect-ratio: 320 / 224; flex-shrink: 0; }
-.loop-node .circuit-label { display: none; }
-.loop-node h3 { font-size: clamp(.875rem, 3cqw, 1.125rem); font-weight: 550; color: var(--text); margin-bottom: 8px; }
-.loop-outcome { position: absolute; left: 19%; right: 19%; top: 76%; bottom: 1%; border: 1px solid transparent; border-radius: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(var(--surface), var(--surface)) padding-box, linear-gradient(110deg, var(--flow-cyan), color-mix(in srgb, var(--flow-cyan) 30%, var(--border)), var(--flow-violet)) border-box; box-shadow: 0 -4px 28px color-mix(in srgb, var(--flow-cyan) 9%, transparent), 0 8px 25px color-mix(in srgb, var(--flow-violet) 6%, transparent); }
-.loop-outcome .brand { font-size: clamp(1.125rem, 4cqw, 1.65rem); gap: 9px; }
-.loop-outcome .brand img { width: clamp(26px, 6cqw, 35px); height: clamp(29px, 7cqw, 38px); }
-@container (max-width: 430px) {
-  .loop-node h3 { font-size: clamp(.75rem, 3.8cqw, .875rem); line-height: 1.2; margin-bottom: 0; }
-}
 .contact-section { text-align: center; padding-block: 105px; }
 .contact-section h2 { font-size: clamp(2.3rem, 5vw, 4.2rem); letter-spacing: -.04em; line-height: 1.2; font-weight: 550; margin-top: 25px; }
 .contact-actions { display: flex; justify-content: center; gap: 16px; margin: 38px 0 25px; }

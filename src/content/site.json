@@ -35,13 +35,14 @@
     {
       "id": "spdt",
       "number": "01",
-      "title": "D-band SPDT switch",
+      "title": "Wideband SPDT switch",
       "kind": "Series-shunt architecture",
       "band": "60–150 GHz",
       "images": [
         {
           "src": "/assets/spdt.png",
-          "alt": "User-supplied full SPDT switch layout",
+          "preview": "/assets/spdt-preview.webp",
+          "alt": "Full layout of the SPDT switch",
           "label": "Full layout",
           "fit": "cover",
           "width": 2048,
@@ -55,7 +56,8 @@
         },
         {
           "src": "/assets/spdt-detail.png",
-          "alt": "User-supplied close-up of the SPDT transistors and their connections",
+          "preview": "/assets/spdt-detail-preview.webp",
+          "alt": "Close-up of the SPDT transistors and their connections",
           "label": "Transistor detail",
           "fit": "contain",
           "width": 444,
@@ -73,7 +75,8 @@
       "images": [
         {
           "src": "/assets/mixer.png",
-          "alt": "User-supplied quadcore mixer layout",
+          "preview": "/assets/mixer-preview.webp",
+          "alt": "Layout of the quadcore passive mixer",
           "label": "Full layout",
           "fit": "contain",
           "width": 739,
@@ -91,7 +94,8 @@
       "images": [
         {
           "src": "/assets/divider.png",
-          "alt": "User-supplied compact three-port power divider layout",
+          "preview": "/assets/divider-preview.webp",
+          "alt": "Layout of the compact three-port power divider",
           "label": "Full layout",
           "fit": "contain",
           "width": 151,
@@ -109,15 +113,42 @@
     "scopeLabel": "Service scope",
     "subscription": {
       "label": "Subscription details",
-      "teamLabel": "Your design team",
       "hint": "Select a part to see its scope.",
-      "flow": {
-        "label": "Where GENESIS fits",
-        "designer": "You set the requirements and choose what moves forward.",
-        "genesis": "Prepares design iterations, runs your tools and compares the results.",
-        "toolsLabel": "Your design tools",
-        "tools": "Your CAD and simulation tools calculate circuit behavior.",
-        "feedback": "GENESIS brings the results back for your next decision."
+      "modules": {
+        "title": "What GENESIS does",
+        "intro": "GENESIS runs on your own Linux server, next to your Cadence tools and licenses. Your engineers use it in the browser.",
+        "items": [
+          {
+            "icon": "grid",
+            "title": "Passive synthesis",
+            "detail": "Draw the pixel area, place the ports and set S-parameter goals. GENESIS searches layouts for baluns, power dividers, couplers, filters and other N-port structures, and checks each candidate with your EM solver."
+          },
+          {
+            "icon": "sliders",
+            "title": "Optimization",
+            "detail": "Choose evolutionary, Bayesian or reinforcement-learning search, run many EM simulations in parallel, compare the trade-offs on a Pareto front and download the best layout as GDS."
+          },
+          {
+            "icon": "chip",
+            "title": "Active circuits",
+            "detail": "Open a Cadence schematic, set its design variables and run Spectre analyses such as S-parameters, noise, harmonic balance and stability. Tune the variables toward S-parameter targets."
+          },
+          {
+            "icon": "switch",
+            "title": "Composer",
+            "detail": "Place active stages and passive structures on one canvas, connect their ports, run each block and export the design to Cadence as a library with testbenches."
+          },
+          {
+            "icon": "spark",
+            "title": "Design assistant",
+            "detail": "Describe what you want to design. The assistant opens the right tool with a first setup and can start and follow an optimization for you."
+          },
+          {
+            "icon": "document",
+            "title": "Results and scripting",
+            "detail": "Every run keeps its settings, responses and GDS files, so you can compare runs and continue from earlier work. What you do in the interface can also be run from Python."
+          }
+        ]
       },
       "parts": [
         {
@@ -181,8 +212,8 @@
         "icon": "layers",
         "label": "Software",
         "title": "Software subscription",
-        "headline": "GENESIS access for your design team.",
-        "description": "Give your team access to GENESIS in your design environment. Your subscription specifies the modules, licensed users, software delivery and support you receive.",
+        "headline": "Your RF and mmWave design environment.",
+        "description": "GENESIS brings passive synthesis, optimization, active circuit simulation and a design assistant into one environment. Your subscription gives your team access to the modules and support agreed in your offer.",
         "visualLabel": "WORKSPACE",
         "action": "Request subscription details",
         "scopeLabel": "Access, delivery and support",
@@ -213,6 +244,10 @@
         "headline": "Take your design to silicon.",
         "description": "Technical support with prototype planning, fabrication preparation and measurement.",
         "visualLabel": "PROTOTYPE",
+        "legend": [
+          "Simulated",
+          "Measured"
+        ],
         "features": [
           {
             "icon": "document",
@@ -243,19 +278,23 @@
         "connections": [
           {
             "icon": "switch",
-            "label": "CAD tools"
+            "label": "CAD tools",
+            "action": "Export to Cadence"
           },
           {
             "icon": "wave",
-            "label": "EM solvers"
+            "label": "EM solvers",
+            "action": "Run EM simulation"
           },
           {
             "icon": "layers",
-            "label": "Device libraries"
+            "label": "Device libraries",
+            "action": "Load device models"
           },
           {
             "icon": "sliders",
-            "label": "Your workflows"
+            "label": "Your workflows",
+            "action": "Record the results"
           }
         ],
         "features": [
@@ -279,30 +318,6 @@
       }
     ]
   },
-  "designLoop": {
-    "left": {
-      "title": "RFIC expertise",
-      "icon": "chip",
-      "items": [
-        "Circuit design",
-        "EM knowledge",
-        "Silicon processes",
-        "Real-world constraints"
-      ]
-    },
-    "right": {
-      "title": "AI agents",
-      "icon": "spark",
-      "items": [
-        "Reasoning",
-        "Planning",
-        "Optimization",
-        "Learning"
-      ]
-    },
-    "outcome": "Autonomous RFIC design engine",
-    "caption": "Domain expertise meets autonomous intelligence."
-  },
   "story": {
     "eyebrow": "OUR STORY",
     "headline": "Why we’re building GENESIS.",
@@ -311,28 +326,48 @@
       "Changing a circuit is only one part of the job. Engineers also need to prepare the next simulation, compare it with earlier runs and check what the change means for the physical design.",
       "We are building GENESIS so that this process does not need to be reconstructed with every iteration. Engineers should be able to focus on the circuit, and carry the settings and results of earlier work into their next design."
     ],
-    "diagram": {
-      "designer": {
-        "title": "Circuit designers",
-        "detail": "Set the intent. Define the constraints. Make the engineering decisions.",
-        "compact": "Your intent."
+    "loop": {
+      "caption": "The GENESIS design loop: from your target to a layout that meets it.",
+      "target": {
+        "title": "Your target",
+        "items": [
+          "Frequency band",
+          "Loss limit",
+          "Port positions"
+        ]
       },
-      "engine": {
-        "title": "AI-assisted orchestration",
-        "detail": "Translate intent into structured, tool-driven workflows.",
-        "compact": "Connected intelligence."
+      "candidate": "Candidate",
+      "best": "Best candidate",
+      "response": "Response",
+      "solver": {
+        "title": "Your EM solver",
+        "running": "Simulating…",
+        "outside": "Outside the target",
+        "met": "Target met"
       },
-      "tools": {
-        "title": "CAD tools",
-        "detail": "Build, simulate and verify with dedicated engineering tools.",
-        "compact": "Your tools."
-      },
-      "intent": "Design intent",
-      "workflow": "Structured workflows",
-      "feedback": "Results & feedback",
-      "assets": "PDKs · device models",
-      "environment": "Controlled engineering environment",
-      "caption": "Circuit designers and CAD tools, connected through GENESIS."
+      "steps": [
+        {
+          "title": "Set the target",
+          "detail": "You define the frequency band, the allowed loss and where the ports sit."
+        },
+        {
+          "title": "GENESIS proposes a layout",
+          "detail": "It generates a candidate geometry for your process."
+        },
+        {
+          "title": "Your EM solver checks it",
+          "detail": "A full-wave simulation returns the real response."
+        },
+        {
+          "title": "Compare and refine",
+          "detail": "GENESIS learns from the gap and proposes a better candidate."
+        },
+        {
+          "title": "Target met",
+          "detail": "The best candidate moves on to layout and verification."
+        }
+      ],
+      "note": "Illustration of the loop, not measured data."
     }
   },
   "workflow": {
@@ -353,7 +388,7 @@
         "specialty": "Technology strategy · Venture building",
         "description": "20+ years in technology strategy, venture building and AI-driven innovation, with experience in Silicon Valley and international networks.",
         "image": "/assets/team-venture.webp",
-        "alt": "Venture architect portrait from the GENESIS overview",
+        "alt": "Portrait of Mehmet Parlak",
         "focus": [
           "Strategy & execution",
           "VC & partnerships",
@@ -368,7 +403,7 @@
         "specialty": "RFIC design automation · Multi-agent systems",
         "description": "Research in RFIC design, machine learning and optimization, with a focus on autonomous design systems and advanced silicon technologies.",
         "image": "/assets/team-research.webp",
-        "alt": "PhD researcher portrait from the GENESIS overview",
+        "alt": "Portrait of İslam Güven",
         "focus": [
           "RFIC & mmWave",
           "AI agents & ML",

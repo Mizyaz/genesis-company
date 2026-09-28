@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 import test from 'node:test';
 import ts from 'typescript';
@@ -28,6 +28,9 @@ test('TR/ENG dictionary covers static labels, preserves technical identity and u
     assert.doesNotMatch(turkish, /—/);
     assert.deepEqual([...english.matchAll(/\{\w+\}/g)].map(m=>m[0]).sort(), [...turkish.matchAll(/\{\w+\}/g)].map(m=>m[0]).sort());
   }
+  // JSON.parse silently keeps the last duplicate; one once replaced the Platform navigation label.
+  const keys = ts.parseJsonText('tr.json', read('src/content/tr.json')).statements[0].expression.properties.map(property => property.name.text);
+  assert.deepEqual(keys.filter((key, index) => keys.indexOf(key) !== index), []);
   const code = ts.transpileModule(read('src/shared/Language.tsx'), { compilerOptions: { module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true } }).outputText;
   const exports = {}, require = createRequire(import.meta.url);
   new Function('exports', 'require', code)(exports, id => id === '../content/tr.json' ? dictionary : require(id));
@@ -44,44 +47,33 @@ test('TR/ENG dictionary covers static labels, preserves technical identity and u
   assert.match(read('src/public.tsx'), /<LanguageProvider>/);
 });
 
-test('company diagrams share RF artwork instead of text cards and respect visible motion', () => {
-  const artwork = read('src/shared/CircuitArtwork.tsx');
-  const bridge = read('src/shared/DesignBridge.tsx');
-  const loop = read('src/shared/DesignLoop.tsx');
-  for (const kind of ['schematic', 'designer', 'engine', 'simulation']) assert.ok(artwork.includes(`kind === '${kind}'`));
-  assert.match(artwork, /circuit-mos/);
-  assert.match(artwork, /designer-person/);
-  assert.match(artwork, /simulation-response/);
-  assert.doesNotMatch(artwork, /kind === 'layout'/);
-  assert.match(artwork, /circuit-radio/);
+test('the design loop tells one story: every candidate is judged and only the last meets the target', () => {
+  const code = ts.transpileModule(read('src/shared/designStory.ts'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText;
+  const story = {};
+  new Function('exports', code)(story);
+  const { candidates, meetsTarget, failingPath, timeline } = story;
+  assert.ok(candidates.length >= 2);
+  for (const layout of candidates) assert.ok(layout.length === 9 && layout.every(row => /^[.#]{9}$/.test(row)));
+  candidates.forEach((_, i) => assert.equal(meetsTarget(i), i === candidates.length - 1, `candidate ${i}`));
+  candidates.slice(0, -1).forEach((_, i) => assert.match(failingPath(i), /^M/, `candidate ${i} shows where it misses the target`));
+  assert.equal(failingPath(candidates.length - 1), '');
+  assert.deepEqual([timeline[0].step, timeline.at(-1).step], [1, 5]);
+  assert.ok(timeline.at(-1).met && timeline.slice(0, -1).every(frame => !frame.met));
+  assert.ok(timeline.every(frame => frame.ms >= 1000), 'each step stays long enough to read');
+  const { story: content } = JSON.parse(read('src/content/site.json'));
+  assert.equal(content.loop.steps.length, Math.max(...timeline.map(frame => frame.step)));
+  const component = read('src/shared/DesignStory.tsx');
+  assert.match(component, /useVisibleMotion/);
+  assert.match(component, /timeline\[final\]/); // Stopped or reduced motion shows the finished loop.
+  assert.doesNotMatch(component, /fetch\s*\(|setInterval/);
+  assert.match(read('src/pages/Welcome.tsx'), /<DesignStory compact content=\{site.story.loop\}/);
   const explore = read('src/pages/Explore.tsx');
-  assert.equal((explore.match(/<DesignLoop /g) || []).length, 1);
+  assert.match(explore, /<DesignStory content=\{site.story.loop\}/);
   assert.match(explore, /className="story-narrative"/);
-  assert.doesNotMatch(explore, /<DesignBridge /); // The subscription already explains designer / GENESIS / tools.
-  assert.doesNotMatch(explore, /approach-section/);
   assert.match(explore, /id="team"/); // Existing approach links still reach the story illustration.
-  for (const diagram of [bridge, loop]) {
-    assert.match(diagram, /import \{ CircuitArtwork \}/);
-    assert.match(diagram, /useVisibleMotion/);
-    assert.match(diagram, /running=\{running\}/);
-    assert.match(diagram, /className="sr-only"/);
-    assert.doesNotMatch(diagram, /<article|<ul|bridge-actor|loop-node-icon/);
-  }
-  assert.match(read('src/styles/circuit-artwork.css'), /prefers-reduced-motion: reduce/);
-  assert.match(read('src/styles/circuit-artwork.css'), /animation-play-state: running/);
-  assert.doesNotMatch(artwork, /from .*?(?:web\/|assistant)|fetch\s*\(/);
-});
-
-test('story flow uses fixed circuits and selection, retaining visibility and theme controls', () => {
-  const flow = read('src/shared/EnergyFlow.tsx');
-  assert.doesNotMatch(flow, /ringPoint|const rings|ribbon|strand/);
-  assert.match(flow, /const leftFeed: Point\[\]/);
-  assert.match(flow, /const rightFeed: Point\[\]/);
-  assert.match(flow, /const active = selected \? 1/);
-  assert.match(flow, /IntersectionObserver/);
-  assert.match(flow, /document\.hidden \|\| paused/);
-  assert.match(flow, /attributeFilter: \['data-theme', 'style', 'class'\]/);
-  assert.doesNotMatch(read('src/styles/site.css'), /\.design-loop-energy\s*\{\s*display:\s*none/);
+  const css = read('src/styles/design-story.css');
+  assert.match(css, /prefers-reduced-motion: reduce/);
+  assert.match(css, /data-motion="off"/);
 });
 
 test('welcome uses the shared, single-line brand entrance with readable acronym emphasis', () => {
@@ -97,6 +89,8 @@ test('welcome uses the shared, single-line brand entrance with readable acronym 
   assert.match(css, /identity-signature-arrive .65s ease-out 1.25s/);
   assert.match(css, /data-running="false"/);
   assert.doesNotMatch(welcome + read('src/styles/welcome.css'), /welcome-tagline|welcome-signature|welcome-identity/);
+  // Decorative motion that told no story (drifting chips, running trace dashes) stays removed.
+  assert.doesNotMatch(welcome + identity + css, /CircuitBackdrop|identity-signal|chip-drift/);
 });
 
 test('services precede the story, remain data-driven and have natural Turkish copy', () => {
@@ -104,7 +98,7 @@ test('services precede the story, remain data-driven and have natural Turkish co
   const dictionary = JSON.parse(read('src/content/tr.json'));
   assert.equal(content.services.items.length, 3);
   assert.deepEqual(content.services.items.map(item => item.id), ['platform-membership', 'silicon-demonstration', 'specialised-integration']);
-  for (const copy of [content.services.eyebrow, content.services.title, content.services.intro, content.services.action, content.services.scopeLabel, ...content.services.items.flatMap(item => [item.label, item.title, item.headline, item.description, item.note, item.visualLabel, item.scopeLabel, item.action, ...(item.connections ?? []).map(connection => connection.label), ...item.features.flatMap(feature => [feature.title, feature.detail, feature.unit])])].filter(Boolean)) assert.ok(dictionary[copy], copy);
+  for (const copy of [content.services.eyebrow, content.services.title, content.services.intro, content.services.action, content.services.scopeLabel, ...content.services.items.flatMap(item => [item.label, item.title, item.headline, item.description, item.note, item.visualLabel, item.scopeLabel, item.action, ...(item.connections ?? []).flatMap(connection => [connection.label, connection.action]), ...(item.legend ?? []), ...item.features.flatMap(feature => [feature.title, feature.detail, feature.unit])])].filter(Boolean)) assert.ok(dictionary[copy], copy);
   for (const item of content.services.items) {
     assert.equal(item.features.length, 3);
     assert.equal(item.stages, undefined);
@@ -131,7 +125,9 @@ test('subscription distinguishes software access, customer resources and separat
   const subscription = services.subscription;
   assert.deepEqual(subscription.parts.map(item => item.id), ['software', 'environment', 'services']);
   assert.equal(subscription.setup.steps.length, 3);
-  for (const copy of [subscription.label, subscription.teamLabel, subscription.hint, subscription.setup.title, ...Object.values(subscription.flow), ...subscription.parts.flatMap(item => [item.title, item.status, item.detail, ...item.items]), ...subscription.setup.steps.flatMap(step => [step.title, step.detail])]) assert.ok(dictionary[copy], copy);
+  for (const copy of [subscription.label, subscription.hint, subscription.setup.title, subscription.modules.title, subscription.modules.intro, ...subscription.modules.items.flatMap(item => [item.title, item.detail]), ...subscription.parts.flatMap(item => [item.title, item.status, item.detail, ...item.items]), ...subscription.setup.steps.flatMap(step => [step.title, step.detail])]) assert.ok(dictionary[copy], copy);
+  // The subscription names what the application does, module by module.
+  assert.ok(subscription.modules.items.length >= 5 && subscription.modules.items.every(item => item.icon && item.title && item.detail.length > 60));
   assert.equal(subscription.term, undefined);
   assert.equal(services.items[0].features[0].unit, undefined);
   assert.match(services.items[0].features[0].detail, /one user access.*for one year/);
@@ -142,11 +138,8 @@ test('subscription distinguishes software access, customer resources and separat
   const component = read('src/shared/SubscriptionOverview.tsx');
   assert.match(component, /aria-pressed=\{selected === i\}/);
   assert.match(component, /data-part=\{part.id\}/);
-  assert.match(component, /useVisibleMotion<HTMLElement>/);
   assert.match(component, /aria-live="polite"/);
-  for (const kind of ['designer', 'engine', 'simulation']) assert.ok(component.includes(`kind="${kind}"`));
-  assert.match(component, /<section ref=\{ref\} className="subscription-role"/);
-  assert.match(component, /className="subscription-feedback"/);
+  assert.match(component, /content.modules.items.map/);
   assert.doesNotMatch(JSON.stringify(services) + read('src/shared/Services.tsx'), /\bCLI\b|\bJSON\b|configurations and runners/);
   assert.doesNotMatch(component, /fetch\s*\(|setInterval|setTimeout/);
   assert.equal(services.membership, undefined);
@@ -154,7 +147,7 @@ test('subscription distinguishes software access, customer resources and separat
   assert.equal(existsSync(resolve(root, 'src/styles/membership-value.css')), false);
   assert.doesNotMatch(read('src/shared/Services.tsx'), /service-stages|service-workspace/);
   assert.doesNotMatch(read('src/styles/services.css'), /service-stages|service-stage|service-workspace/);
-  assert.match(read('src/styles/subscription-overview.css'), /prefers-reduced-motion: reduce/);
+  assert.doesNotMatch(read('src/styles/subscription-overview.css'), /animation/);
 });
 
 test('services share contact actions, support keyboard tabs and animate only when visible', () => {
@@ -165,7 +158,6 @@ test('services share contact actions, support keyboard tabs and animate only whe
   assert.match(services, /aria-selected=\{selected === i\}/);
   assert.match(services, /useVisibleMotion<HTMLElement>/);
   assert.match(services, /data-active=\{running\}/);
-  assert.match(services, /running=\{running\}/);
   for (const path of ['src/shared/Services.tsx', 'src/pages/Explore.tsx', 'src/pages/ProductLaunch.tsx']) {
     assert.match(read(path), /<ActionLink [^>]*icon="mail"/);
     assert.doesNotMatch(read(path), /className="text-link services-contact"/);
@@ -196,7 +188,7 @@ test('silicon gate is shared, optional and presentation-only', () => {
 test('public source has no assistant, landing page or engineering service', () => {
   for (const path of ['src/App.tsx', 'src/main.tsx', 'src/pages/Landing.tsx', 'src/assistant', 'server', '.env']) assert.equal(existsSync(resolve(root, path)), false, path);
   const content = JSON.parse(read('src/content/site.json'));
-  assert.deepEqual(Object.keys(content).sort(), ['about', 'brand', 'designLoop', 'portfolio', 'services', 'stages', 'story', 'workflow'].sort());
+  assert.deepEqual(Object.keys(content).sort(), ['about', 'brand', 'portfolio', 'services', 'stages', 'story', 'workflow'].sort());
   const source = walk('src').map(read).join('\n');
   assert.doesNotMatch(source, /localhost|127\.0\.0\.1|\/api\/|VITE_WORKBENCH_URL|codex exec|fetch\s*\(|new WebSocket/);
   assert.match(read('index.html'), /connect-src 'none'/);
@@ -205,11 +197,19 @@ test('public source has no assistant, landing page or engineering service', () =
 
 test('every published image is local and included', () => {
   const content = JSON.parse(read('src/content/site.json'));
-  const paths = [...content.portfolio.flatMap(item => item.images.map(image => image.src)), ...content.about.people.map(person => person.image)];
+  const images = content.portfolio.flatMap(item => item.images);
+  const paths = [...images.flatMap(image => [image.src, image.preview]), ...content.about.people.map(person => person.image)];
   for (const path of paths) {
     assert.match(path, /^\/assets\/[\w.-]+$/);
     assert.ok(existsSync(resolve(root, `public${path}`)), path);
   }
+  // Cards load light previews; the viewer and Original links keep the unchanged source files.
+  for (const image of images) {
+    assert.match(image.preview, /\.webp$/, image.src);
+    assert.ok(statSync(resolve(root, `public${image.preview}`)).size < statSync(resolve(root, `public${image.src}`)).size / 2, image.preview);
+  }
+  const card = read('index.html').match(/<meta property="og:image" content="https:\/\/[^"]+?(\/assets\/[\w.-]+)"/);
+  assert.ok(card && existsSync(resolve(root, `public${card[1]}`)), 'og:image must be a bundled asset');
 });
 
 test('publication records are attributable, deduplicated and exclude preprints', () => {

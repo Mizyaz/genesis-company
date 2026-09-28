@@ -1,8 +1,8 @@
-import { useId, useRef, useState, type KeyboardEvent } from 'react';
-import { ActionLink, Icon, SectionHeading } from './ui';
-import { CircuitArtwork } from './CircuitArtwork';
+import { useId, useRef, useState, type CSSProperties, type KeyboardEvent } from 'react';
+import { ActionLink, Brand, Icon, SectionHeading } from './ui';
 import { useVisibleMotion } from './MotionSettings';
 import { SubscriptionOverview, SubscriptionStart, type SubscriptionContent } from './SubscriptionOverview';
+import { candidates, curvePath, response, x, y } from './designStory';
 import '../styles/services.css';
 
 type ServicesContent = {
@@ -11,44 +11,62 @@ type ServicesContent = {
   items: {
     id: string; icon: string; label: string; title: string; description: string;
     headline: string; note: string; visualLabel: string; scopeLabel?: string; action?: string;
-    connections?: { icon: string; label: string }[];
+    legend?: string[];
+    connections?: { icon: string; label: string; action: string }[];
     features: { icon: string; title: string; detail: string; unit?: string }[];
   }[];
 };
 
+// Illustrative measured points, slightly below the simulated curve as bench losses usually are.
+const measured = response(candidates.length - 1, 13).slice(1, -1).map((point, i) => ({ f: point.f, db: point.db - 0.18 - 0.12 * Math.sin(i * 1.7) }));
+
+/** From wafer to measurement: the loop's final layout, probed and compared with its simulation. */
+function SiliconStory({ legend }: { legend: string[] }) {
+  const clip = `service-wafer-${useId().replace(/:/g, '')}`;
+  const plot = { left: 250, right: 452, top: 196, bottom: 292 };
+  const layout = candidates[candidates.length - 1];
+  return <svg className="silicon-story" viewBox="0 0 480 320" aria-hidden="true">
+    <defs><clipPath id={clip}><circle cx="112" cy="168" r="86" /></clipPath></defs>
+    <circle className="silicon-wafer" cx="112" cy="168" r="88" />
+    <g clipPath={`url(#${clip})`}>{Array.from({ length: 49 }, (_, i) =>
+      <rect key={i} className="silicon-die" x={28 + (i % 7) * 24} y={84 + Math.floor(i / 7) * 24} width="20" height="20" rx="2" />)}</g>
+    <rect className="silicon-die silicon-die-picked" x="124" y="132" width="20" height="20" rx="2" />
+    <path className="silicon-zoom" d="M144 132L232 36M144 152L232 156" />
+    <rect className="silicon-closeup" x="232" y="36" width="120" height="120" rx="6" />
+    {layout.flatMap((row, r) => [...row].map((cell, c) => cell === '#' &&
+      <rect key={`${r}-${c}`} className="silicon-metal" x={248 + c * 10} y={52 + r * 10} width="8" height="8" rx="1" />))}
+    {[[236, 92], [340, 62], [340, 122]].map(([px, py]) => <rect key={`${px}-${py}`} className="silicon-pad" x={px} y={py} width="8" height="8" rx="1" />)}
+    <g className="silicon-probes"><path d="M200 12H222L240 88" /><path d="M392 12H362L344 58" /><circle cx="240" cy="92" r="3" /><circle cx="344" cy="62" r="3" /></g>
+    <path className="silicon-flow" d="M292 156V182m-5-6 5 6 5-6" />
+    <path className="silicon-axis" d="M250 186V292H452" />
+    <path className="silicon-sweep" d="M250 190V292" />
+    <path className="silicon-simulated" d={curvePath(candidates.length - 1, plot)} />
+    {measured.map(point => <circle key={point.f} className="silicon-measured" style={{ '--delay': (0.6 + 3 * point.f).toFixed(2) } as CSSProperties} cx={x(point.f, plot)} cy={y(point.db, plot)} r="3" />)}
+    <g className="silicon-legend"><path d="M250 308h16" /><text x="272" y="311">{legend[0]}</text><circle cx="358" cy="308" r="3" /><text x="368" y="311">{legend[1]}</text></g>
+  </svg>;
+}
+
+/** GENESIS sends one job at a time to a connected tool; the hub names the job. */
+function IntegrationStory({ connections }: { connections: NonNullable<ServicesContent['items'][number]['connections']> }) {
+  const paths = ['M144 64H162V146H180', 'M336 64H318V146H300', 'M144 256H162V174H180', 'M336 256H318V174H300'];
+  return <div className="integration-story">
+    <svg viewBox="0 0 480 320" aria-hidden="true">{paths.map((d, i) => <path key={d} className="integration-link" style={{ '--order': i } as CSSProperties} d={d} />)}</svg>
+    {connections.map((connection, i) => <div key={connection.label} className={`integration-tool integration-tool-${i}`} style={{ '--order': i } as CSSProperties}>
+      <Icon name={connection.icon} /><span>{connection.label}</span>
+    </div>)}
+    <div className="integration-hub"><Brand /><span className="integration-actions">{connections.map((connection, i) =>
+      <span key={connection.action} style={{ '--order': i } as CSSProperties}>{connection.action}</span>)}</span></div>
+  </div>;
+}
+
 /** A conceptual product illustration, not a live CAD session or measured result. */
 function ServiceVisual({ item }: { item: ServicesContent['items'][number] }) {
-  const { ref, running } = useVisibleMotion<HTMLElement>();
-  const clip = `service-wafer-${useId().replace(/:/g, '')}`;
-  return <figure ref={ref} className="service-visual" data-active={running} data-kind={item.id}>
+  const { ref, enabled, running } = useVisibleMotion<HTMLElement>();
+  return <figure ref={ref} className="service-visual" data-active={running} data-motion={enabled ? 'on' : 'off'} data-kind={item.id}>
     <div className="service-visual-heading"><span className="service-live-dot" /><span>GENESIS</span><span>{item.visualLabel}</span></div>
-    <div className="service-artboard" aria-hidden="true">
-      <div className="service-aura" />
-      {item.id === 'silicon-demonstration' && <svg className="service-wafer" viewBox="0 0 480 320" fill="none">
-        <defs><clipPath id={clip}><circle cx="155" cy="140" r="105" /></clipPath></defs>
-        <circle className="service-wafer-base" cx="155" cy="140" r="105" />
-        <g clipPath={`url(#${clip})`}>
-          {Array.from({ length: 49 }, (_, i) => <rect className="service-die" key={i} x={43 + (i % 7) * 33} y={28 + Math.floor(i / 7) * 33} width="27" height="27" rx="2" style={{ animationDelay: `${i * -.16}s` }} />)}
-          <path className="service-wafer-scan" d="M40 34H270" />
-        </g>
-        <circle className="service-wafer-rim" cx="155" cy="140" r="112" />
-        <path className="service-signal-base" d="M195 166h63l46 42h26M376 193v-52h56" />
-        <path className="service-signal" pathLength="100" d="M195 166h63l46 42h26M376 193v-52h56" />
-        <g className="service-prototype">
-          <rect x="305" y="174" width="125" height="112" rx="10" />
-          <rect x="334" y="199" width="65" height="61" rx="4" />
-          <path d="M341 230h10c0-16 10-16 10 0c0-16 10-16 10 0h21M374 230v10m-8 0h16m-16 6h16m-8 0v9" />
-          {[0,1,2,3,4].map(i => <path key={i} d={`M${342+i*12} 187v12m0 61v13M322 ${207+i*11}h12m65 0h18`} />)}
-        </g>
-        <path className="service-probe" d="M419 86v45l-39 60m-15-120v53l-19 69" />
-        <circle className="service-probe-tip" cx="380" cy="191" r="5" /><circle className="service-probe-tip" cx="346" cy="193" r="5" />
-        <path className="service-measured-wave" d="M285 75h15q10-38 20 0t20 0t20 0t20 0h24" />
-      </svg>}
-      {item.id === 'specialised-integration' && <>
-        <svg className="service-connectors" viewBox="0 0 480 320" fill="none"><path className="service-signal-base" d="M75 70h82l45 63M405 70h-82l-45 63M75 250h82l45-63M405 250h-82l-45-63" /><path className="service-signal" pathLength="100" d="M75 70h82l45 63M405 70h-82l-45 63M75 250h82l45-63M405 250h-82l-45-63" /></svg>
-        <div className="service-integration-core"><CircuitArtwork kind="engine" running={running} /></div>
-        {item.connections?.map((connection, i) => <div className={`service-connector service-connector-${i}`} key={connection.icon}><Icon name={connection.icon} /><span>{connection.label}</span></div>)}
-      </>}
+    <div className="service-artboard">
+      {item.id === 'silicon-demonstration' && <SiliconStory legend={item.legend ?? []} />}
+      {item.id === 'specialised-integration' && item.connections && <IntegrationStory connections={item.connections} />}
     </div>
   </figure>;
 }
