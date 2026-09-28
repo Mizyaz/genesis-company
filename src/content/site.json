@@ -107,82 +107,55 @@
   ],
   "membership": {
     "eyebrow": "GENESIS MEMBERSHIP",
-    "headline": "Your RF design environment,",
-    "headlineAccent": "as an annual membership.",
-    "intro": "GENESIS works between your design team and your CAD tools. It sizes devices, synthesizes matching networks and passive structures, runs your circuit and EM simulations and compares every result with your target. Your team sets the goals and makes the decisions.",
-    "plan": {
-      "title": "Membership at a glance",
-      "terms": [
-        {
-          "label": "License",
-          "value": "Per user, for one year"
-        },
-        {
-          "label": "Price",
-          "value": "Confirmed in your offer"
-        }
-      ],
-      "included": {
-        "title": "Included",
-        "items": [
-          "The GENESIS modules agreed for your team",
-          "Software updates and documentation",
-          "Product support and onboarding"
-        ]
-      },
-      "provided": {
-        "title": "You provide",
-        "items": [
-          "Compatible Cadence and EM solver licenses",
-          "PDK access and device models",
-          "A Linux server in your environment"
-        ]
-      },
-      "steps": {
-        "title": "How it starts",
-        "items": [
-          "We agree users and modules",
-          "You prepare your environment",
-          "Your first project starts"
-        ]
-      },
-      "action": "Request a membership offer",
-      "note": "Custom integration, managed compute, circuit design consulting and fabrication are scoped separately."
-    },
-    "visualLabel": "DESIGN LOOP",
-    "modulesTitle": "What GENESIS does",
-    "modules": [
+    "headline": "Start with a free demo,",
+    "headlineAccent": "then pick your tier.",
+    "intro": "Every tier runs next to your Cadence tools, on your own server. Choose what fits your team; we confirm the details and the price in your offer.",
+    "tiers": [
       {
-        "icon": "grid",
-        "title": "Passive synthesis",
-        "detail": "Pixel layouts for baluns, dividers, couplers, filters and other N-port structures, each checked with your EM solver."
+        "id": "demo",
+        "icon": "play",
+        "title": "Demo",
+        "label": "Free",
+        "pitch": "See GENESIS on a design like yours.",
+        "features": [
+          "Free live demo sessions with our team",
+          "A guided run on an example RF block",
+          "Answers on your tools, setup and fit"
+        ],
+        "action": "Book a free demo"
       },
       {
-        "icon": "sliders",
-        "title": "Optimization",
-        "detail": "Evolutionary, Bayesian and reinforcement-learning search, parallel simulations, Pareto trade-offs and GDS export."
-      },
-      {
+        "id": "pro",
         "icon": "chip",
-        "title": "Active circuits",
-        "detail": "Your Cadence schematics with Spectre S-parameter, noise, harmonic-balance and stability analyses, tuned toward your targets."
+        "title": "Pro",
+        "label": "Per user",
+        "pitch": "The GENESIS design environment for your engineers.",
+        "features": [
+          "Passive synthesis with EM-checked layouts",
+          "Optimization: evolutionary, Bayesian and reinforcement learning",
+          "Active circuits with your Cadence and Spectre",
+          "Design assistant, run history and Python scripting",
+          "Software updates and product support"
+        ],
+        "action": "Request an offer"
       },
       {
-        "icon": "switch",
-        "title": "Composer",
-        "detail": "Active stages and passive structures on one canvas, exported to Cadence as a library with testbenches."
-      },
-      {
-        "icon": "spark",
-        "title": "Design assistant",
-        "detail": "Describe the design; the assistant sets up the right tool and can run the optimization for you."
-      },
-      {
-        "icon": "document",
-        "title": "Results and scripting",
-        "detail": "Every run keeps its settings, responses and GDS files. The same steps also run from Python."
+        "id": "enterprise",
+        "icon": "layers",
+        "title": "Enterprise",
+        "label": "For teams and labs",
+        "pitch": "GENESIS across your team, connected to your flow.",
+        "features": [
+          "Everything in Pro, for your whole team",
+          "Composer: multi-block designs exported to Cadence with testbenches",
+          "Onboarding and training for your engineers",
+          "Custom tool integration and deployment support",
+          "Silicon prototype support, planned with you"
+        ],
+        "action": "Talk to us"
       }
     ],
+    "note": "Prices are confirmed in your offer. CAD and solver licenses, PDK access and compute stay on your side.",
     "faq": {
       "title": "Frequently asked questions",
       "intro": "Short answers about the membership, your tools and our services. If your question is not here, write to us.",
@@ -190,11 +163,11 @@
       "items": [
         {
           "question": "What does the membership include?",
-          "answer": "Access to the GENESIS modules agreed for your team, for the users and license term in your offer, with documentation, software updates and product support. It is software access, not a chip design delivered on your behalf."
+          "answer": "The GENESIS modules of your tier for your team, with documentation, software updates and product support. It is software access, not a chip design delivered on your behalf."
         },
         {
           "question": "How is GENESIS licensed and priced?",
-          "answer": "Each license gives one user access to the selected GENESIS modules for one year. The price depends on the modules and the number of users; we confirm it in your offer, together with the update policy and support terms."
+          "answer": "Per user. Your tier, the number of users and the term are set in your offer, together with the price, the update policy and the support terms."
         },
         {
           "question": "Which tools does GENESIS work with?",
@@ -222,7 +195,7 @@
         },
         {
           "question": "How do we get started?",
-          "answer": "First we agree your users, modules, toolchain and terms. Then we review compatibility and installation requirements while you arrange the tool licenses, PDK access and infrastructure. Delivery, access and onboarding follow the agreed scope."
+          "answer": "With a free demo session. Then we agree your tier, users and toolchain, and review compatibility and installation requirements while you arrange the tool licenses, PDK access and infrastructure."
         }
       ]
     }
@@ -402,7 +375,41 @@
   "workflow": {
     "headline": "RF design.",
     "headlineAccent": "From concept to layout.",
-    "intro": "Circuit design, EM simulation and optimization, connected from the first idea to physical verification."
+    "intro": "Circuit design, EM simulation and optimization, connected from the first idea to physical verification.",
+    "visualLabel": "DESIGN LOOP",
+    "modulesTitle": "What GENESIS does",
+    "modules": [
+      {
+        "icon": "grid",
+        "title": "Passive synthesis",
+        "detail": "Pixel layouts for baluns, dividers, couplers, filters and other N-port structures, each checked with your EM solver."
+      },
+      {
+        "icon": "sliders",
+        "title": "Optimization",
+        "detail": "Evolutionary, Bayesian and reinforcement-learning search, parallel simulations, Pareto trade-offs and GDS export."
+      },
+      {
+        "icon": "chip",
+        "title": "Active circuits",
+        "detail": "Your Cadence schematics with Spectre S-parameter, noise, harmonic-balance and stability analyses, tuned toward your targets."
+      },
+      {
+        "icon": "switch",
+        "title": "Composer",
+        "detail": "Active stages and passive structures on one canvas, exported to Cadence as a library with testbenches."
+      },
+      {
+        "icon": "spark",
+        "title": "Design assistant",
+        "detail": "Describe the design; the assistant sets up the right tool and can run the optimization for you."
+      },
+      {
+        "icon": "document",
+        "title": "Results and scripting",
+        "detail": "Every run keeps its settings, responses and GDS files. The same steps also run from Python."
+      }
+    ]
   },
   "about": {
     "eyebrow": "ABOUT US",

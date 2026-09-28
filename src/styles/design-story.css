@@ -76,7 +76,9 @@
 @keyframes story-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes story-travel { 0% { left: 0; opacity: 0; } 15%, 85% { opacity: 1; } 100% { left: 100%; opacity: 0; } }
 @keyframes story-travel-back { 0% { left: 100%; opacity: 0; } 15%, 85% { opacity: 1; } 100% { left: 0; opacity: 0; } }
-@container (max-width: 640px) {
+@keyframes story-travel-down { 0% { top: 0; opacity: 0; } 15%, 85% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+@keyframes story-travel-up { 0% { top: 100%; opacity: 0; } 15%, 85% { opacity: 1; } 100% { top: 0; opacity: 0; } }
+@container (min-width: 560px) and (max-width: 640px) {
   .story-card { padding: 9px; gap: 7px; }
   .story-card-title, .story-card-title .brand { font-size: .66rem; }
   .story-card-title > .icon { display: none; }
@@ -87,12 +89,23 @@
   .story-chips > span { font-size: .52rem; padding: 1px 5px; }
   .story-card-status { font-size: .58rem; white-space: normal; line-height: 1.25; min-height: 2.5em; }
 }
-@container (max-width: 440px) {
-  .story-card-title { align-items: flex-start; min-height: 2.4em; line-height: 1.2; white-space: normal; }
-  .story-spec { display: none; }
-  .story-chips { display: none; }
-  .story-link { gap: 8px; }
+/* Phones: the three stations stack; work flows down the left rail and results come back up the right one. */
+@container (max-width: 559px) {
+  .story-scene { grid-template-columns: minmax(0, 1fr); }
+  .story-link { grid-auto-flow: column; justify-content: center; align-content: stretch; gap: 26px; height: 36px; }
+  .story-rail { width: 2px; height: auto; }
+  .story-rail::after { top: auto; bottom: 0; right: auto; left: 50%; transform: translateX(-50%) rotate(135deg); }
+  .story-rail-back::after { top: 0; bottom: auto; transform: translateX(-50%) rotate(-45deg); }
+  .story-rail::before { top: 0; left: 50%; }
+  .story-rail[data-on="true"]::before { animation-name: story-travel-down; }
+  .story-rail-back[data-on="true"]::before { animation-name: story-travel-up; }
+  .story-designer { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); align-items: center; gap: 10px 14px; }
+  .story-designer > .story-card-title { grid-column: 1 / -1; }
+  .story-engine .story-art, .story-tools .story-art { max-width: 280px; margin-inline: auto; }
 }
-@container (max-width: 340px) { .story-card-title .brand img { display: none; } }
+@container (max-width: 420px) {
+  .story-designer { grid-template-columns: minmax(0, 1fr); }
+  .story-designer .story-art { max-width: 190px; margin-inline: auto; }
+}
 .design-story[data-motion="off"] *, .design-story[data-motion="off"] *::before, .design-story[data-motion="off"] *::after { animation: none !important; transition: none !important; }
 @media (prefers-reduced-motion: reduce) { .design-story * { animation-duration: 1ms !important; transition-duration: 1ms !important; } }

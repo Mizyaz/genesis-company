@@ -29,30 +29,38 @@ const spiral = (cx: number, cy: number, half: number, pitch: number, turns: numb
   return `${d}V${cy}`;
 };
 
-/** From wafer to measurement: the loop's final amplifier, probed on its pads and compared with its simulation. */
+/** From wafer to measurement: one die lights up, is magnified, probed on its pads and measured against its simulation. */
 function SiliconStory({ legend }: { legend: string[] }) {
-  const clip = `service-wafer-${useId().replace(/:/g, '')}`;
-  const plot = { left: 250, right: 452, top: 196, bottom: 292 };
+  const id = `service-wafer-${useId().replace(/:/g, '')}`;
+  const plot = { left: 244, right: 460, top: 206, bottom: 290 };
   return <svg className="silicon-story" viewBox="0 0 480 320" aria-hidden="true">
-    <defs><clipPath id={clip}><circle cx="112" cy="168" r="86" /></clipPath></defs>
-    <circle className="silicon-wafer" cx="112" cy="168" r="88" />
-    <g clipPath={`url(#${clip})`}>{Array.from({ length: 49 }, (_, i) =>
-      <rect key={i} className="silicon-die" x={28 + (i % 7) * 24} y={84 + Math.floor(i / 7) * 24} width="20" height="20" rx="2" />)}</g>
-    <rect className="silicon-die silicon-die-picked" x="124" y="132" width="20" height="20" rx="2" />
-    <path className="silicon-zoom" d="M144 132L232 36M144 152L232 156" />
-    <rect className="silicon-closeup" x="232" y="36" width="120" height="120" rx="6" />
-    <path className="silicon-metal" d={`${spiral(262, 96, 13, 4, 2, 1)}${spiral(320, 96, 13, 4, 2, -1)}M244 96h5M333 96h5`} />
-    <path className="silicon-underpass" d="M257 96H283M299 96H325" />
-    <g className="silicon-via">{[257, 325].map(cx => <rect key={cx} x={cx - 2} y="94" width="4" height="4" />)}</g>
-    <rect className="silicon-device" x="283" y="86" width="16" height="20" rx="1" /><path className="silicon-fingers" d="M287 86v20M291 86v20M295 86v20" />
-    {[236, 338].map(px => <rect key={px} className="silicon-pad" x={px} y="92" width="8" height="8" rx="1" />)}
-    <g className="silicon-probes"><path d="M200 12H222L240 90" /><path d="M392 12H362L342 90" /><circle cx="240" cy="94" r="3" /><circle cx="342" cy="94" r="3" /></g>
-    <path className="silicon-flow" d="M292 156V182m-5-6 5 6 5-6" />
-    <path className="silicon-axis" d="M250 186V292H452" />
-    <path className="silicon-sweep" d="M250 190V292" />
+    <defs>
+      <clipPath id={`${id}-clip`}><circle cx="100" cy="170" r="86" /></clipPath>
+      <linearGradient id={`${id}-beam`} x1="0" y1="1" x2="1" y2="0"><stop offset="0" stopColor="var(--cyan)" stopOpacity=".38" /><stop offset="1" stopColor="var(--cyan)" stopOpacity=".05" /></linearGradient>
+    </defs>
+    <circle className="silicon-wafer" cx="100" cy="170" r="88" />
+    <g clipPath={`url(#${id}-clip)`}>{Array.from({ length: 49 }, (_, i) =>
+      <rect key={i} className="silicon-die" x={18 + (i % 7) * 24} y={88 + Math.floor(i / 7) * 24} width="20" height="20" rx="2" />)}</g>
+    {/* The magnified view grows out of the picked die, inside one light beam. */}
+    <polygon className="silicon-beam" fill={`url(#${id}-beam)`} points="138,132 138,112 220,24 380,24 380,152 220,152" />
+    <rect className="silicon-die silicon-die-picked" x="138" y="112" width="20" height="20" rx="2" />
+    <g className="silicon-zoom">
+      <rect className="silicon-closeup" x="220" y="24" width="160" height="128" rx="6" />
+      <g transform="translate(300 88) scale(1.25) translate(-291 -96)">
+        <path className="silicon-metal" d={`${spiral(262, 96, 13, 4, 2, 1)}${spiral(320, 96, 13, 4, 2, -1)}M244 96h5M333 96h5`} />
+        <path className="silicon-underpass" d="M257 96H283M299 96H325" />
+        <g className="silicon-via">{[257, 325].map(cx => <rect key={cx} x={cx - 2} y="94" width="4" height="4" />)}</g>
+        <rect className="silicon-device" x="283" y="86" width="16" height="20" rx="1" /><path className="silicon-fingers" d="M287 86v20M291 86v20M295 86v20" />
+        {[236, 338].map(px => <rect key={px} className="silicon-pad" x={px} y="92" width="8" height="8" rx="1" />)}
+      </g>
+    </g>
+    <g className="silicon-probes"><path d="M182 4H210L240 80L236 88L232 80Z" /><path d="M418 4H390L368 80L364 88L360 80Z" /><circle cx="236" cy="88" r="2.5" /><circle cx="364" cy="88" r="2.5" /></g>
+    <path className="silicon-flow" d="M300 152V188m-5-6 5 6 5-6" />
+    <path className="silicon-axis" d="M244 196V290H460" />
+    <path className="silicon-sweep" d="M244 200V290" />
     <path className="silicon-simulated" d={curvePath(designs.length - 1, plot)} />
-    {measured.map(point => <circle key={point.f} className="silicon-measured" style={{ '--delay': (0.6 + 3 * point.f).toFixed(2) } as CSSProperties} cx={x(point.f, plot)} cy={y(point.db, plot)} r="3" />)}
-    <g className="silicon-legend"><path d="M250 308h16" /><text x="272" y="311">{legend[0]}</text><circle cx="358" cy="308" r="3" /><text x="368" y="311">{legend[1]}</text></g>
+    <g className="silicon-measured">{measured.map(point => <circle key={point.f} cx={x(point.f, plot)} cy={y(point.db, plot)} r="3" />)}</g>
+    <g className="silicon-legend"><path d="M244 308h16" /><text x="266" y="311">{legend[0]}</text><circle cx="352" cy="308" r="3" /><text x="362" y="311">{legend[1]}</text></g>
   </svg>;
 }
 

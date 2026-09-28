@@ -1,5 +1,4 @@
 import { useEffect, useId, useState, type ReactNode } from 'react';
-import { useLanguage } from './Language';
 import { useVisibleMotion } from './MotionSettings';
 import { Icon } from './ui';
 import { band, chart, curvePath, designs, failingPath, limitDb, timeline, x, y, type Frame } from './designStory';
@@ -74,8 +73,7 @@ function Link({ forward, back }: { forward: boolean; back: boolean }) {
 }
 
 /** Designer, GENESIS and CAD tools in one loop, told in five steps. Motion pauses offscreen and when stopped. */
-export function DesignStory({ content, brand, storyLink = false }: { content: StoryContent; brand: ReactNode; storyLink?: boolean }) {
-  const { t } = useLanguage();
+export function DesignStory({ content, brand }: { content: StoryContent; brand: ReactNode }) {
   const { ref, enabled, running } = useVisibleMotion<HTMLElement>();
   const [index, setIndex] = useState(0);
   const [cycle, setCycle] = useState(0);
@@ -117,7 +115,6 @@ export function DesignStory({ content, brand, storyLink = false }: { content: St
     </div>
     <figcaption className="story-now">
       <span className="story-now-step" aria-hidden="true"><span>{frame.step} / {content.steps.length}</span> {content.steps[frame.step - 1].title}</span>
-      {storyLink && <a href="#/explore/story">{t('Discover our story')} <Icon name="diagonal" /></a>}
       <span className="story-now-note">{content.note}</span>
     </figcaption>
     <ol className="sr-only">{content.steps.map(step => <li key={step.title}>{step.title}: {step.detail}</li>)}</ol>

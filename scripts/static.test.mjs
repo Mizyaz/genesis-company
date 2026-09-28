@@ -82,14 +82,20 @@ test('the design loop tells one story: your team, GENESIS and your CAD tools des
   assert.match(component, /<dl className="story-spec">/);
   assert.doesNotMatch(component, /fetch\s*\(|setInterval/);
   assert.doesNotMatch(component, /story-pixel/);
-  assert.match(read('src/pages/Welcome.tsx'), /<DesignStory storyLink content=\{site.story.loop\}/);
-  // The membership shows the bridge next to its terms.
-  assert.match(read('src/shared/Membership.tsx'), /<DesignStory content=\{loop\}/);
+  // The loop lives in the technical part of the page: the platform section, next to the modules.
+  const explorePage = read('src/pages/Explore.tsx');
+  const loopAt = explorePage.indexOf('<DesignStory content={site.story.loop}');
+  assert.ok(loopAt > explorePage.indexOf('<section id="workflow"') && loopAt < explorePage.indexOf('<Services '), 'design loop in the platform section');
+  assert.doesNotMatch(read('src/pages/Welcome.tsx') + read('src/shared/Membership.tsx'), /DesignStory/);
+  // On phones the three stations stack, and work flows down while results come back up.
+  const loopCss = read('src/styles/design-story.css');
+  assert.match(loopCss, /@container \(max-width: 559px\) \{\n  \.story-scene \{ grid-template-columns: minmax\(0, 1fr\); \}/);
+  assert.match(loopCss, /@keyframes story-travel-down/);
   // Every appearance says it is an illustration and gives screen readers the five steps in words.
   assert.match(component, /story-now-note">\{content.note\}/);
   assert.match(component, /<ol className="sr-only">\{content.steps.map/);
   const explore = read('src/pages/Explore.tsx');
-  assert.match(explore, /<Membership content=\{site.membership\} loop=\{site.story.loop\}/);
+  assert.match(explore, /<Membership content=\{site.membership\} email=\{site.brand.email\} \/>/);
   assert.match(explore, /className="story-narrative"/);
   assert.match(explore, /id="team"/); // Existing approach links still reach the story illustration.
   for (const path of ['src/styles/design-story.css', 'src/styles/story-scene.css']) {
@@ -98,11 +104,17 @@ test('the design loop tells one story: your team, GENESIS and your CAD tools des
   }
 });
 
-test('our story is an animated scene with a designer, AI agents and GENESIS, not a list of words', () => {
+test('the lead diagram is an animated scene: a designer, AI agents and GENESIS making a chip, not a list of words', () => {
   const { story } = JSON.parse(read('src/content/site.json'));
   const dictionary = JSON.parse(read('src/content/tr.json'));
   const scene = read('src/shared/StoryScene.tsx');
-  assert.match(read('src/pages/Explore.tsx'), /<StoryScene content=\{site.story.scene\} brand=\{<Brand \/>\} \/>/);
+  // It leads both the home page and Explore (in the hero, before the membership).
+  const explore = read('src/pages/Explore.tsx');
+  const sceneAt = explore.indexOf('<StoryScene content={site.story.scene} brand={<Brand />} />');
+  assert.ok(sceneAt > explore.indexOf('<section className="company-hero"') && sceneAt < explore.indexOf('<Membership '), 'scene in the hero');
+  assert.match(read('src/pages/Welcome.tsx'), /<StoryScene content=\{site.story.scene\} brand=\{<Brand \/>\} \/>/);
+  // More telling without more text: the designer's pen, the agent that checks each candidate, and the chip GENESIS hands back.
+  for (const part of ['className="scene-pen"', 'className="scene-agent"', '<OutputArt on={phase === final} />', 'className="scene-die-check"']) assert.ok(scene.includes(part), part);
   assert.equal(existsSync(resolve(root, 'src/shared/DesignPillars.tsx')), false);
   assert.match(scene, /className="art-person"/); // The designer is a person at the workstation.
   assert.match(scene, /coil\(/); // Circuits are drawn with schematic symbols.
@@ -113,7 +125,7 @@ test('our story is an animated scene with a designer, AI agents and GENESIS, not
   assert.equal((scene.match(/className="scene-title"/g) || []).length, 2);
   assert.equal((scene.match(/className="sr-only"/g) || []).length, 2);
   for (const copy of [story.scene.caption, story.scene.outcome, ...['expertise', 'agents'].flatMap(key => [story.scene[key].title, story.scene[key].detail])]) assert.ok(dictionary[copy], copy);
-  assert.match(read('src/styles/site.css'), /\.story-narrative \{ display: grid; grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/); // Wide text never widens the page.
+  assert.match(read('src/styles/site.css'), /\.company-hero-inner \{ display: grid; grid-template-columns: minmax\(0, 1fr\) minmax\(0, 1fr\)/); // Wide text never widens the page.
 });
 
 test('welcome uses the shared, single-line brand entrance with readable acronym emphasis', () => {
@@ -161,38 +173,47 @@ test('Explore opens with the membership, then the portfolio; services stay data-
   assert.doesNotMatch(page, /hero-index|Reason\. Simulate\. Learn\. Refine\./);
 });
 
-test('the membership states its terms plainly; further questions are folded until opened', () => {
-  const {membership, services} = JSON.parse(read('src/content/site.json'));
+test('the membership offers a free demo and three tiers with their own symbols; questions are folded until opened', () => {
+  const {membership, services, workflow} = JSON.parse(read('src/content/site.json'));
   const dictionary = JSON.parse(read('src/content/tr.json'));
-  const {plan, faq} = membership;
-  // At a glance: license and price, what is included, what you provide and how it starts.
-  assert.deepEqual(plan.terms.map(term => term.label), ['License', 'Price']);
-  assert.match(plan.terms[0].value, /per user.*one year/i);
-  assert.match(plan.terms[1].value, /offer/);
-  assert.ok(plan.included.items.length >= 3 && plan.provided.items.length >= 3 && plan.steps.items.length === 3);
-  assert.match(plan.provided.items.join(' '), /Cadence.*licenses.*PDK.*Linux server/);
-  assert.match(plan.note, /scoped separately/);
-  assert.ok(membership.modules.length >= 5 && membership.modules.every(module => module.icon && module.title && module.detail.length > 60));
+  const {tiers, faq} = membership;
+  assert.deepEqual(tiers.map(tier => tier.id), ['demo', 'pro', 'enterprise']);
+  assert.equal(new Set(tiers.map(tier => tier.icon)).size, tiers.length, 'each tier has its own symbol');
+  for (const tier of tiers) assert.ok(tier.title && tier.label && tier.pitch && tier.action && tier.features.length >= 3, tier.id);
+  assert.equal(tiers[0].label, 'Free');
+  assert.match(tiers[0].features.join(' '), /free live demo sessions/i);
+  assert.match(tiers[2].features[0], /Everything in Pro/);
+  assert.match(membership.note, /offer/);
+  // No fixed term is promised on the page.
+  assert.doesNotMatch(JSON.stringify(membership), /one year|annual|yearly/i);
+  assert.ok(workflow.modules.length >= 5 && workflow.modules.every(module => module.icon && module.title && module.detail.length > 60));
   assert.ok(faq.items.length >= 6);
   for (const item of faq.items) {
     assert.match(item.question, /\?$/);
     assert.ok(item.answer.length > 60, item.question);
   }
-  const copy = [membership.eyebrow, membership.headline, membership.headlineAccent, membership.intro, membership.visualLabel, membership.modulesTitle, plan.title, plan.action, plan.note,
-    ...plan.terms.flatMap(term => [term.label, term.value]), ...['included', 'provided', 'steps'].flatMap(key => [plan[key].title, ...plan[key].items]),
-    ...membership.modules.flatMap(module => [module.title, module.detail]), faq.title, faq.intro, faq.action, ...faq.items.flatMap(item => [item.question, item.answer])];
+  const copy = [membership.eyebrow, membership.headline, membership.headlineAccent, membership.intro, membership.note,
+    ...tiers.flatMap(tier => [tier.title, tier.label, tier.pitch, tier.action, ...tier.features]),
+    workflow.visualLabel, workflow.modulesTitle, ...workflow.modules.flatMap(module => [module.title, module.detail]),
+    faq.title, faq.intro, faq.action, ...faq.items.flatMap(item => [item.question, item.answer])];
   for (const text of copy) assert.ok(dictionary[text], text);
   const answers = faq.items.map(item => item.answer).join('\n');
-  assert.match(answers, /one user access to the selected GENESIS modules for one year/);
+  assert.match(answers, /^Per user\./m);
   assert.match(answers, /software access, not a chip design/);
   assert.match(answers, /CAD and solver licenses.*PDK access.*compute/);
   assert.match(answers, /own Linux server/);
+  assert.match(answers, /free demo session/);
   assert.doesNotMatch(JSON.stringify({membership, services}), /€\s*\d|\d+\s*%|24\/7|unlimited|guaranteed|—/i);
   assert.doesNotMatch(JSON.stringify({membership, services}), /\bCLI\b|\bJSON\b|configurations and runners|subscription/i);
   const component = read('src/shared/Membership.tsx');
   assert.match(component, /id="membership"/);
-  assert.ok(component.indexOf('membership-plan') < component.indexOf('<ServiceFaq'), 'the terms come before the questions');
-  assert.doesNotMatch(component, /fetch\s*\(|setInterval|setTimeout|checkout|payment/);
+  assert.match(component, /data-tier=\{tier.id\}/);
+  assert.match(component, /className="tier-symbol"/);
+  assert.match(component, /mailto:\$\{email\}\?subject=\$\{encodeURIComponent\(`GENESIS \$\{tier.title\}`\)\}/);
+  assert.ok(component.indexOf('membership-tiers') < component.indexOf('<ServiceFaq'), 'the tiers come before the questions');
+  assert.doesNotMatch(component, /fetch\s*\(|setInterval|setTimeout|checkout|payment|DesignStory/);
+  const css = read('src/styles/membership.css');
+  for (const tier of tiers) assert.match(css, new RegExp(`data-tier="${tier.id}"\\] \\.tier-symbol`), tier.id);
   const faqComponent = read('src/shared/ServiceFaq.tsx');
   assert.match(faqComponent, /<details id="faq" className="service-faq">/); // The whole block is folded.
   assert.match(faqComponent, /<details key=\{item.question\} name=/); // Native disclosure, one answer at a time.
@@ -236,6 +257,10 @@ test('services share contact actions, support keyboard tabs and animate only whe
   assert.match(styles, /data-active='true'/);
   assert.doesNotMatch(styles, /\.button(?:-primary|-secondary)?\s*\{[^}]*background:/);
   assert.doesNotMatch(services, /setInterval|setTimeout/); // Service choice never advances while someone reads.
+  // Silicon: the close-up grows out of the picked die inside one beam, probes land, the sweep measures.
+  for (const part of ['className="silicon-beam"', 'className="silicon-die silicon-die-picked"', 'className="silicon-zoom"', 'className="silicon-probes"', 'className="silicon-measured"']) assert.ok(services.includes(part), part);
+  for (const name of ['silicon-pick', 'silicon-beam', 'silicon-zoom', 'silicon-probe', 'silicon-sweep', 'silicon-measure']) assert.match(styles, new RegExp(`@keyframes ${name} `), name);
+  assert.match(styles, /prefers-reduced-motion: reduce\) \{\n(?:  [^\n]*\n)*  \.service-visual :is\(\.silicon-die-picked/);
 });
 
 test('silicon gate is shared, optional and presentation-only', () => {

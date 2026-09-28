@@ -1,7 +1,7 @@
 import { useLanguage, useTranslatedContent } from '../shared/Language';
 import siteContent from '../content/site.json';
 import { Brand, Icon } from '../shared/ui';
-import { DesignStory } from '../shared/DesignStory';
+import { StoryScene } from '../shared/StoryScene';
 import { BrandIntro } from '../shared/CircuitIdentity';
 import '../styles/welcome.css';
 
@@ -19,7 +19,7 @@ export function Welcome() {
         <a className="welcome-choice" href="#/explore"><Icon name="wave" /><span><strong>{t("Discover")}</strong><small>{t("Our approach, our circuits, our story.")}</small></span><Icon name="arrow" /></a>
         <a className="welcome-choice welcome-choice-design" href="#/design"><Icon name="chip" /><span><strong>{t("Design")}</strong><small>{t("Open your GENESIS design environment.")}</small></span><Icon name="arrow" /></a>
       </div>
-      <DesignStory storyLink content={site.story.loop} brand={<Brand />} />
+      <StoryScene content={site.story.scene} brand={<Brand />} />
     </section>
   </main>;
 }
