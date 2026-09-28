@@ -9,9 +9,9 @@ export type SceneContent = {
   agents: { title: string; detail: string };
 };
 
-// 0 blank screen, 1 the designer draws the circuit, 2 a signal runs through it,
-// 3-5 the agents check three candidates, 6 expertise and agents join in GENESIS.
-const durations = [500, 2000, 1300, 1100, 1300, 1100, 3400];
+// 0 blank screen, 1 the designer draws the circuit, 2 a signal runs through it, 3-5 the agents
+// check three candidates, 6 expertise and agents join in GENESIS, which turns them into a chip.
+const durations = [500, 2000, 1300, 1100, 1300, 1100, 4600];
 const final = durations.length - 1;
 const best = 1;
 const candidates = [
@@ -21,7 +21,7 @@ const candidates = [
 ];
 
 /** A designer at the workstation draws an amplifier stage; a signal runs through it once it is complete. */
-function ExpertiseArt({ drawn, signal }: { drawn: boolean; signal: boolean }) {
+function ExpertiseArt({ drawn, drawing, signal }: { drawn: boolean; drawing: boolean; signal: boolean }) {
   const strokes = ['M87 56H94', coil(94, 56, 4, 24), 'M118 56H150', `M132 56v6M126 62h12M126 66h12M132 66v7${ground(132, 73)}`,
     'M150 46V66M155 43V69', `M155 48H168V30H186M155 64H164V73${ground(164, 73)}M160 61l3 3-3 3`];
   return <svg className="scene-art" viewBox="0 0 220 150" aria-hidden="true">
@@ -30,6 +30,7 @@ function ExpertiseArt({ drawn, signal }: { drawn: boolean; signal: boolean }) {
     {strokes.map((d, i) => <path key={i} className="scene-draw" style={{ '--i': i } as CSSProperties} data-on={drawn} d={d} pathLength="1" />)}
     <circle className="art-port scene-fade" data-on={drawn} cx="84" cy="56" r="3" /><circle className="art-port scene-fade" data-on={drawn} cx="189" cy="30" r="3" />
     <path className="scene-signal" data-on={signal} d="M87 56H150M155 48H168V30H186" pathLength="1" />
+    <path className="scene-pen" data-on={drawing} d="M0 0l3-9 13-13 6 6-13 13Z" />
     <g className="art-person">
       <rect x="42" y="100" width="12" height="14" rx="3" />
       <path d="M18 144c0-20 13-32 30-32s30 12 30 32Z" />
@@ -57,6 +58,23 @@ function AgentsArt({ phase }: { phase: number }) {
         {row === best && <g className="agent-check" data-on={phase >= 3 + row}><circle cx="206" cy={top + 8} r="6" /><path d={`M203 ${top + 8}l2 2 4-4`} /></g>}
       </g>;
     })}
+    {/* The agent: it moves to the candidate it is checking and stays with the one it keeps. */}
+    <path className="scene-agent" data-on={phase >= 3} style={{ transform: `translate(97px, ${26 + 47 * (phase >= 3 && phase <= 5 ? phase - 3 : best)}px)` }}
+      d="M0-7L1.8-1.8 7 0 1.8 1.8 0 7-1.8 1.8-7 0-1.8-1.8Z" />
+  </svg>;
+}
+
+/** What GENESIS hands back: a finished stage on a die, checked. */
+function OutputArt({ on }: { on: boolean }) {
+  return <svg className="scene-output" data-on={on} viewBox="0 0 120 60" aria-hidden="true">
+    <path className="scene-output-arrow" d="M4 30H40m-7-6 7 6-7 6" pathLength="1" />
+    <g className="scene-die">
+      <rect x="48" y="4" width="56" height="52" rx="4" />
+      <path className="scene-die-metal" d="M53 30V23H67V37H56V26H64V34H59V30M99 30V23H85V37H96V26H88V34H93V30" />
+      <path className="scene-die-under" d="M59 30H72M80 30H93" />
+      <rect className="scene-die-device" x="72" y="24" width="8" height="12" />
+    </g>
+    <g className="scene-die-check"><circle cx="104" cy="8" r="7" /><path d="M100.5 8l2.4 2.4 4.6-4.6" /></g>
   </svg>;
 }
 
@@ -78,7 +96,7 @@ export function StoryScene({ content, brand }: { content: SceneContent; brand: R
     <div className="scene-stage" key={cycle}>
       <div className="scene-row">
         <div className="scene-card" data-active={phase === 1 || phase === 2}>
-          <ExpertiseArt drawn={phase >= 1} signal={phase === 2} />
+          <ExpertiseArt drawn={phase >= 1} drawing={phase === 1} signal={phase === 2} />
           <span className="scene-title">{content.expertise.title}</span>
           <span className="sr-only">{content.expertise.detail}</span>
         </div>
@@ -89,7 +107,7 @@ export function StoryScene({ content, brand }: { content: SceneContent; brand: R
         </div>
       </div>
       <span className="scene-join" data-on={phase === final} aria-hidden="true"><span className="scene-pulse" /><span className="scene-pulse scene-pulse-right" /></span>
-      <div className="scene-outcome" data-on={phase === final}>{brand}<span>{content.outcome}</span></div>
+      <div className="scene-outcome" data-on={phase === final}><div className="scene-outcome-name">{brand}<span>{content.outcome}</span></div><OutputArt on={phase === final} /></div>
     </div>
   </figure>;
 }

@@ -1,5 +1,6 @@
 import { useId } from 'react';
 import { ActionLink, Icon } from './ui';
+import '../styles/services.css';
 
 export type FaqContent = { title: string; intro: string; action: string; items: { question: string; answer: string }[] };
 

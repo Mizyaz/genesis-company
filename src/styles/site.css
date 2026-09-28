@@ -110,7 +110,9 @@ img { display: block; max-width: 100%; }
 .company-hero-image { position: absolute; inset: 0 0 0 30%; background: url('/assets/hero-metal.webp') right center / cover no-repeat; opacity: .85; z-index: -2; mask-image: linear-gradient(90deg, transparent, #000 32%); }
 .company-hero::after { position: absolute; content: ''; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(90deg, var(--page) 3%, transparent 85%), linear-gradient(0deg, var(--page), transparent 25%); }
 .company-hero-copy { width: 100%; max-width: 650px; min-width: 0; }
-.company-hero h1 { font-size: clamp(3.5rem, 7.8vw, 7.8rem); line-height: 1.04; font-weight: 620; letter-spacing: -.055em; margin: 24px 0; overflow-wrap: break-word; }
+.company-hero-inner { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(32px, 5vw, 72px); align-items: center; }
+.company-hero .story-scene-figure { width: 100%; max-width: 560px; justify-self: end; padding: 14px; border-radius: 20px; background: color-mix(in srgb, var(--page) 72%, transparent); backdrop-filter: blur(6px); } /* Keeps the connectors readable over the photo. */
+.company-hero h1 { font-size: clamp(3.5rem, 6.4vw, 7rem); line-height: 1.04; font-weight: 620; letter-spacing: -.055em; margin: 24px 0; overflow-wrap: break-word; }
 .company-hero-copy > p:not(.eyebrow) { font-size: 1.25rem; color: var(--muted); line-height: 1.65; }
 .company-hero .button { margin-top: 34px; }
 .button { display: inline-flex; align-items: center; gap: 20px; justify-content: center; padding: 15px 23px; border: 1px solid var(--border); border-radius: 8px; font-size: .9375rem; font-weight: 550; transition: transform .2s, background .2s, border-color .2s; }
@@ -138,11 +140,13 @@ img { display: block; max-width: 100%; }
 .loop-note { display: flex; gap: 14px; align-items: center; margin-top: 25px; font-size: .875rem; }
 .loop-note > .icon { color: var(--cyan); width: 18px; height: 18px; }
 .story-section, .workflow-section { border-top: 1px solid var(--border-soft); }
-.story-narrative { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(32px, 5vw, 72px); align-items: center; }
-.story-narrative > div { min-width: 0; }
+.platform-loop { margin: 44px auto 0; }
+.platform-loop .service-loop { padding: 22px 20px 16px; }
+.platform-loop .design-story { max-width: 900px; }
+.story-narrative { max-width: 780px; }
+.story-narrative > * { min-width: 0; }
 .story-copy { color: var(--muted); line-height: 1.85; margin-top: 28px; font-size: .95rem; }
 .story-copy p + p { margin-top: 20px; }
-@media (max-width: 850px) { .story-narrative { grid-template-columns: minmax(0, 1fr); } .story-narrative > .story-scene-figure { width: 100%; max-width: 620px; justify-self: center; } }
 .portfolio-section { border-top: 1px solid var(--border-soft); }
 .portfolio-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
 .portfolio-card { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); overflow: hidden; transition: border-color .2s, transform .2s; }
@@ -187,6 +191,8 @@ img { display: block; max-width: 100%; }
 @media (min-width: 1700px) { .landing { padding-top: 70px; } .landing-center { width: 760px; } .prompt-examples { margin-block: 48px; } }
 @media (max-width: 1000px) {
   .header-caption, .header-divider { display: none; }
+  .company-hero-inner { grid-template-columns: minmax(0, 1fr); }
+  .company-hero .story-scene-figure { justify-self: center; }
   .section-intro { gap: 35px; }
   .workflow-track { grid-template-columns: repeat(3, 1fr); }
   .workflow-step:nth-child(n+4) { border-top: 1px solid var(--border); }
