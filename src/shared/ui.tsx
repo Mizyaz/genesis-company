@@ -21,6 +21,7 @@ const paths: Record<string, ReactNode> = {
   mail: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 6 9 7 9-7" /></>,
   check: <path d="m5 12.5 4.5 4.5L19 7.5" />,
   chevron: <path d="m6 9 6 6 6-6" />,
+  menu: <path d="M4 7h16M4 12h16M4 17h16" />,
   grid: <><rect x="4" y="4" width="16" height="16" rx="2" /><path d="M9.3 4v16m5.4-16v16M4 9.3h16M4 14.7h16" /></>,
 };
 export function Icon({ name, className = '' }: { name: string; className?: string }) {

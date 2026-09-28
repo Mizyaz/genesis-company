@@ -1,0 +1,33 @@
+/* Membership: the terms at a glance next to the design loop, then what GENESIS does and the folded questions. */
+.membership-overview { display: grid; grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr); gap: clamp(24px, 4vw, 48px); align-items: start; }
+.membership-plan { display: grid; gap: 22px; min-width: 0; padding: clamp(20px, 3vw, 32px); border: 1px solid transparent; border-radius: var(--radius); background: linear-gradient(var(--surface), var(--surface)) padding-box, var(--gradient) border-box; box-shadow: 0 16px 40px var(--glow); }
+.membership-plan h3 { font-size: 1.15rem; font-weight: 600; letter-spacing: -.01em; }
+.membership-plan h4 { margin: 0 0 10px; font-size: .72rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--subtle); }
+.plan-terms { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0; }
+.plan-terms > div { min-width: 0; padding: 12px 14px; border-radius: 10px; background: var(--surface-raised); }
+.plan-terms dt { font-size: .72rem; color: var(--subtle); }
+.plan-terms dd { margin: 4px 0 0; font-size: .95rem; font-weight: 600; line-height: 1.35; color: var(--text); }
+.plan-lists { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.plan-lists ul { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.plan-lists li { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 9px; align-items: start; font-size: .86rem; line-height: 1.5; color: var(--muted); }
+.plan-lists li .icon { width: 16px; height: 16px; margin-top: 2px; }
+.plan-included .icon { color: var(--cyan); stroke-width: 2.2; }
+.plan-provided .icon { color: var(--violet); }
+.plan-steps ol { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 0; padding: 0; list-style: none; counter-reset: none; }
+.plan-steps li { display: grid; gap: 7px; align-content: start; padding-top: 10px; border-top: 2px solid var(--border); font-size: .8rem; line-height: 1.45; color: var(--muted); }
+.plan-steps li > span { font: .7rem var(--font-mono); color: var(--cyan); }
+.membership-plan .button { justify-self: start; }
+.plan-note { font-size: .74rem; line-height: 1.6; color: var(--subtle); }
+.membership-visual { align-self: stretch; display: flex; flex-direction: column; }
+.membership-visual .service-loop { flex: 1; display: grid; align-content: center; }
+.membership-modules { margin-top: 44px; }
+@media (max-width: 1000px) {
+  .membership-overview { grid-template-columns: minmax(0, 1fr); }
+  .membership-visual { width: 100%; max-width: 640px; justify-self: center; }
+}
+@media (max-width: 520px) {
+  .plan-lists { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .plan-steps ol { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .plan-steps li { grid-template-columns: 22px minmax(0, 1fr); gap: 8px; padding: 9px 0; border-top-width: 1px; }
+  .membership-plan .button { justify-self: stretch; justify-content: center; }
+}
