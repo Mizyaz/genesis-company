@@ -113,7 +113,7 @@
     "tiers": [
       {
         "id": "demo",
-        "icon": "play",
+        "icon": "calendar",
         "title": "Demo",
         "label": "Free",
         "pitch": "See GENESIS on a design like yours.",

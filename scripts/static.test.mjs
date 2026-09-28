@@ -179,6 +179,8 @@ test('the membership offers a free demo and three tiers with their own symbols; 
   const {tiers, faq} = membership;
   assert.deepEqual(tiers.map(tier => tier.id), ['demo', 'pro', 'enterprise']);
   assert.equal(new Set(tiers.map(tier => tier.icon)).size, tiers.length, 'each tier has its own symbol');
+  assert.ok(tiers.every(tier => tier.icon !== 'play'), 'no symbol looks like a video you could play');
+  assert.doesNotMatch(read('src/shared/Membership.tsx'), /'play'/);
   for (const tier of tiers) assert.ok(tier.title && tier.label && tier.pitch && tier.action && tier.features.length >= 3, tier.id);
   assert.equal(tiers[0].label, 'Free');
   assert.match(tiers[0].features.join(' '), /free live demo sessions/i);

@@ -22,6 +22,7 @@ const paths: Record<string, ReactNode> = {
   check: <path d="m5 12.5 4.5 4.5L19 7.5" />,
   chevron: <path d="m6 9 6 6 6-6" />,
   menu: <path d="M4 7h16M4 12h16M4 17h16" />,
+  calendar: <><rect x="4" y="5" width="16" height="15" rx="2" /><path d="M4 10h16M9 3v4m6-4v4M8 14h2m4 0h2m-8 3h2" /></>,
   grid: <><rect x="4" y="4" width="16" height="16" rx="2" /><path d="M9.3 4v16m5.4-16v16M4 9.3h16M4 14.7h16" /></>,
 };
 export function Icon({ name, className = '' }: { name: string; className?: string }) {
