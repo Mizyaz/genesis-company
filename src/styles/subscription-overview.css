@@ -1,25 +1,16 @@
-/* Roles and subscription terms are separate. Shared artwork, theme and motion stay site-owned. */
+/* What the software does, then what the subscription covers. Theme and typography stay site-owned. */
 .subscription-overview { min-width: 0; }
-.subscription-role { padding: clamp(20px, 3vw, 40px); border: 1px solid var(--border); border-radius: var(--radius); background: radial-gradient(ellipse at 50% 35%, var(--glow), transparent 65%), var(--surface); }
-.subscription-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 26px; }
-.subscription-heading h4, .subscription-scope-heading h4 { margin: 0; font-size: .95rem; font-weight: 550; }
-.subscription-flow { display: grid; grid-template-columns: minmax(0, 1fr) 60px minmax(0, 1.25fr) 60px minmax(0, 1fr); gap: 8px; align-items: center; }
-.subscription-actor { min-width: 0; padding: 18px 12px; text-align: center; }
-.subscription-actor .circuit-artwork { max-width: 240px; margin: 0 auto 20px; }
-.subscription-actor h5 { margin: 0 0 10px; font-size: 1.05rem; font-weight: 550; }
-.subscription-actor p { color: var(--muted); font-size: .85rem; line-height: 1.7; max-width: 30ch; margin: auto; }
-.subscription-genesis { border: 1px solid color-mix(in srgb, var(--cyan) 40%, var(--border)); border-radius: var(--radius); background: color-mix(in srgb, var(--surface) 80%, transparent); box-shadow: 0 12px 40px var(--glow); }
-.subscription-genesis h5 { letter-spacing: .09em; font-size: 1.3rem; }
-.subscription-genesis p { color: var(--text); }
-.subscription-connection svg { display: block; width: 100%; height: auto; }
-.subscription-trace { stroke: var(--border); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
-.subscription-signal { stroke: var(--cyan); stroke-width: 2; stroke-dasharray: 14 86; filter: drop-shadow(0 0 4px var(--cyan)); vector-effect: non-scaling-stroke; animation: subscription-signal 4.8s linear infinite paused; }
-.subscription-feedback { position: relative; margin: 24px auto 0; width: 78%; padding-top: 34px; text-align: center; }
-.subscription-feedback > svg { position: absolute; top: 0; left: 0; width: 100%; height: 32px; }
-.subscription-feedback .subscription-signal { stroke: var(--violet); animation-delay: -2.4s; }
-.subscription-feedback > span { display: inline-flex; align-items: center; gap: 9px; color: var(--muted); font-size: .8rem; line-height: 1.6; padding-top: 12px; }
-.subscription-feedback .icon { transform: rotate(180deg); color: var(--violet); }
-.subscription-scope-heading { margin: 28px 0 16px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 20px; }
+.subscription-modules { padding: clamp(20px, 3vw, 36px); border: 1px solid var(--border); border-radius: var(--radius); background: radial-gradient(ellipse at 50% 0%, var(--glow), transparent 70%), var(--surface); }
+.subscription-modules-heading { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 12px 40px; align-items: baseline; margin-bottom: 26px; }
+.subscription-modules-heading h4, .subscription-scope-heading h4 { margin: 0; font-size: .95rem; font-weight: 550; }
+.subscription-modules-heading p { color: var(--muted); font-size: .85rem; line-height: 1.7; }
+.subscription-modules ul { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; margin: 0; padding: 0; list-style: none; border: 1px solid var(--border-soft); border-radius: 10px; overflow: hidden; background: var(--border-soft); }
+.subscription-modules li { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: 14px; align-items: start; min-width: 0; padding: 22px 20px; background: var(--surface); }
+.subscription-module-icon { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid color-mix(in srgb, var(--cyan) 35%, var(--border)); border-radius: 8px; color: var(--cyan); background: var(--glow); }
+.subscription-module-icon .icon { width: 18px; height: 18px; }
+.subscription-modules h5 { margin: 5px 0 8px; font-size: .95rem; font-weight: 600; line-height: 1.35; }
+.subscription-modules li p { color: var(--muted); font-size: .82rem; line-height: 1.7; }
+.subscription-scope-heading { margin: 30px 0 16px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 20px; }
 .subscription-scope-heading p { font-size: .75rem; color: var(--muted); }
 .subscription-choices { display: flex; flex-wrap: wrap; gap: 10px; }
 .subscription-choice { display: inline-flex; align-items: center; justify-content: center; gap: 9px; padding: 12px 16px; border: 1px solid var(--border); border-radius: 7px; background: var(--surface); color: var(--muted); font: .82rem var(--font-sans); line-height: 1.5; transition: border-color .2s, background .2s; }
@@ -30,7 +21,8 @@
 .subscription-detail h4 { margin: 10px 0 8px; font-size: 1.05rem; font-weight: 550; }
 .subscription-detail p { color: var(--muted); font-size: .85rem; line-height: 1.75; }
 .subscription-detail ul { margin: 0; padding: 4px 0 0 18px; color: var(--muted); font-size: .85rem; line-height: 1.7; align-self: center; }
-.subscription-detail li + li { margin-top: 9px; }.subscription-detail li::marker { color: var(--cyan); }
+.subscription-detail li + li { margin-top: 9px; }
+.subscription-detail li::marker { color: var(--cyan); }
 .subscription-start { border-top: 1px solid var(--border-soft); margin-top: 32px; padding-top: 26px; }
 .subscription-start > h4 { margin: 0 0 22px; font-size: 1rem; font-weight: 550; }
 .subscription-start ol { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px; margin: 0; padding: 0; list-style: none; }
@@ -38,26 +30,16 @@
 .subscription-start li > span { color: var(--cyan); font: .7rem var(--font-mono); border: 1px solid var(--border); border-radius: 50%; padding: 7px; line-height: 1; }
 .subscription-start h5 { font-size: .85rem; font-weight: 550; margin: 0 0 8px; line-height: 1.4; }
 .subscription-start li p { color: var(--muted); font-size: .8rem; line-height: 1.75; }
-.subscription-overview[data-active='true'] .subscription-signal { animation-play-state: running; }
-@keyframes subscription-signal { to { stroke-dashoffset: -100; } }
+@media (max-width: 1000px) { .subscription-modules ul { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 850px) {
+  .subscription-modules-heading { grid-template-columns: 1fr; }
   .subscription-start ol { grid-template-columns: 1fr; gap: 22px; }
-  .subscription-flow { grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1.25fr) 28px minmax(0, 1fr); gap: 0; }
-  .subscription-actor { padding: 16px 8px; }
 }
 @media (max-width: 650px) {
-  .subscription-heading { align-items: start; }
-  .subscription-flow { grid-template-columns: 1fr; }
-  .subscription-actor { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 14px; align-items: center; text-align: left; padding: 16px 12px; }
-  .subscription-actor .circuit-artwork { margin: 0; }.subscription-actor p { max-width: none; margin: 0; font-size: .8rem; }
-  .subscription-actor h5 { font-size: .95rem; }.subscription-genesis h5 { font-size: 1.15rem; }
-  .subscription-connection { display: flex; align-items: center; justify-content: center; height: 45px; }.subscription-connection svg { width: 45px; transform: rotate(90deg); }
-  .subscription-feedback { margin-top: 18px; width: 100%; padding-top: 0; }.subscription-feedback > svg { display: none; }
-  .subscription-feedback > span { align-items: start; text-align: left; }.subscription-feedback .icon { transform: rotate(-90deg); margin-top: 3px; }
-  .subscription-choices { gap: 8px; }.subscription-choice { flex: 1 1 130px; font-size: .75rem; padding: 11px 9px; }
+  .subscription-modules ul { grid-template-columns: 1fr; }
+  .subscription-modules li { padding: 18px 16px; }
+  .subscription-choices { gap: 8px; }
+  .subscription-choice { flex: 1 1 130px; font-size: .75rem; padding: 11px 9px; }
   .subscription-detail { grid-template-columns: 1fr; gap: 16px; }
 }
-@media (max-width: 380px) {
-  .subscription-role { padding: 18px 12px; }.subscription-actor { grid-template-columns: 72px minmax(0, 1fr); gap: 9px; padding: 14px 8px; }
-}
-@media (prefers-reduced-motion: reduce) { .subscription-signal { animation: none !important; } }
+@media (max-width: 380px) { .subscription-modules { padding: 18px 12px; } }

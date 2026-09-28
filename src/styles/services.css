@@ -21,12 +21,11 @@
 .service-overview[data-kind='platform-membership'] .service-copy h3 { grid-column: 1; grid-row: 2 / 4; max-width: 20ch; }
 .service-overview[data-kind='platform-membership'] .service-copy > p:not(.eyebrow) { grid-column: 2; margin-top: 18px; max-width: none; }
 .service-overview[data-kind='platform-membership'] .service-copy .button { grid-column: 2; justify-self: start; }
-.service-visual { position: relative; overflow: hidden; min-width: 0; border: 1px solid var(--border); border-radius: var(--radius); background: linear-gradient(140deg, var(--surface), var(--surface-raised)); }
+.service-visual { position: relative; overflow: hidden; min-width: 0; border: 1px solid var(--border); border-radius: var(--radius); background: radial-gradient(ellipse at 50% 55%, var(--glow), transparent 70%), linear-gradient(140deg, var(--surface), var(--surface-raised)); }
 .service-visual-heading { display: flex; align-items: center; gap: 9px; padding: 17px 20px; font: .65rem var(--font-mono); letter-spacing: .09em; color: var(--muted); border-bottom: 1px solid var(--border-soft); }
 .service-visual-heading > span:last-child { margin-left: auto; letter-spacing: .04em; }
 .service-live-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--cyan); }
-.service-artboard { position: relative; aspect-ratio: 1.5; isolation: isolate; background-image: linear-gradient(var(--border-soft) 1px, transparent 1px), linear-gradient(90deg, var(--border-soft) 1px, transparent 1px); background-size: 30px 30px; }
-.service-aura { position: absolute; z-index: -1; inset: 5%; background: radial-gradient(ellipse at 25% 40%, color-mix(in srgb, var(--cyan) 14%, transparent), transparent 65%), radial-gradient(ellipse at 75% 60%, color-mix(in srgb, var(--violet) 12%, transparent), transparent 60%); filter: blur(20px); animation: service-atmosphere 6s ease-in-out infinite paused; }
+.service-artboard { position: relative; aspect-ratio: 1.5; }
 .service-scope { margin-top: 38px; padding: 28px 0 0; border-top: 1px solid var(--border); }
 .service-scope > .eyebrow { font-size: .65rem; }
 .service-scope ul { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px; list-style: none; margin: 22px 0 0; padding: 0; }
@@ -37,29 +36,55 @@
 .service-scope li p { color: var(--muted); font-size: .85rem; line-height: 1.75; }
 .service-note { display: flex; align-items: flex-start; gap: 10px; color: var(--subtle); font-size: .75rem; line-height: 1.7; margin-top: 28px; }
 .service-note .icon { width: 16px; height: 16px; margin-top: 2px; }
-.service-wafer, .service-connectors { width: 100%; height: 100%; stroke-linecap: round; stroke-linejoin: round; }
-.service-wafer-base { fill: var(--surface); stroke: var(--cyan); }
-.service-wafer-rim { stroke: var(--border); stroke-dasharray: 2 7; }
-.service-die { fill: color-mix(in srgb, var(--cyan) 8%, var(--surface)); stroke: color-mix(in srgb, var(--cyan) 40%, var(--border)); stroke-width: .8; animation: service-die 4s ease-in-out infinite paused; }
-.service-wafer-scan { stroke: var(--cyan); stroke-width: 2; filter: drop-shadow(0 0 8px var(--cyan)); animation: service-scan 4s ease-in-out infinite paused; }
-.service-prototype { fill: var(--surface); stroke: var(--violet); stroke-width: 1.5; }
-.service-prototype > rect:first-child { fill: var(--surface-raised); stroke: var(--border); }
-.service-probe { stroke: var(--muted); stroke-width: 3; }
-.service-probe-tip { fill: var(--cyan); filter: drop-shadow(0 0 5px var(--cyan)); animation: service-die 3s ease-in-out infinite paused; }
-.service-measured-wave { stroke: var(--violet); stroke-width: 1.5; }
-.service-signal-base { stroke: var(--border); stroke-width: 1.5; }
-.service-signal { stroke: var(--cyan); stroke-width: 2; stroke-dasharray: 7 93; filter: drop-shadow(0 0 5px var(--cyan)); animation: service-signal 4s linear infinite paused; }
-.service-connectors { position: absolute; inset: 0; }
-.service-integration-core { position: absolute; width: 63%; left: 18.5%; top: 17%; }
-.service-connector { position: absolute; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 6px; width: 22%; min-height: 82px; padding: 8px 3px; aspect-ratio: 1; border: 1px solid var(--border); border-radius: 9px; background: var(--surface); box-shadow: 0 8px 30px var(--glow); color: var(--cyan); }
-.service-connector .icon { width: 28px; height: 28px; }
-.service-connector span { font: .65rem var(--font-sans); color: var(--muted); line-height: 1.3; text-align: center; padding: 0 3px; }
-.service-connector-0 { top: 8%; left: 5%; }.service-connector-1 { top: 8%; right: 5%; }.service-connector-2 { bottom: 8%; left: 5%; }.service-connector-3 { bottom: 8%; right: 5%; }
-.service-visual[data-active='true'] :is(.service-aura, .service-die, .service-wafer-scan, .service-probe-tip, .service-signal) { animation-play-state: running; }
-@keyframes service-atmosphere { 50% { opacity: .45; transform: scale(.9); } }
-@keyframes service-die { 50% { opacity: .35; } }
-@keyframes service-scan { to { transform: translateY(216px); } }
-@keyframes service-signal { to { stroke-dashoffset: -100; } }
+
+/* Silicon support: a die from the wafer, probed on its pads, measured against its simulation. */
+.silicon-story, .integration-story > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.silicon-wafer { fill: var(--surface); stroke: var(--cyan); stroke-width: 1.2; }
+.silicon-die { fill: color-mix(in srgb, var(--cyan) 7%, var(--surface)); stroke: color-mix(in srgb, var(--cyan) 28%, var(--border)); stroke-width: .8; }
+.silicon-die-picked { fill: color-mix(in srgb, var(--cyan) 40%, var(--surface)); stroke: var(--cyan); stroke-width: 1.4; }
+.silicon-zoom { fill: none; stroke: var(--cyan); stroke-width: 1; stroke-opacity: .55; }
+.silicon-closeup { fill: var(--surface); stroke: var(--cyan); stroke-width: 1.2; }
+.silicon-metal { fill: var(--cyan); fill-opacity: .8; }
+.silicon-pad { fill: var(--surface-raised); stroke: var(--muted); stroke-width: 1; }
+.silicon-probes path { fill: none; stroke: var(--muted); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.silicon-probes circle { fill: var(--cyan); filter: drop-shadow(0 0 4px var(--cyan)); }
+.silicon-flow, .silicon-axis { fill: none; stroke: var(--subtle); stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; }
+.silicon-sweep { stroke: var(--violet); stroke-width: 1.2; opacity: 0; }
+.silicon-simulated { fill: none; stroke: var(--cyan); stroke-width: 2; stroke-linejoin: round; }
+.silicon-measured { fill: var(--violet); }
+.silicon-legend path { stroke: var(--cyan); stroke-width: 2; }
+.silicon-legend circle { fill: var(--violet); }
+.silicon-legend text { fill: var(--muted); font: 10px var(--font-mono); }
+
+/* Integration: GENESIS sends one job at a time to a connected tool and names it in the hub. */
+.integration-story { position: absolute; inset: 0; }
+.integration-link { fill: none; stroke: var(--border); stroke-width: 2; stroke-linejoin: round; }
+.integration-tool, .integration-hub { position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; width: 25%; height: 22.5%; background: var(--surface); }
+.integration-tool { border: 1px solid var(--border); border-radius: 10px; color: var(--cyan); }
+.integration-tool .icon { width: 22px; height: 22px; }
+.integration-tool span { padding: 0 4px; font-size: .7rem; line-height: 1.25; text-align: center; color: var(--muted); }
+.integration-tool-0 { left: 5%; top: 8.75%; }
+.integration-tool-1 { right: 5%; top: 8.75%; }
+.integration-tool-2 { left: 5%; bottom: 8.75%; }
+.integration-tool-3 { right: 5%; bottom: 8.75%; }
+.integration-hub { left: 37.5%; top: 38.75%; border: 1px solid color-mix(in srgb, var(--cyan) 60%, var(--border)); border-radius: 12px; background: var(--surface-raised); box-shadow: 0 10px 34px var(--glow); }
+.integration-hub .brand { font-size: .8rem; gap: 5px; }
+.integration-hub .brand img { width: 18px; height: 19px; }
+.integration-actions { position: relative; width: 100%; height: 2.6em; font: .6rem/1.3 var(--font-mono); color: var(--cyan); text-align: center; }
+.integration-actions > span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 0 6px; opacity: 0; }
+
+/* Motion runs only while visible and allowed; otherwise the complete picture stays still. */
+.service-visual[data-motion='on'] .silicon-sweep { animation: silicon-sweep 6s linear infinite paused; }
+.service-visual[data-motion='on'] .silicon-measured { animation: silicon-point 6s ease-out calc(var(--delay) * 1s) infinite paused; }
+.service-visual[data-motion='on'] .integration-link { animation: integration-link 8s ease-in-out calc(var(--order) * 2s) infinite paused; }
+.service-visual[data-motion='on'] .integration-tool { animation: integration-tool 8s ease-in-out calc(var(--order) * 2s) infinite paused; }
+.service-visual[data-motion='on'] .integration-actions > span { animation: integration-action 8s ease-in-out calc(var(--order) * 2s) infinite paused; }
+.service-visual[data-active='true'] :is(.silicon-sweep, .silicon-measured, .integration-link, .integration-tool, .integration-actions > span) { animation-play-state: running; }
+@keyframes silicon-sweep { 0%, 10% { transform: translateX(0); opacity: 0; } 12%, 58% { opacity: .9; } 60%, 100% { transform: translateX(202px); opacity: 0; } }
+@keyframes silicon-point { 0% { opacity: 0; } 3%, 78% { opacity: 1; } 88%, 100% { opacity: 0; } }
+@keyframes integration-link { 0%, 25%, 100% { stroke: var(--border); } 3%, 22% { stroke: var(--cyan); } }
+@keyframes integration-tool { 0%, 25%, 100% { border-color: var(--border); } 3%, 22% { border-color: var(--cyan); } }
+@keyframes integration-action { 0%, 25%, 100% { opacity: 0; } 3%, 22% { opacity: 1; } }
 @media (max-width: 850px) {
   .service-tabs button { flex-direction: column; justify-content: center; padding: 18px 8px; gap: 10px; font-size: .8rem; text-align: center; line-height: 1.5; }
   .service-tab-number { display: none; }
@@ -74,9 +99,11 @@
 @media (max-width: 400px) {
   .service-tabs button { font-size: .75rem; }
   .service-visual-heading { padding: 14px 12px; font-size: .55rem; gap: 6px; }
-  .service-visual[data-kind='specialised-integration'] .service-artboard { aspect-ratio: 1.1; }
-  .service-connector span { font-size: .6rem; padding: 0; }
+  .integration-tool .icon { width: 16px; height: 16px; }
+  .integration-tool span { font-size: .58rem; }
+  .integration-hub .brand { font-size: .62rem; }
+  .integration-actions { font-size: .5rem; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .service-visual :is(.service-aura, .service-die, .service-wafer-scan, .service-probe-tip, .service-signal) { animation: none !important; }
+  .service-visual :is(.silicon-sweep, .silicon-measured, .integration-link, .integration-tool, .integration-actions > span) { animation: none !important; }
 }

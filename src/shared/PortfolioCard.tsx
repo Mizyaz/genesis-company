@@ -5,10 +5,11 @@ import { ImageViewer } from './ImageViewer';
 
 type PortfolioItem = {
   id: string; number: string; title: string; kind: string; band: string; description: string;
-  images: { src: string; alt: string; label: string; fit: string; width: number; height: number; viewport?: { x: number; y: number; width: number; height: number } }[];
+  images: { src: string; preview?: string; alt: string; label: string; fit: string; width: number; height: number; viewport?: { x: number; y: number; width: number; height: number } }[];
 };
 
-/** Data-driven gallery: a block can have one layout or several detail views. */
+/** Data-driven gallery: a block can have one layout or several detail views.
+ * Cards show the light preview; the viewer and Original link load the unchanged source. */
 export function PortfolioCard({ item }: { item: PortfolioItem }) {
   const { t } = useLanguage();
   const [selected, setSelected] = useState(0);
@@ -16,12 +17,13 @@ export function PortfolioCard({ item }: { item: PortfolioItem }) {
   const clipId = `layout-${useId().replace(/:/g, '')}`;
   const image = item.images[selected] || item.images[0];
   const imageUrl = assetUrl(image.src);
+  const previewUrl = assetUrl(image.preview ?? image.src);
   return <article className="portfolio-card">
     <div className="portfolio-top"><span className="eyebrow">{item.number} / {item.band}</span><Icon name="chip" /></div>
     <div className="layout-image">
       <button type="button" className="layout-open" onClick={() => setViewing(true)} aria-label={t('Inspect {title}, {view}', { title: item.title, view: image.label })} aria-haspopup="dialog">
-      {image.viewport ? <svg className="layout-media" viewBox={`${image.viewport.x} ${image.viewport.y} ${image.viewport.width} ${image.viewport.height}`} role="img" aria-label={image.alt}><defs><clipPath id={clipId}><rect {...image.viewport} /></clipPath></defs><image href={imageUrl} width={image.width} height={image.height} clipPath={`url(#${clipId})`} /></svg>
-        : <img className="layout-media" src={imageUrl} alt={image.alt} loading="lazy" width={image.width} height={image.height} style={{ objectFit: image.fit === 'cover' ? 'cover' : 'contain' }} />}
+      {image.viewport ? <svg className="layout-media" viewBox={`${image.viewport.x} ${image.viewport.y} ${image.viewport.width} ${image.viewport.height}`} role="img" aria-label={image.alt}><defs><clipPath id={clipId}><rect {...image.viewport} /></clipPath></defs><image href={previewUrl} width={image.width} height={image.height} clipPath={`url(#${clipId})`} /></svg>
+        : <img className="layout-media" src={previewUrl} alt={image.alt} loading="lazy" width={image.width} height={image.height} style={{ objectFit: image.fit === 'cover' ? 'cover' : 'contain' }} />}
       <span className="layout-inspect"><Icon name="diagonal" /> {t("Explore layout")}</span></button>
       <a className="layout-original" href={imageUrl} target="_blank" rel="noopener noreferrer" aria-label={t('Open original {title}, {view}', { title: item.title, view: image.label })}>{t("Original")} <Icon name="diagonal" /></a>
     </div>
