@@ -581,25 +581,37 @@ test('the research page flies a signal through a city of our papers: one buildin
   assert.ok(existsSync(resolve(root, 'public/assets/research-flight.webp')));
 });
 
-test('the signal flight is fully playable on a phone: two thumbs, tap to fly, a timeline scrubber, both orientations', () => {
-  const flight = read('src/shared/ResearchFlight.tsx');
-  // The left thumb flies, the right thumb rises and sinks, at the same time; further fingers can still tap.
-  assert.match(flight, /event.pointerType === 'touch' && event.clientX > event.currentTarget.clientWidth \/ 2 \? 'lift' : 'fly'/);
-  assert.match(flight, /role: taken \? 'tap' : wanted/);
-  assert.match(flight, /handle.current\?.setInput\(\{ turn: x, forward: -y \}\)/);
-  assert.match(flight, /handle.current\?.setInput\(\{ lift: -y \}\)/);
+test('the signal flight is fully playable on a phone: one thumb flies, arrows rise and sink, tap to fly, a timeline scrubber, both orientations', () => {
+  const flight = read('src/shared/ResearchFlight.tsx'), world = read('src/flight/world.ts');
+  // The first finger flies from wherever it lands, left or right; a second finger rises and sinks; further fingers tap.
+  assert.match(flight, /const role = !roles\.includes\('fly'\) \? 'fly' : event\.pointerType === 'touch' && !roles\.includes\('lift'\) \? 'lift' : 'tap';/);
+  assert.doesNotMatch(flight, /clientWidth \/ 2/);
+  assert.match(flight, /handle.current\?.setInput\(\{ turn: respond\(x\), forward: -respond\(y\) \}\)/);
+  assert.match(flight, /handle.current\?.setInput\(\{ lift: -respond\(y\) \}\)/);
+  // A small dead zone and a soft centre for fine steering, full at the edge.
+  const respond = new Function(`return ${flight.match(/const respond = (\(value: number\) => [^;]+);/)[1].replace(': number', '')}`)();
+  assert.equal(respond(0.1), 0);
+  assert.ok(respond(0.4) > 0 && respond(0.4) < 0.3 && Math.abs(respond(1) - 1) < 1e-9 && respond(-1) === -1);
+  // The arrows rise and sink while held, in the row on a computer and under the right thumb on a touch screen.
+  assert.match(flight, /\{!coarse && lifts\}/);
+  assert.match(flight, /\{coarse && <div className="flight-lifts">\{lifts\}<\/div>\}/);
+  // Letting go brakes (sooner beside a building, to visit it); flying on into a building hops over its roof.
+  assert.match(world, /const brake = input\.forward \? 1\.7 : focus \? 4\.2 : 3\.2;/);
+  assert.match(world, /if \(input\.forward > 0\) vel\.y = Math\.max\(vel\.y, HOP\);/);
+  assert.match(world, /thrust = input\.forward > 0 \? input\.forward : input\.forward \* 0\.5/);
   // A tap (or click) that does not move flies to the building under it; the engine picks walls, roofs and posters.
   assert.match(flight, /!touch.moved && event.timeStamp - touch.at < \d+ && handle.current\?.pick\(event.clientX, event.clientY\)/);
   assert.match(read('src/flight/world.ts'), /pick\(clientX: number, clientY: number\): boolean/);
   // The timeline is a scrubber; letting go flies there, sliding off cancels.
   assert.match(flight, /onPointerUp: \(event: ReactPointerEvent<HTMLDivElement>\) => \{[\s\S]*?handle.current\?.flyTo\(paper.id\)/);
-  // The game owns every gesture: no page zoom, scroll, selection or long-press menu; pads show where the thumbs go.
+  // The game owns every gesture: no page zoom, scroll, selection or long-press menu; a pad shows where a thumb can go.
   assert.match(flight, /onContextMenu=\{event => event.preventDefault\(\)\}/);
   assert.match(flight, /data-touch=\{coarse \|\| undefined\}/);
   const css = read('src/styles/research-flight.css');
   assert.match(css, /\.flight-overlay \{[^}]*touch-action: none;[^}]*-webkit-touch-callout: none;/);
   assert.match(css, /\.flight-pad-fly \{/);
-  assert.match(css, /\.flight-pad-lift \{/);
+  assert.match(css, /\.flight-lifts \{ position: absolute; right:/);
+  assert.doesNotMatch(css + flight, /flight-pad-lift/);
   assert.match(css, /@media \(orientation: landscape\) and \(max-height: 520px\)/);
   assert.match(flight, /requestFullscreen/);
 });
@@ -625,7 +637,8 @@ test('the GENESIS symbol is a pixelated front end, the logo everywhere, and pres
   const welcome = read('src/pages/Welcome.tsx'), flight = read('src/shared/ResearchFlight.tsx'), symbol = read('src/shared/Emblem.tsx');
   assert.match(welcome, /<BrandIntro headingId="welcome-heading" symbol=\{<FlightSymbol papers=\{papers\} library="research" onShowPaper=\{id => \{ requestPaper\(id\); navigate\('#\/publications'\); \}\} \/>\} \/>/);
   assert.match(read('src/shared/CircuitIdentity.tsx'), /\{symbol\}\n    <h1 id=\{headingId\}><ElectricBrand mark=\{!symbol\} \/><\/h1>/);
-  assert.match(flight, /<EmblemLauncher ref=\{launcher\} label=\{t\("Fly through our research"\)\} hint=\{t\("Press the symbol to fly"\)\} onLaunch=\{\(\) => setOpen\(true\)\} \/>/);
+  assert.match(flight, /<EmblemLauncher ref=\{launcher\} label=\{t\("Fly through our research"\)\} onLaunch=\{\(\) => setOpen\(true\)\} \/>/);
+  assert.doesNotMatch(symbol + read('src/styles/emblem.css'), /emblem-hint/); // Nothing written under the symbol.
   assert.match(flight, /<div className="flight-launch-preview">\n      <img [^\n]*\/>\n      <FlightSymbol papers=\{papers\} onShowPaper=\{onShowPaper\} \/>/);
   const card = flight.slice(flight.indexOf('export function ResearchFlight('), flight.indexOf('function FlightOverlay('));
   assert.doesNotMatch(card, /<button|Launch the signal/); // No start button: the symbol is the way in.
@@ -639,7 +652,7 @@ test('the GENESIS symbol is a pixelated front end, the logo everywhere, and pres
   assert.match(css, /prefers-reduced-motion: reduce/);
   assert.match(css, /\.emblem\[data-running="false"\] \*/);
   const dictionary = JSON.parse(read('src/content/tr.json'));
-  for (const copy of ['Fly through our research', 'Press the symbol to fly', 'Read the summary on the research page']) assert.ok(dictionary[copy], copy);
+  for (const copy of ['Fly through our research', 'Press the symbol to take off. Keyboard, mouse or one thumb on a phone; stay next to a building to visit its paper.', 'Read the summary on the research page']) assert.ok(dictionary[copy], copy);
 });
 
 test('pixelated passives look like the ones in our papers: hundreds of pixels, every port connected, mirrored where symmetric', () => {
