@@ -17,7 +17,7 @@ export function PublicApp() {
   const { theme, setTheme } = useCompanyAppearance();
   const explore = route.startsWith('#/explore');
   const research = route === '#/publications';
-  const about = route === '#/about';
+  const about = route === '#/about' || route.startsWith('#/about/');
   const design = route === '#/design';
   useEffect(() => {
     const change = () => setRoute(window.location.hash);
@@ -30,7 +30,7 @@ export function PublicApp() {
   useEffect(() => {
     const section = route.split('/')[2];
     const timer = window.setTimeout(() => {
-      const target = section && ['membership', 'portfolio', 'workflow', 'services', 'faq', 'team', 'story', 'contact'].includes(section) ? document.getElementById(section) : null;
+      const target = section && ['membership', 'portfolio', 'workflow', 'services', 'faq', 'story', 'contact'].includes(section) ? document.getElementById(section) : null;
       if (target instanceof HTMLDetailsElement) target.open = true; // A link to the questions opens them.
       if (target) target.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
       else window.scrollTo({ top: 0 });

@@ -87,17 +87,26 @@ test('the design loop tells one story: your team, GENESIS and your CAD tools des
   const loopAt = explorePage.indexOf('<DesignStory content={site.story.loop}');
   assert.ok(loopAt > explorePage.indexOf('<section id="workflow"') && loopAt < explorePage.indexOf('<Services '), 'design loop in the platform section');
   assert.doesNotMatch(read('src/pages/Welcome.tsx') + read('src/shared/Membership.tsx'), /DesignStory/);
-  // On phones the three stations stack, and work flows down while results come back up.
+  // On phones the whole loop fits one screen: the team on top, GENESIS and the tools side by side; work goes down and across.
   const loopCss = read('src/styles/design-story.css');
-  assert.match(loopCss, /@container \(max-width: 559px\) \{\n  \.story-scene \{ grid-template-columns: minmax\(0, 1fr\); \}/);
-  assert.match(loopCss, /@keyframes story-travel-down/);
+  assert.match(loopCss, /@container \(max-width: 559px\) \{\n  \.story-scene \{ --link: 20px; grid-template-columns: minmax\(0, 1fr\) var\(--link\) minmax\(0, 1fr\); grid-template-areas: "team team team" "down \. \." "engine across tools"; \}/);
+  assert.match(loopCss, /\.story-link-team \.story-rail\[data-on="true"\]::before \{ animation-name: story-travel-down; \}/);
+  assert.doesNotMatch(loopCss, /@container \(max-width: 420px\)/); // The team card keeps its drawing beside the sheet.
+  // The step counter reads as a loop: no "4 / 5, then 2 / 5"; steps 2 to 4 are a lap with the attempt counted.
+  assert.doesNotMatch(component, /\{frame\.step\} \/ \{content\.steps\.length\}/);
+  assert.match(component, /<Steps frame=\{frame\} count=\{content\.steps\.length\} attempt=\{`\$\{content\.engine\.iteration\} \$\{frame\.design \+ 1\}`\}/);
+  assert.match(component, /frame\.step === 2 && frame\.design > 0 && <path key=\{run\} className="story-lap-spark"/);
+  assert.match(loopCss, /\.story-steps\[data-looping="true"\] \.story-lap \{ stroke: var\(--violet\)/);
   // Every appearance says it is an illustration and gives screen readers the five steps in words.
   assert.match(component, /story-now-note">\{content.note\}/);
   assert.match(component, /<ol className="sr-only">\{content.steps.map/);
   const explore = read('src/pages/Explore.tsx');
   assert.match(explore, /<Membership content=\{site.membership\} email=\{site.brand.email\} \/>/);
-  assert.match(explore, /className="story-narrative"/);
-  assert.match(explore, /id="team"/); // Existing approach links still reach the story illustration.
+  // Our story is told on the About page; the approach link leads to the hero scene.
+  assert.doesNotMatch(explore, /id="story"|id="team"|story-narrative/);
+  assert.match(read('src/pages/About.tsx'), /<section id="story" className="about-story" aria-labelledby="story-title">/);
+  assert.doesNotMatch(read('src/content/site.json'), /#\/explore\/(story|team)/, 'story links go to About; the approach is the hero');
+  for (const app of ['src/PublicApp.tsx', 'src/App.tsx'].filter(path => existsSync(resolve(root, path)))) assert.match(read(app), /const about = route === '#\/about' \|\| route\.startsWith\('#\/about\/'\);/, app);
   for (const path of ['src/styles/design-story.css', 'src/styles/story-scene.css']) {
     assert.match(read(path), /prefers-reduced-motion: reduce/);
     assert.match(read(path), /data-motion="off"/);
@@ -163,6 +172,41 @@ test('both illustrations answer a click: the part dips, a ripple spreads and it 
   assert.match(sceneCss, /\.scene-draw\[data-on="true"\] \{ stroke-dashoffset: 0; animation: scene-draw/);
 });
 
+test('on phones rows of cards scroll sideways, sections are named not numbered, and a live wire shows how far the page is read', () => {
+  // Sections: an eyebrow and a title, no numbers; numbers stay for real sequences (the platform steps).
+  assert.match(read('src/shared/ui.tsx'), /export function SectionHeading\(\{ eyebrow, children \}/);
+  for (const path of walk('src').filter(path => path.endsWith('.tsx'))) assert.doesNotMatch(read(path), /<SectionHeading number=/, path);
+  assert.doesNotMatch(read('src/shared/PortfolioCard.tsx'), /item\.number/);
+  assert.match(read('src/shared/Workflow.tsx'), /padStart\(2, '0'\)/);
+  // Swipe rows: each with its dots, only below 700 px; the row reaches the screen edges and snaps card by card.
+  const rows = { 'src/shared/Membership.tsx': 'tiers', 'src/pages/Explore.tsx': 'designs', 'src/shared/Workflow.tsx': 'ref', 'src/shared/Services.tsx': 'scope' };
+  for (const [path, ref] of Object.entries(rows)) {
+    assert.match(read(path), /className="[^"]*swipe-row"/, path);
+    assert.match(read(path), new RegExp(`<SwipeDots [^>]*row=\\{${ref}\\}`), path);
+  }
+  assert.match(read('src/pages/Explore.tsx'), /<ul ref=\{modules\} className="swipe-row">/);
+  const css = read('src/styles/site.css');
+  assert.match(css, /\.swipe-dots \{ display: none; \}/);
+  const phone = css.slice(css.indexOf('@media (max-width: 700px)'));
+  assert.match(phone, /\.content-section \.swipe-row \{ display: flex; gap: 12px; max-width: none; margin-inline: -24px; padding: 4px 24px 12px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory;/);
+  assert.match(phone, /\.content-section \.swipe-row > \* \{ flex: 0 0 var\(--swipe-card, 84%\); min-width: 0; scroll-snap-align: start; \}/);
+  const dots = read('src/shared/SwipeDots.tsx');
+  assert.match(dots, /aria-hidden="true"/);
+  assert.match(dots, /tabIndex=\{-1\}/);
+  assert.match(dots, /\{ passive: true \}/);
+  // The wire: in the shell of every page, decorative, measured once a frame, still when motion is stopped or reduced.
+  assert.match(read('src/shared/SiteShell.tsx'), /<ScrollCurrent \/>/);
+  const wire = read('src/shared/ScrollCurrent.tsx'), wireCss = read('src/styles/scroll-current.css');
+  assert.match(wire, /aria-hidden="true"/);
+  assert.match(wire, /requestAnimationFrame\(measure\)/);
+  assert.match(wire, /new ResizeObserver\(request\)/);
+  assert.match(wireCss, /\.scroll-current \{ --progress: 0; position: fixed; z-index: 40;/);
+  assert.match(wireCss, /clip-path: inset\(-8px calc\(\(1 - var\(--progress\)\) \* 100%\) -8px 0\)/);
+  assert.match(wireCss, /\.scroll-current\[data-motion="off"\] \*/);
+  assert.match(wireCss, /prefers-reduced-motion: reduce/);
+  assert.ok(40 < 1000 && /z-index: 1000/.test(read('src/styles/research-flight.css')), 'the flight covers the wire');
+});
+
 test('welcome uses the shared, single-line brand entrance with readable acronym emphasis', () => {
   const welcome = read('src/pages/Welcome.tsx');
   const identity = read('src/shared/CircuitIdentity.tsx');
@@ -190,7 +234,7 @@ test('Explore opens with the membership, then the portfolio; services stay data-
     assert.equal(item.stages, undefined);
   }
   const page = read('src/pages/Explore.tsx');
-  const order = ['<section className="company-hero"', '<Membership ', '<section id="portfolio"', '<section id="workflow"', '<Services ', '<section id="story"', '<section id="contact"'].map(marker => page.indexOf(marker));
+  const order = ['<section className="company-hero"', '<Membership ', '<section id="portfolio"', '<section id="workflow"', '<Services ', '<section id="contact"'].map(marker => page.indexOf(marker));
   assert.ok(order.every((position, i) => position >= 0 && (i === 0 || position > order[i - 1])), `section order ${order}`);
   assert.match(page, /href="#\/explore\/membership"/); // The hero leads straight to the membership.
   assert.doesNotMatch(page, /id="about"|TeamProfiles/); // About us is a page of its own.
@@ -204,7 +248,7 @@ test('Explore opens with the membership, then the portfolio; services stay data-
   assert.match(read('src/styles/site.css'), /font-size: clamp\(2.75rem, 12vw, 4.6rem\)/);
   for (const copy of [content.story.headline, content.story.intro, ...content.story.paragraphs]) assert.ok(dictionary[copy], copy);
   assert.equal(content.story.paragraphs.length, 2);
-  assert.match(page, /site.story.paragraphs.map/);
+  assert.match(read('src/pages/About.tsx'), /site.story.paragraphs.map/);
   assert.doesNotMatch(page, /hero-index|Reason\. Simulate\. Learn\. Refine\./);
 });
 
