@@ -10,7 +10,8 @@ import { empireIds, laneX, layoutCity, type Building, type EmpireId } from './la
 
 /** Seconds spent next to a building (slowly) before the visit prompt, how close counts, and how slow. */
 export const DWELL_SECONDS = 1.3;
-const NEAR = 12, SLOW = 10;
+// The signal flies below 28 and the camera below 29: under the empire banners (29.3) and the year arches (34).
+const NEAR = 12, SLOW = 10, ARC = 27, CEILING = 28, CAMERA_CEILING = 29;
 
 export type FlightTarget = { kind: 'paper'; paper: Publication; empire: EmpireId } | { kind: 'genesis' };
 export type FlightLabels = { empires: Record<EmpireId, string>; journal: string; conference: string; genesisLine: string };
@@ -29,6 +30,8 @@ export type FlightHandle = {
   nudge(forward: number, lift: number): void;
   step(direction: 1 | -1): void;
   flyTo(id: string): void;
+  /** Fly to the building or poster under a screen point (a tap or a click); false if there is none. */
+  pick(clientX: number, clientY: number): boolean;
   dispose(): void;
 };
 export type FlightOptions = { canvas: HTMLCanvasElement; papers: Publication[]; labels: FlightLabels; reducedMotion: boolean; events: FlightEvents };
@@ -674,6 +677,7 @@ export function createFlight({ canvas, papers, labels, reducedMotion, events }: 
   let pilot: { from: THREE.Vector3; via: THREE.Vector3; to: THREE.Vector3; yaw: number; t: number; duration: number; target: Solid } | null = null;
   let focus: Solid | null = null, prompted: Solid | null = null, dwell = 0, lastYear = 0, lastEmpire: EmpireId | 'genesis' | null | undefined;
   const look = new THREE.Vector3(), lookTarget = new THREE.Vector3(), want = new THREE.Vector3(), tmp = new THREE.Vector3();
+  const raycaster = new THREE.Raycaster(), pointer = new THREE.Vector2();
   history.forEach(point => point.copy(reducedMotion ? pos : introFrom));
 
   const bezier = (a: THREE.Vector3, b: THREE.Vector3, c: THREE.Vector3, t: number, out: THREE.Vector3) =>
@@ -681,7 +685,7 @@ export function createFlight({ canvas, papers, labels, reducedMotion, events }: 
   const forward = (angle: number, out = tmp) => out.set(-Math.sin(angle), 0, -Math.cos(angle));
   const chase = (snap: boolean) => {
     const f = forward(yaw).clone(), back = focus?.building ? 8.5 : 11;
-    want.set(pos.x - f.x * back, Math.max(pos.y + 4.4, 1.6), pos.z - f.z * back);
+    want.set(pos.x - f.x * back, clamp(pos.y + 4.4, 1.6, CAMERA_CEILING), pos.z - f.z * back);
     look.set(pos.x + f.x * 9, pos.y + 1.2, pos.z + f.z * 9);
     if (focus) look.lerp(tmp.set(focus.x, focus.posterY, focus.z), 0.3);
     // Keep the camera outside buildings and clear of the posters above them.
@@ -701,11 +705,13 @@ export function createFlight({ canvas, papers, labels, reducedMotion, events }: 
   const pilotTo = (solid: Solid) => {
     let to: THREE.Vector3, heading: number;
     if (solid.building) {
-      to = new THREE.Vector3(laneX[solid.building.empire] + 0.5 * solid.side, clamp(solid.top + 3, 7, 30), solid.z + 1.5);
+      to = new THREE.Vector3(laneX[solid.building.empire] + 0.5 * solid.side, clamp(solid.top + 3, 7, ARC), solid.z + 1.5);
       heading = Math.atan2(-(solid.x - to.x), -(solid.z - to.z));
-    } else { to = new THREE.Vector3(0, solid.top + 5, solid.z + solid.radius + 9); heading = 0; }
+    } else { to = new THREE.Vector3(0, Math.min(solid.top + 5, CEILING), solid.z + solid.radius + 9); heading = 0; }
     const distance = pos.distanceTo(to);
-    pilot = { from: pos.clone(), via: pos.clone().lerp(to, 0.5).setY(Math.max(pos.y, to.y) + 14), to, yaw: heading, t: 0, duration: clamp(distance / 28, 0.9, 3.5), target: solid };
+    // Arc over the buildings but stay under the year arches (beam at 34), so the camera never runs into a year board.
+    const arc = Math.max(Math.min(Math.max(pos.y, to.y) + 12, ARC), pos.y, to.y);
+    pilot = { from: pos.clone(), via: pos.clone().lerp(to, 0.5).setY(arc), to, yaw: heading, t: 0, duration: clamp(distance / 28, 0.9, 3.5), target: solid };
     vel.set(0, 0, 0);
     markMoved();
   };
@@ -785,7 +791,7 @@ export function createFlight({ canvas, papers, labels, reducedMotion, events }: 
         if (into < 0) { vel.x -= into * nx; vel.z -= into * nz; }
       }
     }
-    pos.set(clamp(pos.x, -80, 80), clamp(pos.y, 2, 48), clamp(pos.z, city.genesisZ - 40, city.startZ + 50));
+    pos.set(clamp(pos.x, -80, 80), clamp(pos.y, 2, CEILING), clamp(pos.z, city.genesisZ - 40, city.startZ + 50));
     sense(dt);
     chase(false);
     camera.position.lerp(want, 1 - Math.exp(-dt * 5));
@@ -941,6 +947,34 @@ export function createFlight({ canvas, papers, labels, reducedMotion, events }: 
     flyTo(id) {
       const target = order.find(solid => solid.building!.paper.id === id);
       if (target && mode === 'fly') pilotTo(target);
+    },
+    pick(clientX, clientY) {
+      if (mode !== 'fly') return false;
+      const rect = canvas.getBoundingClientRect();
+      pointer.set(((clientX - rect.left) / rect.width) * 2 - 1, -((clientY - rect.top) / rect.height) * 2 + 1);
+      raycaster.setFromCamera(pointer, camera);
+      const { origin, direction } = raycaster.ray;
+      let best: Solid | null = null, nearest = Infinity;
+      for (const { solid, mesh } of posters) {
+        const hit = raycaster.intersectObject(mesh, false)[0];
+        if (hit && hit.distance < nearest) { best = solid; nearest = hit.distance; }
+      }
+      // Buildings count as upright cylinders from the ground to the roof: a tap on a wall or on the roof.
+      for (const solid of solids) {
+        const ox = origin.x - solid.x, oz = origin.z - solid.z, a = direction.x ** 2 + direction.z ** 2, hits: number[] = [];
+        if (a > 1e-9) {
+          const b = 2 * (ox * direction.x + oz * direction.z), c = ox * ox + oz * oz - solid.radius ** 2, disc = b * b - 4 * a * c;
+          if (disc >= 0) hits.push((-b - Math.sqrt(disc)) / (2 * a), (-b + Math.sqrt(disc)) / (2 * a));
+        }
+        if (Math.abs(direction.y) > 1e-9) hits.push((solid.top - origin.y) / direction.y);
+        for (const t of hits) {
+          if (t <= 0 || t >= nearest) continue;
+          const x = ox + direction.x * t, y = origin.y + direction.y * t, z = oz + direction.z * t;
+          if (y >= -0.01 && y <= solid.top + 0.01 && x * x + z * z <= solid.radius ** 2 + 0.01) { best = solid; nearest = t; }
+        }
+      }
+      if (best) pilotTo(best);
+      return Boolean(best);
     },
     dispose() {
       cancelAnimationFrame(frame);

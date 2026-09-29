@@ -352,7 +352,6 @@
   "Fly through our research": "Araştırmalarımızın içinden uçun",
   "Every building is one of our papers, standing on a timeline from {from} to {to}. Circuits, signals and drones each rule an empire of their own.": "Her bina makalelerimizden biri ve {from}–{to} zaman çizgisi üzerinde duruyor. Devreler, sinyaller ve drone'lar kendi imparatorluklarını kuruyor.",
   "Launch the signal": "Sinyali başlat",
-  "Keyboard, mouse or touch. Stay next to a building to visit its paper.": "Klavye, fare veya dokunmatik ekran. Makalesini ziyaret etmek için bir binanın yanında durun.",
   "Circuit Empire": "Devre İmparatorluğu",
   "Signal Empire": "Sinyal İmparatorluğu",
   "Drone Empire": "Drone İmparatorluğu",
@@ -361,8 +360,6 @@
   "Loading the city…": "Şehir yükleniyor…",
   "3D graphics could not start in this browser. Every paper is also listed in the library on this page.": "3B grafik bu tarayıcıda başlatılamadı. Tüm makaleler bu sayfadaki kütüphanede de listeleniyor.",
   "Back to the library": "Kütüphaneye dön",
-  "Drag to fly. Use ▲ ▼ to rise and sink.": "Uçmak için sürükleyin. Yükselmek ve alçalmak için ▲ ▼ kullanın.",
-  "Fly with W A S D or the arrow keys, rise with Space, sink with Shift, or drag.": "W A S D veya ok tuşlarıyla uçun, Boşluk ile yükselin, Shift ile alçalın ya da sürükleyin.",
   "Stay here to visit": "Ziyaret için burada kalın",
   "Would you like to visit?": "Ziyaret etmek ister misiniz?",
   "Visit": "Ziyaret et",
@@ -373,5 +370,10 @@
   "Rise": "Yüksel",
   "Sink": "Alçal",
   "Research timeline": "Araştırma zaman çizgisi",
-  "Fly to: {title}": "Uç: {title}"
+  "Fly to: {title}": "Uç: {title}",
+  "Keyboard, mouse or two thumbs on a phone. Stay next to a building to visit its paper.": "Klavye, fare ya da telefonda iki başparmak. Makalesini ziyaret etmek için bir binanın yanında durun.",
+  "Left thumb: fly. Right thumb: rise and sink. Tap a building to fly there.": "Sol başparmak: uç. Sağ başparmak: yüksel ve alçal. Bir binaya dokunursanız oraya uçar.",
+  "Fly with W A S D or the arrow keys, rise with Space, sink with Shift. Drag to steer or click a building to fly there.": "W A S D veya ok tuşlarıyla uçun, Boşluk ile yükselin, Shift ile alçalın. Sürükleyerek yön verin ya da bir binaya tıklayıp oraya uçun.",
+  "Full screen": "Tam ekran",
+  "Leave full screen": "Tam ekrandan çık"
 }
