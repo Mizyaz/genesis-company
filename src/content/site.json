@@ -6,29 +6,119 @@
   },
   "stages": [
     {
+      "id": "specification",
       "title": "Specification",
       "detail": "Define the circuit, frequency band and performance targets.",
-      "icon": "document"
+      "icon": "document",
+      "software": [
+        {
+          "icon": "spark",
+          "title": "Design assistant",
+          "detail": "Describe the circuit in your own words; the assistant sets up the right tool."
+        },
+        {
+          "icon": "check",
+          "title": "Targets as goals",
+          "detail": "Band, gain, noise figure and matching become the goals every run is checked against."
+        },
+        {
+          "icon": "server",
+          "title": "On your own server",
+          "detail": "GENESIS runs next to your Cadence tools, on your own server."
+        }
+      ]
     },
     {
+      "id": "synthesis",
       "title": "Circuit synthesis",
       "detail": "Organize the topology, devices and testbenches.",
-      "icon": "chip"
+      "icon": "chip",
+      "software": [
+        {
+          "icon": "chip",
+          "title": "Active circuits",
+          "detail": "Your Cadence schematics, with Spectre S-parameter, noise, harmonic-balance and stability analyses."
+        },
+        {
+          "icon": "grid",
+          "title": "Passive synthesis",
+          "detail": "Pixel layouts for baluns, dividers, couplers, filters and other N-port structures."
+        },
+        {
+          "icon": "switch",
+          "title": "Composer",
+          "detail": "Active stages and passive structures together on one canvas."
+        }
+      ]
     },
     {
+      "id": "em",
       "title": "EM simulation",
       "detail": "Bring the electromagnetic behavior into the design loop.",
-      "icon": "wave"
+      "icon": "wave",
+      "software": [
+        {
+          "icon": "wave",
+          "title": "Your EM solver",
+          "detail": "Every passive layout is checked with the EM solver you already use."
+        },
+        {
+          "icon": "layers",
+          "title": "Parallel simulations",
+          "detail": "Candidates are simulated side by side, not one after another."
+        },
+        {
+          "icon": "document",
+          "title": "Every run kept",
+          "detail": "Settings, responses and GDS files stay with each run."
+        }
+      ]
     },
     {
+      "id": "optimization",
       "title": "Optimization",
       "detail": "Explore circuit and passive design choices together.",
-      "icon": "sliders"
+      "icon": "sliders",
+      "software": [
+        {
+          "icon": "sliders",
+          "title": "Search strategies",
+          "detail": "Evolutionary, Bayesian and reinforcement-learning search."
+        },
+        {
+          "icon": "signal",
+          "title": "Pareto trade-offs",
+          "detail": "See what each target costs the others and choose the balance you want."
+        },
+        {
+          "icon": "spark",
+          "title": "Run by the assistant",
+          "detail": "The assistant can set up and run the optimization for you."
+        }
+      ]
     },
     {
+      "id": "layout",
       "title": "Layout & verification",
       "detail": "Connect physical design with DRC, LVS and extraction.",
-      "icon": "layers"
+      "icon": "layers",
+      "software": [
+        {
+          "icon": "grid",
+          "title": "GDS export",
+          "detail": "The chosen layouts leave GENESIS as GDS files."
+        },
+        {
+          "icon": "switch",
+          "title": "Cadence library",
+          "detail": "Composer exports the whole design to Cadence as a library with testbenches."
+        },
+        {
+          "icon": "document",
+          "title": "Python scripting",
+          "detail": "The same steps run from Python, so a flow can be repeated."
+        }
+      ]
     }
   ],
   "portfolio": [
@@ -379,6 +469,7 @@
     "headlineAccent": "From concept to layout.",
     "intro": "Circuit design, EM simulation and optimization, connected from the first idea to physical verification.",
     "visualLabel": "DESIGN LOOP",
+    "softwareLabel": "In GENESIS",
     "modulesTitle": "What GENESIS does",
     "modules": [
       {

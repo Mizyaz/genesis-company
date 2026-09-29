@@ -207,6 +207,43 @@ test('on phones rows of cards scroll sideways, sections are named not numbered, 
   assert.ok(40 < 1000 && /z-index: 1000/.test(read('src/styles/research-flight.css')), 'the flight covers the wire');
 });
 
+test('every platform stage opens a tube screen with what GENESIS offers there, animated, without new claims', () => {
+  const { stages, workflow } = JSON.parse(read('src/content/site.json'));
+  const dictionary = JSON.parse(read('src/content/tr.json'));
+  const screens = read('src/shared/StageScreens.tsx');
+  assert.deepEqual(stages.map(stage => stage.id), ['specification', 'synthesis', 'em', 'optimization', 'layout']);
+  assert.ok(dictionary[workflow.softwareLabel], workflow.softwareLabel);
+  for (const stage of stages) {
+    assert.match(screens, new RegExp(`${stage.id}: \\w+`), `${stage.id} has its picture`);
+    assert.equal(stage.software.length, 3, stage.id);
+    for (const offer of stage.software) {
+      assert.ok(offer.icon && offer.title && offer.detail, stage.id);
+      for (const copy of [offer.title, offer.detail]) assert.ok(dictionary[copy], copy);
+    }
+  }
+  // Only what the site already says GENESIS does: no figures, speed-ups or promises.
+  assert.doesNotMatch(JSON.stringify(stages), /\d+\s*%|\d+x\b|guarante|unlimited|faster|instant/i);
+  assert.doesNotMatch(Object.values(dictionary).join('\n'), /—/);
+  // The card title is the disclosure button; the screen can be closed with the card, its own button or Escape.
+  const component = read('src/shared/Workflow.tsx');
+  assert.match(component, /<h3><button type="button" className="workflow-open" aria-expanded=\{open === index && !off\} aria-controls=\{open === index \? panel : undefined\}/);
+  assert.match(component, /event\.key === 'Escape'/);
+  assert.match(component, /aria-label=\{t\("Close"\)\}/);
+  assert.match(component, /event\.animationName === 'stage-screen-off'/); // It goes back into the tube before it is removed.
+  assert.match(component, /if \(still\) setOpen\(null\)/); // With motion stopped it simply closes.
+  assert.match(read('src/pages/Explore.tsx'), /<Workflow stages=\{site\.stages\} label=\{site\.workflow\.softwareLabel\} \/>/);
+  // A cathode-ray tube: a bright line where the tube lands, then the picture; scanlines; back to a line and a dot.
+  const css = read('src/styles/workflow-detail.css');
+  assert.match(css, /transform-origin: var\(--tube-x\) 0; animation: stage-screen-on/);
+  assert.match(css, /@keyframes stage-screen-on \{ 0% \{ opacity: 0; transform: scale\(\.02, \.012\);[^}]*\} 6% \{ opacity: 1; \} 32% \{ transform: scale\(1, \.012\);/);
+  assert.match(css, /@keyframes stage-screen-off/);
+  assert.match(css, /@keyframes stage-tube-grow/);
+  assert.match(css, /repeating-linear-gradient\(to bottom/);
+  assert.match(css, /\.workflow-detail\[data-motion="off"\] \*/);
+  assert.match(css, /prefers-reduced-motion: reduce/);
+  assert.match(css, /\.workflow-detail \{ position: relative; display: grid; grid-template-rows: 0fr;/);
+});
+
 test('welcome uses the shared, single-line brand entrance with readable acronym emphasis', () => {
   const welcome = read('src/pages/Welcome.tsx');
   const identity = read('src/shared/CircuitIdentity.tsx');

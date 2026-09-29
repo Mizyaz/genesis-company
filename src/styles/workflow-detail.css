@@ -1,0 +1,115 @@
+/* Platform stages: every card opens what GENESIS offers at that stage, on a tube screen below the cards. */
+
+/* The title is the card's button, stretched over the whole card; a socket in the corner turns into a cross when open. */
+.workflow-open { padding: 0; border: 0; background: none; color: inherit; font: inherit; letter-spacing: inherit; text-align: inherit; cursor: pointer; }
+.workflow-open::after { content: ''; position: absolute; z-index: 2; inset: 0; border-radius: inherit; }
+.workflow-open:focus-visible { outline: none; }
+.workflow-open:focus-visible::after { outline: 2px solid var(--cyan); outline-offset: -3px; }
+.workflow-open::before { content: ''; position: absolute; z-index: 1; right: 14px; bottom: 14px; width: 22px; height: 22px; border: 1px solid color-mix(in srgb, var(--cyan) 55%, var(--border)); border-radius: 50%; background: linear-gradient(var(--cyan), var(--cyan)) center / 9px 1.5px no-repeat, linear-gradient(var(--cyan), var(--cyan)) center / 1.5px 9px no-repeat; transition: rotate .3s, background-color .3s, box-shadow .3s; }
+.workflow-open[aria-expanded="true"]::before { rotate: 45deg; background-color: color-mix(in srgb, var(--cyan) 16%, transparent); box-shadow: 0 0 12px color-mix(in srgb, var(--cyan) 45%, transparent); }
+.workflow-step { transition: background-color .3s, box-shadow .3s; }
+@media (hover: hover) { .workflow-step:hover { background-color: color-mix(in srgb, var(--cyan) 5%, transparent); } }
+/* The open card is powered: it keeps the light while its screen is on. */
+.workflow-step[data-open="true"] { background: linear-gradient(180deg, color-mix(in srgb, var(--cyan) 12%, transparent), transparent 75%); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cyan) 70%, transparent), 0 0 26px color-mix(in srgb, var(--cyan) 16%, transparent); }
+.workflow-step[data-open="true"]::after { content: ''; position: absolute; inset: auto 0 0; height: 3px; background: var(--gradient); box-shadow: 0 0 14px var(--cyan); }
+
+/* The space for the screen opens smoothly and closes after the screen has gone back into the tube. */
+.workflow-detail { position: relative; display: grid; grid-template-rows: 0fr; transition: grid-template-rows .45s cubic-bezier(.3, .7, .2, 1) .3s; }
+.workflow-detail[data-open="true"] { grid-template-rows: 1fr; transition-delay: .1s; }
+.workflow-detail-inner { min-height: 0; overflow: hidden; }
+
+/* The tube: a glass tube with a glowing filament and a current running down it, from the card to the screen. */
+.stage-tube { position: absolute; z-index: 3; top: calc(-1 * var(--reach, 0px)); left: var(--tube-x); width: 12px; height: calc(var(--reach, 0px) + 36px); margin-left: -6px; border: 1px solid rgba(65, 220, 232, .55); border-top: 0; border-radius: 0 0 6px 6px; background: linear-gradient(90deg, rgba(65, 220, 232, .08), rgba(214, 252, 255, .2) 50%, rgba(65, 220, 232, .08)); box-shadow: 0 0 14px rgba(65, 220, 232, .35); transform-origin: top; animation: stage-tube-grow .26s ease-out both; }
+.stage-tube::before { content: ''; position: absolute; top: 0; bottom: 4px; left: 50%; width: 2px; margin-left: -1px; background: linear-gradient(#e7fbff, #41dce8); box-shadow: 0 0 6px #41dce8, 0 0 12px #b08af4; animation: stage-filament 1.3s steps(1) infinite; }
+.stage-tube::after { content: ''; position: absolute; top: 0; left: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: #fff; box-shadow: 0 0 8px 2px #41dce8; animation: stage-current .9s linear infinite; }
+.stage-tube[data-off="true"] { animation: stage-tube-retract .3s ease-in .28s both; }
+
+/* The screen: a cathode-ray tube. It powers on from the point where the tube lands: a bright line along its top,
+   then the picture rolls down, settles and warms up. It powers off the other way: back into a line, into a dot. */
+.stage-screen { --ink: #e7fbff; --phosphor: #41dce8; --phosphor-2: #b08af4; --dim: #6c93ad; --glass: #030f1b; position: relative; isolation: isolate; margin: 36px 0 6px; padding: 16px 20px 22px; overflow: hidden; border: 1px solid rgba(65, 220, 232, .5); border-radius: 18px; color: var(--ink); background: radial-gradient(ellipse at 50% 38%, rgba(65, 220, 232, .13), transparent 70%), var(--glass); box-shadow: inset 0 0 44px rgba(65, 220, 232, .12), 0 0 34px rgba(65, 220, 232, .14), 0 20px 50px rgba(0, 0, 0, .35); transform-origin: var(--tube-x) 0; animation: stage-screen-on .75s cubic-bezier(.2, .7, .25, 1) .2s both; }
+.stage-screen[data-off="true"] { animation: stage-screen-off .42s ease-in both; }
+/* Scanlines, and the curve and reflection of the glass. */
+.stage-screen::before { content: ''; position: absolute; z-index: 2; inset: 0; pointer-events: none; background: repeating-linear-gradient(to bottom, rgba(214, 252, 255, .045) 0 1px, transparent 1px 3px); }
+.stage-screen::after { content: ''; position: absolute; z-index: 2; inset: 0; pointer-events: none; border-radius: inherit; background: radial-gradient(ellipse at 50% 45%, transparent 58%, rgba(0, 0, 0, .42) 100%), linear-gradient(160deg, rgba(255, 255, 255, .06), transparent 38%); }
+/* One refresh band rolls down after the picture comes on. */
+.stage-screen-scan { position: absolute; z-index: 2; top: -70px; left: 0; right: 0; height: 70px; pointer-events: none; background: linear-gradient(to bottom, transparent, rgba(65, 220, 232, .14), transparent); opacity: 0; animation: stage-scan 1.5s ease-in-out .95s both; }
+.stage-screen-head { position: relative; z-index: 1; display: flex; align-items: center; gap: 12px; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid rgba(65, 220, 232, .18); }
+.stage-screen-head > span { font: 600 .65rem var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--phosphor); text-shadow: 0 0 8px rgba(65, 220, 232, .6); }
+.stage-screen-head strong { font-size: 1rem; font-weight: 600; letter-spacing: -.01em; }
+.stage-screen-close { position: relative; z-index: 3; display: grid; place-items: center; width: 32px; height: 32px; margin-left: auto; padding: 0; border: 1px solid rgba(65, 220, 232, .35); border-radius: 50%; background: rgba(65, 220, 232, .06); color: var(--ink); }
+.stage-screen-close:hover { border-color: var(--phosphor); background: rgba(65, 220, 232, .14); }
+.stage-screen-close:focus-visible { outline: 2px solid var(--phosphor); outline-offset: 2px; }
+.stage-screen-close .icon { width: 14px; height: 14px; }
+.stage-screen-body { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 16px 32px; align-items: center; }
+/* The offers warm up one after another, the way a tube display comes on. */
+.stage-offers { display: grid; gap: 14px; margin: 0; padding: 0; list-style: none; }
+.stage-offers li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 12px; align-items: start; animation: stage-warm .7s linear calc(.85s + var(--o, 0) * .16s) both; }
+.stage-offers .icon { width: 20px; height: 20px; margin-top: 1px; color: var(--phosphor); filter: drop-shadow(0 0 4px rgba(65, 220, 232, .6)); }
+.stage-offers span { font-size: .84rem; line-height: 1.55; color: #a9c6d8; }
+.stage-offers strong { display: block; margin-bottom: 3px; font-size: .92rem; font-weight: 600; color: var(--ink); }
+
+/* The stage pictures, drawn in phosphor. Base styles are the finished picture; animations lead up to it. */
+.stage-picture { display: block; width: 100%; height: auto; overflow: visible; }
+.scr-frame { fill: rgba(65, 220, 232, .04); stroke: rgba(65, 220, 232, .22); stroke-width: 1; }
+.scr-dim { fill: none; stroke: var(--dim); stroke-width: 2; stroke-linecap: round; }
+.scr-track { fill: none; stroke: rgba(214, 252, 255, .18); stroke-width: 2; stroke-linecap: round; }
+.scr-goal { stroke: var(--phosphor-2); stroke-width: 1.4; stroke-dasharray: 2 2; }
+.scr-knob { fill: var(--phosphor); filter: drop-shadow(0 0 3px var(--phosphor)); animation: scr-slide .7s cubic-bezier(.3, .9, .3, 1) calc(.9s + var(--r) * .32s) both; }
+.scr-tick { transform-box: fill-box; transform-origin: center; animation: scr-pop .35s cubic-bezier(.3, 1.6, .5, 1) calc(1.4s + var(--r) * .32s) both; }
+.scr-tick circle { fill: var(--phosphor); }
+.scr-tick path, .scr-badge path { fill: none; stroke: var(--glass); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.scr-spark { fill: var(--phosphor-2); filter: drop-shadow(0 0 4px var(--phosphor-2)); opacity: 0; animation: scr-walk 1.5s ease-in-out .85s both; }
+.scr-bench { fill: none; stroke: var(--phosphor-2); stroke-width: 1; stroke-dasharray: 4 4; opacity: .7; animation: scr-fade .5s ease-out 2s both; }
+.scr-draw { fill: none; stroke: var(--phosphor); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; animation: scr-draw .5s ease-out calc(.85s + var(--d) * .22s) both; }
+.scr-port { fill: var(--glass); stroke: var(--phosphor); stroke-width: 1.5; animation: scr-fade .3s ease-out 1.9s both; }
+.scr-cell { fill: none; stroke: rgba(214, 252, 255, .1); stroke-width: .8; }
+.scr-pixel { fill: var(--phosphor); opacity: .45; animation: scr-field 1.8s ease-in-out calc(.9s + var(--c) * 70ms) infinite; }
+.scr-port-line { stroke: var(--phosphor-2); stroke-width: 2.4; stroke-linecap: round; }
+.scr-axis { fill: none; stroke: rgba(214, 252, 255, .25); stroke-width: 1; }
+.scr-response { fill: none; stroke: var(--phosphor-2); stroke-width: 1.8; stroke-linecap: round; stroke-dasharray: 1; filter: drop-shadow(0 0 3px var(--phosphor-2)); animation: scr-draw 1.2s ease-in-out 1.2s both; }
+.scr-front { fill: none; stroke: var(--phosphor); stroke-width: 1.6; stroke-dasharray: 1; opacity: .8; animation: scr-draw .9s ease-in-out 1.9s both; }
+.scr-best, .scr-dominated { animation: scr-settle 1.1s cubic-bezier(.2, .8, .2, 1) calc(.85s + var(--i) * 45ms) both; }
+.scr-best { fill: var(--phosphor); filter: drop-shadow(0 0 3px var(--phosphor)); }
+.scr-dominated { fill: var(--dim); opacity: .55; }
+.scr-choice { fill: none; stroke: var(--phosphor-2); stroke-width: 1.5; transform-box: fill-box; transform-origin: center; animation: scr-pop .4s cubic-bezier(.3, 1.6, .5, 1) 2.6s both, scr-ring 1.6s ease-out 3s infinite; }
+.scr-plane { fill: rgba(65, 220, 232, .07); stroke: var(--phosphor); stroke-width: 1.2; stroke-linejoin: round; }
+.scr-metal { fill: none; stroke: var(--phosphor-2); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.scr-via { fill: var(--phosphor); }
+.scr-layer { animation: scr-drop .5s cubic-bezier(.3, 1.3, .5, 1) calc(.85s + var(--l) * .25s) both; }
+.scr-badge { transform-box: fill-box; transform-origin: center; animation: scr-pop .35s cubic-bezier(.3, 1.6, .5, 1) calc(1.8s + var(--b) * .22s) both; }
+.scr-badge rect { fill: rgba(65, 220, 232, .1); stroke: var(--phosphor); stroke-width: 1; }
+.scr-badge text { fill: var(--ink); font: 700 9px var(--font-mono); letter-spacing: .06em; }
+.scr-badge path { stroke: var(--phosphor); }
+
+@keyframes stage-tube-grow { from { transform: scaleY(0); } }
+@keyframes stage-tube-retract { to { transform: scaleY(0); } }
+@keyframes stage-current { from { top: 0; opacity: 0; } 15%, 85% { opacity: 1; } to { top: 100%; opacity: 0; } }
+@keyframes stage-filament { 0%, 100% { opacity: 1; } 40% { opacity: .7; } 44% { opacity: 1; } 71% { opacity: .82; } }
+@keyframes stage-screen-on { 0% { opacity: 0; transform: scale(.02, .012); filter: brightness(6) saturate(0); } 6% { opacity: 1; } 32% { transform: scale(1, .012); filter: brightness(4.5) saturate(.2); } 70% { transform: scale(1, 1.015); filter: brightness(1.5); } 84% { transform: scale(1, .996); filter: brightness(1.1); } 100% { opacity: 1; transform: none; filter: none; } }
+@keyframes stage-screen-off { 0% { transform: none; filter: none; } 40% { transform: scale(1, .012); filter: brightness(4); } 78% { opacity: 1; transform: scale(.02, .012); filter: brightness(7); } 100% { opacity: 0; transform: scale(0); } }
+@keyframes stage-scan { 0% { opacity: 1; transform: translateY(0); } 100% { opacity: 1; transform: translateY(560px); } }
+@keyframes stage-warm { 0% { opacity: 0; } 18% { opacity: .85; } 26% { opacity: .15; } 38% { opacity: 1; } 46% { opacity: .45; } 58%, 100% { opacity: 1; } }
+@keyframes scr-slide { from { opacity: .3; transform: translateX(var(--from)); } }
+@keyframes scr-pop { from { opacity: 0; transform: scale(.3); } }
+@keyframes scr-walk { 0% { opacity: 0; transform: translate(50px, 18px); } 10% { opacity: 1; } 30% { transform: translate(50px, 44px); } 55% { transform: translate(50px, 70px); } 80% { opacity: 1; transform: translate(50px, 96px); } 100% { opacity: 0; transform: translate(50px, 96px); } }
+@keyframes scr-fade { from { opacity: 0; } }
+@keyframes scr-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes scr-field { 0%, 100% { opacity: .35; } 30% { opacity: 1; fill: var(--ink); } }
+@keyframes scr-settle { from { opacity: 0; transform: translate(var(--dx), var(--dy)); } 30% { opacity: 1; } }
+@keyframes scr-ring { to { stroke-opacity: .15; transform: scale(1.7); } }
+@keyframes scr-drop { from { opacity: 0; transform: translateY(-26px); } }
+
+/* Wide screens: the three offers side by side next to the picture, like the panels of one instrument. */
+@media (min-width: 1100px) {
+  .stage-offers { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; }
+  .stage-offers li { grid-template-columns: minmax(0, 1fr); align-content: start; gap: 10px; padding: 6px 22px; border-left: 1px solid rgba(65, 220, 232, .16); }
+}
+@media (max-width: 700px) {
+  .stage-screen { margin-top: 30px; padding: 14px 14px 18px; border-radius: 16px; }
+  .stage-screen-body { grid-template-columns: minmax(0, 1fr); }
+  .stage-picture { max-width: 280px; margin-inline: auto; }
+  .workflow-open::before { right: 12px; bottom: 12px; }
+}
+/* Motion stopped: the screen and its picture appear finished; nothing grows, rolls or flickers. */
+.workflow-detail[data-motion="off"], .workflow-detail[data-motion="off"] *, .workflow-detail[data-motion="off"] *::before, .workflow-detail[data-motion="off"] *::after { animation: none !important; transition: none !important; }
+@media (prefers-reduced-motion: reduce) { .workflow-detail *, .workflow-detail *::before, .workflow-detail *::after { animation-duration: 1ms !important; animation-iteration-count: 1 !important; transition-duration: 1ms !important; } }
