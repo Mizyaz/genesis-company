@@ -398,6 +398,29 @@ test('the research page flies a signal through a city of our papers: one buildin
   assert.ok(existsSync(resolve(root, 'public/assets/research-flight.webp')));
 });
 
+test('the signal flight is fully playable on a phone: two thumbs, tap to fly, a timeline scrubber, both orientations', () => {
+  const flight = read('src/shared/ResearchFlight.tsx');
+  // The left thumb flies, the right thumb rises and sinks, at the same time; further fingers can still tap.
+  assert.match(flight, /event.pointerType === 'touch' && event.clientX > event.currentTarget.clientWidth \/ 2 \? 'lift' : 'fly'/);
+  assert.match(flight, /role: taken \? 'tap' : wanted/);
+  assert.match(flight, /handle.current\?.setInput\(\{ turn: x, forward: -y \}\)/);
+  assert.match(flight, /handle.current\?.setInput\(\{ lift: -y \}\)/);
+  // A tap (or click) that does not move flies to the building under it; the engine picks walls, roofs and posters.
+  assert.match(flight, /!touch.moved && event.timeStamp - touch.at < \d+ && handle.current\?.pick\(event.clientX, event.clientY\)/);
+  assert.match(read('src/flight/world.ts'), /pick\(clientX: number, clientY: number\): boolean/);
+  // The timeline is a scrubber; letting go flies there, sliding off cancels.
+  assert.match(flight, /onPointerUp: \(event: ReactPointerEvent<HTMLDivElement>\) => \{[\s\S]*?handle.current\?.flyTo\(paper.id\)/);
+  // The game owns every gesture: no page zoom, scroll, selection or long-press menu; pads show where the thumbs go.
+  assert.match(flight, /onContextMenu=\{event => event.preventDefault\(\)\}/);
+  assert.match(flight, /data-touch=\{coarse \|\| undefined\}/);
+  const css = read('src/styles/research-flight.css');
+  assert.match(css, /\.flight-overlay \{[^}]*touch-action: none;[^}]*-webkit-touch-callout: none;/);
+  assert.match(css, /\.flight-pad-fly \{/);
+  assert.match(css, /\.flight-pad-lift \{/);
+  assert.match(css, /@media \(orientation: landscape\) and \(max-height: 520px\)/);
+  assert.match(flight, /requestFullscreen/);
+});
+
 test('production bundle has no local service client or assistant endpoint', () => {
   assert.ok(existsSync(resolve(root, 'dist/index.html')), 'Run npm run build before npm test');
   const output = walk('dist').filter(path => /\.(js|css|html)$/.test(path)).map(read).join('\n');
