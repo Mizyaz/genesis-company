@@ -4,7 +4,7 @@ import { assetUrl, Icon } from './ui';
 import { ImageViewer } from './ImageViewer';
 
 type PortfolioItem = {
-  id: string; number: string; title: string; kind: string; band: string; description: string;
+  id: string; title: string; kind: string; band: string; description: string;
   images: { src: string; preview?: string; alt: string; label: string; fit: string; width: number; height: number; viewport?: { x: number; y: number; width: number; height: number } }[];
 };
 
@@ -19,7 +19,7 @@ export function PortfolioCard({ item }: { item: PortfolioItem }) {
   const imageUrl = assetUrl(image.src);
   const previewUrl = assetUrl(image.preview ?? image.src);
   return <article className="portfolio-card">
-    <div className="portfolio-top"><span className="eyebrow">{item.number} / {item.band}</span><Icon name="chip" /></div>
+    <div className="portfolio-top"><span className="eyebrow">{item.band}</span><Icon name="chip" /></div>
     <div className="layout-image">
       <button type="button" className="layout-open" onClick={() => setViewing(true)} aria-label={t('Inspect {title}, {view}', { title: item.title, view: image.label })} aria-haspopup="dialog">
       {image.viewport ? <svg className="layout-media" viewBox={`${image.viewport.x} ${image.viewport.y} ${image.viewport.width} ${image.viewport.height}`} role="img" aria-label={image.alt}><defs><clipPath id={clipId}><rect {...image.viewport} /></clipPath></defs><image href={previewUrl} width={image.width} height={image.height} clipPath={`url(#${clipId})`} /></svg>

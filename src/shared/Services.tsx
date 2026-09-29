@@ -2,6 +2,7 @@ import { useId, useRef, useState, type CSSProperties, type KeyboardEvent } from 
 import { ActionLink, Brand, Icon, SectionHeading } from './ui';
 import { useVisibleMotion } from './MotionSettings';
 import { curvePath, designs, response, x, y } from './designStory';
+import { SwipeDots } from './SwipeDots';
 import '../styles/services.css';
 
 type ServicesContent = {
@@ -93,6 +94,7 @@ function ServiceVisual({ item }: { item: ServicesContent['items'][number] }) {
 export function Services({ content, contactHref }: { content: ServicesContent; contactHref: string }) {
   const [selected, setSelected] = useState(0);
   const tabs = useRef<(HTMLButtonElement | null)[]>([]);
+  const scope = useRef<HTMLUListElement>(null);
   const prefix = `services-${useId().replace(/:/g, '')}`;
   const item = content.items[selected] ?? content.items[0];
   function navigate(event: KeyboardEvent<HTMLButtonElement>, index: number) {
@@ -103,7 +105,7 @@ export function Services({ content, contactHref }: { content: ServicesContent; c
   }
   return <section id="services" className="content-section services-section" aria-labelledby="services-title">
     <div className="section-intro">
-      <SectionHeading number="04" eyebrow={content.eyebrow}><span id="services-title">{content.title}</span></SectionHeading>
+      <SectionHeading eyebrow={content.eyebrow}><span id="services-title">{content.title}</span></SectionHeading>
       <p>{content.intro}</p>
     </div>
     <div className="service-tabs" role="tablist" aria-label={content.title}>
@@ -116,7 +118,7 @@ export function Services({ content, contactHref }: { content: ServicesContent; c
         <div className="service-copy"><p className="eyebrow">{item.title}</p><h3>{item.headline}</h3><p>{item.description}</p><ActionLink href={contactHref} icon="mail">{item.action ?? content.action}</ActionLink></div>
         <ServiceVisual key={item.id} item={item} />
       </div>
-      <div className="service-scope"><p className="eyebrow">{item.scopeLabel ?? content.scopeLabel}</p><ul>{item.features.map(feature => <li key={feature.title}><Icon name={feature.icon} /><div><h4>{feature.title}</h4>{feature.unit && <span className="service-billing-unit">{feature.unit}</span>}<p>{feature.detail}</p></div></li>)}</ul></div>
+      <div className="service-scope"><p className="eyebrow">{item.scopeLabel ?? content.scopeLabel}</p><ul ref={scope} key={`${item.id}-scope`} className="swipe-row">{item.features.map(feature => <li key={feature.title}><Icon name={feature.icon} /><div><h4>{feature.title}</h4>{feature.unit && <span className="service-billing-unit">{feature.unit}</span>}<p>{feature.detail}</p></div></li>)}</ul><SwipeDots key={`${item.id}-dots`} row={scope} count={item.features.length} /></div>
       {item.note && <p className="service-note"><Icon name="document" />{item.note}</p>}
     </div>
   </section>;

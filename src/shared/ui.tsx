@@ -42,6 +42,7 @@ export function Brand({ large = false }: { large?: boolean }) {
 export function assetUrl(path: string) {
   return path.startsWith('/assets/') ? `${import.meta.env.BASE_URL}${path.slice(1)}` : path;
 }
-export function SectionHeading({ number, eyebrow, children }: { number: string; eyebrow: string; children: ReactNode }) {
-  return <div className="section-heading"><p className="eyebrow"><span>{number}</span> {eyebrow}</p><h2>{children}</h2></div>;
+/** A section's eyebrow and title. Sections are named, not numbered: numbers are kept for real sequences (steps). */
+export function SectionHeading({ eyebrow, children }: { eyebrow: string; children: ReactNode }) {
+  return <div className="section-heading"><p className="eyebrow">{eyebrow}</p><h2>{children}</h2></div>;
 }

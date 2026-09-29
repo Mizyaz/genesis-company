@@ -3,6 +3,7 @@ import { useEffect, useId, useState, type MouseEvent, type ReactNode } from 'rea
 import { Brand, Icon } from './ui';
 import { useMotion } from './MotionSettings';
 import { SiliconGate } from './SiliconGate';
+import { ScrollCurrent } from './ScrollCurrent';
 
 type Theme = 'light' | 'dark';
 export function useCompanyAppearance() {
@@ -39,6 +40,7 @@ export function SiteShell({ children, explore, workbenchUrl, homeUrl = '#/', cap
   const followLink = (event: MouseEvent<HTMLElement>) => { if ((event.target as HTMLElement).closest('a')) setMenuOpen(false); };
   return <div className={`site-shell ${explore ? 'is-explore' : 'is-landing'}`}>
     <a className="skip-link" href="#main">{t("Skip to content")}</a>
+    <ScrollCurrent />
     <header className="site-header" data-menu={menuOpen ? 'open' : 'closed'}>
       <a className="brand-link" href={homeUrl} aria-label={t("GENESIS home")}><Brand /></a>
       <span className="header-divider" />

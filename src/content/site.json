@@ -34,7 +34,6 @@
   "portfolio": [
     {
       "id": "spdt",
-      "number": "01",
       "title": "Wideband SPDT switch",
       "kind": "Series-shunt architecture",
       "band": "60–150 GHz",
@@ -68,7 +67,6 @@
     },
     {
       "id": "mixer",
-      "number": "02",
       "title": "D-band passive mixer",
       "kind": "Quadcore topology",
       "band": "120–160 GHz",
@@ -87,7 +85,6 @@
     },
     {
       "id": "divider",
-      "number": "03",
       "title": "Broadband power divider",
       "kind": "Three-port · equal split",
       "band": "20–120 GHz",

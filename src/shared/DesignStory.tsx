@@ -91,8 +91,27 @@ function Response({ frame, rerun }: { frame: Frame; rerun: { design: number; run
 }
 
 /** Two rails between stations: the upper carries work forward, the lower brings results back. */
-function Link({ forward, back }: { forward: boolean; back: boolean }) {
-  return <span className="story-link" aria-hidden="true"><span className="story-rail" data-on={forward} /><span className="story-rail story-rail-back" data-on={back} /></span>;
+function Link({ between, forward, back }: { between: 'team' | 'tools'; forward: boolean; back: boolean }) {
+  return <span className={`story-link story-link-${between}`} aria-hidden="true"><span className="story-rail" data-on={forward} /><span className="story-rail story-rail-back" data-on={back} /></span>;
+}
+
+// The five steps on one line; steps 2 to 4 repeat for every design, drawn as a lap from step 4 back to step 2.
+const node = (step: number) => 20 + (step - 1) * 50;
+const lap = 'M170 27C168 5 72 5 70 27';
+
+/** Where the loop is: done, current and next steps, and the lap back to step 2 while GENESIS tries another design.
+ * Going back is the loop, not a restart: the lap lights up, a spark runs back along it and the attempt is counted. */
+function Steps({ frame, count, attempt, run }: { frame: Frame; count: number; attempt: string; run: string }) {
+  const looping = frame.step >= 2 && frame.step <= 4;
+  return <svg className="story-steps" viewBox="0 0 240 44" aria-hidden="true" data-looping={looping}>
+    {frame.design >= 0 && <text x="120" y="9" textAnchor="middle">{attempt}</text>}
+    <path className="story-lap" d={`${lap}M66.5 22.5 70 27.5l3.5-5`} />
+    {frame.step === 2 && frame.design > 0 && <path key={run} className="story-lap-spark" d={lap} pathLength="1" />}
+    <path className="story-track" d={`M${node(1)} 35H${node(count)}`} />
+    <path className="story-done" d={`M${node(1)} 35H${node(count)}`} pathLength="200" style={{ strokeDashoffset: 200 - (frame.step - 1) * (200 / (count - 1)) }} />
+    {Array.from({ length: count }, (_, i) => <circle key={i} cx={node(i + 1)} cy="35" r="5" data-state={i + 1 < frame.step ? 'done' : i + 1 === frame.step ? 'now' : 'next'} />)}
+    <circle key={`now-${run}`} className="story-halo" cx={node(frame.step)} cy="35" r="5" />
+  </svg>;
 }
 
 type Station = 'designer' | 'engine' | 'tools';
@@ -140,7 +159,7 @@ export function DesignStory({ content, brand }: { content: StoryContent; brand: 
           <dt>{row.label}</dt><dd>{row.value}</dd><span className="story-check"><Icon name="check" /></span>
         </div>)}</dl>
       </div>
-      <Link key={`target-${clicks}`} forward={frame.flow === 'target'} back={frame.flow === 'review'} />
+      <Link key={`target-${clicks}`} between="team" forward={frame.flow === 'target'} back={frame.flow === 'review'} />
       <div className="story-card story-engine" data-active={frame.step === 2 || frame.step === 4}>
         <button type="button" className="story-press" aria-label={content.actions.engine} onClick={play('engine')} />
         {wave('engine')}
@@ -148,7 +167,7 @@ export function DesignStory({ content, brand }: { content: StoryContent; brand: 
         <CircuitArt design={frame.design} />
         <span className="story-card-status">{engine}</span>
       </div>
-      <Link key={`jobs-${clicks}`} forward={frame.flow === 'jobs'} back={frame.flow === 'results'} />
+      <Link key={`jobs-${clicks}`} between="tools" forward={frame.flow === 'jobs'} back={frame.flow === 'results'} />
       <div className="story-card story-tools" data-active={frame.step === 3}>
         <button type="button" className="story-press" aria-label={content.actions.tools} onClick={play('tools')} />
         {wave('tools')}
@@ -160,7 +179,8 @@ export function DesignStory({ content, brand }: { content: StoryContent; brand: 
       </div>
     </div>
     <figcaption className="story-now">
-      <span className="story-now-step" aria-hidden="true"><span>{frame.step} / {content.steps.length}</span> {content.steps[frame.step - 1].title}</span>
+      <Steps frame={frame} count={content.steps.length} attempt={`${content.engine.iteration} ${frame.design + 1}`} run={`${cycle}.${index}.${clicks}`} />
+      <span className="story-now-step" aria-hidden="true">{content.steps[frame.step - 1].title}</span>
       <span className="story-now-note">{content.note}</span>
     </figcaption>
     <ol className="sr-only">{content.steps.map(step => <li key={step.title}>{step.title}: {step.detail}</li>)}</ol>

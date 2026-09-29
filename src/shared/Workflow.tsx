@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Icon } from './ui';
 import { useVisibleMotion } from './MotionSettings';
+import { SwipeDots } from './SwipeDots';
 
 type Stage = { title: string; detail: string; icon: string };
 
@@ -35,10 +36,10 @@ export function Workflow({ stages }: { stages: Stage[] }) {
       else animation.pause();
     });
   }, [running, stages.length]);
-  return <div ref={ref} className="workflow-track" data-motion={running ? 'playing' : 'paused'}>
+  return <><div ref={ref} className="workflow-track swipe-row" data-motion={running ? 'playing' : 'paused'}>
     {stages.map((stage, index) => <article key={stage.icon} className="workflow-step">
       <span className="workflow-glow" aria-hidden="true" /><span className="workflow-progress" aria-hidden="true" />
       <span className="step-number">{String(index + 1).padStart(2, '0')}</span><Icon name={stage.icon} /><h3>{stage.title}</h3><p>{stage.detail}</p>
     </article>)}
-  </div>;
+  </div><SwipeDots row={ref} count={stages.length} /></>;
 }

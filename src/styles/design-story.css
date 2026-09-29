@@ -77,14 +77,29 @@
 .story-rail-back[data-on="true"]::before { animation-name: story-travel-back; }
 
 /* Caption: the current step, an optional link to the story and what the figure is. The steps in words are for screen readers. */
-.story-now { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px; margin-top: 14px; font-size: .75rem; color: var(--muted); }
-.story-now-step > span { margin-right: 6px; font-family: var(--font-mono); color: var(--cyan); }
+.story-now { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: 14px; font-size: .75rem; color: var(--muted); text-align: center; }
+.story-now-step { color: var(--text); }
+/* Steps: done steps fill in, the current one glows; steps 2 to 4 repeat for every design, drawn as a lap back to step 2
+   with the attempt above it. When the loop goes back, the lap lights up and a spark runs back along it. */
+.story-steps { display: block; width: 100%; max-width: 240px; height: auto; margin-bottom: 2px; overflow: visible; }
+.story-steps text { fill: var(--violet); font: 600 10px var(--font-mono); letter-spacing: .02em; }
+.story-lap { fill: none; stroke: color-mix(in srgb, var(--violet) 45%, var(--border)); stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 3 3; transition: stroke .3s; }
+.story-steps[data-looping="true"] .story-lap { stroke: var(--violet); stroke-dasharray: none; }
+.story-lap-spark { fill: none; stroke: var(--flow-highlight); stroke-width: 3; stroke-linecap: round; stroke-dasharray: .14 1; opacity: 0; filter: drop-shadow(0 0 3px var(--violet)) drop-shadow(0 0 2px var(--cyan)); animation: story-lap .8s ease-in-out both; }
+.story-track { fill: none; stroke: var(--border); stroke-width: 2; }
+.story-done { fill: none; stroke: var(--cyan); stroke-width: 2; stroke-dasharray: 200; transition: stroke-dashoffset .45s ease-in-out; }
+.story-steps circle { fill: var(--surface); stroke: var(--border); stroke-width: 1.5; transition: fill .3s, stroke .3s; }
+.story-steps circle[data-state="done"] { fill: var(--cyan); stroke: var(--cyan); }
+.story-steps circle[data-state="now"] { fill: var(--cyan); stroke: var(--flow-highlight); stroke-width: 2; filter: drop-shadow(0 0 4px var(--cyan)); }
+.story-steps .story-halo { fill: none; stroke: var(--cyan); stroke-width: 1.5; opacity: 0; transform-box: fill-box; transform-origin: center; animation: story-halo 1.4s ease-out both; }
 .story-now a { color: var(--subtle); }
 .story-now a:hover { color: var(--cyan); }
 .story-now .icon { width: 12px; height: 12px; margin-left: 3px; }
-.story-now-note { flex-basis: 100%; text-align: center; font-size: .68rem; color: var(--subtle); }
+.story-now-note { font-size: .68rem; color: var(--subtle); }
 
 @keyframes story-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes story-lap { from { opacity: 1; stroke-dashoffset: .14; } to { opacity: 1; stroke-dashoffset: -1; } }
+@keyframes story-halo { from { opacity: .8; transform: scale(1); } to { opacity: 0; transform: scale(2.3); } }
 @keyframes story-tick { from { transform: scale(.3); } to { transform: none; } }
 @keyframes press-ripple { 0% { transform: translate(-50%, -50%) scale(.05); opacity: 1; } 60% { opacity: .75; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 0; } }
 @keyframes story-sized { 0% { stroke-width: 1.8; filter: none; } 30% { stroke-width: 2.8; filter: drop-shadow(0 0 4px var(--cyan)); } 100% { stroke-width: 1.8; filter: none; } }
@@ -104,23 +119,31 @@
   .story-chips > span { font-size: .52rem; padding: 1px 5px; }
   .story-card-status { font-size: .58rem; white-space: normal; line-height: 1.25; min-height: 2.5em; }
 }
-/* Phones: the three stations stack; work flows down the left rail and results come back up the right one. */
+/* Phones: the whole loop on one screen. The team on top, GENESIS and the CAD tools side by side below: work goes down
+   to GENESIS and across to the tools, results come back across and the best design goes up to the team. */
 @container (max-width: 559px) {
-  .story-scene { grid-template-columns: minmax(0, 1fr); }
-  .story-link { grid-auto-flow: column; justify-content: center; align-content: stretch; gap: 26px; height: 36px; }
-  .story-rail { width: 2px; height: auto; }
-  .story-rail::after { top: auto; bottom: 0; right: auto; left: 50%; transform: translateX(-50%) rotate(135deg); }
-  .story-rail-back::after { top: 0; bottom: auto; transform: translateX(-50%) rotate(-45deg); }
-  .story-rail::before { top: 0; left: 50%; }
-  .story-rail[data-on="true"]::before { animation-name: story-travel-down; }
-  .story-rail-back[data-on="true"]::before { animation-name: story-travel-up; }
-  .story-designer { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); align-items: center; gap: 10px 14px; }
+  .story-scene { --link: 20px; grid-template-columns: minmax(0, 1fr) var(--link) minmax(0, 1fr); grid-template-areas: "team team team" "down . ." "engine across tools"; }
+  .story-designer { grid-area: team; display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); align-items: center; gap: 8px 12px; }
   .story-designer > .story-card-title { grid-column: 1 / -1; }
-  .story-engine .story-art, .story-tools .story-art { max-width: 280px; margin-inline: auto; }
-}
-@container (max-width: 420px) {
-  .story-designer { grid-template-columns: minmax(0, 1fr); }
-  .story-designer .story-art { max-width: 190px; margin-inline: auto; }
+  .story-engine { grid-area: engine; }
+  .story-tools { grid-area: tools; }
+  .story-link-tools { grid-area: across; gap: 10px; }
+  .story-link-team { grid-area: down; grid-auto-flow: column; justify-content: center; align-content: stretch; gap: 22px; height: 30px; }
+  .story-link-team .story-rail { width: 2px; height: auto; }
+  .story-link-team .story-rail::after { top: auto; bottom: 0; right: auto; left: 50%; transform: translateX(-50%) rotate(135deg); }
+  .story-link-team .story-rail-back::after { top: 0; bottom: auto; transform: translateX(-50%) rotate(-45deg); }
+  .story-link-team .story-rail::before { top: 0; left: 50%; }
+  .story-link-team .story-rail[data-on="true"]::before { animation-name: story-travel-down; }
+  .story-link-team .story-rail-back[data-on="true"]::before { animation-name: story-travel-up; }
+  .story-card { padding: 10px; gap: 7px; }
+  .story-card-title, .story-card-title .brand { font-size: .7rem; }
+  .story-tools .story-card-title > .icon, .story-engine .art-label { display: none; }
+  .story-spec { font-size: .64rem; gap: 4px; }
+  .story-spec > div { grid-template-columns: minmax(0, 1fr) auto 12px; gap: 6px; padding: 3px 6px; }
+  .story-check { width: 12px; height: 12px; }
+  .story-chips { gap: 4px; }
+  .story-chips > span { font-size: .55rem; padding: 1px 5px; }
+  .story-card-status { font-size: .6rem; white-space: normal; line-height: 1.25; min-height: 2.5em; }
 }
 .design-story[data-motion="off"] *, .design-story[data-motion="off"] *::before, .design-story[data-motion="off"] *::after { animation: none !important; transition: none !important; }
 @media (prefers-reduced-motion: reduce) { .design-story * { animation-duration: 1ms !important; transition-duration: 1ms !important; } }
