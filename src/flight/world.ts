@@ -32,6 +32,8 @@ export type FlightHandle = {
   flyTo(id: string): void;
   /** Fly to the building or poster under a screen point (a tap or a click); false if there is none. */
   pick(clientX: number, clientY: number): boolean;
+  /** Let the intro run: the signal waits far down the lane until the loading screen opens. */
+  start(): void;
   dispose(): void;
 };
 export type FlightOptions = { canvas: HTMLCanvasElement; papers: Publication[]; labels: FlightLabels; reducedMotion: boolean; events: FlightEvents };
@@ -673,7 +675,7 @@ export function createFlight({ canvas, papers, labels, reducedMotion, events }: 
   const introCam = new THREE.Vector3(0, 12, city.startZ + 46), introFrom = new THREE.Vector3(0, 13, city.startZ - 70), introVia = new THREE.Vector3(-14, 22, city.startZ - 12);
   const introTo = introCam.clone().add(new THREE.Vector3(0, -0.2, -1.7));
   const HOLD = 0.6, APPROACH = 1.8;
-  let mode: 'intro' | 'fly' = reducedMotion ? 'fly' : 'intro', introTime = 0;
+  let mode: 'intro' | 'fly' = reducedMotion ? 'fly' : 'intro', introTime = 0, started = false;
   let pilot: { from: THREE.Vector3; via: THREE.Vector3; to: THREE.Vector3; yaw: number; t: number; duration: number; target: Solid } | null = null;
   let focus: Solid | null = null, prompted: Solid | null = null, dwell = 0, lastYear = 0, lastEmpire: EmpireId | 'genesis' | null | undefined;
   const look = new THREE.Vector3(), lookTarget = new THREE.Vector3(), want = new THREE.Vector3(), tmp = new THREE.Vector3();
@@ -805,7 +807,7 @@ export function createFlight({ canvas, papers, labels, reducedMotion, events }: 
   }
 
   function intro(dt: number) {
-    introTime += dt;
+    if (started) introTime += dt;
     const u = clamp((introTime - HOLD) / APPROACH, 0, 1);
     bezier(introFrom, introVia, introTo, u ** 1.8, pos);
     camera.position.copy(introCam);
@@ -976,6 +978,7 @@ export function createFlight({ canvas, papers, labels, reducedMotion, events }: 
       if (best) pilotTo(best);
       return Boolean(best);
     },
+    start() { started = true; },
     dispose() {
       cancelAnimationFrame(frame);
       observer.disconnect();

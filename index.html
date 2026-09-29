@@ -19,6 +19,31 @@
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <title>GENESIS | From specs to silicon</title>
+    <!-- The first load shows the site's one loading screen (the silicon gate's chip), matched to its first frame. -->
+    <style>
+      .boot-gate { position: fixed; inset: 0; z-index: 1100; background: #041325; cursor: progress; }
+      .boot-gate-core { position: absolute; inset: 50% auto auto 50%; width: min(90vw, 620px); padding: 38px 16px; transform: translate(-50%, -50%); text-align: center; font: 16px/1.55 Inter, "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif; }
+      .boot-gate-chip { width: clamp(90px, 12vw, 144px); margin: 0 auto 18px; color: #41dce8; }
+      .boot-gate-chip svg { display: block; width: 100%; overflow: visible; }
+      .boot-gate-leads { fill: none; stroke: currentColor; stroke-width: 1.5; opacity: .7; }
+      .boot-gate-body { fill: #091d32; stroke: currentColor; stroke-width: 1.4; }
+      .boot-gate-channel { fill: #0d253c; stroke: #b08af4; stroke-width: .8; }
+      .boot-gate-wave { fill: none; stroke: currentColor; stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; stroke-dasharray: 80; filter: drop-shadow(0 0 4px currentColor); animation: boot-gate-wave 900ms linear infinite; }
+      .boot-gate-brand { font: 600 11px "SFMono-Regular", Consolas, monospace; letter-spacing: .38em; color: #6e87a0; }
+      .boot-gate-track { width: min(220px, 55vw); height: 2px; margin: 28px auto 0; overflow: hidden; background: #142c42; }
+      .boot-gate-track span { display: block; width: 45%; height: 100%; background: linear-gradient(105deg, #41dce8 10%, #6fb9ed 47%, #b08af4 92%); animation: boot-gate-energy 1100ms ease-in-out infinite; }
+      @keyframes boot-gate-wave { from { stroke-dashoffset: 160; } to { stroke-dashoffset: 0; } }
+      @keyframes boot-gate-energy { from { transform: translateX(-110%); } to { transform: translateX(340%); } }
+      @media (prefers-reduced-motion: reduce) { .boot-gate * { animation: none !important; } }
+    </style>
   </head>
-  <body><div id="root"></div><script type="module" src="/src/public.tsx"></script></body>
+  <body>
+    <div id="root"><div class="boot-gate" aria-hidden="true"><div class="boot-gate-core">
+      <div class="boot-gate-chip"><svg viewBox="0 0 160 160"><path class="boot-gate-leads" d="M0 52H44M0 80H44M0 108H44M116 52H160M116 80H160M116 108H160M52 0V44M80 0V44M108 0V44M52 116V160M80 116V160M108 116V160" /><rect class="boot-gate-body" x="36" y="36" width="88" height="88" rx="12" /><rect class="boot-gate-channel" x="52" y="52" width="56" height="56" rx="5" /><path class="boot-gate-wave" d="M61 83H67L75 65L85 96L94 76H100" /></svg></div>
+      <span class="boot-gate-brand">GENESIS</span>
+      <div class="boot-gate-track"><span></span></div>
+    </div></div></div>
+    <noscript><style>.boot-gate { display: none; }</style><p style="padding: 24px; color: #f1f6fc; font-family: sans-serif;">GENESIS needs JavaScript to show this site.</p></noscript>
+    <script type="module" src="/src/public.tsx"></script>
+  </body>
 </html>
