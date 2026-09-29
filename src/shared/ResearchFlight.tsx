@@ -5,6 +5,7 @@ import { useMotion } from './MotionSettings';
 import { Icon, assetUrl } from './ui';
 import { publicationUrl, type Publication } from './citations';
 import { holdGate, navigate } from './gate';
+import { EmblemLauncher } from './Emblem';
 import type { EmpireId } from '../flight/layout';
 import type { FlightHandle, FlightTarget, FlightTimeline } from '../flight/world';
 import '../styles/research-flight.css';
@@ -16,27 +17,44 @@ type Paper = FlightTimeline['papers'][number];
 /** One pointer on the canvas: the thumb that flies, the thumb that rises and sinks, or a further finger that can only tap. */
 type Touch = { role: 'fly' | 'lift' | 'tap'; x: number; y: number; at: number; moved: boolean };
 
-/** Our research as a city to fly through. The page shows a launch card; three.js loads only when the flight starts. */
-export function ResearchFlight({ papers, onShowPaper }: { papers: Publication[]; onShowPaper: (id: string) => void }) {
+// A paper chosen in a flight started away from the research page: the research page opens it when it loads.
+let requested: string | null = null;
+export const requestPaper = (id: string) => { requested = id; };
+export const takeRequestedPaper = () => { const id = requested; requested = null; return id; };
+
+/** The GENESIS symbol that starts the signal flight through our research; three.js loads only when the flight starts.
+ * The flight opens over the page, and closing it gives focus back to the symbol. `library` says whether the paper
+ * summaries are on this page (the research page) or on the research page the flight leads to. */
+export function FlightSymbol({ papers, onShowPaper, library = 'here' }: { papers: Publication[]; onShowPaper: (id: string) => void; library?: 'here' | 'research' }) {
   const { t } = useLanguage();
   const [open, setOpen] = useState(false);
   const launcher = useRef<HTMLButtonElement>(null);
-  const years = papers.map(paper => paper.year);
   const close = () => { setOpen(false); window.requestAnimationFrame(() => launcher.current?.focus()); };
+  return <>
+    <EmblemLauncher ref={launcher} label={t("Fly through our research")} hint={t("Press the symbol to fly")} onLaunch={() => setOpen(true)} />
+    {open && createPortal(<FlightOverlay papers={papers} library={library} onClose={close} onShowPaper={id => { setOpen(false); onShowPaper(id); }} />, document.body)}
+  </>;
+}
+
+/** Our research as a city to fly through: the card on the research page, with the symbol over a still of the city. */
+export function ResearchFlight({ papers, onShowPaper }: { papers: Publication[]; onShowPaper: (id: string) => void }) {
+  const { t } = useLanguage();
+  const years = papers.map(paper => paper.year);
   return <section className="flight-launch" aria-labelledby="flight-launch-title">
     <div className="flight-launch-copy">
       <p className="eyebrow">{t("SIGNAL FLIGHT")}</p>
       <h2 id="flight-launch-title">{t("Fly through our research")}</h2>
       <p>{t("Every building is one of our papers, standing on a timeline from {from} to {to}. Circuits, signals and drones each rule an empire of their own.", { from: Math.min(...years), to: Math.max(...years) })}</p>
-      <button ref={launcher} type="button" className="button button-primary" onClick={() => setOpen(true)}>{t("Launch the signal")}<Icon name="signal" /></button>
       <small>{t("Keyboard, mouse or two thumbs on a phone. Stay next to a building to visit its paper.")}</small>
     </div>
-    <div className="flight-launch-preview" onClick={() => setOpen(true)} aria-hidden="true"><img src={assetUrl('/assets/research-flight.webp')} alt="" loading="lazy" /></div>
-    {open && createPortal(<FlightOverlay papers={papers} onClose={close} onShowPaper={id => { setOpen(false); onShowPaper(id); }} />, document.body)}
+    <div className="flight-launch-preview">
+      <img src={assetUrl('/assets/research-flight.webp')} alt="" loading="lazy" />
+      <FlightSymbol papers={papers} onShowPaper={onShowPaper} />
+    </div>
   </section>;
 }
 
-function FlightOverlay({ papers, onClose, onShowPaper }: { papers: Publication[]; onClose: () => void; onShowPaper: (id: string) => void }) {
+function FlightOverlay({ papers, library, onClose, onShowPaper }: { papers: Publication[]; library: 'here' | 'research'; onClose: () => void; onShowPaper: (id: string) => void }) {
   const { t } = useLanguage();
   const { enabled: motion } = useMotion();
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -236,7 +254,7 @@ function FlightOverlay({ papers, onClose, onShowPaper }: { papers: Publication[]
             : <a className="button button-primary" href="#/explore" onClick={event => { event.preventDefault(); visit(prompt); }}>{t("Visit")}<Icon name="arrow" /></a>}
           <button type="button" className="button button-secondary" onClick={() => setPrompt(null)}>{t("Keep flying")}</button>
         </div>
-        {prompt.kind === 'paper' && <button type="button" className="flight-prompt-link" onClick={() => onShowPaper(prompt.paper.id)}>{t("Read the summary on this page")}</button>}
+        {prompt.kind === 'paper' && <button type="button" className="flight-prompt-link" onClick={() => onShowPaper(prompt.paper.id)}>{t(library === 'here' ? "Read the summary on this page" : "Read the summary on the research page")}</button>}
       </div>}</div>
       <div className="flight-controls">
         <button type="button" className="flight-step" onClick={() => handle.current?.step(-1)} aria-label={t("Earlier paper")}><Icon name="arrow" className="icon-back" /><span>{t("Earlier paper")}</span></button>

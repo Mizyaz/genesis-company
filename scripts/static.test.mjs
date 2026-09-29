@@ -604,6 +604,76 @@ test('the signal flight is fully playable on a phone: two thumbs, tap to fly, a 
   assert.match(flight, /requestFullscreen/);
 });
 
+const transpiled = path => { const module = {}; new Function('exports', 'require', ts.transpileModule(read(path), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText)(module, () => ({})); return module; };
+
+test('the GENESIS symbol is a pixelated front end, the logo everywhere, and pressing it starts the signal flight', () => {
+  const { emblem, emblemMark, drawEmblem } = transpiled('src/shared/emblem.ts');
+  // Detailed, not a few pixels: a 64-pixel crest (and a 32-pixel logo) with metal, transistor fingers and ports, mirrored.
+  for (const [grid, size] of [[emblem, 64], [emblemMark, 32]]) {
+    assert.equal(grid.length, size);
+    assert.ok(grid.every(row => row.length === size && row.every((cell, c) => cell === row[size - 1 - c])), `${size}: mirror-symmetric`);
+  }
+  const count = kind => emblem.flat().filter(cell => cell === kind).length;
+  assert.ok(count(1) > 900 && count(2) > 100 && count(3) === 32, 'metal, fingers and eight ports');
+  assert.deepEqual(drawEmblem(64), emblem, 'fixed shapes and seed: the same symbol every time');
+  // The logo is the symbol: the header, the cards and the favicon; the old wave image is no longer published.
+  assert.match(read('src/shared/ui.tsx'), /\{mark && <EmblemMark \/>\}<span>GENESIS<\/span>/);
+  assert.doesNotMatch(walk('src').filter(path => /\.(tsx?|css)$/.test(path)).map(read).join('\n'), /brand-mark|\.brand img/);
+  for (const exporter of ['scripts/export-public.mjs'].filter(path => existsSync(resolve(root, path)))) assert.doesNotMatch(read(exporter), /brand-mark\.webp/);
+  assert.match(read('public/favicon.svg'), /<linearGradient id="g"[^]*<path d="M\d/);
+  // Pressing the large symbol starts the flight: on the home page above the name, and on the research page's card.
+  const welcome = read('src/pages/Welcome.tsx'), flight = read('src/shared/ResearchFlight.tsx'), symbol = read('src/shared/Emblem.tsx');
+  assert.match(welcome, /<BrandIntro headingId="welcome-heading" symbol=\{<FlightSymbol papers=\{papers\} library="research" onShowPaper=\{id => \{ requestPaper\(id\); navigate\('#\/publications'\); \}\} \/>\} \/>/);
+  assert.match(read('src/shared/CircuitIdentity.tsx'), /\{symbol\}\n    <h1 id=\{headingId\}><ElectricBrand mark=\{!symbol\} \/><\/h1>/);
+  assert.match(flight, /<EmblemLauncher ref=\{launcher\} label=\{t\("Fly through our research"\)\} hint=\{t\("Press the symbol to fly"\)\} onLaunch=\{\(\) => setOpen\(true\)\} \/>/);
+  assert.match(flight, /<div className="flight-launch-preview">\n      <img [^\n]*\/>\n      <FlightSymbol papers=\{papers\} onShowPaper=\{onShowPaper\} \/>/);
+  const card = flight.slice(flight.indexOf('export function ResearchFlight('), flight.indexOf('function FlightOverlay('));
+  assert.doesNotMatch(card, /<button|Launch the signal/); // No start button: the symbol is the way in.
+  assert.match(read('src/pages/Research.tsx'), /useEffect\(\(\) => \{ const id = takeRequestedPaper\(\); if \(id\) setFocus\(\{ id, at: Date\.now\(\) \}\); \}, \[\]\);/);
+  // It charges, flashes over the closing gate and hands over; with motion stopped or reduced it starts at once.
+  assert.match(symbol, /if \(!enabled \|\| matchMedia\('\(prefers-reduced-motion: reduce\)'\)\.matches\) \{ onLaunch\(\); return; \}/);
+  assert.match(flight, /window\.requestAnimationFrame\(\(\) => launcher\.current\?\.focus\(\)\)/);
+  const css = read('src/styles/emblem.css');
+  assert.ok(Number(css.match(/\.emblem-flash \{ position: fixed; z-index: (\d+);/)[1]) > Number(read('src/styles/silicon-gate.css').match(/\.silicon-gate \{[^}]*z-index: (\d+)/)[1]));
+  assert.match(css, /\.emblem\[data-motion="off"\] \*/);
+  assert.match(css, /prefers-reduced-motion: reduce/);
+  assert.match(css, /\.emblem\[data-running="false"\] \*/);
+  const dictionary = JSON.parse(read('src/content/tr.json'));
+  for (const copy of ['Fly through our research', 'Press the symbol to fly', 'Read the summary on the research page']) assert.ok(dictionary[copy], copy);
+});
+
+test('pixelated passives look like the ones in our papers: hundreds of pixels, every port connected, mirrored where symmetric', () => {
+  const { pixelPassives } = transpiled('src/shared/pixelLayout.ts');
+  const edge = (layout, port) => Array.from({ length: port.width ?? 2 }, (_, i) => port.at + i).map(i =>
+    port.side === 'left' ? [i, 0] : port.side === 'right' ? [i, layout.columns - 1] : port.side === 'top' ? [0, i] : [layout.rows - 1, i]);
+  for (const [name, layout] of Object.entries(pixelPassives)) {
+    const cells = layout.columns * layout.rows, metal = layout.metal.flat().filter(Boolean).length;
+    assert.ok(cells >= 168 && metal / cells > .35 && metal / cells < .75, `${name}: ${metal} of ${cells}`);
+    // Every port starts on metal and all of them are joined through it.
+    const seen = layout.metal.map(row => row.map(() => false)), queue = [edge(layout, layout.ports[0])[0]];
+    seen[queue[0][0]][queue[0][1]] = true;
+    while (queue.length) {
+      const [r, c] = queue.pop();
+      for (const [dr, dc] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) if (layout.metal[r + dr]?.[c + dc] && !seen[r + dr][c + dc]) { seen[r + dr][c + dc] = true; queue.push([r + dr, c + dc]); }
+    }
+    for (const port of layout.ports) for (const [r, c] of edge(layout, port)) assert.ok(layout.metal[r][c] && seen[r][c], `${name}: port ${port.side} ${port.at}`);
+  }
+  const { divider, coupler } = pixelPassives;
+  assert.ok(divider.columns * divider.rows >= 300, 'the EM screen shows a few hundred pixels, not a toy grid');
+  assert.ok(divider.metal.every((row, r) => row.every((on, c) => on === divider.metal[divider.rows - 1 - r][c])), 'an equal split is symmetric');
+  assert.ok(coupler.metal.every((row, r) => row.every((on, c) => on === coupler.metal[r][coupler.columns - 1 - c] && on === coupler.metal[coupler.rows - 1 - r][c])));
+  // They are what the site draws: the EM and layout screens, and the posters of our pixelated papers in the flight.
+  const screens = read('src/shared/StageScreens.tsx'), art = read('src/flight/art.ts');
+  assert.match(screens, /pixelPassives\.divider/);
+  assert.match(screens, /pixelPassives\.frontEnd/);
+  assert.doesNotMatch(screens, /const pixels = \[/);
+  for (const use of ['pixelPassives.coupler', 'pixelPassives.threePort', '{ lower, upper } = pixelPassives']) assert.ok(art.includes(use), use);
+  assert.match(art, /emblemMark\.forEach/); // The GENESIS sign at the end of the timeline carries the symbol.
+  const { glyphOf } = transpiled('src/flight/layout.ts');
+  const papers = JSON.parse(read('src/content/publications.json')).filter(paper => /pixelated|three-port/i.test(paper.title));
+  assert.deepEqual(papers.map(glyphOf).sort(), ['pixels', 'ports', 'stack']);
+});
+
 test('production bundle has no local service client or assistant endpoint', () => {
   assert.ok(existsSync(resolve(root, 'dist/index.html')), 'Run npm run build before npm test');
   const output = walk('dist').filter(path => /\.(js|css|html)$/.test(path)).map(read).join('\n');

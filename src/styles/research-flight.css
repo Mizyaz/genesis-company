@@ -4,8 +4,11 @@
 .flight-launch-copy h2 { margin: 10px 0 12px; font-size: clamp(1.5rem, 2.6vw, 2.1rem); font-weight: 600; letter-spacing: -.03em; line-height: 1.15; }
 .flight-launch-copy p:not(.eyebrow) { margin: 0 0 20px; color: var(--muted); font-size: .95rem; line-height: 1.7; }
 .flight-launch-copy small { display: block; margin-top: 14px; color: var(--subtle); font-size: .78rem; line-height: 1.6; }
-.flight-launch-preview { overflow: hidden; border-radius: 12px; aspect-ratio: 16 / 9; background: #190e4c; cursor: pointer; }
-.flight-launch-preview img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .6s ease; }
+.flight-launch-preview { position: relative; display: grid; place-items: center; overflow: hidden; border-radius: 12px; aspect-ratio: 16 / 9; background: #190e4c; }
+.flight-launch-preview img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .6s ease; }
+/* The GENESIS symbol over the still of the city starts the flight. */
+.flight-launch-preview .emblem { --emblem-size: clamp(112px, 13vw, 164px); gap: 8px; }
+.flight-launch-preview .emblem-hint { color: #e7fbff; text-shadow: 0 0 10px #041325, 0 0 3px #041325; }
 .flight-launch-preview:hover img { transform: scale(1.03); }
 @media (max-width: 800px) {
   .flight-launch { grid-template-columns: minmax(0, 1fr); }

@@ -1,4 +1,5 @@
 import type { AnchorHTMLAttributes, ReactNode } from 'react';
+import { EmblemMark } from './Emblem';
 
 const paths: Record<string, ReactNode> = {
   arrow: <path d="M5 12h14m-6-6 6 6-6 6" />,
@@ -35,8 +36,9 @@ export function Icon({ name, className = '' }: { name: string; className?: strin
 export function ActionLink({ variant = 'primary', icon = 'arrow', className = '', children, ...props }: AnchorHTMLAttributes<HTMLAnchorElement> & { variant?: 'primary' | 'secondary'; icon?: string }) {
   return <a {...props} className={`button button-${variant} ${className}`.trim()}>{children}<Icon name={icon} /></a>;
 }
-export function Brand({ large = false }: { large?: boolean }) {
-  return <span className={`brand ${large ? 'brand-large' : ''}`}><img src={assetUrl('/assets/brand-mark.webp')} alt="" /><span>GENESIS</span></span>;
+/** The logo: the GENESIS symbol and the name. The home page shows the symbol large above the name (`mark={false}`). */
+export function Brand({ large = false, mark = true }: { large?: boolean; mark?: boolean }) {
+  return <span className={`brand ${large ? 'brand-large' : ''}`}>{mark && <EmblemMark />}<span>GENESIS</span></span>;
 }
 /** Works at a domain root and under a static host's repository subpath. */
 export function assetUrl(path: string) {

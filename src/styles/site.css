@@ -23,7 +23,7 @@ img { display: block; max-width: 100%; }
 .site-header { min-height: 82px; padding: 20px 3.3vw; display: flex; align-items: center; gap: 24px; border-bottom: 1px solid var(--border-soft); position: relative; z-index: 10; }
 .is-explore .site-header { position: sticky; top: 0; background: color-mix(in srgb, var(--page) 92%, transparent); backdrop-filter: blur(18px); }
 .brand { display: inline-flex; align-items: center; gap: 12px; font-size: 1.4rem; font-weight: 650; letter-spacing: .045em; line-height: 1; }
-.brand img { width: 39px; height: 43px; object-fit: contain; }
+.brand .emblem-mark { width: 44px; height: 40px; }
 .header-divider { width: 1px; height: 20px; background: var(--border); }
 .header-caption { color: var(--subtle); font-size: .6875rem; letter-spacing: .17em; }
 .site-header nav { margin-left: auto; display: flex; align-items: center; gap: 30px; font-size: .875rem; color: var(--muted); }
@@ -65,7 +65,7 @@ img { display: block; max-width: 100%; }
 .landing-center { width: min(720px, 100%); text-align: center; margin: auto 0; }
 .landing-eyebrow { color: var(--subtle); margin-bottom: 24px; font-size: .6875rem; }
 .brand-large { gap: 16px; font-size: clamp(3.3rem, 6vw, 5.25rem); letter-spacing: .055em; font-weight: 650; }
-.brand-large img { width: 82px; height: 90px; }
+.brand-large .emblem-mark { width: 92px; height: 83px; }
 .landing-tagline { font-size: clamp(1.45rem, 2.7vw, 2.2rem); letter-spacing: -.035em; margin-top: 20px; font-weight: 400; }
 .landing-intro { margin-top: 20px; color: var(--muted); font-size: 1rem; line-height: 1.75; }
 .landing-intro span { color: var(--subtle); font-size: .9375rem; }
@@ -207,13 +207,13 @@ img { display: block; max-width: 100%; }
 }
 @media (max-width: 700px) {
   .site-header { min-height: 70px; padding: 16px 20px; gap: 12px; }
-  .brand { font-size: 1.1rem; gap: 8px; } .brand img { width: 30px; height: 32px; }
+  .brand { font-size: 1.1rem; gap: 8px; } .brand .emblem-mark { width: 34px; height: 31px; }
   .team-profiles { grid-template-columns: 1fr; gap: 38px; }
   .about-page { padding: 24px 24px 56px; }
   .about-page-heading { margin: 30px 0 34px; }
   .landing { min-height: calc(100dvh - 125px); padding: 42px 22px 24px; }
   .landing-eyebrow { font-size: .625rem; margin-bottom: 23px; }
-  .brand-large { font-size: clamp(2.75rem, 10vw, 4rem); gap: 10px; } .brand-large img { width: 58px; height: 65px; }
+  .brand-large { font-size: clamp(2.75rem, 10vw, 4rem); gap: 10px; } .brand-large .emblem-mark { width: 64px; height: 58px; }
   .landing-tagline { margin-top: 18px; }
   .landing-intro { font-size: .9375rem; }
   .landing-intro span { font-size: .875rem; }

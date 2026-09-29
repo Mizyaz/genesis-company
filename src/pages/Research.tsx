@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLanguage, useTranslatedContent } from '../shared/Language';
 import siteContent from '../content/site.json';
 import papers from '../content/publications.json';
 import { Publications } from '../shared/Publications';
-import { ResearchFlight } from '../shared/ResearchFlight';
+import { ResearchFlight, takeRequestedPaper } from '../shared/ResearchFlight';
 import { Icon } from '../shared/ui';
 
 /** Company presentation page. The library itself only receives supplied data. */
@@ -11,6 +11,8 @@ export function Research() {
   const { t } = useLanguage();
   const site = useTranslatedContent(siteContent);
   const [focus, setFocus] = useState<{ id: string; at: number } | null>(null);
+  // A paper chosen in a flight started on another page opens as soon as this page is shown.
+  useEffect(() => { const id = takeRequestedPaper(); if (id) setFocus({ id, at: Date.now() }); }, []);
   return <main id="main" className="research-page">
     <a className="research-return" href="#/about"><Icon name="arrow" /> {t("Back to About us")}</a>
     <header className="research-page-heading">

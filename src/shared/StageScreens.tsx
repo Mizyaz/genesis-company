@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type AnimationEvent, type CSSProperties, t
 import { Icon } from './ui';
 import { useLanguage } from './Language';
 import { coil, ground } from './symbols';
+import { pixelPassives } from './pixelLayout';
 import '../styles/tube-screen.css';
 
 // What each platform stage looks like inside GENESIS, drawn for the stage's tube screen. Illustrations, not data.
@@ -37,17 +38,28 @@ function Schematic() {
   </>;
 }
 
-// A pixel layout: 1 is metal. Twelve columns by five rows, a coupled structure between two ports.
-const pixels = ['111111000000', '000001011111', '011101010000', '010111011110', '110000000011'];
+// A pixel of the divider below, in picture units; the window leaves room for the response on its right.
+const cell = 5.2;
+const port = (at: number) => 14 + (at + 1) * cell;
 
-/** EM simulation: a field sweeps across the pixel layout, and the response is drawn from it. */
+/** EM simulation: a pixelated three-port divider (one input, an equal split) in its window of the ground plane. The
+ * field sweeps across the pixels, then the response is drawn: both outputs together, the input match low across the band. */
 function Field() {
+  const { columns, rows, metal } = pixelPassives.divider, right = 14 + columns * cell;
   return <>
-    {pixels.flatMap((row, r) => [...row].map((cell, c) => <rect key={`${r}.${c}`} className={cell === '1' ? 'scr-pixel' : 'scr-cell'}
-      style={vars({ '--c': c })} x={22 + c * 13} y={10 + r * 13} width="10" height="10" rx="1.5" />))}
-    <path className="scr-port-line" d="M8 15H22M178 67H192" />
-    <path className="scr-axis" d="M22 84V112H180" />
-    <path className="scr-response" d="M22 108C44 106 58 90 78 90S112 104 134 94 164 88 180 90" pathLength="1" />
+    <rect className="scr-window" x="12" y="12" width={columns * cell + 4} height={rows * cell + 4} rx="2" />
+    {metal.flatMap((row, r) => row.map((on, c) => on && <rect key={`${r}.${c}`} className="scr-pixel" style={vars({ '--c': c })}
+      x={14 + c * cell} y={14 + r * cell} width={cell - .7} height={cell - .7} />))}
+    <path className="scr-port-line" d={`M3 ${port(6)}H12M${right + 2} ${port(2)}H${right + 11}M${right + 2} ${port(10)}H${right + 11}`} />
+    {([[4, port(6) - 4, '1'], [right + 4, port(2) - 4, '2'], [right + 4, port(10) - 4, '3']] as const).map(([x, y, name]) =>
+      <text key={name} className="scr-label" x={x} y={y}>{name}</text>)}
+    <rect className="scr-band" x="152" y="14" width="36" height="72" />
+    <path className="scr-axis" d="M146 12V87H197" />
+    <path className="scr-response" d="M146 31C156 28 166 27 176 28S192 31 197 34" pathLength="1" />
+    <path className="scr-response scr-response-twin" d="M146 33C156 29 166 28 176 29S192 33 197 36" pathLength="1" />
+    <path className="scr-response scr-match" d="M146 44C150 47 152 70 160 76S172 70 178 80 186 66 197 46" pathLength="1" />
+    <text className="scr-label scr-label-out" x="146" y="100">S21 S31</text>
+    <text className="scr-label scr-label-match" x="180" y="100">S11</text>
   </>;
 }
 
@@ -73,13 +85,23 @@ function Pareto() {
   </>;
 }
 
-/** Layout and verification: the layers stack into the layout, the checks pass and the GDS leaves. */
+/** Layout and verification: a front end takes shape (two pixelated passives, mirrored, around the transistor core,
+ * with the RF, LO and IF pads), the checks pass and the GDS leaves. */
 function Layout() {
-  const layer = (y: number) => `M22 ${y}H112L132 ${y + 18}H42Z`;
+  const { columns, rows, metal } = pixelPassives.frontEnd, size = 4, top = 22, middle = top + 7 * size;
+  const pixels = (x0: number, flip: boolean) => metal.flatMap((row, r) => row.map((on, c) => on &&
+    <rect key={`${r}.${c}`} x={x0 + (flip ? columns - 1 - c : c) * size} y={top + r * size} width={size - .6} height={size - .6} />));
   return <>
-    <g className="scr-layer" style={vars({ '--l': 0 })}><path className="scr-plane" d={layer(80)} /><path className="scr-dim" d="M40 89H118M48 94H124" /></g>
-    <g className="scr-layer" style={vars({ '--l': 1 })}><path className="scr-plane" d={layer(56)} /><path className="scr-metal" d="M36 61H98L106 69M50 69H112" /></g>
-    <g className="scr-layer" style={vars({ '--l': 2 })}><path className="scr-plane" d={layer(32)} />{[46, 66, 86, 104].map(x => <rect key={x} className="scr-via" x={x} y="38" width="6" height="6" />)}</g>
+    <rect className="scr-plane" x="4" y="16" width="134" height="68" rx="3" />
+    <g className="scr-layer scr-passive" style={vars({ '--l': 0 })}>{pixels(10, false)}{pixels(10 + columns * size + 24, true)}</g>
+    <g className="scr-layer" style={vars({ '--l': 1 })}>
+      <rect className="scr-core" x="61" y="36" width="20" height="28" rx="1.5" />
+      {[64, 67, 70, 73, 76].map(x => <path key={x} className="scr-finger" d={`M${x + .5} 40V60`} />)}
+    </g>
+    <g className="scr-layer" style={vars({ '--l': 2 })}>
+      <path className="scr-metal" d={`M4 ${middle}H10M58 ${middle}H61M81 ${middle}H84M132 ${middle}H138M71 36V26M71 64V74`} />
+      {[[0, middle - 4], [134, middle - 4], [67, 18], [67, 74]].map(([x, y]) => <rect key={`${x}.${y}`} className="scr-pad" x={x} y={y} width="8" height="8" rx="1.5" />)}
+    </g>
     {['DRC', 'LVS', 'GDS'].map((name, i) => <g key={name} className="scr-badge" style={vars({ '--b': i })}>
       <rect x="144" y={16 + i * 32} width="50" height="20" rx="6" />
       <text x="152" y={30 + i * 32}>{name}</text>

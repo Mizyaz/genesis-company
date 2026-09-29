@@ -1,0 +1,72 @@
+import { forwardRef, useEffect, useId, useRef, useState, type CSSProperties, type MouseEvent } from 'react';
+import { createPortal } from 'react-dom';
+import { useVisibleMotion } from './MotionSettings';
+import { cellPath, emblem, emblemBox, emblemMark } from './emblem';
+import '../styles/emblem.css';
+
+const mark = { box: emblemBox(emblemMark), cells: cellPath(emblemMark, [1, 2, 3]) };
+const big = {
+  box: emblemBox(emblem), all: cellPath(emblem, [1, 2, 3]),
+  metal: cellPath(emblem, [1]), fingers: cellPath(emblem, [2]), ports: cellPath(emblem, [3]),
+};
+// The shape of the symbol as a mask, so the current that runs up through it stays inside the metal.
+const maskImage = `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${big.box.viewBox}"><path d="${big.all}"/></svg>`)}")`;
+
+/** The GENESIS symbol at logo size, in the theme's brand gradient. */
+export function EmblemMark() {
+  const id = `emblem-mark-${useId().replace(/:/g, '')}`;
+  return <svg className="emblem-mark" viewBox={mark.box.viewBox} aria-hidden="true">
+    <defs><linearGradient id={id} x1="0" y1="0" x2="0" y2="1"><stop offset="0" style={{ stopColor: 'var(--cyan)' }} /><stop offset="1" style={{ stopColor: 'var(--violet)' }} /></linearGradient></defs>
+    <path d={mark.cells} fill={`url(#${id})`} />
+  </svg>;
+}
+
+/** The GENESIS symbol, large and lit, as the button that starts the signal flight. It boots pixel by pixel from the
+ * core, glows and a current runs up through it now and then. Pressed, it charges, flashes across the screen and hands
+ * over to the flight. With motion stopped or reduced it starts the flight at once. */
+export const EmblemLauncher = forwardRef<HTMLButtonElement, { label: string; hint: string; onLaunch: () => void }>(function EmblemLauncher({ label, hint, onLaunch }, ref) {
+  const { ref: seen, enabled, running } = useVisibleMotion<HTMLSpanElement>();
+  const id = `emblem-${useId().replace(/:/g, '')}`;
+  const [firing, setFiring] = useState(false);
+  const [flash, setFlash] = useState<{ x: number; y: number; run: number } | null>(null);
+  const timers = useRef<number[]>([]);
+  useEffect(() => () => timers.current.forEach(window.clearTimeout), []);
+  const fire = (event: MouseEvent<HTMLButtonElement>) => {
+    if (firing) return;
+    if (!enabled || matchMedia('(prefers-reduced-motion: reduce)').matches) { onLaunch(); return; }
+    const box = event.currentTarget.getBoundingClientRect();
+    setFiring(true);
+    timers.current.push(window.setTimeout(() => setFlash({ x: box.left + box.width / 2, y: box.top + box.height * .55, run: Date.now() }), 380));
+    timers.current.push(window.setTimeout(() => { setFiring(false); onLaunch(); }, 620));
+  };
+  return <span ref={seen} className="emblem" data-motion={enabled ? 'on' : 'off'} data-running={running}>
+    <button ref={ref} type="button" className="emblem-launch" data-firing={firing || undefined} aria-label={label} onClick={fire}
+      style={{ '--emblem-ratio': `${big.box.width} / ${big.box.height}`, '--emblem-mask': maskImage } as CSSProperties}>
+      <span className="emblem-mesh" aria-hidden="true" />
+      <span className="emblem-art" aria-hidden="true">
+        <svg className="emblem-halo" viewBox={big.box.viewBox}>
+          <defs><linearGradient id={`${id}-halo`} x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#41dce8" /><stop offset=".6" stopColor="#6fa8ff" /><stop offset="1" stopColor="#b08af4" /></linearGradient></defs>
+          <path d={big.all} fill={`url(#${id}-halo)`} />
+        </svg>
+        <svg className="emblem-bloom" viewBox={big.box.viewBox}><path d={big.all} /></svg>
+        <svg className="emblem-body" viewBox={big.box.viewBox} shapeRendering="crispEdges">
+          <defs>
+            <radialGradient id={`${id}-hot`} cx="50%" cy="58%" r="64%">
+              <stop offset="0" stopColor="#ffffff" /><stop offset=".3" stopColor="#f0fdff" /><stop offset=".5" stopColor="#9ff3fa" />
+              <stop offset=".72" stopColor="#41dce8" /><stop offset=".9" stopColor="#8f8cf6" /><stop offset="1" stopColor="#c77dff" />
+            </radialGradient>
+            <pattern id={`${id}-grid`} width="1" height="1" patternUnits="userSpaceOnUse"><path d="M1 0V1H0" /></pattern>
+          </defs>
+          <path d={big.metal} fill={`url(#${id}-hot)`} />
+          <path className="emblem-fingers" d={big.fingers} />
+          <path className="emblem-ports" d={big.ports} />
+          <path className="emblem-grid" d={big.all} fill={`url(#${id}-grid)`} />
+        </svg>
+        <span className="emblem-current" />
+      </span>
+    </button>
+    <span className="emblem-hint" aria-hidden="true">{hint}</span>
+    {flash && createPortal(<span key={flash.run} className="emblem-flash" aria-hidden="true" onAnimationEnd={() => setFlash(null)}
+      style={{ '--x': `${flash.x}px`, '--y': `${flash.y}px` } as CSSProperties} />, document.body)}
+  </span>;
+});

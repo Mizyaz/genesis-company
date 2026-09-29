@@ -18,7 +18,7 @@ export function empireOf(paper: Paper): EmpireId {
 /** The picture on top of each building: a symbol for what the paper is about. */
 export type Glyph = 'phase' | 'bidirectional' | 'mixer' | 'switch' | 'distributed' | 'gain' | 'amplifier' | 'spectrogram'
   | 'chirp' | 'grid' | 'field' | 'chain' | 'transformer' | 'dots' | 'survey' | 'medical' | 'leaf' | 'agents' | 'coverage'
-  | 'relay' | 'priority' | 'sensing' | 'search' | 'bayes' | 'pixels' | 'ports' | 'book' | 'chip';
+  | 'relay' | 'priority' | 'sensing' | 'search' | 'stack' | 'bayes' | 'pixels' | 'ports' | 'book' | 'chip';
 const glyphs: [RegExp, Glyph][] = [
   [/phase shifter/i, 'phase'], [/bidirectional/i, 'bidirectional'], [/mixer/i, 'mixer'], [/SPDT|switch/i, 'switch'],
   [/distributed amplifier/i, 'distributed'], [/variable gain/i, 'gain'], [/low.noise|\bLNA\b/i, 'amplifier'],
@@ -26,7 +26,7 @@ const glyphs: [RegExp, Glyph][] = [
   [/agriculture/i, 'field'], [/blockchain/i, 'chain'], [/flyback/i, 'transformer'], [/quantum dot/i, 'dots'],
   [/survey/i, 'survey'], [/medical/i, 'medical'], [/sustainab/i, 'leaf'], [/heterogeneous/i, 'agents'],
   [/coverage/i, 'coverage'], [/connectivity|relay/i, 'relay'], [/priority/i, 'priority'], [/sensing-aware/i, 'sensing'],
-  [/search/i, 'search'], [/bayesian/i, 'bayes'], [/pixelated/i, 'pixels'], [/synthesis/i, 'ports'], [/education/i, 'book'],
+  [/search/i, 'search'], [/multi-layer pixelated/i, 'stack'], [/bayesian/i, 'bayes'], [/pixelated/i, 'pixels'], [/synthesis/i, 'ports'], [/education/i, 'book'],
 ];
 export const glyphOf = (paper: Paper): Glyph => glyphs.find(([pattern]) => pattern.test(text(paper)))?.[1] ?? 'chip';
 
