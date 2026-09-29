@@ -1,0 +1,55 @@
+/* The GENESIS symbol (Emblem.tsx). The logo mark takes the theme's gradient; the large symbol is a lit panel with its
+   own palette in both themes, like the tube screens. */
+.emblem-mark { flex: none; display: block; }
+
+.emblem { --emblem-size: 240px; position: relative; display: inline-flex; flex-direction: column; align-items: center; gap: 14px; isolation: isolate; }
+.emblem-launch { position: relative; display: block; width: var(--emblem-size); margin: 0; padding: 0; border: 0; border-radius: 28px; background: none; color: inherit; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.emblem-launch:focus-visible { outline: 2px solid var(--cyan); outline-offset: 10px; }
+.emblem-art { position: relative; display: block; aspect-ratio: var(--emblem-ratio); transition: transform .18s ease-out, filter .3s; }
+.emblem-art > * { position: absolute; inset: 0; width: 100%; height: 100%; }
+.emblem-launch:active .emblem-art { transform: scale(.97); }
+@media (hover: hover) { .emblem-launch:hover .emblem-art { filter: brightness(1.14); } }
+/* The panel the symbol shines through: a fine pixel grid that fades out around it. */
+.emblem-mesh { position: absolute; z-index: -1; inset: -20% -16%; border-radius: 50%; pointer-events: none;
+  background: linear-gradient(90deg, rgba(65, 220, 232, .12) 1px, transparent 1px) 50% 50% / 5px 5px, linear-gradient(rgba(65, 220, 232, .12) 1px, transparent 1px) 50% 50% / 5px 5px, radial-gradient(closest-side, #041325 35%, rgba(4, 19, 37, .85) 62%, rgba(4, 19, 37, 0));
+  -webkit-mask: radial-gradient(closest-side, #000 50%, transparent); mask: radial-gradient(closest-side, #000 50%, transparent); }
+/* Light around the metal: a wide coloured halo and a close bloom on the pixels. */
+.emblem-halo { opacity: 1; transform: scale(1.08); filter: blur(calc(var(--emblem-size) * .08)) saturate(1.3); }
+.emblem-bloom { opacity: .7; filter: blur(calc(var(--emblem-size) * .01)); }
+.emblem-bloom path { fill: #9ff3fa; }
+.emblem-body pattern path { fill: none; stroke: #03101d; stroke-width: .1; stroke-opacity: .8; }
+.emblem-fingers { fill: #ffe7a8; }
+.emblem-ports { fill: #c9a6ff; }
+/* The current: now and then a band of light runs up through the metal, from the ports into the crest. */
+.emblem-current { overflow: hidden; -webkit-mask: var(--emblem-mask) center / 100% 100% no-repeat; mask: var(--emblem-mask) center / 100% 100% no-repeat; }
+.emblem-current::before { content: ''; position: absolute; left: 0; right: 0; top: 100%; height: 36%; opacity: 0; background: linear-gradient(to top, rgba(255, 255, 255, 0), rgba(255, 255, 255, .92), rgba(255, 255, 255, 0)); }
+.emblem-hint { font: 600 .66rem/1.3 var(--font-mono); letter-spacing: .16em; text-transform: uppercase; color: var(--cyan); text-align: center; }
+
+/* Motion: the symbol boots from the core outwards, one ring of pixels at a time, and its light breathes. */
+.emblem[data-motion="on"] .emblem-body { animation: emblem-boot 1.1s steps(11, end) .1s both; }
+.emblem[data-motion="on"] .emblem-halo { animation: emblem-halo-in 1.4s ease-out .5s both, emblem-breathe 5.2s ease-in-out 1.9s infinite; }
+.emblem[data-motion="on"] .emblem-current::before { animation: emblem-current 6.5s ease-in-out 2.4s infinite; }
+.emblem[data-motion="on"] .emblem-hint { animation: emblem-hint 2.8s ease-in-out 1.6s infinite; }
+/* Pressed: it charges, the current races through twice and the light floods the screen (the flash). */
+.emblem-launch[data-firing] .emblem-body { animation: emblem-charge .62s cubic-bezier(.5, 0, .75, .3) both; }
+.emblem-launch[data-firing] .emblem-halo { animation: emblem-halo-charge .62s ease-in both; }
+.emblem-launch[data-firing] .emblem-current::before { animation: emblem-current-fire .31s linear 2; }
+.emblem-flash { position: fixed; z-index: 1150; inset: 0; pointer-events: none; transform-origin: var(--x) var(--y);
+  background: radial-gradient(circle at var(--x) var(--y), #fff 0, rgba(240, 253, 255, .96) 4%, rgba(65, 220, 232, .86) 12%, rgba(143, 140, 246, .62) 24%, rgba(4, 19, 37, 0) 46%);
+  animation: emblem-flash 1.25s cubic-bezier(.2, .7, .3, 1) both; }
+.emblem[data-running="false"] *, .emblem[data-running="false"] *::before { animation-play-state: paused; }
+
+@keyframes emblem-boot { from { clip-path: circle(0% at 50% 58%); } to { clip-path: circle(75% at 50% 58%); } }
+@keyframes emblem-halo-in { from { opacity: 0; } }
+@keyframes emblem-breathe { 0%, 100% { opacity: 1; } 50% { opacity: .62; } }
+@keyframes emblem-current { 0% { opacity: 0; transform: translateY(0); } 4% { opacity: 1; } 22% { opacity: .9; transform: translateY(-380%); } 24%, 100% { opacity: 0; transform: translateY(-380%); } }
+@keyframes emblem-hint { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
+@keyframes emblem-charge { 0% { filter: none; transform: none; } 55% { filter: brightness(1.5) saturate(1.2); transform: scale(1.04); } 100% { filter: brightness(2.8) saturate(.4); transform: scale(1.12); } }
+@keyframes emblem-halo-charge { from { opacity: 1; transform: scale(1.08); } to { opacity: 1; transform: scale(1.55); } }
+@keyframes emblem-current-fire { from { opacity: 1; transform: translateY(0); } to { opacity: 1; transform: translateY(-380%); } }
+@keyframes emblem-flash { 0% { opacity: 0; transform: scale(.25); } 18% { opacity: 1; } 45% { opacity: 1; transform: scale(3.2); } 100% { opacity: 0; transform: scale(3.6); } }
+
+/* Motion stopped or reduced: the symbol is simply lit; pressing it opens the flight at once. */
+.emblem[data-motion="off"] *, .emblem[data-motion="off"] *::before { animation: none !important; transition: none !important; }
+@media (prefers-reduced-motion: reduce) { .emblem *, .emblem *::before, .emblem-flash { animation: none !important; transition: none !important; } }
+@media (forced-colors: active) { .emblem-mesh, .emblem-halo, .emblem-bloom, .emblem-current { display: none; } }

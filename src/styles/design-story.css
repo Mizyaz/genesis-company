@@ -17,7 +17,7 @@
 .story-card-title { display: flex; align-items: center; gap: 7px; min-width: 0; font-size: .78rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .story-card-title > .icon { flex: none; width: 16px; height: 16px; color: var(--cyan); }
 .story-card-title .brand { font-size: .78rem; gap: 5px; }
-.story-card-title .brand img { width: 18px; height: 19px; }
+.story-card-title .brand .emblem-mark { width: 21px; height: 19px; }
 .story-card-status { min-height: 1.3em; margin-top: auto; font-family: var(--font-mono); font-size: .68rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .design-story[data-met="true"] .story-card-status { color: var(--cyan); }
 

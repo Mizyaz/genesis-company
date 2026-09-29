@@ -1,4 +1,6 @@
 import type { EmpireId, Glyph } from './layout';
+import { pixelPassives, type PixelLayout } from '../shared/pixelLayout';
+import { emblemMark } from '../shared/emblem';
 
 /** Cel palettes: each empire steps from ink to light, with one complementary accent and one hot contrast. */
 export type Palette = { ink: string; deep: string; mid: string; bright: string; light: string; accent: string; hot: string };
@@ -74,6 +76,22 @@ function arrow(ctx: Ctx, p: Palette, from: Point, to: Point, color: string, widt
   const angle = Math.atan2(to[1] - from[1], to[0] - from[0]);
   const head = (a: number): Point => [to[0] - 16 * Math.cos(angle + a), to[1] - 16 * Math.sin(angle + a)];
   stroke(ctx, p.ink, color, width, () => { poly(ctx, [from, to]); poly(ctx, [head(0.55), to, head(-0.55)]); });
+}
+
+/** A pixelated passive in its window of the ground plane, `size` across and centred on (x, y): metal pixels with seams
+ * between them, and each port's line out to a pad (from `pixelLayout`, the structures of our pixelated papers). */
+function pixelated(ctx: Ctx, p: Palette, layout: PixelLayout, size: number, metal: string, x = 0, y = 0) {
+  const cell = size / Math.max(layout.columns, layout.rows), w = cell * layout.columns, h = cell * layout.rows, left = x - w / 2, top = y - h / 2;
+  for (const port of layout.ports) {
+    const along = (port.at + (port.width ?? 2) / 2) * cell;
+    const [from, to]: [Point, Point] = port.side === 'left' ? [[left, top + along], [left - 26, top + along]] : port.side === 'right' ? [[left + w, top + along], [left + w + 26, top + along]]
+      : port.side === 'top' ? [[left + along, top], [left + along, top - 26]] : [[left + along, top + h], [left + along, top + h + 26]];
+    stroke(ctx, p.ink, p.light, 7, () => poly(ctx, [from, to]));
+    fill(ctx, p.ink, p.accent, () => ctx.rect(to[0] - 8, to[1] - 8, 16, 16), 5);
+  }
+  fill(ctx, p.ink, mix(p.ink, p.deep, 0.45), () => ctx.rect(left - 5, top - 5, w + 10, h + 10), 6);
+  ctx.fillStyle = metal;
+  layout.metal.forEach((row, r) => row.forEach((on, c) => { if (on) ctx.fillRect(left + c * cell + 0.7, top + r * cell + 0.7, cell - 1.4, cell - 1.4); }));
 }
 
 /** The picture on top of a building: one symbol per topic, drawn around (0, 0) within ±95. */
@@ -278,18 +296,24 @@ function drawGlyph(ctx: Ctx, glyph: Glyph, p: Palette, rnd: () => number, keywor
       break;
     }
     case 'pixels': {
-      for (let c = 0; c < 4; c++) for (let r = 0; r < 8; r++) if (rnd() > 0.42) for (const col of [c, 7 - c])
-        f(r % 3 ? p.bright : p.accent, [[-80 + col * 20, -80 + r * 20], [-62 + col * 20, -80 + r * 20], [-62 + col * 20, -62 + r * 20], [-80 + col * 20, -62 + r * 20]]);
-      s(p.hot, 8, [[-100, 0], [-82, 0]]); s(p.hot, 8, [[82, 0], [100, 0]]);
+      // A wideband directional coupler: four ports and the pixels between them.
+      pixelated(ctx, p, pixelPassives.coupler, 128, p.bright);
       break;
     }
     case 'ports': {
-      for (const a of [Math.PI, Math.PI / 3, -Math.PI / 3]) {
-        const end: Point = [78 * Math.cos(a), 78 * Math.sin(a)];
-        s(p.bright, 8, [[0, 0], end]);
-        f(p.accent, [[end[0] - 14, end[1] - 14], [end[0] + 14, end[1] - 14], [end[0] + 14, end[1] + 14], [end[0] - 14, end[1] + 14]]);
-      }
-      for (let c = 0; c < 4; c++) for (let r = 0; r < 4; r++) f((c + r) % 2 ? p.light : p.hot, [[-28 + c * 14, -28 + r * 14], [-14 + c * 14, -28 + r * 14], [-14 + c * 14, -14 + r * 14], [-28 + c * 14, -14 + r * 14]]);
+      // Three-port circuits: one input, an equal split to two outputs.
+      pixelated(ctx, p, pixelPassives.threePort, 128, p.bright);
+      break;
+    }
+    case 'stack': {
+      // Stacked binary metal layers: the lower one behind, the upper one in front, joined by vias where both have metal.
+      const { lower, upper } = pixelPassives, cell = 100 / upper.columns;
+      pixelated(ctx, p, lower, 100, p.mid, -18, 16);
+      pixelated(ctx, p, upper, 100, p.bright, 18, -16);
+      ctx.fillStyle = p.hot;
+      upper.metal.forEach((row, r) => row.forEach((on, c) => {
+        if (on && lower.metal[r][c] && (r + 2 * c) % 5 === 0) ctx.fillRect(18 - 50 + c * cell + cell * 0.3, -16 - 50 + r * cell + cell * 0.3, cell * 0.4, cell * 0.4);
+      }));
       break;
     }
     case 'book': {
@@ -399,11 +423,18 @@ export function genesisCanvas(line: string) {
   const p = palettes.genesis;
   ctx.beginPath(); chamfer(ctx, 0, 0, 1024, 320, 48); ctx.fillStyle = p.ink; ctx.fill();
   ctx.beginPath(); chamfer(ctx, 14, 14, 996, 292, 38); ctx.strokeStyle = p.bright; ctx.lineWidth = 6; ctx.stroke();
-  const gradient = ctx.createLinearGradient(160, 0, 860, 0);
+  // The GENESIS symbol, then the name.
+  const cell = 5.2, markTop = 58, markLeft = 64;
+  const markGradient = ctx.createLinearGradient(0, markTop, 0, markTop + emblemMark.length * cell);
+  markGradient.addColorStop(0, p.bright); markGradient.addColorStop(1, p.accent);
+  ctx.save(); ctx.shadowColor = p.bright; ctx.shadowBlur = 18; ctx.fillStyle = markGradient;
+  emblemMark.forEach((row, r) => row.forEach((on, c) => { if (on) ctx.fillRect(markLeft + c * cell, markTop + r * cell, cell - 0.6, cell - 0.6); }));
+  ctx.restore();
+  const gradient = ctx.createLinearGradient(260, 0, 960, 0);
   gradient.addColorStop(0, p.bright); gradient.addColorStop(0.5, '#6fb9ed'); gradient.addColorStop(1, p.accent);
-  ctx.font = font(800, 150); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillStyle = gradient; ctx.fillText('GENESIS', 512, 140);
-  ctx.font = font(600, 38); ctx.fillStyle = p.light; ctx.fillText(line, 512, 252);
+  ctx.font = font(800, 132); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillStyle = gradient; ctx.fillText('GENESIS', 616, 140);
+  ctx.font = font(600, 36); ctx.fillStyle = p.light; ctx.fillText(line, 616, 252);
   return element;
 }
 

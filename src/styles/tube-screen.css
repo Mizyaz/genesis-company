@@ -51,11 +51,18 @@
 .scr-bench { fill: none; stroke: var(--phosphor-2); stroke-width: 1; stroke-dasharray: 4 4; opacity: .7; animation: scr-fade .5s ease-out 2s both; }
 .scr-draw { fill: none; stroke: var(--phosphor); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; animation: scr-draw .5s ease-out calc(.85s + var(--d) * .22s) both; }
 .scr-port { fill: var(--glass); stroke: var(--phosphor); stroke-width: 1.5; animation: scr-fade .3s ease-out 1.9s both; }
-.scr-cell { fill: none; stroke: rgba(214, 252, 255, .1); stroke-width: .8; }
-.scr-pixel { fill: var(--phosphor); opacity: .45; animation: scr-field 1.8s ease-in-out calc(.9s + var(--c) * 70ms) infinite; }
+/* A pixelated passive in its window of the ground plane; the field sweeps across it column by column. */
+.scr-window { fill: rgba(3, 15, 27, .9); stroke: rgba(65, 220, 232, .3); stroke-width: 1; }
+.scr-pixel { fill: var(--phosphor); opacity: .55; animation: scr-field 1.8s ease-in-out calc(.9s + var(--c) * 60ms) infinite; }
 .scr-port-line { stroke: var(--phosphor-2); stroke-width: 2.4; stroke-linecap: round; }
+.scr-label { fill: var(--dim); font: 700 6.5px var(--font-mono); letter-spacing: .04em; }
+.scr-label-out { fill: var(--phosphor); }
+.scr-label-match { fill: var(--phosphor-2); }
+.scr-band { fill: rgba(65, 220, 232, .07); }
 .scr-axis { fill: none; stroke: rgba(214, 252, 255, .25); stroke-width: 1; }
-.scr-response { fill: none; stroke: var(--phosphor-2); stroke-width: 1.8; stroke-linecap: round; stroke-dasharray: 1; filter: drop-shadow(0 0 3px var(--phosphor-2)); animation: scr-draw 1.2s ease-in-out 1.2s both; }
+.scr-response { fill: none; stroke: var(--phosphor); stroke-width: 1.6; stroke-linecap: round; stroke-dasharray: 1; filter: drop-shadow(0 0 3px var(--phosphor)); animation: scr-draw 1.2s ease-in-out 1.6s both; }
+.scr-response-twin { opacity: .6; animation-delay: 1.75s; }
+.scr-match { stroke: var(--phosphor-2); filter: drop-shadow(0 0 3px var(--phosphor-2)); animation-delay: 2s; }
 .scr-front { fill: none; stroke: var(--phosphor); stroke-width: 1.6; stroke-dasharray: 1; opacity: .8; animation: scr-draw .9s ease-in-out 1.9s both; }
 .scr-best, .scr-dominated { animation: scr-settle 1.1s cubic-bezier(.2, .8, .2, 1) calc(.85s + var(--i) * 45ms) both; }
 .scr-best { fill: var(--phosphor); filter: drop-shadow(0 0 3px var(--phosphor)); }
@@ -63,7 +70,10 @@
 .scr-choice { fill: none; stroke: var(--phosphor-2); stroke-width: 1.5; transform-box: fill-box; transform-origin: center; animation: scr-pop .4s cubic-bezier(.3, 1.6, .5, 1) 2.6s both, scr-ring 1.6s ease-out 3s infinite; }
 .scr-plane { fill: rgba(65, 220, 232, .07); stroke: var(--phosphor); stroke-width: 1.2; stroke-linejoin: round; }
 .scr-metal { fill: none; stroke: var(--phosphor-2); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
-.scr-via { fill: var(--phosphor); }
+.scr-passive rect { fill: var(--phosphor); opacity: .8; }
+.scr-core { fill: rgba(255, 231, 168, .08); stroke: #ffe7a8; stroke-width: 1; }
+.scr-finger { stroke: #ffe7a8; stroke-width: 1.6; stroke-linecap: round; }
+.scr-pad { fill: rgba(176, 138, 244, .25); stroke: var(--phosphor-2); stroke-width: 1; }
 .scr-layer { animation: scr-drop .5s cubic-bezier(.3, 1.3, .5, 1) calc(.85s + var(--l) * .25s) both; }
 .scr-badge { transform-box: fill-box; transform-origin: center; animation: scr-pop .35s cubic-bezier(.3, 1.6, .5, 1) calc(1.8s + var(--b) * .22s) both; }
 .scr-badge rect { fill: rgba(65, 220, 232, .1); stroke: var(--phosphor); stroke-width: 1; }

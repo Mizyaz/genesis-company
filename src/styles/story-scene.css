@@ -66,7 +66,7 @@
 .scene-outcome { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 22px; padding: 16px; border: 1px solid transparent; border-radius: 16px; text-align: center; background: linear-gradient(var(--surface), var(--surface)) padding-box, linear-gradient(var(--border), var(--border)) border-box; }
 .scene-outcome[data-on="true"] { background: linear-gradient(var(--surface), var(--surface)) padding-box, var(--gradient) border-box; box-shadow: 0 10px 34px var(--glow); }
 .scene-outcome .brand { font-size: 1.3rem; gap: 8px; }
-.scene-outcome .brand img { width: 28px; height: 30px; }
+.scene-outcome .brand .emblem-mark { width: 32px; height: 29px; }
 .scene-outcome-name { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
 .scene-outcome-name > span { font-size: .8rem; color: var(--muted); }
 /* GENESIS hands back a finished stage on a die: the arrow draws, the die appears, the check follows. */
