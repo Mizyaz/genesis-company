@@ -1,5 +1,10 @@
-/* Shell-owned transition, using the shared light/dark palette. */
-.silicon-gate { position: fixed; inset: 0; z-index: 1000; overflow: hidden; isolation: isolate; cursor: progress; }
+/* The site's one loading screen (every page change and every wait), using the shared light/dark palette. It sits above
+   everything, the signal flight included. */
+.silicon-gate { position: fixed; inset: 0; z-index: 1100; overflow: hidden; isolation: isolate; cursor: progress; }
+/* The first load: a plain cover with the chip, exactly what the HTML shows before the app starts; then it fades. */
+.silicon-gate:is([data-phase='boot'], [data-phase='unboot']) { background: var(--page); }
+.silicon-gate:is([data-phase='boot'], [data-phase='unboot']) .silicon-gate-core { animation: none; }
+.silicon-gate[data-phase='unboot'] { animation: gate-core-out 480ms ease both; }
 .silicon-gate-panel { position: absolute; inset-block: 0; width: 50.1%; color: var(--cyan); will-change: transform; animation: gate-close-left 420ms cubic-bezier(.65,0,.2,1) both; }
 .silicon-gate-left { left: 0; }
 .silicon-gate-right { right: 0; color: var(--violet); animation-name: gate-close-right; }
@@ -44,4 +49,6 @@
 @keyframes gate-wave { from { stroke-dashoffset: 160; } to { stroke-dashoffset: 0; } }
 @keyframes gate-energy { from { transform: translateX(-110%); } to { transform: translateX(340%); } }
 @keyframes gate-pulse { from { opacity: .25; } to { opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { .silicon-gate { display: none; } }
+/* Reduced or stopped motion: page changes are instant; a real wait still shows the gate, standing still. */
+.silicon-gate[data-still], .silicon-gate[data-still] * { animation: none !important; }
+@media (prefers-reduced-motion: reduce) { .silicon-gate, .silicon-gate * { animation: none !important; } }

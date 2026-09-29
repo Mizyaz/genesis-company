@@ -2,6 +2,7 @@ import { useLanguage } from './Language';
 import { useEffect, useId, useRef, useState } from 'react';
 import type { PointerEvent as ReactPointerEvent, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+import { holdGate } from './gate';
 import './image-viewer.css';
 
 export type ImageViewport = { x: number; y: number; width: number; height: number };
@@ -107,6 +108,12 @@ export function ImageViewer({ src, alt, title = 'Image view', caption, toolbar, 
 
   // A new source is fitted once, never left under the previous image's transform.
   useEffect(() => { imageSize.current = { width: 0, height: 0 }; fitting.current = true; setStatus('loading'); }, [src]);
+  // A large layout takes a moment: the site's loading screen covers it (not a quick, cached one).
+  useEffect(() => {
+    if (status !== 'loading') return;
+    const release = holdGate({ title: 'Loading image', subtitle: title, delay: 180 });
+    return () => release();
+  }, [status, src, title]);
 
   function startWindowDrag(event: ReactPointerEvent<HTMLElement>, kind: 'move' | 'resize') {
     if (event.button !== 0 || (kind === 'move' && (event.target as Element).closest('button'))) return;
@@ -194,8 +201,7 @@ export function ImageViewer({ src, alt, title = 'Image view', caption, toolbar, 
             setStatus('ready'); fit();
           }} onError={() => setStatus('error')} />
       </div>
-      {status !== 'ready' && <p className="image-viewer-message" role={status === 'error' ? 'alert' : 'status'}>
-        {t(status === 'error' ? 'Could not load this image. Close and reopen to retry.' : 'Loading image…')}</p>}
+      {status === 'error' && <p className="image-viewer-message" role="alert">{t('Could not load this image. Close and reopen to retry.')}</p>}
     </div>
     <footer className="image-viewer-footer">
       <small>{caption || t('Image view · changes here do not edit the source.')}</small>

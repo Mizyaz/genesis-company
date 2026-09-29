@@ -279,6 +279,33 @@ test('silicon gate is shared, optional and presentation-only', () => {
   assert.match(read('src/styles/silicon-gate.css'), /var\(--page\)/);
 });
 
+test('every page change and every wait uses the one silicon gate, from the first load on', () => {
+  const store = read('src/shared/gate.ts'), gate = read('src/shared/SiliconGate.tsx');
+  assert.match(store, /export function holdGate\(request: GateRequest\)/);
+  assert.match(store, /export function navigate\(hash: string\)/);
+  // Links, code, back and forward, the first load and waits all go through the one gate.
+  assert.match(gate, /useSyncExternalStore\(subscribeGate, gateJobs\)/);
+  assert.match(gate, /window.addEventListener\('genesis:gate-navigate', requested\)/);
+  assert.match(gate, /Back, forward or a typed address/);
+  assert.match(gate, /\{ phase: 'boot', title: '', subtitle: '', handoff: false \}/);
+  assert.match(read('src/styles/silicon-gate.css'), /\.silicon-gate \{ position: fixed; inset: 0; z-index: 1100;/);
+  // Before the app starts, the HTML shows the same cover: the gate's chip, name and energy bar.
+  const html = read('index.html');
+  assert.match(html, /<div id="root"><div class="boot-gate" aria-hidden="true">/);
+  assert.match(html, /M61 83H67L75 65L85 96L94 76H100/);
+  assert.match(gate, /M61 83H67L75 65L85 96L94 76H100/);
+  // Waits ask for the gate instead of drawing their own loading text; code changes page through it.
+  const flight = read('src/shared/ResearchFlight.tsx'), viewer = read('src/shared/ImageViewer.tsx');
+  assert.match(flight, /holdGate\(\{ title: 'Loading the city'/);
+  assert.match(flight, /release\(\(\) => \{ setRevealed\(true\); flight.start\(\); \}\)/);
+  assert.match(flight, /navigate\('#\/explore'\)/);
+  assert.match(viewer, /holdGate\(\{ title: 'Loading image', subtitle: title, delay: \d+ \}\)/);
+  // Only the gate itself may set the address directly (and only when no gate is on the page).
+  for (const path of walk('src').filter(path => /\.tsx?$/.test(path) && path !== 'src/shared/gate.ts')) {
+    assert.doesNotMatch(read(path), /["'`]Loading[^"'`]*…["'`]|window\.location\.hash =/, path);
+  }
+});
+
 test('public source has no assistant, landing page or engineering service', () => {
   for (const path of ['src/App.tsx', 'src/main.tsx', 'src/pages/Landing.tsx', 'src/assistant', 'server', '.env']) assert.equal(existsSync(resolve(root, path)), false, path);
   const content = JSON.parse(read('src/content/site.json'));

@@ -208,7 +208,6 @@
   "Scroll to zoom · Press and drag to pan": "Yakınlaştırmak için kaydırın · Gezinmek için sürükleyin",
   "Image pan and zoom": "Görseli kaydır ve yakınlaştır",
   "Could not load this image. Close and reopen to retry.": "Görsel yüklenemedi. Tekrar denemek için kapatıp açın.",
-  "Loading image…": "Görsel yükleniyor…",
   "Image view · changes here do not edit the source.": "Görsel görünümü · Buradaki değişiklikler kaynağı değiştirmez.",
   "Resize image window": "Görsel penceresini boyutlandır",
   "Drag to resize · Arrow keys resize": "Boyutlandırmak için sürükleyin · Ok tuşları boyutu değiştirir",
@@ -357,7 +356,6 @@
   "Drone Empire": "Drone İmparatorluğu",
   "Signal flight through our research": "Araştırmalarımızın içinden sinyal uçuşu",
   "Close the flight": "Uçuşu kapat",
-  "Loading the city…": "Şehir yükleniyor…",
   "3D graphics could not start in this browser. Every paper is also listed in the library on this page.": "3B grafik bu tarayıcıda başlatılamadı. Tüm makaleler bu sayfadaki kütüphanede de listeleniyor.",
   "Back to the library": "Kütüphaneye dön",
   "Stay here to visit": "Ziyaret için burada kalın",
@@ -375,5 +373,8 @@
   "Left thumb: fly. Right thumb: rise and sink. Tap a building to fly there.": "Sol başparmak: uç. Sağ başparmak: yüksel ve alçal. Bir binaya dokunursanız oraya uçar.",
   "Fly with W A S D or the arrow keys, rise with Space, sink with Shift. Drag to steer or click a building to fly there.": "W A S D veya ok tuşlarıyla uçun, Boşluk ile yükselin, Shift ile alçalın. Sürükleyerek yön verin ya da bir binaya tıklayıp oraya uçun.",
   "Full screen": "Tam ekran",
-  "Leave full screen": "Tam ekrandan çık"
+  "Leave full screen": "Tam ekrandan çık",
+  "Loading the city": "Şehir yükleniyor",
+  "Loading image": "Görsel yükleniyor",
+  "Every building is one of our papers.": "Her bina makalelerimizden biri."
 }

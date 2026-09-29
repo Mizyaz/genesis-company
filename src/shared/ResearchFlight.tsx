@@ -4,6 +4,7 @@ import { useLanguage } from './Language';
 import { useMotion } from './MotionSettings';
 import { Icon, assetUrl } from './ui';
 import { publicationUrl, type Publication } from './citations';
+import { holdGate, navigate } from './gate';
 import type { EmpireId } from '../flight/layout';
 import type { FlightHandle, FlightTarget, FlightTimeline } from '../flight/world';
 import '../styles/research-flight.css';
@@ -46,6 +47,7 @@ function FlightOverlay({ papers, onClose, onShowPaper }: { papers: Publication[]
   const touches = useRef(new Map<number, Touch>());
   const [status, setStatus] = useState<'loading' | 'intro' | 'flying' | 'error'>('loading');
   const [impact, setImpact] = useState(false);
+  const [revealed, setRevealed] = useState(false);
   const [moved, setMoved] = useState(false);
   const [place, setPlace] = useState<{ year: number; empire: EmpireId | 'genesis' | null }>({ year: Math.min(...papers.map(paper => paper.year)), empire: null });
   const [nearTarget, setNearTarget] = useState<FlightTarget | null>(null);
@@ -60,8 +62,10 @@ function FlightOverlay({ papers, onClose, onShowPaper }: { papers: Publication[]
   const coarse = useMemo(() => matchMedia('(pointer: coarse)').matches, []);
   const canFullScreen = useMemo(() => Boolean(document.fullscreenEnabled && document.documentElement.requestFullscreen), []);
 
+  // The site's loading screen covers the wait for three.js and the city; the signal's intro starts as it opens.
   useEffect(() => {
     let cancelled = false;
+    const release = holdGate({ title: 'Loading the city', subtitle: 'Every building is one of our papers.' });
     import('../flight/world').then(({ createFlight }) => {
       if (cancelled || !canvas.current) return;
       try {
@@ -84,9 +88,10 @@ function FlightOverlay({ papers, onClose, onShowPaper }: { papers: Publication[]
         handle.current = flight;
         setTimeline(flight.timeline);
         setStatus(current => current === 'loading' ? 'intro' : current);
-      } catch { setStatus('error'); }
-    }, () => { if (!cancelled) setStatus('error'); });
-    return () => { cancelled = true; handle.current?.dispose(); handle.current = null; };
+        release(() => { setRevealed(true); flight.start(); });
+      } catch { setStatus('error'); release(); }
+    }, () => { if (!cancelled) { setStatus('error'); release(); } });
+    return () => { cancelled = true; release(); handle.current?.dispose(); handle.current = null; };
   }, []); // One flight per opening; the page behind stays as it was.
 
   useEffect(() => {
@@ -109,7 +114,7 @@ function FlightOverlay({ papers, onClose, onShowPaper }: { papers: Publication[]
   }, [tap]);
 
   const visit = (target: FlightTarget) => {
-    if (target.kind === 'genesis') { onClose(); window.location.hash = '#/explore'; return; }
+    if (target.kind === 'genesis') { onClose(); navigate('#/explore'); return; }
     window.open(publicationUrl(target.paper), '_blank', 'noopener,noreferrer');
     setPrompt(null);
   };
@@ -194,7 +199,7 @@ function FlightOverlay({ papers, onClose, onShowPaper }: { papers: Publication[]
   const nearName = nearTarget ? nearTarget.kind === 'genesis' ? 'GENESIS' : nearTarget.paper.title : '';
 
   return <div ref={dialog} className="flight-overlay" role="dialog" aria-modal="true" aria-label={t("Signal flight through our research")} tabIndex={-1}
-    data-status={status} data-motion={motion ? 'on' : 'off'} data-touch={coarse || undefined} onContextMenu={event => event.preventDefault()}>
+    data-status={status} data-motion={motion ? 'on' : 'off'} data-touch={coarse || undefined} data-revealed={revealed || undefined} onContextMenu={event => event.preventDefault()}>
     <canvas ref={canvas} className="flight-canvas" aria-hidden="true" onPointerDown={press} onPointerMove={drag} onPointerUp={release} onPointerCancel={release}
       onWheel={event => handle.current?.nudge(clamp(-event.deltaY / 60) * 8, 0)} />
     {stick && <span className="flight-stick" aria-hidden="true" style={{ left: stick.x, top: stick.y }}><span style={{ transform: `translate(${stick.dx * STICK * 0.6}px, ${stick.dy * STICK * 0.6}px)` }} /></span>}
@@ -204,7 +209,6 @@ function FlightOverlay({ papers, onClose, onShowPaper }: { papers: Publication[]
     <div className="flight-frame" data-locked={impact} aria-hidden="true"><span /><span /><span /><span /></div>
     {canFullScreen && <button type="button" className="flight-full" onClick={toggleFullScreen} aria-pressed={full} aria-label={full ? t("Leave full screen") : t("Full screen")}><Icon name={full ? 'shrink' : 'expand'} /></button>}
     <button type="button" className="flight-close" onClick={onClose} aria-label={t("Close the flight")}><Icon name="close" /></button>
-    {status === 'loading' && <p className="flight-loading" role="status">{t("Loading the city…")}</p>}
     {status === 'error' && <div className="flight-error" role="alert">
       <p>{t("3D graphics could not start in this browser. Every paper is also listed in the library on this page.")}</p>
       <button type="button" className="button button-secondary" onClick={onClose}>{t("Back to the library")}</button>
