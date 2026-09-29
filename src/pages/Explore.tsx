@@ -33,7 +33,7 @@ export function Explore({ workbenchUrl }: { workbenchUrl?: string }) {
     </section>
     <section id="workflow" className="content-section workflow-section">
       <div className="section-intro"><SectionHeading eyebrow={t('THE PLATFORM')}>{site.workflow.headline}<br /><span className="gradient-text">{site.workflow.headlineAccent}</span></SectionHeading><p>{site.workflow.intro}</p></div>
-      <Workflow stages={site.stages} />
+      <Workflow stages={site.stages} label={site.workflow.softwareLabel} />
       <figure className="service-visual platform-loop">
         <div className="service-visual-heading"><span className="service-live-dot" /><span>GENESIS</span><span>{site.workflow.visualLabel}</span></div>
         <div className="service-loop"><DesignStory content={site.story.loop} brand={<Brand />} /></div>

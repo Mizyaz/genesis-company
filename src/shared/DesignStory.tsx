@@ -40,7 +40,7 @@ export const ground = (x: number, y: number) => `M${x - 6} ${y}h12M${x - 3.5} ${
 
 /** The feel of a click on part of an illustration, shared with the story scene: the part dips and springs back, and a
  * ripple spreads from where it was touched (from its middle for keys). Nothing moves when motion is stopped or reduced. */
-export function usePress<Part extends string>(enabled: boolean) {
+export function usePress<Part extends string | number>(enabled: boolean) {
   const [ripple, setRipple] = useState<{ part: Part; left: number; top: number; size: number; key: number } | null>(null);
   function press(part: Part, event: MouseEvent<HTMLElement>, target: HTMLElement = event.currentTarget) {
     if (!enabled || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
