@@ -1,5 +1,8 @@
-import type { CSSProperties } from 'react';
-import { coil, ground } from './DesignStory';
+import { useEffect, useRef, useState, type AnimationEvent, type CSSProperties, type RefObject } from 'react';
+import { Icon } from './ui';
+import { useLanguage } from './Language';
+import { coil, ground } from './symbols';
+import '../styles/tube-screen.css';
 
 // What each platform stage looks like inside GENESIS, drawn for the stage's tube screen. Illustrations, not data.
 const vars = (values: Record<string, number | string>) => values as CSSProperties;
@@ -91,4 +94,81 @@ const screens: Record<string, () => JSX.Element> = { specification: Targets, syn
 export function StageScreen({ id }: { id: string }) {
   const Screen = screens[id];
   return Screen ? <svg className={`stage-picture stage-picture-${id}`} viewBox="0 0 200 120" aria-hidden="true"><Screen /></svg> : null;
+}
+
+export type Offer = { icon: string; title: string; detail: string };
+/** What a tube screen shows: its title, which picture, and what GENESIS offers there. */
+export type TubeContent = { title: string; image: string; software: Offer[] };
+
+/** The inside of a tube screen: whose screen it is, the animated picture and three offers that warm up in turn. */
+export function TubePanel({ label, content, onClose, closer }: { label: string; content: TubeContent; onClose: () => void; closer?: RefObject<HTMLButtonElement> }) {
+  const { t } = useLanguage();
+  return <>
+    <span className="stage-screen-scan" aria-hidden="true" />
+    <header className="stage-screen-head"><span>{label}</span><strong>{content.title}</strong>
+      <button ref={closer} type="button" className="stage-screen-close" aria-label={t("Close")} onClick={onClose}><Icon name="close" /></button></header>
+    <div className="stage-screen-body">
+      <StageScreen id={content.image} />
+      <ul className="stage-offers">{content.software.map((offer, i) => <li key={offer.title} style={{ '--o': i } as CSSProperties}>
+        <Icon name={offer.icon} /><span><strong>{offer.title}</strong>{offer.detail}</span>
+      </li>)}</ul>
+    </div>
+  </>;
+}
+
+type Rect = { top: number; left: number; width: number; height: number };
+type CardState<Part> = { part: Part; off: boolean; run: number; rect: Rect; from: HTMLElement };
+
+/** A tube screen that grows out of the card that was pressed, over its whole illustration (the `.tube-stack`, which
+ * grows too when the screen needs more room). The same card, the close button or Escape folds it back into the card.
+ * With motion stopped it opens and closes at once. Focus moves into the screen and back to the card. */
+export function useCardScreen<Part extends string>(enabled: boolean) {
+  const stack = useRef<HTMLDivElement>(null);
+  const runs = useRef(0);
+  const [state, setState] = useState<CardState<Part> | null>(null);
+  const still = !enabled || matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // The card is inert while its screen is on, so it takes focus back only once the screen is gone.
+  const giveBack = (from: HTMLElement) => window.setTimeout(() => from.focus({ preventScroll: true }), 0);
+  const close = () => {
+    if (!state || state.off) return;
+    if (still) { setState(null); giveBack(state.from); }
+    else setState({ ...state, off: true });
+  };
+  const toggle = (part: Part, card: HTMLElement, from: HTMLElement) => {
+    if (state && state.part === part && !state.off) { close(); return; }
+    const box = stack.current?.getBoundingClientRect(), rect = card.getBoundingClientRect();
+    if (!box) return;
+    runs.current += 1;
+    setState({ part, off: false, run: runs.current, from, rect: { top: rect.top - box.top, left: rect.left - box.left, width: rect.width, height: rect.height } });
+  };
+  const ended = (event: AnimationEvent<HTMLElement>) => {
+    if (state?.off && event.target === event.currentTarget && event.animationName === 'tube-collapse') { setState(null); giveBack(state.from); }
+  };
+  useEffect(() => {
+    if (!state || state.off) return;
+    const key = (event: KeyboardEvent) => { if (event.key === 'Escape') close(); };
+    document.addEventListener('keydown', key);
+    return () => document.removeEventListener('keydown', key);
+  });
+  return { stack, state, still, open: Boolean(state && !state.off), toggle, close, ended };
+}
+
+/** The screen itself: it flashes where the card was, folds into a bright line across the illustration and opens into the
+ * picture (see `tube-expand`); closing runs it back into the card and out (`tube-collapse`). */
+export function CardScreen({ id, state, still, label, content, onClose, onEnded }: { id: string; state: { off: boolean; run: number; rect: Rect }; still: boolean;
+  label: string; content: TubeContent; onClose: () => void; onEnded: (event: AnimationEvent<HTMLElement>) => void }) {
+  const closer = useRef<HTMLButtonElement>(null);
+  const screen = useRef<HTMLElement>(null);
+  useEffect(() => {
+    closer.current?.focus({ preventScroll: true });
+    // On a phone the open screen can reach below the fold: bring it into view once it is open.
+    const timer = window.setTimeout(() => screen.current?.scrollIntoView({ block: 'nearest', behavior: still ? 'auto' : 'smooth' }), still ? 0 : 760);
+    return () => window.clearTimeout(timer);
+  }, [state.run, still]);
+  const { rect } = state;
+  return <section ref={screen} id={id} className="stage-screen tube-card" data-off={state.off} aria-label={`${label}: ${content.title}`} onAnimationEnd={onEnded}
+    style={{ '--t': `${rect.top}px`, '--l': `${rect.left}px`, '--w': `${rect.width}px`, '--h': `${rect.height}px` } as CSSProperties}>
+    <span className="tube-flash" aria-hidden="true" />
+    <TubePanel label={label} content={content} onClose={onClose} closer={closer} />
+  </section>;
 }

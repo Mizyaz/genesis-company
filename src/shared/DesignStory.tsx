@@ -1,20 +1,20 @@
-import { useEffect, useId, useState, type CSSProperties, type MouseEvent, type ReactNode } from 'react';
+import { useEffect, useId, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from 'react';
 import { useVisibleMotion } from './MotionSettings';
 import { Icon } from './ui';
+import { coil, ground, verticalCoil } from './symbols';
+import { CardScreen, useCardScreen, type Offer, type TubeContent } from './StageScreens';
 import { band, chart, curvePath, designs, failingPath, limitDb, timeline, x, y, type Frame } from './designStory';
 import '../styles/design-story.css';
 
+type Screen = { image: string; software: Offer[] };
 export type StoryContent = {
-  caption: string; note: string;
-  designer: { title: string; spec: { label: string; value: string }[] };
-  engine: { iteration: string; best: string };
-  tools: { title: string; chips: string[]; running: string; below: string; met: string };
+  caption: string; note: string; label: string;
+  designer: Screen & { title: string; spec: { label: string; value: string }[] };
+  engine: Screen & { iteration: string; best: string; title: string };
+  tools: Screen & { title: string; chips: string[]; running: string; below: string; met: string };
   steps: { title: string; detail: string }[];
-  actions: { designer: string; engine: string; tools: string };
 };
 const final = timeline.length - 1;
-/** The frame where a design (-1 before the first) is at a step. */
-const frameAt = (design: number, step: number) => timeline.findIndex(frame => frame.design === design && frame.step === step);
 
 /** A designer at the workstation, seen from behind: the person who sets the target and decides. */
 function DesignerArt() {
@@ -30,13 +30,6 @@ function DesignerArt() {
     </g>
   </svg>;
 }
-
-// Schematic symbols shared by the design loop and the story scene: coils and ground in SVG path syntax.
-export const coil = (x: number, y: number, turns: number, span: number) =>
-  `M${x} ${y}` + `c0-7 ${span / turns} -7 ${span / turns} 0`.repeat(turns);
-export const verticalCoil = (x: number, y: number, turns: number, span: number) =>
-  `M${x} ${y}` + `c7 0 7 ${span / turns} 0 ${span / turns}`.repeat(turns);
-export const ground = (x: number, y: number) => `M${x - 6} ${y}h12M${x - 3.5} ${y + 3}h7M${x - 1} ${y + 6}h2`;
 
 /** The feel of a click on part of an illustration, shared with the story scene: the part dips and springs back, and a
  * ripple spreads from where it was touched (from its middle for keys). Nothing moves when motion is stopped or reduced. */
@@ -75,16 +68,15 @@ function CircuitArt({ design }: { design: number }) {
   </svg>;
 }
 
-/** Gain target and every simulated response so far; the newest curve is judged against the target.
- * A design simulated again on request draws its curve again (`rerun`). */
-function Response({ frame, rerun }: { frame: Frame; rerun: { design: number; run: number } }) {
+/** Gain target and every simulated response so far; the newest curve is judged against the target. */
+function Response({ frame }: { frame: Frame }) {
   const left = x(band.start), right = x(band.end), limit = y(limitDb);
   const hatch = `story-hatch-${useId().replace(/:/g, '')}`;
   return <svg className="story-art story-chart" viewBox="0 0 220 120" aria-hidden="true">
     <defs><pattern id={hatch} width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><path d="M0 0V6" /></pattern></defs>
     <g className="story-mask"><rect x={left} y={limit} width={right - left} height={chart.bottom - limit} fill={`url(#${hatch})`} /><path d={`M${left} ${limit}H${right}`} /></g>
     <path className="story-axis" d={`M${chart.left} ${chart.top - 4}V${chart.bottom}H${chart.right + 4}`} />
-    {designs.slice(0, frame.drawn).map((_, i) => <path key={`${i}.${rerun.design === i ? rerun.run : 0}`} d={curvePath(i)} pathLength="1"
+    {designs.slice(0, frame.drawn).map((_, i) => <path key={i} d={curvePath(i)} pathLength="1"
       className={`story-curve ${i < frame.drawn - 1 ? 'is-earlier' : frame.met ? 'is-met' : 'is-current'}`} />)}
     {frame.judged && !frame.met && <path className="story-fail" d={failingPath(frame.design)} />}
   </svg>;
@@ -116,70 +108,76 @@ function Steps({ frame, count, attempt, run }: { frame: Frame; count: number; at
 
 type Station = 'designer' | 'engine' | 'tools';
 
-/** Designer, GENESIS and CAD tools in one loop, told in five steps. Motion pauses offscreen and when stopped.
- * Every station is also a button that does its part now: the team sets the target again, GENESIS prepares the next
- * design, the tools simulate the current one; the loop carries on from there. With motion stopped, a click shows the
- * result of that part, still. */
+/** Designer, GENESIS and CAD tools in one loop, told in five steps. Motion pauses offscreen, when stopped and while a
+ * screen is open. Every station is a button: pressed, it lights up, folds into a bright line across the loop and opens
+ * into a tube screen with what GENESIS offers there; the same station, the close button or Escape folds it back. */
 export function DesignStory({ content, brand }: { content: StoryContent; brand: ReactNode }) {
   const { ref, enabled, running } = useVisibleMotion<HTMLElement>();
   const [index, setIndex] = useState(0);
   const [cycle, setCycle] = useState(0);
-  const [clicks, setClicks] = useState(0);
-  const [rerun, setRerun] = useState({ design: -1, run: 0 });
-  const [touched, setTouched] = useState(false);
   const { press, wave } = usePress<Station>(enabled);
+  const screen = useCardScreen<Station>(enabled);
+  const scene = useRef<HTMLDivElement>(null);
+  const id = useId();
+  const playing = running && !screen.state;
   useEffect(() => {
-    if (!running) return;
+    if (!playing) return;
     const timer = window.setTimeout(() => {
       if (index === final) setCycle(value => value + 1);
       setIndex(index === final ? 0 : index + 1);
     }, timeline[index].ms);
     return () => window.clearTimeout(timer);
-  }, [index, running, clicks]);
-  const frame = enabled || touched ? timeline[index] : timeline[final];
-  const play = (station: Station) => (event: MouseEvent<HTMLButtonElement>) => {
-    press(station, event, event.currentTarget.parentElement ?? undefined);
-    const design = Math.max(frame.design, 0);
-    if (station === 'designer') { setCycle(value => value + 1); setIndex(0); }
-    else if (station === 'engine') setIndex(frameAt((frame.design + 1) % designs.length, 2));
-    else { setRerun(value => ({ design, run: value.run + 1 })); setIndex(frameAt(design, enabled ? 3 : 4)); }
-    setTouched(true); setClicks(value => value + 1);
+  }, [index, playing]);
+  // The loop under an open screen is out of reach, for the keyboard too.
+  useEffect(() => { if (scene.current) scene.current.inert = screen.open; }, [screen.open]);
+  const frame = enabled ? timeline[index] : timeline[final];
+  const screens: Record<Station, TubeContent> = {
+    designer: { title: content.designer.title, image: content.designer.image, software: content.designer.software },
+    engine: { title: content.engine.title, image: content.engine.image, software: content.engine.software },
+    tools: { title: content.tools.title, image: content.tools.image, software: content.tools.software },
   };
+  const station = (name: Station) => <button type="button" className="story-press" aria-label={screens[name].title}
+    aria-expanded={screen.open && screen.state?.part === name} aria-controls={screen.state?.part === name ? `${id}-screen` : undefined}
+    onClick={event => { const card = event.currentTarget.parentElement ?? event.currentTarget; press(name, event, card); screen.toggle(name, card, event.currentTarget); }} />;
   const engine = frame.design < 0 ? '' : frame.met ? content.engine.best : `${content.engine.iteration} ${frame.design + 1}`;
   const tools = frame.met ? content.tools.met : frame.judged ? content.tools.below : frame.step === 3 ? content.tools.running : '';
   return <figure ref={ref} className="design-story" aria-label={content.caption}
     data-motion={enabled ? 'on' : 'off'} data-step={frame.step} data-met={Boolean(frame.met)}>
-    <div className="story-scene">
-      <div className="story-card story-designer" data-active={frame.step === 1 || frame.step === 5}>
-        <button type="button" className="story-press" aria-label={content.actions.designer} onClick={play('designer')} />
-        {wave('designer')}
-        <span className="story-card-title"><Icon name="users" />{content.designer.title}</span>
-        <DesignerArt />
-        <dl className="story-spec" key={cycle}>{content.designer.spec.map((row, i) => <div key={row.label} style={{ '--row': i } as CSSProperties}>
-          <dt>{row.label}</dt><dd>{row.value}</dd><span className="story-check"><Icon name="check" /></span>
-        </div>)}</dl>
+    <div ref={screen.stack} className="tube-stack">
+      <div ref={scene} className="story-scene">
+        <div className="story-card story-designer" data-active={frame.step === 1 || frame.step === 5}>
+          {station('designer')}
+          {wave('designer')}
+          <span className="story-card-title"><Icon name="users" />{content.designer.title}</span>
+          <DesignerArt />
+          <dl className="story-spec" key={cycle}>{content.designer.spec.map((row, i) => <div key={row.label} style={{ '--row': i } as CSSProperties}>
+            <dt>{row.label}</dt><dd>{row.value}</dd><span className="story-check"><Icon name="check" /></span>
+          </div>)}</dl>
+        </div>
+        <Link between="team" forward={frame.flow === 'target'} back={frame.flow === 'review'} />
+        <div className="story-card story-engine" data-active={frame.step === 2 || frame.step === 4}>
+          {station('engine')}
+          {wave('engine')}
+          <span className="story-card-title">{brand}</span>
+          <CircuitArt design={frame.design} />
+          <span className="story-card-status">{engine}</span>
+        </div>
+        <Link between="tools" forward={frame.flow === 'jobs'} back={frame.flow === 'results'} />
+        <div className="story-card story-tools" data-active={frame.step === 3}>
+          {station('tools')}
+          {wave('tools')}
+          <span className="story-card-title"><Icon name="layers" />{content.tools.title}</span>
+          <span className="story-chips">{content.tools.chips.map((chip, i) =>
+            <span key={chip} data-on={i < 2 ? frame.step === 3 : Boolean(frame.met)}>{chip}</span>)}</span>
+          <Response key={cycle} frame={frame} />
+          <span className="story-card-status">{tools}</span>
+        </div>
       </div>
-      <Link key={`target-${clicks}`} between="team" forward={frame.flow === 'target'} back={frame.flow === 'review'} />
-      <div className="story-card story-engine" data-active={frame.step === 2 || frame.step === 4}>
-        <button type="button" className="story-press" aria-label={content.actions.engine} onClick={play('engine')} />
-        {wave('engine')}
-        <span className="story-card-title">{brand}</span>
-        <CircuitArt design={frame.design} />
-        <span className="story-card-status">{engine}</span>
-      </div>
-      <Link key={`jobs-${clicks}`} between="tools" forward={frame.flow === 'jobs'} back={frame.flow === 'results'} />
-      <div className="story-card story-tools" data-active={frame.step === 3}>
-        <button type="button" className="story-press" aria-label={content.actions.tools} onClick={play('tools')} />
-        {wave('tools')}
-        <span className="story-card-title"><Icon name="layers" />{content.tools.title}</span>
-        <span className="story-chips">{content.tools.chips.map((chip, i) =>
-          <span key={chip} data-on={i < 2 ? frame.step === 3 : Boolean(frame.met)}>{chip}</span>)}</span>
-        <Response key={cycle} frame={frame} rerun={rerun} />
-        <span className="story-card-status">{tools}</span>
-      </div>
+      {screen.state && <CardScreen key={screen.state.run} id={`${id}-screen`} state={screen.state} still={screen.still} label={content.label}
+        content={screens[screen.state.part]} onClose={screen.close} onEnded={screen.ended} />}
     </div>
     <figcaption className="story-now">
-      <Steps frame={frame} count={content.steps.length} attempt={`${content.engine.iteration} ${frame.design + 1}`} run={`${cycle}.${index}.${clicks}`} />
+      <Steps frame={frame} count={content.steps.length} attempt={`${content.engine.iteration} ${frame.design + 1}`} run={`${cycle}.${index}`} />
       <span className="story-now-step" aria-hidden="true">{content.steps[frame.step - 1].title}</span>
       <span className="story-now-note">{content.note}</span>
     </figcaption>

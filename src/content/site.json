@@ -388,6 +388,24 @@
       "caption": "Your design team, GENESIS and your CAD tools in one design loop.",
       "designer": {
         "title": "Your design team",
+        "image": "specification",
+        "software": [
+          {
+            "icon": "check",
+            "title": "Targets as goals",
+            "detail": "Band, gain, noise figure and matching become the goals every run is checked against."
+          },
+          {
+            "icon": "spark",
+            "title": "Design assistant",
+            "detail": "Describe the circuit in your own words; the assistant sets up the right tool."
+          },
+          {
+            "icon": "server",
+            "title": "On your own server",
+            "detail": "GENESIS runs next to your Cadence tools, on your own server."
+          }
+        ],
         "spec": [
           {
             "label": "Band",
@@ -409,10 +427,47 @@
       },
       "engine": {
         "iteration": "Iteration",
-        "best": "Best design"
+        "best": "Best design",
+        "title": "GENESIS prepares the design",
+        "image": "synthesis",
+        "software": [
+          {
+            "icon": "chip",
+            "title": "Sizing and matching",
+            "detail": "It sizes the devices and synthesizes the matching networks for your topology."
+          },
+          {
+            "icon": "grid",
+            "title": "Passive synthesis",
+            "detail": "Pixel layouts for baluns, dividers, couplers, filters and other N-port structures."
+          },
+          {
+            "icon": "sliders",
+            "title": "Search strategies",
+            "detail": "Evolutionary, Bayesian and reinforcement-learning search."
+          }
+        ]
       },
       "tools": {
         "title": "Your CAD tools",
+        "image": "em",
+        "software": [
+          {
+            "icon": "chip",
+            "title": "Active circuits",
+            "detail": "Your Cadence schematics, with Spectre S-parameter, noise, harmonic-balance and stability analyses."
+          },
+          {
+            "icon": "wave",
+            "title": "Your EM solver",
+            "detail": "Every passive layout is checked with the EM solver you already use."
+          },
+          {
+            "icon": "layers",
+            "title": "Parallel simulations",
+            "detail": "Candidates are simulated side by side, not one after another."
+          }
+        ],
         "chips": [
           "Circuit",
           "EM",
@@ -445,23 +500,76 @@
         }
       ],
       "note": "Illustration of the loop, not measured data.",
-      "actions": {
-        "designer": "Set the target again",
-        "engine": "Prepare the next design",
-        "tools": "Simulate this design"
-      }
+      "label": "In GENESIS"
     },
     "scene": {
       "caption": "Domain expertise meets autonomous intelligence.",
+      "label": "In GENESIS",
       "expertise": {
         "title": "RFIC expertise",
-        "detail": "Circuit design, EM knowledge, silicon processes and real-world constraints."
+        "detail": "Circuit design, EM knowledge, silicon processes and real-world constraints.",
+        "image": "synthesis",
+        "software": [
+          {
+            "icon": "check",
+            "title": "Targets as goals",
+            "detail": "Band, gain, noise figure and matching become the goals every run is checked against."
+          },
+          {
+            "icon": "chip",
+            "title": "Active circuits",
+            "detail": "Your Cadence schematics, with Spectre S-parameter, noise, harmonic-balance and stability analyses."
+          },
+          {
+            "icon": "wave",
+            "title": "Your EM solver",
+            "detail": "Every passive layout is checked with the EM solver you already use."
+          }
+        ]
       },
       "agents": {
         "title": "AI agents",
-        "detail": "Reasoning, planning, optimization and learning."
+        "detail": "Reasoning, planning, optimization and learning.",
+        "image": "optimization",
+        "software": [
+          {
+            "icon": "spark",
+            "title": "Design assistant",
+            "detail": "Describe the circuit in your own words; the assistant sets up the right tool."
+          },
+          {
+            "icon": "sliders",
+            "title": "Search strategies",
+            "detail": "Evolutionary, Bayesian and reinforcement-learning search."
+          },
+          {
+            "icon": "signal",
+            "title": "Pareto trade-offs",
+            "detail": "See what each target costs the others and choose the balance you want."
+          }
+        ]
       },
-      "outcome": "Autonomous RFIC design engine"
+      "outcome": "Autonomous RFIC design engine",
+      "result": {
+        "image": "layout",
+        "software": [
+          {
+            "icon": "switch",
+            "title": "Composer",
+            "detail": "Active stages and passive structures together on one canvas."
+          },
+          {
+            "icon": "grid",
+            "title": "GDS export",
+            "detail": "The chosen layouts leave GENESIS as GDS files."
+          },
+          {
+            "icon": "document",
+            "title": "Every run kept",
+            "detail": "Settings, responses and GDS files stay with each run."
+          }
+        ]
+      }
     }
   },
   "workflow": {

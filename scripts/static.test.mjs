@@ -123,7 +123,7 @@ test('the lead diagram is an animated scene: a designer, AI agents and GENESIS m
   assert.ok(sceneAt > explore.indexOf('<section className="company-hero"') && sceneAt < explore.indexOf('<Membership '), 'scene in the hero');
   assert.match(read('src/pages/Welcome.tsx'), /<StoryScene content=\{site.story.scene\} brand=\{<Brand \/>\} \/>/);
   // More telling without more text: the designer's pen, the agent that checks each candidate, and the chip GENESIS hands back.
-  for (const part of ['className="scene-pen"', 'className="scene-agent"', '<OutputArt key={runs.outcome} on={phase === final} burst={burst} />', 'className="scene-die-check"']) assert.ok(scene.includes(part), part);
+  for (const part of ['className="scene-pen"', 'className="scene-agent"', '<OutputArt on={phase === final} />', 'className="scene-die-check"']) assert.ok(scene.includes(part), part);
   assert.equal(existsSync(resolve(root, 'src/shared/DesignPillars.tsx')), false);
   assert.match(scene, /className="art-person"/); // The designer is a person at the workstation.
   assert.match(scene, /coil\(/); // Circuits are drawn with schematic symbols.
@@ -137,35 +137,69 @@ test('the lead diagram is an animated scene: a designer, AI agents and GENESIS m
   assert.match(read('src/styles/site.css'), /\.company-hero-inner \{ display: grid; grid-template-columns: minmax\(0, 1fr\) minmax\(0, 1fr\)/); // Wide text never widens the page.
 });
 
-test('both illustrations answer a click: the part dips, a ripple spreads and it does its own work, and the loop carries on', () => {
-  const scene = read('src/shared/StoryScene.tsx'), loop = read('src/shared/DesignStory.tsx');
+test('every card of both illustrations grows into a tube screen with what GENESIS offers there; the story waits under it', () => {
+  const scene = read('src/shared/StoryScene.tsx'), loop = read('src/shared/DesignStory.tsx'), screens = read('src/shared/StageScreens.tsx');
   const { story } = JSON.parse(read('src/content/site.json'));
   const dictionary = JSON.parse(read('src/content/tr.json'));
-  // The story scene: every part is a real button that plays its own moment again.
-  for (const part of ['expertise', 'agents', 'outcome']) assert.match(scene, new RegExp(`<button type="button" className="scene-[^"]*scene-part"[^\\n]*onClick=\\{play\\('${part}'\\)\\}>`), part);
-  assert.match(scene, /const moment: Record<Part, number> = \{ expertise: 1, agents: 3, outcome: final \}/);
-  for (const drawing of ['<ExpertiseArt key={runs.expertise}', '<AgentsArt key={runs.agents}', '<OutputArt key={runs.outcome}']) assert.ok(scene.includes(drawing), drawing);
-  assert.match(scene, /className="scene-sparks"/); // GENESIS stamps the chip with sparks when asked.
+  // The story scene: every part is a real button that opens its own screen.
+  for (const part of ['expertise', 'agents', 'outcome']) assert.match(scene, new RegExp(`<button type="button" className="scene-[^"]*scene-part"[^\\n]*\\{\\.\\.\\.opens\\('${part}'\\)\\}>`), part);
+  assert.match(scene, /screen\.toggle\(part, event\.currentTarget, event\.currentTarget\)/);
   assert.match(scene, /aria-describedby=\{`\$\{id\}-expertise`\}/); // The detail stays for screen readers, as the button's description.
-  // The design loop: each station is a button stretched over its card, named for what it does.
-  for (const station of ['designer', 'engine', 'tools']) assert.match(loop, new RegExp(`<button type="button" className="story-press" aria-label=\\{content\\.actions\\.${station}\\} onClick=\\{play\\('${station}'\\)\\} />`), station);
-  for (const label of Object.values(story.loop.actions)) assert.ok(dictionary[label], label);
-  assert.match(loop, /frameAt\(\(frame\.design \+ 1\) % designs\.length, 2\)/); // GENESIS prepares the next design.
-  assert.match(loop, /frameAt\(design, enabled \? 3 : 4\)/); // The tools simulate now; stopped, the result shows still.
+  assert.doesNotMatch(scene + read('src/styles/story-scene.css'), /scene-spark|burst/);
+  // The design loop: each station is a button stretched over its card, named for its card; the whole card grows.
+  assert.match(loop, /<button type="button" className="story-press" aria-label=\{screens\[name\]\.title\}\n    aria-expanded=\{screen\.open && screen\.state\?\.part === name\}/);
+  assert.match(loop, /press\(name, event, card\); screen\.toggle\(name, card, event\.currentTarget\);/);
+  for (const station of ['designer', 'engine', 'tools']) assert.ok(loop.includes(`{station('${station}')}`), station);
+  assert.equal(story.loop.actions, undefined);
+  assert.doesNotMatch(loop, /content\.actions|frameAt|rerun/);
+  // Both: the screen shares the illustration's grid cell; the story pauses under it and is out of reach, for keys too.
+  for (const [name, code, part] of [['scene', scene, 'Part'], ['loop', loop, 'Station']]) {
+    assert.ok(code.includes(`const screen = useCardScreen<${part}>(enabled);`), name);
+    assert.ok(code.includes('const playing = running && !screen.state;'), name);
+    assert.match(code, /\.inert = screen\.open; \}, \[screen\.open\]\);/, name);
+    assert.match(code, /<div ref=\{screen\.stack\} className="tube-stack">/, name);
+    assert.ok(code.includes('<CardScreen key={screen.state.run} id={`${id}-screen`} state={screen.state} still={screen.still} label={content.label}'), name);
+    assert.match(code, /aria-controls/, name);
+  }
+  // What each card opens: one of the stage pictures and three offers the site already makes, all in Turkish too.
+  const parts = [story.scene.expertise, story.scene.agents, story.scene.result, story.loop.designer, story.loop.engine, story.loop.tools];
+  for (const part of parts) {
+    assert.match(screens, new RegExp(`\\b${part.image}: \\w+`), part.image);
+    assert.equal(part.software.length, 3, part.image);
+    for (const offer of part.software) {
+      assert.ok(offer.icon && offer.title && offer.detail, part.image);
+      for (const copy of [offer.title, offer.detail]) assert.ok(dictionary[copy], copy);
+    }
+  }
+  for (const copy of [story.scene.label, story.loop.label, story.loop.engine.title]) assert.ok(dictionary[copy], copy);
+  assert.doesNotMatch(JSON.stringify(parts), /\d+\s*%|\d+x\b|guarante|unlimited|faster|instant/i);
+  // Like a tube powering on: a flash on the card, a bright line across the illustration, then the screen; back into the card.
+  const tube = read('src/styles/tube-screen.css');
+  assert.match(tube, /\.tube-stack > \* \{ grid-area: 1 \/ 1;/);
+  assert.match(tube, /@keyframes tube-expand \{\n  0% \{ clip-path: inset\(var\(--t\) calc\(100% - var\(--l\) - var\(--w\)\) calc\(100% - var\(--t\) - var\(--h\)\) var\(--l\)/);
+  assert.match(tube, /@keyframes tube-collapse/);
+  assert.match(tube, /\.tube-flash \{/);
+  // It is removed once folded; with motion stopped it opens and closes at once. Focus goes into the screen and back to the card.
+  assert.match(screens, /event\.animationName === 'tube-collapse'/);
+  assert.match(screens, /if \(still\) \{ setState\(null\); giveBack\(state\.from\); \}/);
+  assert.match(screens, /event\.key === 'Escape'/);
+  assert.match(screens, /closer\.current\?\.focus\(\{ preventScroll: true \}\)/);
+  assert.match(screens, /from\.focus\(\{ preventScroll: true \}\)/);
   // Buttons stay mounted, so keyboard focus survives the loop; only the drawings start again.
   assert.doesNotMatch(scene, /className="scene-stage" key=/);
   assert.doesNotMatch(loop, /className="story-scene" key=/);
-  // One shared feel: a dip sized to the part and a ripple from the touch (the middle for keys), never with motion stopped or reduced.
+  // One shared press: a dip sized to the part and a ripple from the touch (the middle for keys), never with motion stopped or reduced.
   assert.match(loop, /export function usePress/);
   assert.match(scene, /usePress<Part>\(enabled\)/);
   assert.match(loop, /if \(!enabled \|\| matchMedia\('\(prefers-reduced-motion: reduce\)'\)\.matches\) return;/);
   assert.match(loop, /event\.detail === 0/);
-  assert.doesNotMatch(scene + loop, /vibrate|fetch\s*\(|setInterval/);
+  assert.doesNotMatch(scene + loop + screens, /vibrate|fetch\s*\(|setInterval/);
   const sceneCss = read('src/styles/story-scene.css'), loopCss = read('src/styles/design-story.css');
   for (const css of [sceneCss, loopCss]) {
     assert.match(css, /touch-action: manipulation/);
     assert.match(css, /@media \(hover: hover\)/);
     assert.match(css, /:focus-visible \{ outline: 2px solid var\(--cyan\)/);
+    assert.match(css, /\[data-motion="off"\] \*, /); // A stopped illustration opens its screen finished, screen included.
   }
   assert.match(loopCss, /\.press-ripple \{ position: absolute; z-index: 1; inset: 0; overflow: hidden;/);
   // Replays start from the first frame: drawing is an animation on the part, not a transition that needs the previous state.
@@ -228,7 +262,8 @@ test('every platform stage opens a tube screen with what GENESIS offers there, a
   const component = read('src/shared/Workflow.tsx');
   assert.match(component, /<h3><button type="button" className="workflow-open" aria-expanded=\{open === index && !off\} aria-controls=\{open === index \? panel : undefined\}/);
   assert.match(component, /event\.key === 'Escape'/);
-  assert.match(component, /aria-label=\{t\("Close"\)\}/);
+  assert.match(component, /<TubePanel label=\{label\} content=\{\{ title: stage\.title, image: stage\.id, software: stage\.software \}\} onClose=\{close\} \/>/);
+  assert.match(screens, /aria-label=\{t\("Close"\)\}/); // One screen for every card on the site (see the illustrations).
   assert.match(component, /event\.animationName === 'stage-screen-off'/); // It goes back into the tube before it is removed.
   assert.match(component, /if \(still\) setOpen\(null\)/); // With motion stopped it simply closes.
   assert.match(read('src/pages/Explore.tsx'), /<Workflow stages=\{site\.stages\} label=\{site\.workflow\.softwareLabel\} \/>/);
@@ -238,7 +273,12 @@ test('every platform stage opens a tube screen with what GENESIS offers there, a
   assert.match(css, /@keyframes stage-screen-on \{ 0% \{ opacity: 0; transform: scale\(\.02, \.012\);[^}]*\} 6% \{ opacity: 1; \} 32% \{ transform: scale\(1, \.012\);/);
   assert.match(css, /@keyframes stage-screen-off/);
   assert.match(css, /@keyframes stage-tube-grow/);
-  assert.match(css, /repeating-linear-gradient\(to bottom/);
+  const tube = read('src/styles/tube-screen.css');
+  assert.match(tube, /repeating-linear-gradient\(to bottom/);
+  // The screen arranges itself by its own width: one column when narrow, the offers side by side when wide.
+  assert.match(tube, /container-type: inline-size;/);
+  assert.match(tube, /@container \(max-width: 560px\)/);
+  assert.match(tube, /@container \(min-width: 880px\)/);
   assert.match(css, /\.workflow-detail\[data-motion="off"\] \*/);
   assert.match(css, /prefers-reduced-motion: reduce/);
   assert.match(css, /\.workflow-detail \{ position: relative; display: grid; grid-template-rows: 0fr;/);
