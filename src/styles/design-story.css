@@ -1,8 +1,19 @@
 /* Designer, GENESIS and CAD tools in one loop: target -> design -> simulation -> compare -> decision. */
 .design-story { min-width: 0; max-width: 720px; margin: 28px auto 0; container-type: inline-size; text-align: left; }
 .story-scene { --link: clamp(16px, 6cqw, 48px); display: grid; grid-template-columns: minmax(0, 1fr) var(--link) minmax(0, 1fr) var(--link) minmax(0, 1fr); }
-.story-card { position: relative; display: flex; flex-direction: column; gap: 10px; min-width: 0; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius); background: color-mix(in srgb, var(--surface) 90%, transparent); transition: border-color .45s, box-shadow .45s; }
+.story-card { position: relative; display: flex; flex-direction: column; gap: 10px; min-width: 0; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius); background: color-mix(in srgb, var(--surface) 90%, transparent); transition: border-color .45s, box-shadow .45s, translate .25s ease, scale .12s ease-out; }
 .story-card[data-active="true"] { border-color: color-mix(in srgb, var(--cyan) 75%, var(--border)); box-shadow: 0 0 0 1px color-mix(in srgb, var(--cyan) 22%, transparent), 0 12px 32px color-mix(in srgb, var(--cyan) 10%, transparent); }
+/* Every station is a button stretched over its card: it lifts under the pointer, dips when pressed and does its part now. */
+.story-press { position: absolute; z-index: 2; inset: 0; width: 100%; margin: 0; padding: 0; border: 0; border-radius: inherit; background: transparent; cursor: pointer; touch-action: manipulation; }
+.story-press:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
+.story-card:active { scale: .975; }
+@media (hover: hover) {
+  .story-card:hover { translate: 0 -2px; }
+  .story-card:not([data-active="true"]):hover { border-color: color-mix(in srgb, var(--cyan) 40%, var(--border)); }
+}
+/* A click on part of an illustration (this loop and the story scene): a soft ripple from where it was touched. */
+.press-ripple { position: absolute; z-index: 1; inset: 0; overflow: hidden; border-radius: inherit; pointer-events: none; }
+.press-ripple > span { position: absolute; border-radius: 50%; background: radial-gradient(closest-side, color-mix(in srgb, var(--ripple, var(--cyan)) 42%, transparent), color-mix(in srgb, var(--ripple, var(--cyan)) 16%, transparent) 65%, transparent); transform: translate(-50%, -50%) scale(.05); animation: press-ripple .6s cubic-bezier(.2, .7, .3, 1) both; }
 .story-card-title { display: flex; align-items: center; gap: 7px; min-width: 0; font-size: .78rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .story-card-title > .icon { flex: none; width: 16px; height: 16px; color: var(--cyan); }
 .story-card-title .brand { font-size: .78rem; gap: 5px; }
@@ -37,6 +48,8 @@
 .story-check .icon { width: 10px; height: 10px; stroke-width: 2.5; color: var(--page); opacity: 0; transition: opacity .3s; }
 .design-story[data-met="true"] .story-check { border-color: var(--cyan); background: var(--cyan); }
 .design-story[data-met="true"] .story-check .icon { opacity: 1; }
+/* The target is met: the lines of the sheet are ticked one after another. */
+.design-story[data-met="true"] .story-check { animation: story-tick .45s cubic-bezier(.3, 1.6, .5, 1) calc(var(--row, 0) * 110ms) both; }
 
 /* CAD tools: which engines run now, then the gain response against the target (hatched = too low). */
 .story-chips { display: flex; flex-wrap: wrap; gap: 5px; }
@@ -72,6 +85,8 @@
 .story-now-note { flex-basis: 100%; text-align: center; font-size: .68rem; color: var(--subtle); }
 
 @keyframes story-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes story-tick { from { transform: scale(.3); } to { transform: none; } }
+@keyframes press-ripple { 0% { transform: translate(-50%, -50%) scale(.05); opacity: 1; } 60% { opacity: .75; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 0; } }
 @keyframes story-sized { 0% { stroke-width: 1.8; filter: none; } 30% { stroke-width: 2.8; filter: drop-shadow(0 0 4px var(--cyan)); } 100% { stroke-width: 1.8; filter: none; } }
 @keyframes story-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes story-travel { 0% { left: 0; opacity: 0; } 15%, 85% { opacity: 1; } 100% { left: 100%; opacity: 0; } }
