@@ -1,5 +1,5 @@
 import { useLanguage } from './Language';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Icon } from './ui';
 import { publicationUrl, type Publication } from './citations';
 import { PublicationActions } from './PublicationActions';
@@ -7,7 +7,7 @@ import '../styles/publications.css';
 
 type Researcher = { id: string; name: string; scholar: string };
 /** Reusable library and reading pane. Static inputs, no router or service dependency. */
-export function Publications({ people, papers }: { people: Researcher[]; papers: Publication[] }) {
+export function Publications({ people, papers, focus }: { people: Researcher[]; papers: Publication[]; focus?: { id: string; at: number } | null }) {
   const { t } = useLanguage();
   const [person, setPerson] = useState('all');
   const [query, setQuery] = useState('');
@@ -23,6 +23,15 @@ export function Publications({ people, papers }: { people: Researcher[]; papers:
   const selected = matching.find(paper => paper.id === selectedId) ?? matching[0];
   const filtered = person !== 'all' || kind !== 'all' || year !== 'all' || query !== '';
   const reset = () => { setPerson('all'); setKind('all'); setYear('all'); setQuery(''); };
+  // A paper chosen elsewhere on the page (the signal flight): clear the filters, open it and bring the reader into view.
+  useEffect(() => {
+    if (!focus) return;
+    reset(); setSelectedId(focus.id);
+    window.requestAnimationFrame(() => window.requestAnimationFrame(() => {
+      reader.current?.focus({ preventScroll: true });
+      reader.current?.scrollIntoView({ block: 'start', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+    }));
+  }, [focus]); // eslint-disable-line react-hooks/exhaustive-deps -- runs once per request
   const selectPaper = (id: string) => {
     setSelectedId(id);
     if (window.matchMedia('(max-width: 800px)').matches) window.requestAnimationFrame(() => {
