@@ -148,9 +148,13 @@ img { display: block; max-width: 100%; }
 .portfolio-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
 .portfolio-card { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); overflow: hidden; transition: border-color .2s, transform .2s; }
 .portfolio-card:hover { transform: translateY(-5px); border-color: color-mix(in srgb, var(--cyan) 50%, var(--border)); }
-.portfolio-top { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; }
-.portfolio-top .eyebrow { font-family: var(--font-mono); letter-spacing: .045em; color: var(--cyan); font-size: .75rem; }
+.portfolio-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; padding: 20px 24px; }
+.portfolio-top .eyebrow { font-family: var(--font-mono); letter-spacing: .045em; color: var(--cyan); font-size: .75rem; white-space: nowrap; }
 .portfolio-top .icon { color: var(--subtle); width: 18px; height: 18px; }
+/* Designs that went to silicon name the foundry technology they were fabricated in. */
+.portfolio-top:has(.portfolio-silicon) { flex-direction: column; align-items: flex-start; }
+.portfolio-silicon { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px 4px 8px; border: 1px solid color-mix(in srgb, var(--cyan) 38%, var(--border)); border-radius: 999px; background: color-mix(in srgb, var(--cyan) 8%, transparent); color: var(--text); font: 600 .6875rem/1.2 var(--font-mono); letter-spacing: .02em; white-space: nowrap; }
+.portfolio-silicon .icon { width: 14px; height: 14px; color: var(--cyan); }
 .layout-image { position: relative; background: var(--surface); isolation: isolate; height: 244px; padding: 14px 20px; display: flex; align-items: center; justify-content: center; }
 .layout-media { width: 100%; height: 100%; overflow: hidden; object-fit: contain; filter: var(--layout-filter); mix-blend-mode: var(--layout-blend); }
 .layout-original { position: absolute; top: 8px; right: 12px; display: inline-flex; align-items: center; gap: 5px; padding: 5px 8px; border-radius: 5px; background: color-mix(in srgb, var(--surface) 88%, transparent); color: var(--muted); font-size: .6875rem; backdrop-filter: blur(8px); }

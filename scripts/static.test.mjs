@@ -327,6 +327,11 @@ test('Explore opens with the membership, then the portfolio; services stay data-
   assert.equal(content.story.paragraphs.length, 2);
   assert.match(read('src/pages/About.tsx'), /site.story.paragraphs.map/);
   assert.doesNotMatch(page, /hero-index|Reason\. Simulate\. Learn\. Refine\./);
+  // The designs went to silicon: each card names the foundry technology it was fabricated in (as the founders state it).
+  assert.deepEqual(content.portfolio.map(item => [item.id, item.foundry]), [['spdt', 'GlobalFoundries'], ['mixer', 'STMicroelectronics'], ['divider', 'STMicroelectronics']]);
+  assert.match(read('src/shared/PortfolioCard.tsx'), /\{item\.foundry \? <span className="portfolio-silicon"><Icon name="chip" \/>\{t\("Fabricated"\)\} · \{item\.foundry\}<\/span>/);
+  assert.match(read('src/shared/Language.tsx'), /'band', 'foundry'/); // Foundry names are not translated.
+  assert.equal(dictionary.Fabricated, 'Üretildi');
 });
 
 test('the membership offers a free demo and three tiers with their own symbols; questions are folded until opened', () => {

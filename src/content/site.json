@@ -127,6 +127,7 @@
       "title": "Wideband SPDT switch",
       "kind": "Series-shunt architecture",
       "band": "60–150 GHz",
+      "foundry": "GlobalFoundries",
       "images": [
         {
           "src": "/assets/spdt.png",
@@ -160,6 +161,7 @@
       "title": "D-band passive mixer",
       "kind": "Quadcore topology",
       "band": "120–160 GHz",
+      "foundry": "STMicroelectronics",
       "images": [
         {
           "src": "/assets/mixer.png",
@@ -178,6 +180,7 @@
       "title": "Broadband power divider",
       "kind": "Three-port · equal split",
       "band": "20–120 GHz",
+      "foundry": "STMicroelectronics",
       "images": [
         {
           "src": "/assets/divider.png",
