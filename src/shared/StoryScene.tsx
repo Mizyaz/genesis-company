@@ -1,12 +1,16 @@
-import { useEffect, useId, useState, type CSSProperties, type MouseEvent, type ReactNode } from 'react';
+import { useEffect, useId, useRef, useState, type CSSProperties, type MouseEvent, type ReactNode } from 'react';
 import { useVisibleMotion } from './MotionSettings';
-import { coil, ground, usePress } from './DesignStory';
+import { usePress } from './DesignStory';
+import { coil, ground } from './symbols';
+import { CardScreen, useCardScreen, type Offer, type TubeContent } from './StageScreens';
 import '../styles/story-scene.css';
 
+type ScenePart = { title: string; detail: string; image: string; software: Offer[] };
 export type SceneContent = {
-  caption: string; outcome: string;
-  expertise: { title: string; detail: string };
-  agents: { title: string; detail: string };
+  caption: string; outcome: string; label: string;
+  expertise: ScenePart;
+  agents: ScenePart;
+  result: { image: string; software: Offer[] };
 };
 
 // 0 blank screen, 1 the designer draws the circuit, 2 a signal runs through it, 3-5 the agents
@@ -19,14 +23,8 @@ const candidates = [
   { turns: 3, cap: 9, curve: (y: number) => `M106 ${y + 12}C114 ${y - 10} 128 ${y - 9} 156 ${y - 9}S198 ${y - 10} 210 ${y + 10}` },
   { turns: 4, cap: 11, curve: (y: number) => `M106 ${y + 12}C118 ${y - 9} 140 ${y - 8} 162 ${y - 7}S188 ${y + 4} 210 ${y + 12}` },
 ];
-/** Each part of the scene is a button that plays its own moment again, from the phase where it starts. */
+/** Each part of the scene is a button that opens what GENESIS offers for it, on a tube screen grown out of the part. */
 type Part = 'expertise' | 'agents' | 'outcome';
-const moment: Record<Part, number> = { expertise: 1, agents: 3, outcome: final };
-// Sparks around the check GENESIS stamps on the die, when a click asked for it.
-const sparks = Array.from({ length: 8 }, (_, i) => {
-  const angle = (i + .5) * Math.PI / 4, at = (r: number) => `${(104 + r * Math.cos(angle)).toFixed(1)} ${(8 + r * Math.sin(angle)).toFixed(1)}`;
-  return `M${at(11)}L${at(22)}`;
-});
 
 /** A designer at the workstation draws an amplifier stage; a signal runs through it once it is complete. */
 function ExpertiseArt({ drawn, drawing, signal }: { drawn: boolean; drawing: boolean; signal: boolean }) {
@@ -73,8 +71,8 @@ function AgentsArt({ phase }: { phase: number }) {
   </svg>;
 }
 
-/** What GENESIS hands back: a finished stage on a die, checked. When a click asked for it, the check lands with sparks. */
-function OutputArt({ on, burst }: { on: boolean; burst: boolean }) {
+/** What GENESIS hands back: a finished stage on a die, checked. */
+function OutputArt({ on }: { on: boolean }) {
   return <svg className="scene-output" data-on={on} viewBox="0 0 120 60" aria-hidden="true">
     <path className="scene-output-arrow" d="M4 30H40m-7-6 7 6-7 6" pathLength="1" />
     <g className="scene-die">
@@ -84,62 +82,64 @@ function OutputArt({ on, burst }: { on: boolean; burst: boolean }) {
       <rect className="scene-die-device" x="72" y="24" width="8" height="12" />
     </g>
     <g className="scene-die-check"><circle cx="104" cy="8" r="7" /><path d="M100.5 8l2.4 2.4 4.6-4.6" /></g>
-    {burst && on && <g className="scene-sparks"><circle cx="104" cy="8" r="8" />{sparks.map(d => <path key={d} d={d} pathLength="1" />)}</g>}
   </svg>;
 }
 
-/** Our story as one short scene: RFIC expertise and AI agents, joined in GENESIS. Motion pauses offscreen and when stopped.
- * Every part is a button that plays its own moment again and the scene carries on from there: the designer draws the
- * circuit, the agents check the candidates, GENESIS joins both and stamps the chip. With motion stopped, a click marks
- * the part in the finished scene. */
+/** Our story as one short scene: RFIC expertise and AI agents, joined in GENESIS. Motion pauses offscreen and when stopped,
+ * and while a screen is open. Every part is a button: pressed, it lights up, folds into a bright line across the scene
+ * and opens into a tube screen with what GENESIS offers there; the same part, the close button or Escape folds it back. */
 export function StoryScene({ content, brand }: { content: SceneContent; brand: ReactNode }) {
   const { ref, enabled, running } = useVisibleMotion<HTMLElement>();
   const [index, setIndex] = useState(0);
-  // A new key mounts a part's drawing again, so its moment plays from the first frame.
-  const [runs, setRuns] = useState<Record<Part, number>>({ expertise: 0, agents: 0, outcome: 0 });
-  const [burst, setBurst] = useState(false);
-  const [marked, setMarked] = useState<Part | null>(null);
   const { press, wave } = usePress<Part>(enabled);
+  const screen = useCardScreen<Part>(enabled);
+  const stage = useRef<HTMLDivElement>(null);
   const id = useId();
+  const playing = running && !screen.state;
   useEffect(() => {
-    if (!running) return;
-    const timer = window.setTimeout(() => {
-      if (index === final) setBurst(false);
-      setIndex(index === final ? 0 : index + 1);
-    }, durations[index]);
+    if (!playing) return;
+    const timer = window.setTimeout(() => setIndex(index === final ? 0 : index + 1), durations[index]);
     return () => window.clearTimeout(timer);
-  }, [index, running, runs]);
-  const play = (part: Part) => (event: MouseEvent<HTMLButtonElement>) => {
+  }, [index, playing]);
+  // The scene under an open screen is out of reach, for the keyboard too.
+  useEffect(() => { if (stage.current) stage.current.inert = screen.open; }, [screen.open]);
+  const show = (part: Part) => (event: MouseEvent<HTMLButtonElement>) => {
     press(part, event);
-    if (!enabled) { setMarked(part); return; }
-    setRuns(value => ({ ...value, [part]: value[part] + 1 }));
-    setBurst(part === 'outcome');
-    setIndex(moment[part]);
+    screen.toggle(part, event.currentTarget, event.currentTarget);
   };
+  const screens: Record<Part, TubeContent> = {
+    expertise: { title: content.expertise.title, image: content.expertise.image, software: content.expertise.software },
+    agents: { title: content.agents.title, image: content.agents.image, software: content.agents.software },
+    outcome: { title: content.outcome, image: content.result.image, software: content.result.software },
+  };
+  const opens = (part: Part) => ({ 'aria-expanded': screen.open && screen.state?.part === part, 'aria-controls': screen.state?.part === part ? `${id}-screen` : undefined, onClick: show(part) });
   const phase = enabled ? index : final;
-  const still = (part: Part) => !enabled && marked === part;
   return <figure ref={ref} className="story-scene-figure" aria-label={content.caption} data-motion={enabled ? 'on' : 'off'} data-phase={phase}>
-    <div className="scene-stage">
-      <div className="scene-row">
-        <button type="button" className="scene-card scene-part" data-active={phase === 1 || phase === 2 || still('expertise')} aria-describedby={`${id}-expertise`} onClick={play('expertise')}>
-          {wave('expertise')}
-          <ExpertiseArt key={runs.expertise} drawn={phase >= 1} drawing={phase === 1} signal={phase === 2} />
-          <span className="scene-title">{content.expertise.title}</span>
-          <span className="sr-only" id={`${id}-expertise`} aria-hidden="true">{content.expertise.detail}</span>
-        </button>
-        <button type="button" className="scene-card scene-card-agents scene-part" data-active={(phase >= 3 && phase <= 5) || still('agents')} aria-describedby={`${id}-agents`} onClick={play('agents')}>
-          {wave('agents')}
-          <AgentsArt key={runs.agents} phase={phase} />
-          <span className="scene-title">{content.agents.title}</span>
-          <span className="sr-only" id={`${id}-agents`} aria-hidden="true">{content.agents.detail}</span>
+    <div ref={screen.stack} className="tube-stack">
+      <div ref={stage} className="scene-stage">
+        <div className="scene-row">
+          <button type="button" className="scene-card scene-part" data-active={phase === 1 || phase === 2} aria-describedby={`${id}-expertise`} {...opens('expertise')}>
+            {wave('expertise')}
+            <ExpertiseArt drawn={phase >= 1} drawing={phase === 1} signal={phase === 2} />
+            <span className="scene-title">{content.expertise.title}</span>
+            <span className="sr-only" id={`${id}-expertise`} aria-hidden="true">{content.expertise.detail}</span>
+          </button>
+          <button type="button" className="scene-card scene-card-agents scene-part" data-active={phase >= 3 && phase <= 5} aria-describedby={`${id}-agents`} {...opens('agents')}>
+            {wave('agents')}
+            <AgentsArt phase={phase} />
+            <span className="scene-title">{content.agents.title}</span>
+            <span className="sr-only" id={`${id}-agents`} aria-hidden="true">{content.agents.detail}</span>
+          </button>
+        </div>
+        <span className="scene-join" data-on={phase === final} aria-hidden="true"><span className="scene-pulse" /><span className="scene-pulse scene-pulse-right" /></span>
+        <button type="button" className="scene-outcome scene-part" data-on={phase === final} {...opens('outcome')}>
+          {wave('outcome')}
+          <span className="scene-outcome-name">{brand}<span>{content.outcome}</span></span>
+          <OutputArt on={phase === final} />
         </button>
       </div>
-      <span className="scene-join" key={runs.outcome} data-on={phase === final} aria-hidden="true"><span className="scene-pulse" /><span className="scene-pulse scene-pulse-right" /></span>
-      <button type="button" className="scene-outcome scene-part" data-on={phase === final} data-active={still('outcome')} onClick={play('outcome')}>
-        {wave('outcome')}
-        <span className="scene-outcome-name">{brand}<span>{content.outcome}</span></span>
-        <OutputArt key={runs.outcome} on={phase === final} burst={burst} />
-      </button>
+      {screen.state && <CardScreen key={screen.state.run} id={`${id}-screen`} state={screen.state} still={screen.still} label={content.label}
+        content={screens[screen.state.part]} onClose={screen.close} onEnded={screen.ended} />}
     </div>
   </figure>;
 }

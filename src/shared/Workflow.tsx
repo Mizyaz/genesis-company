@@ -1,20 +1,17 @@
 import { useEffect, useId, useRef, useState, type AnimationEvent, type CSSProperties, type MouseEvent } from 'react';
 import { Icon } from './ui';
-import { useLanguage } from './Language';
 import { useVisibleMotion } from './MotionSettings';
 import { SwipeDots } from './SwipeDots';
 import { usePress } from './DesignStory';
-import { StageScreen } from './StageScreens';
+import { TubePanel, type Offer } from './StageScreens';
 import '../styles/workflow-detail.css';
 
-type Offering = { icon: string; title: string; detail: string };
-type Stage = { id: string; title: string; detail: string; icon: string; software: Offering[] };
+type Stage = { id: string; title: string; detail: string; icon: string; software: Offer[] };
 
 /** The stages of RF design. Each card opens what GENESIS offers at that stage: a tube grows out of the card and powers on
  * a screen below it like a cathode-ray tube (a bright line, then the picture), with the stage's animated picture and its
  * software. Another card switches the screen; the same card, the close button or Escape draws it back into the tube. */
 export function Workflow({ stages, label }: { stages: Stage[]; label: string }) {
-  const { t } = useLanguage();
   const { ref, enabled, running } = useVisibleMotion<HTMLDivElement>();
   const animations = useRef<Animation[]>([]);
   const detail = useRef<HTMLDivElement>(null);
@@ -105,15 +102,7 @@ export function Workflow({ stages, label }: { stages: Stage[]; label: string }) 
       {stage && <span key={`tube-${run}`} className="stage-tube" data-off={off} aria-hidden="true" />}
       <div className="workflow-detail-inner">
         {stage && <section key={run} id={panel} className="stage-screen" data-off={off} aria-label={`${label}: ${stage.title}`} onAnimationEnd={ended}>
-          <span className="stage-screen-scan" aria-hidden="true" />
-          <header className="stage-screen-head"><span>{label}</span><strong>{stage.title}</strong>
-            <button type="button" className="stage-screen-close" aria-label={t("Close")} onClick={close}><Icon name="close" /></button></header>
-          <div className="stage-screen-body">
-            <StageScreen id={stage.id} />
-            <ul className="stage-offers">{stage.software.map((offer, i) => <li key={offer.title} style={{ '--o': i } as CSSProperties}>
-              <Icon name={offer.icon} /><span><strong>{offer.title}</strong>{offer.detail}</span>
-            </li>)}</ul>
-          </div>
+          <TubePanel label={label} content={{ title: stage.title, image: stage.id, software: stage.software }} onClose={close} />
         </section>}
       </div>
     </div>
