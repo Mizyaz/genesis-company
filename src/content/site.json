@@ -357,7 +357,12 @@
           "detail": "The best design and its results come back to you for layout and verification."
         }
       ],
-      "note": "Illustration of the loop, not measured data."
+      "note": "Illustration of the loop, not measured data.",
+      "actions": {
+        "designer": "Set the target again",
+        "engine": "Prepare the next design",
+        "tools": "Simulate this design"
+      }
     },
     "scene": {
       "caption": "Domain expertise meets autonomous intelligence.",

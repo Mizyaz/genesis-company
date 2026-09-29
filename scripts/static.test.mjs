@@ -79,7 +79,7 @@ test('the design loop tells one story: your team, GENESIS and your CAD tools des
   const component = read('src/shared/DesignStory.tsx');
   assert.match(component, /useVisibleMotion/);
   assert.match(component, /timeline\[final\]/); // Stopped or reduced motion shows the finished loop.
-  assert.match(component, /<dl className="story-spec">/);
+  assert.match(component, /<dl className="story-spec" key=\{cycle\}>/);
   assert.doesNotMatch(component, /fetch\s*\(|setInterval/);
   assert.doesNotMatch(component, /story-pixel/);
   // The loop lives in the technical part of the page: the platform section, next to the modules.
@@ -114,7 +114,7 @@ test('the lead diagram is an animated scene: a designer, AI agents and GENESIS m
   assert.ok(sceneAt > explore.indexOf('<section className="company-hero"') && sceneAt < explore.indexOf('<Membership '), 'scene in the hero');
   assert.match(read('src/pages/Welcome.tsx'), /<StoryScene content=\{site.story.scene\} brand=\{<Brand \/>\} \/>/);
   // More telling without more text: the designer's pen, the agent that checks each candidate, and the chip GENESIS hands back.
-  for (const part of ['className="scene-pen"', 'className="scene-agent"', '<OutputArt on={phase === final} />', 'className="scene-die-check"']) assert.ok(scene.includes(part), part);
+  for (const part of ['className="scene-pen"', 'className="scene-agent"', '<OutputArt key={runs.outcome} on={phase === final} burst={burst} />', 'className="scene-die-check"']) assert.ok(scene.includes(part), part);
   assert.equal(existsSync(resolve(root, 'src/shared/DesignPillars.tsx')), false);
   assert.match(scene, /className="art-person"/); // The designer is a person at the workstation.
   assert.match(scene, /coil\(/); // Circuits are drawn with schematic symbols.
@@ -126,6 +126,41 @@ test('the lead diagram is an animated scene: a designer, AI agents and GENESIS m
   assert.equal((scene.match(/className="sr-only"/g) || []).length, 2);
   for (const copy of [story.scene.caption, story.scene.outcome, ...['expertise', 'agents'].flatMap(key => [story.scene[key].title, story.scene[key].detail])]) assert.ok(dictionary[copy], copy);
   assert.match(read('src/styles/site.css'), /\.company-hero-inner \{ display: grid; grid-template-columns: minmax\(0, 1fr\) minmax\(0, 1fr\)/); // Wide text never widens the page.
+});
+
+test('both illustrations answer a click: the part dips, a ripple spreads and it does its own work, and the loop carries on', () => {
+  const scene = read('src/shared/StoryScene.tsx'), loop = read('src/shared/DesignStory.tsx');
+  const { story } = JSON.parse(read('src/content/site.json'));
+  const dictionary = JSON.parse(read('src/content/tr.json'));
+  // The story scene: every part is a real button that plays its own moment again.
+  for (const part of ['expertise', 'agents', 'outcome']) assert.match(scene, new RegExp(`<button type="button" className="scene-[^"]*scene-part"[^\\n]*onClick=\\{play\\('${part}'\\)\\}>`), part);
+  assert.match(scene, /const moment: Record<Part, number> = \{ expertise: 1, agents: 3, outcome: final \}/);
+  for (const drawing of ['<ExpertiseArt key={runs.expertise}', '<AgentsArt key={runs.agents}', '<OutputArt key={runs.outcome}']) assert.ok(scene.includes(drawing), drawing);
+  assert.match(scene, /className="scene-sparks"/); // GENESIS stamps the chip with sparks when asked.
+  assert.match(scene, /aria-describedby=\{`\$\{id\}-expertise`\}/); // The detail stays for screen readers, as the button's description.
+  // The design loop: each station is a button stretched over its card, named for what it does.
+  for (const station of ['designer', 'engine', 'tools']) assert.match(loop, new RegExp(`<button type="button" className="story-press" aria-label=\\{content\\.actions\\.${station}\\} onClick=\\{play\\('${station}'\\)\\} />`), station);
+  for (const label of Object.values(story.loop.actions)) assert.ok(dictionary[label], label);
+  assert.match(loop, /frameAt\(\(frame\.design \+ 1\) % designs\.length, 2\)/); // GENESIS prepares the next design.
+  assert.match(loop, /frameAt\(design, enabled \? 3 : 4\)/); // The tools simulate now; stopped, the result shows still.
+  // Buttons stay mounted, so keyboard focus survives the loop; only the drawings start again.
+  assert.doesNotMatch(scene, /className="scene-stage" key=/);
+  assert.doesNotMatch(loop, /className="story-scene" key=/);
+  // One shared feel: a dip sized to the part and a ripple from the touch (the middle for keys), never with motion stopped or reduced.
+  assert.match(loop, /export function usePress/);
+  assert.match(scene, /usePress<Part>\(enabled\)/);
+  assert.match(loop, /if \(!enabled \|\| matchMedia\('\(prefers-reduced-motion: reduce\)'\)\.matches\) return;/);
+  assert.match(loop, /event\.detail === 0/);
+  assert.doesNotMatch(scene + loop, /vibrate|fetch\s*\(|setInterval/);
+  const sceneCss = read('src/styles/story-scene.css'), loopCss = read('src/styles/design-story.css');
+  for (const css of [sceneCss, loopCss]) {
+    assert.match(css, /touch-action: manipulation/);
+    assert.match(css, /@media \(hover: hover\)/);
+    assert.match(css, /:focus-visible \{ outline: 2px solid var\(--cyan\)/);
+  }
+  assert.match(loopCss, /\.press-ripple \{ position: absolute; z-index: 1; inset: 0; overflow: hidden;/);
+  // Replays start from the first frame: drawing is an animation on the part, not a transition that needs the previous state.
+  assert.match(sceneCss, /\.scene-draw\[data-on="true"\] \{ stroke-dashoffset: 0; animation: scene-draw/);
 });
 
 test('welcome uses the shared, single-line brand entrance with readable acronym emphasis', () => {

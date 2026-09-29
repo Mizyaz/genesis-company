@@ -1,19 +1,35 @@
 /* Story scene: a designer draws the circuit, AI agents check candidates, both join in GENESIS. Lines run card to card. */
 .story-scene-figure { --gap: clamp(12px, 4cqw, 28px); min-width: 0; container-type: inline-size; }
 .scene-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--gap); }
-.scene-card { display: flex; flex-direction: column; justify-content: space-between; gap: 12px; min-width: 0; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); transition: border-color .45s, box-shadow .45s; }
+.scene-card { display: flex; flex-direction: column; justify-content: space-between; gap: 12px; min-width: 0; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
 .scene-card[data-active="true"] { border-color: color-mix(in srgb, var(--cyan) 70%, var(--border)); box-shadow: 0 12px 32px color-mix(in srgb, var(--cyan) 10%, transparent); }
+.scene-card-agents { --ripple: var(--violet); }
 .scene-card-agents[data-active="true"] { border-color: color-mix(in srgb, var(--violet) 70%, var(--border)); box-shadow: 0 12px 32px color-mix(in srgb, var(--violet) 12%, transparent); }
 .scene-title { font-size: .92rem; font-weight: 600; line-height: 1.3; text-align: center; overflow-wrap: anywhere; }
 .scene-art { display: block; width: 100%; overflow: visible; }
 
+/* Every part is a button that plays its own moment again: it lifts under the pointer, dips when pressed and springs back. */
+.scene-part { position: relative; width: 100%; margin: 0; color: inherit; font: inherit; appearance: none; cursor: pointer; touch-action: manipulation; -webkit-user-select: none; user-select: none; transition: border-color .45s, box-shadow .45s, translate .25s ease, scale .12s ease-out; }
+.scene-part:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
+.scene-card:active { scale: .97; }
+.scene-outcome:active { scale: .985; }
+@media (hover: hover) {
+  .scene-part:hover { translate: 0 -2px; }
+  .scene-card:not([data-active="true"]):hover { border-color: color-mix(in srgb, var(--cyan) 40%, var(--border)); }
+  .scene-card-agents:not([data-active="true"]):hover { border-color: color-mix(in srgb, var(--violet) 45%, var(--border)); }
+  .scene-outcome:hover { box-shadow: 0 10px 34px var(--glow); }
+}
+
 /* Drawing: each stroke appears in order, like a schematic being entered. */
-.scene-draw { fill: none; stroke: var(--cyan); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset .45s ease-out calc(var(--i, 0) * 280ms); }
-.scene-draw[data-on="true"] { stroke-dashoffset: 0; }
-.scene-fade { opacity: .25; transition: opacity .4s; }
-.scene-fade[data-on="true"] { opacity: 1; }
+.scene-draw { fill: none; stroke: var(--cyan); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; }
+.scene-draw[data-on="true"] { stroke-dashoffset: 0; animation: scene-draw .45s ease-out calc(var(--i, 0) * 280ms) both; }
+.scene-fade { opacity: .25; }
+.scene-fade[data-on="true"] { opacity: 1; animation: scene-fade .4s both; }
 .scene-signal { fill: none; stroke: var(--flow-highlight, var(--cyan)); stroke-width: 3; stroke-linecap: round; stroke-dasharray: .1 1.1; stroke-dashoffset: .1; opacity: 0; filter: drop-shadow(0 0 4px var(--cyan)); }
 .scene-signal[data-on="true"] { opacity: 1; animation: scene-signal 1.2s ease-in-out both; }
+/* The output answers when the signal arrives. */
+.scene-ring { fill: none; stroke: var(--cyan); stroke-width: 1.5; opacity: 0; transform-box: fill-box; transform-origin: center; }
+.scene-ring[data-on="true"] { animation: scene-ring .45s ease-out .85s both; }
 /* The designer's pen follows the circuit while it is drawn. */
 .scene-pen { fill: color-mix(in srgb, var(--violet) 55%, var(--surface)); stroke: var(--violet); stroke-width: 1.2; stroke-linejoin: round; opacity: 0; transform: translate(84px, 56px); }
 .scene-pen[data-on="true"] { animation: scene-pen 2s ease-in-out both; }
@@ -28,8 +44,8 @@
 .agent-target { stroke: var(--error); stroke-width: 1.3; stroke-dasharray: 3 3; opacity: .85; }
 .agent-curve { stroke: var(--violet); stroke-width: 1.8; }
 .agent-row[data-state="kept"] .agent-curve { stroke: var(--cyan); filter: drop-shadow(0 0 3px color-mix(in srgb, var(--cyan) 70%, transparent)); }
-.agent-check { opacity: 0; transform: scale(.5); transform-box: fill-box; transform-origin: center; transition: opacity .3s .5s, transform .3s .5s; }
-.agent-check[data-on="true"] { opacity: 1; transform: none; }
+.agent-check { opacity: 0; transform-box: fill-box; transform-origin: center; }
+.agent-check[data-on="true"] { opacity: 1; animation: scene-pop .4s cubic-bezier(.3, 1.6, .5, 1) .5s both; }
 .agent-check circle { fill: var(--cyan); }
 .agent-check path { fill: none; stroke: var(--page); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 /* The agent marker moves to the candidate being checked and stays with the one it keeps. */
@@ -47,27 +63,39 @@
 .scene-pulse-right { left: 100%; background: var(--violet); box-shadow: 0 0 8px var(--violet); }
 .scene-join[data-on="true"] .scene-pulse { animation: scene-pulse-left 1.4s ease-in-out both; }
 .scene-join[data-on="true"] .scene-pulse-right { animation-name: scene-pulse-right; }
-.scene-outcome { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 22px; padding: 16px; border: 1px solid transparent; border-radius: 16px; text-align: center; background: linear-gradient(var(--surface), var(--surface)) padding-box, linear-gradient(var(--border), var(--border)) border-box; transition: box-shadow .5s; }
+.scene-outcome { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 22px; padding: 16px; border: 1px solid transparent; border-radius: 16px; text-align: center; background: linear-gradient(var(--surface), var(--surface)) padding-box, linear-gradient(var(--border), var(--border)) border-box; }
 .scene-outcome[data-on="true"] { background: linear-gradient(var(--surface), var(--surface)) padding-box, var(--gradient) border-box; box-shadow: 0 10px 34px var(--glow); }
+.scene-outcome[data-active="true"] { box-shadow: 0 0 0 2px color-mix(in srgb, var(--cyan) 45%, transparent), 0 10px 34px var(--glow); }
 .scene-outcome .brand { font-size: 1.3rem; gap: 8px; }
 .scene-outcome .brand img { width: 28px; height: 30px; }
 .scene-outcome-name { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
 .scene-outcome-name > span { font-size: .8rem; color: var(--muted); }
 /* GENESIS hands back a finished stage on a die: the arrow draws, the die appears, the check follows. */
 .scene-output { width: 120px; height: auto; flex: none; overflow: visible; }
-.scene-output-arrow { fill: none; stroke: var(--cyan); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset .5s ease-out 1.3s; }
-.scene-output[data-on="true"] .scene-output-arrow { stroke-dashoffset: 0; }
-.scene-die { opacity: .25; transition: opacity .5s 1.7s; }
-.scene-output[data-on="true"] .scene-die { opacity: 1; }
+.scene-output-arrow { fill: none; stroke: var(--cyan); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; }
+.scene-output[data-on="true"] .scene-output-arrow { stroke-dashoffset: 0; animation: scene-draw .5s ease-out 1.3s both; }
+.scene-die { opacity: .25; }
+.scene-output[data-on="true"] .scene-die { opacity: 1; animation: scene-die .5s 1.7s both; }
 .scene-die > rect { fill: color-mix(in srgb, var(--cyan) 8%, var(--surface)); stroke: var(--cyan); stroke-width: 1.4; }
 .scene-die-metal { fill: none; stroke: var(--cyan); stroke-width: 1.6; }
 .scene-die-under { fill: none; stroke: var(--violet); stroke-width: 1; }
 .scene-die-device { fill: color-mix(in srgb, var(--violet) 30%, var(--surface)); stroke: var(--violet); stroke-width: 1; }
-.scene-die-check { opacity: 0; transform: scale(.5); transform-box: fill-box; transform-origin: center; transition: opacity .3s 2.3s, transform .3s 2.3s; }
-.scene-output[data-on="true"] .scene-die-check { opacity: 1; transform: none; }
+.scene-die-check { opacity: 0; transform-box: fill-box; transform-origin: center; }
+.scene-output[data-on="true"] .scene-die-check { opacity: 1; animation: scene-pop .45s cubic-bezier(.3, 1.6, .5, 1) 2.3s both; }
 .scene-die-check circle { fill: var(--cyan); }
 .scene-die-check path { fill: none; stroke: var(--page); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+/* Asked for with a click: sparks fly off the check as it lands. */
+.scene-sparks path { fill: none; stroke: var(--cyan); stroke-width: 2.2; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; filter: drop-shadow(0 0 3px var(--cyan)); animation: scene-spark .6s ease-out 2.4s both; }
+.scene-sparks path:nth-child(odd) { stroke: var(--violet); filter: drop-shadow(0 0 3px var(--violet)); animation-delay: 2.46s; }
+.scene-sparks circle { fill: none; stroke: var(--cyan); stroke-width: 1.6; opacity: 0; transform-box: fill-box; transform-origin: center; animation: scene-shock .55s ease-out 2.35s both; }
 
+@keyframes scene-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes scene-fade { from { opacity: .25; } to { opacity: 1; } }
+@keyframes scene-die { from { opacity: .25; } to { opacity: 1; } }
+@keyframes scene-pop { from { opacity: 0; transform: scale(.4); } to { opacity: 1; transform: none; } }
+@keyframes scene-ring { 0% { opacity: 0; transform: scale(1); } 10% { opacity: .9; } 100% { opacity: 0; transform: scale(3.4); } }
+@keyframes scene-shock { 0% { opacity: 0; transform: scale(1); } 10% { opacity: 1; } 100% { opacity: 0; transform: scale(2.4); } }
+@keyframes scene-spark { 0% { stroke-dashoffset: 1; opacity: 1; } 45% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: -1; opacity: 0; } }
 @keyframes scene-signal { from { stroke-dashoffset: .1; } to { stroke-dashoffset: -1; } }
 @keyframes scene-pen { 0% { opacity: 0; transform: translate(84px, 56px); } 8% { opacity: 1; } 55% { transform: translate(150px, 56px); } 75% { transform: translate(156px, 44px); } 92% { opacity: 1; } 100% { opacity: 0; transform: translate(186px, 30px); } }
 @keyframes scene-pulse-left { 0% { left: 0; top: 0; opacity: 0; } 10% { opacity: 1; } 45% { left: 0; top: 100%; } 85% { left: 50%; top: 100%; opacity: 1; } 100% { left: 50%; top: calc(100% + 24px); opacity: 0; } }
