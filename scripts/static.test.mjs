@@ -358,6 +358,46 @@ test('About us and research are pages of their own; İslam Güven leads the team
   assert.match(library, /<PublicationActions key=\{selected.id\}/);
 });
 
+test('the research page flies a signal through a city of our papers: one building per paper, on a timeline, with a visit prompt', () => {
+  const research = read('src/pages/Research.tsx');
+  assert.match(research, /<ResearchFlight papers=\{papers\} onShowPaper=/);
+  assert.match(research, /<Publications people=\{site.about.people\} papers=\{papers\} focus=\{focus\}/);
+  // three.js loads only when the flight starts; nothing on the page imports it.
+  const flight = read('src/shared/ResearchFlight.tsx');
+  assert.match(flight, /import\('\.\.\/flight\/world'\)/);
+  for (const path of walk('src').filter(path => /\.tsx?$/.test(path) && !path.startsWith('src/flight/'))) {
+    assert.doesNotMatch(read(path), /from 'three'|^import \{[^}]*\} from '\.\.\/flight\/world'/m, path);
+  }
+  assert.equal(JSON.parse(read('package.json')).dependencies.three, '0.186.1');
+  // Every paper is a building in its empire; later years stand further along the timeline; nothing overlaps.
+  const load = path => { const module = {}; new Function('exports', 'require', ts.transpileModule(read(path), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText)(module, () => ({})); return module; };
+  const papers = JSON.parse(read('src/content/publications.json'));
+  const { layoutCity, empireOf } = load('src/flight/layout.ts');
+  const city = layoutCity(papers);
+  assert.equal(city.buildings.length, papers.length);
+  assert.deepEqual(new Set(city.buildings.map(b => b.paper.id)).size, papers.length);
+  assert.deepEqual([...new Set(papers.map(empireOf))].sort(), ['circuit', 'drone', 'signal']);
+  for (const b of city.buildings) for (const other of city.buildings) {
+    if (b !== other) assert.ok(Math.hypot(b.x - other.x, b.z - other.z) > b.radius + other.radius + 1, `${b.paper.id} / ${other.paper.id}`);
+    if (other.paper.year > b.paper.year) assert.ok(other.z < b.z, `${other.paper.id} after ${b.paper.id}`);
+  }
+  assert.ok(city.years.every((year, i) => !i || year.z < city.years[i - 1].z && year.year === city.years[i - 1].year + 1));
+  assert.ok(city.buildings.every(b => b.glyph !== 'chip'), 'every paper gets a picture for its topic');
+  // The visit prompt appears after a short stay next to a building and leads to the paper or GENESIS.
+  const world = read('src/flight/world.ts');
+  const dwell = Number(world.match(/export const DWELL_SECONDS = ([\d.]+)/)[1]);
+  assert.ok(dwell >= 0.8 && dwell <= 3);
+  assert.match(flight, /t\("Would you like to visit\?"\)/);
+  assert.match(flight, /href=\{publicationUrl\(prompt.paper\)\} target="_blank" rel="noopener noreferrer"/);
+  assert.match(flight, /role="dialog" aria-modal="true"/);
+  assert.match(flight, /reducedMotion: !motion/);
+  assert.match(read('src/styles/research-flight.css'), /prefers-reduced-motion: reduce/);
+  // Crisp pieces only: prisms, boxes and flat rings; no spheres or blobs in the city.
+  assert.doesNotMatch(world.replace(/new THREE\.SphereGeometry\(1800[^)]*\)/, ''), /SphereGeometry|TorusKnot|Capsule|IcosahedronGeometry\(\s*[\d.]+\s*,\s*[1-9]/);
+  assert.doesNotMatch([world, read('src/flight/art.ts'), read('src/flight/layout.ts')].join('\n'), /fetch\s*\(|https?:\/\//);
+  assert.ok(existsSync(resolve(root, 'public/assets/research-flight.webp')));
+});
+
 test('production bundle has no local service client or assistant endpoint', () => {
   assert.ok(existsSync(resolve(root, 'dist/index.html')), 'Run npm run build before npm test');
   const output = walk('dist').filter(path => /\.(js|css|html)$/.test(path)).map(read).join('\n');
