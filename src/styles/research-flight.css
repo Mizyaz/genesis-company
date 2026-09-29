@@ -7,8 +7,7 @@
 .flight-launch-preview { position: relative; display: grid; place-items: center; overflow: hidden; border-radius: 12px; aspect-ratio: 16 / 9; background: #190e4c; }
 .flight-launch-preview img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .6s ease; }
 /* The GENESIS symbol over the still of the city starts the flight. */
-.flight-launch-preview .emblem { --emblem-size: clamp(112px, 13vw, 164px); gap: 8px; }
-.flight-launch-preview .emblem-hint { color: #e7fbff; text-shadow: 0 0 10px #041325, 0 0 3px #041325; }
+.flight-launch-preview .emblem { --emblem-size: clamp(100px, 11vw, 144px); }
 .flight-launch-preview:hover img { transform: scale(1.03); }
 @media (max-width: 800px) {
   .flight-launch { grid-template-columns: minmax(0, 1fr); }
@@ -92,7 +91,12 @@
 .flight-pad { position: absolute; bottom: calc(58px + env(safe-area-inset-bottom)); display: grid; place-items: center; border: 2px solid rgba(214, 252, 255, .42); background: rgba(8, 6, 31, .32); pointer-events: none; }
 .flight-pad::after { content: ''; width: 28px; height: 28px; border-radius: 50%; background: rgba(214, 252, 255, .5); }
 .flight-pad-fly { left: max(18px, env(safe-area-inset-left)); width: 108px; height: 108px; border-radius: 50%; }
-.flight-pad-lift { right: max(18px, env(safe-area-inset-right)); width: 56px; height: 108px; border-radius: 28px; }
+/* On a touch screen the rise and sink arrows stand under the right thumb; they work while the other thumb flies. */
+.flight-lifts { position: absolute; right: max(18px, env(safe-area-inset-right)); bottom: calc(58px + env(safe-area-inset-bottom)); display: grid; gap: 10px; }
+.flight-lifts button { display: grid; place-items: center; width: 58px; height: 50px; padding: 0; border: 1px solid var(--hud-line); border-radius: 25px; color: #f1f6fc; background: var(--hud-ink); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; }
+.flight-lifts button:active { border-color: #41dce8; background: rgba(65, 220, 232, .3); }
+.flight-lifts .icon { width: 20px; height: 20px; }
+.flight-lifts .icon-up { transform: rotate(180deg); }
 .flight-pad .icon { position: absolute; width: 18px; height: 18px; color: rgba(241, 246, 252, .85); }
 .flight-pad .pad-up { top: 7px; transform: rotate(180deg); }
 .flight-pad .pad-down { bottom: 7px; }
@@ -136,8 +140,9 @@
   .flight-kicker, .flight-empire { font-size: .58rem; }
   .flight-overlay[data-touch] .flight-pad { bottom: calc(52px + env(safe-area-inset-bottom)); }
   .flight-overlay[data-touch] .flight-pad-fly { width: 96px; height: 96px; }
-  .flight-overlay[data-touch] .flight-pad-lift { width: 50px; height: 96px; }
-  .flight-overlay[data-touch] .flight-controls { bottom: calc(77px + env(safe-area-inset-bottom)); left: calc(max(18px, env(safe-area-inset-left)) + 108px); right: calc(max(18px, env(safe-area-inset-right)) + 62px); justify-content: space-between; transform: none; }
+  .flight-overlay[data-touch] .flight-lifts { bottom: calc(52px + env(safe-area-inset-bottom)); gap: 8px; }
+  .flight-overlay[data-touch] .flight-lifts button { width: 54px; height: 44px; }
+  .flight-overlay[data-touch] .flight-controls { bottom: calc(77px + env(safe-area-inset-bottom)); left: calc(max(18px, env(safe-area-inset-left)) + 108px); right: calc(max(18px, env(safe-area-inset-right)) + 70px); justify-content: space-between; transform: none; }
   .flight-overlay[data-touch] :is(.flight-hint, .flight-near) { top: max(12px, env(safe-area-inset-top)); bottom: auto; max-width: max(200px, calc(100vw - 360px)); }
   .flight-overlay[data-touch] .flight-prompt-region { top: max(10px, env(safe-area-inset-top)); bottom: auto; width: max(220px, min(430px, calc(100vw - 340px))); }
   .flight-overlay[data-touch] .flight-prompt { padding: 10px 14px; }

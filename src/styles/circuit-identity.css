@@ -2,7 +2,7 @@
 .brand-intro { display: inline-flex; flex-direction: column; align-items: center; gap: 6px; max-width: 100%; }
 .brand-intro h1 { display: flex; min-width: 0; line-height: 1; }
 /* The large GENESIS symbol stands above the name: pressing it starts the flight through our research. */
-.brand-intro > .emblem { --emblem-size: clamp(184px, 22vw, 262px); margin: 6px 0 14px; }
+.brand-intro > .emblem { --emblem-size: clamp(136px, 15vw, 192px); margin: 6px 0 16px; }
 .brand-signature { max-width: 100%; font-size: clamp(.625rem, 2.6vw, .8125rem); line-height: 1.4; letter-spacing: .005em; white-space: nowrap; color: var(--muted); }
 .brand-signature strong { font-weight: 750; color: var(--text); }
 .brand-intro .electric-brand-traces { mask-image: linear-gradient(#000 58%, transparent 76%); }

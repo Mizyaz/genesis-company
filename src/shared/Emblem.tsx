@@ -24,7 +24,7 @@ export function EmblemMark() {
 /** The GENESIS symbol, large and lit, as the button that starts the signal flight. It boots pixel by pixel from the
  * core, glows and a current runs up through it now and then. Pressed, it charges, flashes across the screen and hands
  * over to the flight. With motion stopped or reduced it starts the flight at once. */
-export const EmblemLauncher = forwardRef<HTMLButtonElement, { label: string; hint: string; onLaunch: () => void }>(function EmblemLauncher({ label, hint, onLaunch }, ref) {
+export const EmblemLauncher = forwardRef<HTMLButtonElement, { label: string; onLaunch: () => void }>(function EmblemLauncher({ label, onLaunch }, ref) {
   const { ref: seen, enabled, running } = useVisibleMotion<HTMLSpanElement>();
   const id = `emblem-${useId().replace(/:/g, '')}`;
   const [firing, setFiring] = useState(false);
@@ -65,7 +65,6 @@ export const EmblemLauncher = forwardRef<HTMLButtonElement, { label: string; hin
         <span className="emblem-current" />
       </span>
     </button>
-    <span className="emblem-hint" aria-hidden="true">{hint}</span>
     {flash && createPortal(<span key={flash.run} className="emblem-flash" aria-hidden="true" onAnimationEnd={() => setFlash(null)}
       style={{ '--x': `${flash.x}px`, '--y': `${flash.y}px` } as CSSProperties} />, document.body)}
   </span>;

@@ -11,7 +11,7 @@ import { empireIds, laneX, layoutCity, type Building, type EmpireId } from './la
 /** Seconds spent next to a building (slowly) before the visit prompt, how close counts, and how slow. */
 export const DWELL_SECONDS = 1.3;
 // The signal flies below 28 and the camera below 29: under the empire banners (29.3) and the year arches (34).
-const NEAR = 12, SLOW = 10, ARC = 27, CEILING = 28, CAMERA_CEILING = 29;
+const NEAR = 12, SLOW = 10, ARC = 27, CEILING = 28, CAMERA_CEILING = 29, HOP = 12;
 
 export type FlightTarget = { kind: 'paper'; paper: Publication; empire: EmpireId } | { kind: 'genesis' };
 export type FlightLabels = { empires: Record<EmpireId, string>; journal: string; conference: string; genesisLine: string };
@@ -780,9 +780,11 @@ export function createFlight({ canvas, papers, labels, reducedMotion, events }: 
     } else {
       yawRate += (-input.turn * 1.9 - yawRate) * (1 - Math.exp(-dt * 6));
       yaw += yawRate * dt;
-      const f = forward(yaw);
-      vel.x += f.x * input.forward * 44 * dt; vel.z += f.z * input.forward * 44 * dt; vel.y += input.lift * 30 * dt;
-      vel.multiplyScalar(Math.exp(-dt * 1.7));
+      const f = forward(yaw), thrust = input.forward > 0 ? input.forward : input.forward * 0.5; // Backing up is for small corrections.
+      vel.x += f.x * thrust * 44 * dt; vel.z += f.z * thrust * 44 * dt; vel.y += input.lift * 30 * dt;
+      // Letting go brakes: the signal settles within a few lengths (sooner next to a building), so it can stop there.
+      const brake = input.forward ? 1.7 : focus ? 4.2 : 3.2;
+      vel.x *= Math.exp(-dt * brake); vel.z *= Math.exp(-dt * brake); vel.y *= Math.exp(-dt * (input.lift ? 1.7 : 3.2));
       pos.addScaledVector(vel, dt);
       for (const solid of solids) {
         if (pos.y > solid.top + 1.2) continue;
@@ -791,6 +793,8 @@ export function createFlight({ canvas, papers, labels, reducedMotion, events }: 
         const nx = distance ? dx / distance : 1, nz = distance ? dz / distance : 0, into = vel.x * nx + vel.z * nz;
         pos.x = solid.x + nx * min; pos.z = solid.z + nz * min;
         if (into < 0) { vel.x -= into * nx; vel.z -= into * nz; }
+        // Flying on into a building lifts the signal over its roof instead of pinning it to the wall.
+        if (input.forward > 0) vel.y = Math.max(vel.y, HOP);
       }
     }
     pos.set(clamp(pos.x, -80, 80), clamp(pos.y, 2, CEILING), clamp(pos.z, city.genesisZ - 40, city.startZ + 50));

@@ -12,9 +12,11 @@ import '../styles/research-flight.css';
 
 const STICK = 64; // px of drag for a full turn, thrust, rise or sink
 const clamp = (value: number) => Math.max(-1, Math.min(1, value));
+/** The stick's response: a small dead zone, gentle near the centre for fine steering, full at the edge. */
+const respond = (value: number) => Math.sign(value) * (Math.max(0, Math.abs(value) - 0.12) / 0.88) ** 1.5;
 const sameTarget = (a: FlightTarget, b: FlightTarget | null) => Boolean(b) && (a.kind === 'genesis' ? b!.kind === 'genesis' : b!.kind === 'paper' && b!.paper.id === a.paper.id);
 type Paper = FlightTimeline['papers'][number];
-/** One pointer on the canvas: the thumb that flies, the thumb that rises and sinks, or a further finger that can only tap. */
+/** One pointer on the canvas: the finger that flies, a second one that rises and sinks, or a further finger that can only tap. */
 type Touch = { role: 'fly' | 'lift' | 'tap'; x: number; y: number; at: number; moved: boolean };
 
 // A paper chosen in a flight started away from the research page: the research page opens it when it loads.
@@ -31,7 +33,7 @@ export function FlightSymbol({ papers, onShowPaper, library = 'here' }: { papers
   const launcher = useRef<HTMLButtonElement>(null);
   const close = () => { setOpen(false); window.requestAnimationFrame(() => launcher.current?.focus()); };
   return <>
-    <EmblemLauncher ref={launcher} label={t("Fly through our research")} hint={t("Press the symbol to fly")} onLaunch={() => setOpen(true)} />
+    <EmblemLauncher ref={launcher} label={t("Fly through our research")} onLaunch={() => setOpen(true)} />
     {open && createPortal(<FlightOverlay papers={papers} library={library} onClose={close} onShowPaper={id => { setOpen(false); onShowPaper(id); }} />, document.body)}
   </>;
 }
@@ -45,7 +47,7 @@ export function ResearchFlight({ papers, onShowPaper }: { papers: Publication[];
       <p className="eyebrow">{t("SIGNAL FLIGHT")}</p>
       <h2 id="flight-launch-title">{t("Fly through our research")}</h2>
       <p>{t("Every building is one of our papers, standing on a timeline from {from} to {to}. Circuits, signals and drones each rule an empire of their own.", { from: Math.min(...years), to: Math.max(...years) })}</p>
-      <small>{t("Keyboard, mouse or two thumbs on a phone. Stay next to a building to visit its paper.")}</small>
+      <small>{t("Press the symbol to take off. Keyboard, mouse or one thumb on a phone; stay next to a building to visit its paper.")}</small>
     </div>
     <div className="flight-launch-preview">
       <img src={assetUrl('/assets/research-flight.webp')} alt="" loading="lazy" />
@@ -149,15 +151,15 @@ function FlightOverlay({ papers, library, onClose, onShowPaper }: { papers: Publ
     else void dialog.current?.requestFullscreen().catch(() => undefined);
   };
 
-  // Touch screens take two thumbs: the left half flies (a stick appears where the thumb lands), the right half rises and
-  // sinks; both work at once. A mouse or pen drag flies from anywhere. A tap or click that does not move flies to the
-  // building under it.
+  // One thumb is enough: the first finger flies from wherever it lands, left or right (a stick appears under it). A second
+  // finger rises and sinks while the first flies, and so do the arrow buttons. A mouse or pen drag flies too. A tap or
+  // click that does not move flies to the building under it.
   const press = (event: ReactPointerEvent<HTMLCanvasElement>) => {
     if (event.pointerType === 'mouse' && event.button !== 0) return;
     event.currentTarget.setPointerCapture(event.pointerId);
-    const wanted = event.pointerType === 'touch' && event.clientX > event.currentTarget.clientWidth / 2 ? 'lift' : 'fly';
-    const taken = [...touches.current.values()].some(touch => touch.role === wanted);
-    touches.current.set(event.pointerId, { role: taken ? 'tap' : wanted, x: event.clientX, y: event.clientY, at: event.timeStamp, moved: false });
+    const roles = [...touches.current.values()].map(touch => touch.role);
+    const role = !roles.includes('fly') ? 'fly' : event.pointerType === 'touch' && !roles.includes('lift') ? 'lift' : 'tap';
+    touches.current.set(event.pointerId, { role, x: event.clientX, y: event.clientY, at: event.timeStamp, moved: false });
   };
   const drag = (event: ReactPointerEvent<HTMLCanvasElement>) => {
     const touch = touches.current.get(event.pointerId);
@@ -167,11 +169,11 @@ function FlightOverlay({ papers, library, onClose, onShowPaper }: { papers: Publ
     touch.moved = true;
     if (touch.role === 'fly') {
       const x = clamp(dx / STICK), y = clamp(dy / STICK);
-      handle.current?.setInput({ turn: x, forward: -y });
+      handle.current?.setInput({ turn: respond(x), forward: -respond(y) });
       setStick({ x: touch.x, y: touch.y, dx: x, dy: y });
     } else if (touch.role === 'lift') {
       const y = clamp(dy / STICK);
-      handle.current?.setInput({ lift: -y });
+      handle.current?.setInput({ lift: -respond(y) });
       setSlider({ x: touch.x, y: touch.y, dy: y });
     }
   };
@@ -212,6 +214,11 @@ function FlightOverlay({ papers, library, onClose, onShowPaper }: { papers: Publ
     onPointerCancel: () => setScrub(null),
     onPointerLeave: (event: ReactPointerEvent<HTMLDivElement>) => { if (!event.currentTarget.hasPointerCapture(event.pointerId)) setScrub(null); },
   };
+  // Rise and sink while held: in the row on a computer, stacked under the right thumb on a touch screen.
+  const lifts = <>
+    <button type="button" className="flight-lift" aria-label={t("Rise")} {...hold(1)}><Icon name="chevron" className="icon-up" /></button>
+    <button type="button" className="flight-lift" aria-label={t("Sink")} {...hold(-1)}><Icon name="chevron" /></button>
+  </>;
   const at = (z: number) => timeline ? `${(((timeline.start - z) / (timeline.start - timeline.end)) * 100).toFixed(2)}%` : '0%';
   const lastYear = timeline ? timeline.years[timeline.years.length - 1].year : 0;
   const nearName = nearTarget ? nearTarget.kind === 'genesis' ? 'GENESIS' : nearTarget.paper.title : '';
@@ -237,9 +244,8 @@ function FlightOverlay({ papers, library, onClose, onShowPaper }: { papers: Publ
         <p className="flight-year">{place.year}</p>
         <p className="flight-empire" data-empire={place.empire ?? undefined}>{place.empire === 'genesis' ? 'GENESIS' : place.empire ? empires[place.empire] : ' '}</p>
       </div>
-      {coarse && !stick && <span className="flight-pad flight-pad-fly" aria-hidden="true"><Icon name="chevron" className="pad-up" /><Icon name="chevron" className="pad-right" /><Icon name="chevron" className="pad-down" /><Icon name="chevron" className="pad-left" /></span>}
-      {coarse && !slider && <span className="flight-pad flight-pad-lift" aria-hidden="true"><Icon name="chevron" className="pad-up" /><Icon name="chevron" className="pad-down" /></span>}
-      {status === 'flying' && !moved && <p className="flight-hint">{coarse ? t("Left thumb: fly. Right thumb: rise and sink. Tap a building to fly there.") : t("Fly with W A S D or the arrow keys, rise with Space, sink with Shift. Drag to steer or click a building to fly there.")}</p>}
+      {coarse && !stick && !moved && <span className="flight-pad flight-pad-fly" aria-hidden="true"><Icon name="chevron" className="pad-up" /><Icon name="chevron" className="pad-right" /><Icon name="chevron" className="pad-down" /><Icon name="chevron" className="pad-left" /></span>}
+      {status === 'flying' && !moved && <p className="flight-hint">{coarse ? t("Drag anywhere with one thumb to fly, use the arrows to rise and sink, or tap a building to fly there.") : t("Fly with W A S D or the arrow keys, rise with Space, sink with Shift. Drag to steer or click a building to fly there.")}</p>}
       {nearTarget && !prompt && <div ref={near} className="flight-near" aria-hidden="true">
         <span className="flight-dwell" /><span><strong>{nearName}</strong><small>{t("Stay here to visit")}</small></span>
       </div>}
@@ -258,10 +264,10 @@ function FlightOverlay({ papers, library, onClose, onShowPaper }: { papers: Publ
       </div>}</div>
       <div className="flight-controls">
         <button type="button" className="flight-step" onClick={() => handle.current?.step(-1)} aria-label={t("Earlier paper")}><Icon name="arrow" className="icon-back" /><span>{t("Earlier paper")}</span></button>
-        {!coarse && <button type="button" className="flight-lift" aria-label={t("Rise")} {...hold(1)}><Icon name="chevron" className="icon-up" /></button>}
-        {!coarse && <button type="button" className="flight-lift" aria-label={t("Sink")} {...hold(-1)}><Icon name="chevron" /></button>}
+        {!coarse && lifts}
         <button type="button" className="flight-step" onClick={() => handle.current?.step(1)} aria-label={t("Later paper")}><span>{t("Later paper")}</span><Icon name="arrow" /></button>
       </div>
+      {coarse && <div className="flight-lifts">{lifts}</div>}
       <div className="flight-timeline" aria-label={t("Research timeline")} role="group" {...scrubbing}>
         <div className="flight-track" ref={track}>
           {timeline?.years.filter(({ year }, i) => i === 0 || year === lastYear || (year % 5 === 0 && lastYear - year >= 3)).map(({ year, z }) => <span key={year} className="flight-tick" style={{ left: at(z) }}>{year}</span>)}
