@@ -4,6 +4,27 @@
     "descriptor": "Autonomous RFIC design engine",
     "email": "islam.guven@uclouvain.be"
   },
+  "intro": {
+    "label": "DESIGN SESSION",
+    "you": "You",
+    "prompt": "Design a two-stage amplifier in our technology, with pixelated matching networks.",
+    "steps": [
+      "Setting up the circuit",
+      "Synthesizing the matching networks and sizing the transistors",
+      "Layout ready for your verification"
+    ],
+    "parts": [
+      "Input match",
+      "Interstage",
+      "Output match"
+    ],
+    "ports": [
+      "IN",
+      "OUT"
+    ],
+    "caption": "Illustration of a design session.",
+    "description": "Illustration: a prompt to the GENESIS assistant becomes a two-stage amplifier, drawn as pixelated matching networks with transistors between them, then optimized, the pixels and the transistor sizes changing until the layout is ready."
+  },
   "stages": [
     {
       "id": "specification",

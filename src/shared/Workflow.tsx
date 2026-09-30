@@ -8,9 +8,27 @@ import '../styles/workflow-detail.css';
 
 type Stage = { id: string; title: string; detail: string; icon: string; software: Offer[] };
 
+// Glides the page by `by` pixels in a fixed time (the page's own smooth scrolling has no set duration), then calls `done`.
+// Scrolling by hand takes over at once.
+function glide(by: number, done: () => void) {
+  const from = window.scrollY, start = performance.now();
+  let frame = 0;
+  const stop = () => { cancelAnimationFrame(frame); window.removeEventListener('wheel', finish); window.removeEventListener('touchstart', finish); };
+  const finish = () => { stop(); done(); };
+  const step = (now: number) => {
+    const t = Math.min(1, (now - start) / 420), ease = t < .5 ? 4 * t ** 3 : 1 - (2 - 2 * t) ** 3 / 2;
+    window.scrollTo({ top: from + by * ease, behavior: 'instant' });
+    if (t < 1) frame = requestAnimationFrame(step); else finish();
+  };
+  window.addEventListener('wheel', finish, { passive: true }); window.addEventListener('touchstart', finish, { passive: true });
+  frame = requestAnimationFrame(step);
+  return stop;
+}
+
 /** The stages of RF design. Each card opens what GENESIS offers at that stage: a tube grows out of the card and powers on
- * a screen below it like a cathode-ray tube (a bright line, then the picture), with the stage's animated picture and its
- * software. Another card switches the screen; the same card, the close button or Escape draws it back into the tube. */
+ * a screen below it like a cathode-ray tube: a bright line where the tube lands, then the box opens downwards under it
+ * with the stage's animated picture and its software. Another card switches the screen; the same card, the close button
+ * or Escape closes the box back into the line and the tube. */
 export function Workflow({ stages, label }: { stages: Stage[]; label: string }) {
   const { ref, enabled, running } = useVisibleMotion<HTMLDivElement>();
   const animations = useRef<Animation[]>([]);
@@ -18,6 +36,9 @@ export function Workflow({ stages, label }: { stages: Stage[]; label: string }) 
   const [open, setOpen] = useState<number | null>(null);
   const [off, setOff] = useState(false); // The screen is powering off; it unmounts when that ends.
   const [run, setRun] = useState(0); // A new key powers the screen (and the tube) on again.
+  // How the screen comes on: after the page has made room for it (wait), as a line that opens into the box (open),
+  // or straight away in place of the screen that was on (switch).
+  const [phase, setPhase] = useState<'wait' | 'open' | 'switch'>('open');
   const [tube, setTube] = useState({ x: 0, reach: 0 });
   const { press, wave } = usePress<number>(enabled);
   const panel = `stage-screen-${useId().replace(/:/g, '')}`;
@@ -74,17 +95,34 @@ export function Workflow({ stages, label }: { stages: Stage[]; label: string }) 
     if (open === null || off) return;
     const key = (event: KeyboardEvent) => { if (event.key === 'Escape') close(); };
     document.addEventListener('keydown', key);
-    // On a phone the screen can open below the fold: bring it into view once it has room.
-    const timer = window.setTimeout(() => detail.current?.querySelector('.stage-screen')?.scrollIntoView({ block: 'nearest', behavior: still ? 'auto' : 'smooth' }), still ? 0 : 520);
-    return () => { document.removeEventListener('keydown', key); window.clearTimeout(timer); };
+    return () => document.removeEventListener('keydown', key);
   }, [open, off, run]);
+  // Before the screen comes on, the page glides up (the card with it) if the open box would reach below the fold, so the
+  // line and the box opening under it stay in view and nothing moves while it opens.
+  useEffect(() => {
+    if (phase !== 'wait' || open === null) return;
+    const box = detail.current, card = ref.current?.children[open], content = box?.querySelector<HTMLElement>('.stage-screen-content');
+    if (!box || !(card instanceof HTMLElement) || !content) { setPhase('open'); return; }
+    const room = parseFloat(getComputedStyle(box).getPropertyValue('--room')) || 36;
+    const bottom = box.getBoundingClientRect().top + room + content.offsetHeight + 24;
+    const header = Math.max(0, document.querySelector('.site-header')?.getBoundingClientRect().bottom ?? 0);
+    const by = Math.min(bottom - window.innerHeight, card.getBoundingClientRect().top - header - 12);
+    if (by < 24) { setPhase('open'); return; }
+    return glide(by, () => setPhase('open'));
+  }, [phase, open, run]);
+  // With motion stopped, or when the box is taller than the view, the open screen is brought into view afterwards.
+  const reveal = () => detail.current?.querySelector('.stage-screen')?.scrollIntoView({ block: 'nearest', behavior: still ? 'auto' : 'smooth' });
+  useEffect(() => { if (still && open !== null) reveal(); }, [open, run]);
   const toggle = (index: number) => (event: MouseEvent<HTMLButtonElement>) => {
     press(index, event, event.currentTarget.closest('article') ?? undefined);
     if (open === index && !off) { close(); return; }
+    setPhase(still ? 'open' : open !== null && !off ? 'switch' : 'wait');
     setOff(false); setOpen(index); setRun(value => value + 1);
   };
   const ended = (event: AnimationEvent<HTMLElement>) => {
-    if (off && event.target === event.currentTarget && event.animationName === 'stage-screen-off') { setOpen(null); setOff(false); }
+    if (event.target !== event.currentTarget) return;
+    if (off && event.animationName === 'stage-screen-off') { setOpen(null); setOff(false); }
+    if (!off && (event.animationName === 'stage-screen-on' || event.animationName === 'stage-screen-switch')) reveal();
   };
   const stage = open === null ? null : stages[open];
   return <>
@@ -100,11 +138,11 @@ export function Workflow({ stages, label }: { stages: Stage[]; label: string }) 
     <SwipeDots row={ref} count={stages.length} />
     <div ref={detail} className="workflow-detail" data-open={open !== null && !off} data-motion={still ? 'off' : 'on'} style={{ '--tube-x': `${tube.x}px`, '--reach': `${tube.reach}px` } as CSSProperties}>
       {stage && <span key={`tube-${run}`} className="stage-tube" data-off={off} aria-hidden="true" />}
-      <div className="workflow-detail-inner">
-        {stage && <section key={run} id={panel} className="stage-screen" data-off={off} aria-label={`${label}: ${stage.title}`} onAnimationEnd={ended}>
+      {stage && <section key={run} id={panel} className="stage-screen" data-phase={phase} data-off={off} aria-label={`${label}: ${stage.title}`} onAnimationEnd={ended}>
+        <div className="stage-screen-frame"><div className="stage-screen-content">
           <TubePanel label={label} content={{ title: stage.title, image: stage.id, software: stage.software }} onClose={close} />
-        </section>}
-      </div>
+        </div></div>
+      </section>}
     </div>
   </>;
 }

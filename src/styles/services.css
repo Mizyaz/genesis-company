@@ -55,21 +55,30 @@
 .faq-list details[open] summary .icon { transform: rotate(180deg); color: var(--cyan); }
 .faq-list details p { margin: 0; padding: 0 4px 20px; max-width: 68ch; color: var(--muted); font-size: .9rem; line-height: 1.75; }
 
-/* Silicon support: a die from the wafer, probed on its pads, measured against its simulation. */
+/* Silicon support: the prober steps from die to die; each die is magnified, probed on its GSG pads and measured against
+   its simulation. Picking a die on the wafer probes that one. */
 .silicon-story, .integration-story > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.silicon-wafer-map { cursor: pointer; outline: none; -webkit-tap-highlight-color: transparent; }
+.silicon-wafer-map:focus-visible .silicon-wafer { stroke-width: 2.6; }
 .silicon-wafer { fill: var(--surface); stroke: var(--cyan); stroke-width: 1.2; }
 .silicon-die { fill: color-mix(in srgb, var(--cyan) 7%, var(--surface)); stroke: color-mix(in srgb, var(--cyan) 28%, var(--border)); stroke-width: .8; }
+@media (hover: hover) { .silicon-die[data-reachable]:hover { fill: color-mix(in srgb, var(--cyan) 24%, var(--surface)); } }
 .silicon-die-picked { fill: color-mix(in srgb, var(--cyan) 40%, var(--surface)); stroke: var(--cyan); stroke-width: 1.4; }
+.silicon-hint { fill: var(--subtle); font: 10px var(--font-mono); text-anchor: middle; }
+.silicon-run { pointer-events: none; }
 .silicon-beam { opacity: .9; }
 .silicon-closeup { fill: var(--surface); stroke: var(--cyan); stroke-width: 1.2; }
+.silicon-ground { fill: none; stroke: color-mix(in srgb, var(--cyan) 40%, var(--muted)); stroke-width: 2.2; opacity: .6; }
 .silicon-metal { fill: none; stroke: var(--cyan); stroke-width: 2.2; stroke-linejoin: miter; }
 .silicon-underpass { fill: none; stroke: var(--violet); stroke-width: 1.4; }
 .silicon-via { fill: var(--violet); }
 .silicon-pad { fill: var(--surface-raised); stroke: var(--muted); stroke-width: 1; }
+.silicon-pad[data-signal] { stroke: var(--cyan); }
 .silicon-device { fill: color-mix(in srgb, var(--violet) 22%, var(--surface)); stroke: var(--violet); stroke-width: 1; }
 .silicon-fingers { fill: none; stroke: var(--violet); stroke-width: 1.4; }
-.silicon-probes path { fill: color-mix(in srgb, var(--muted) 35%, var(--surface)); stroke: var(--muted); stroke-width: 1; stroke-linejoin: round; }
-.silicon-probes circle { fill: var(--cyan); filter: drop-shadow(0 0 4px var(--cyan)); }
+.silicon-probe-body { fill: color-mix(in srgb, var(--muted) 35%, var(--surface)); stroke: var(--muted); stroke-width: 1; stroke-linejoin: round; }
+.silicon-probe-tips { fill: none; stroke: var(--muted); stroke-width: 2; stroke-linecap: round; }
+.silicon-contact { fill: var(--cyan); filter: drop-shadow(0 0 4px var(--cyan)); transform-box: fill-box; transform-origin: center; }
 .silicon-flow, .silicon-axis { fill: none; stroke: var(--subtle); stroke-width: 1.2; stroke-linecap: round; stroke-linejoin: round; }
 .silicon-sweep { stroke: var(--violet); stroke-width: 1.2; opacity: 0; }
 .silicon-simulated { fill: none; stroke: var(--cyan); stroke-width: 2; stroke-linejoin: round; }
@@ -96,23 +105,28 @@
 .integration-actions > span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 0 6px; opacity: 0; }
 
 /* Motion runs only while visible and allowed; otherwise the complete picture stays still. */
-.service-visual[data-motion='on'] .silicon-die-picked { animation: silicon-pick 7s ease-in-out infinite paused; }
-.service-visual[data-motion='on'] .silicon-beam { animation: silicon-beam 7s ease-in-out infinite paused; }
-.service-visual[data-motion='on'] .silicon-zoom { transform-box: fill-box; transform-origin: 0% 100%; animation: silicon-zoom 7s ease-in-out infinite paused; }
-.service-visual[data-motion='on'] .silicon-probes { animation: silicon-probe 7s ease-in-out infinite paused; }
-.service-visual[data-motion='on'] .silicon-sweep { animation: silicon-sweep 7s linear infinite paused; }
-.service-visual[data-motion='on'] .silicon-measured { animation: silicon-measure 7s linear infinite paused; }
+/* One pass per die: it lights up and grows into the close-up, the probes come in from both sides and touch down, the
+   sweep measures, and the result stays until the prober moves on. */
+.service-visual[data-motion='on'] .silicon-die-picked { animation: silicon-pick .9s ease-out both paused; }
+.service-visual[data-motion='on'] .silicon-beam { animation: silicon-beam .6s ease-out 1s both paused; }
+.service-visual[data-motion='on'] .silicon-zoom { transform-box: view-box; animation: silicon-zoom 1s cubic-bezier(.2, .7, .3, 1) .2s both paused; }
+.service-visual[data-motion='on'] .silicon-probe-left { animation: silicon-probe-left .8s cubic-bezier(.25, .6, .3, 1) 1.3s both paused; }
+.service-visual[data-motion='on'] .silicon-probe-right { animation: silicon-probe-right .8s cubic-bezier(.25, .6, .3, 1) 1.3s both paused; }
+.service-visual[data-motion='on'] .silicon-contact { animation: silicon-contact .5s ease-out 2.05s both paused; }
+.service-visual[data-motion='on'] .silicon-sweep { animation: silicon-sweep 2.4s linear 2.5s both paused; }
+.service-visual[data-motion='on'] .silicon-measured { animation: silicon-measure 2.2s linear 2.6s both paused; }
 .service-visual[data-motion='on'] .integration-link { animation: integration-link 8s ease-in-out calc(var(--order) * 2s) infinite paused; }
 .service-visual[data-motion='on'] .integration-tool { animation: integration-tool 8s ease-in-out calc(var(--order) * 2s) infinite paused; }
 .service-visual[data-motion='on'] .integration-actions > span { animation: integration-action 8s ease-in-out calc(var(--order) * 2s) infinite paused; }
-.service-visual[data-active='true'] :is(.silicon-die-picked, .silicon-beam, .silicon-zoom, .silicon-probes, .silicon-sweep, .silicon-measured, .integration-link, .integration-tool, .integration-actions > span) { animation-play-state: running; }
-/* One pass: the die lights up, grows into the close-up, the probes land, the sweep measures, then everything resets. */
-@keyframes silicon-pick { 0%, 2% { opacity: .3; filter: none; } 8% { opacity: 1; filter: drop-shadow(0 0 6px var(--cyan)); } 16%, 94% { opacity: 1; filter: none; } 100% { opacity: .3; } }
-@keyframes silicon-beam { 0%, 22% { opacity: 0; } 28%, 92% { opacity: .9; } 100% { opacity: 0; } }
-@keyframes silicon-zoom { 0%, 10% { opacity: 0; transform: scale(.12); } 24%, 92% { opacity: 1; transform: none; } 100% { opacity: 0; transform: none; } }
-@keyframes silicon-probe { 0%, 25% { opacity: 0; transform: translateY(-16px); } 33%, 92% { opacity: 1; transform: none; } 100% { opacity: 0; transform: none; } }
-@keyframes silicon-sweep { 0%, 36% { transform: translateX(0); opacity: 0; } 38%, 84% { opacity: .9; } 86%, 100% { transform: translateX(216px); opacity: 0; } }
-@keyframes silicon-measure { 0%, 40% { clip-path: inset(0 100% 0 0); opacity: 1; } 80%, 92% { clip-path: inset(0 0 0 0); opacity: 1; } 100% { clip-path: inset(0 0 0 0); opacity: 0; } }
+.service-visual[data-active='true'] :is(.silicon-die-picked, .silicon-beam, .silicon-zoom, .silicon-probe, .silicon-contact, .silicon-sweep, .silicon-measured, .integration-link, .integration-tool, .integration-actions > span) { animation-play-state: running; }
+@keyframes silicon-pick { 0% { filter: none; } 35% { filter: drop-shadow(0 0 7px var(--cyan)); } 100% { filter: none; } }
+@keyframes silicon-beam { from { opacity: 0; } }
+@keyframes silicon-zoom { 0% { opacity: 0; transform: scale(.12); } 30% { opacity: 1; } 100% { opacity: 1; transform: none; } }
+@keyframes silicon-probe-left { 0% { opacity: 0; transform: translateX(-34px); } 45% { opacity: 1; } 100% { opacity: 1; transform: none; } }
+@keyframes silicon-probe-right { 0% { opacity: 0; transform: translateX(34px); } 45% { opacity: 1; } 100% { opacity: 1; transform: none; } }
+@keyframes silicon-contact { 0% { opacity: 0; transform: scale(.4); } 45% { opacity: 1; transform: scale(1.9); } 100% { opacity: 1; transform: none; } }
+@keyframes silicon-sweep { 0% { transform: translateX(0); opacity: 0; } 6%, 92% { opacity: .9; } 100% { transform: translateX(216px); opacity: 0; } }
+@keyframes silicon-measure { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
 @keyframes integration-link { 0%, 25%, 100% { stroke: var(--border); } 3%, 22% { stroke: var(--cyan); } }
 @keyframes integration-tool { 0%, 25%, 100% { border-color: var(--border); } 3%, 22% { border-color: var(--cyan); } }
 @keyframes integration-action { 0%, 25%, 100% { opacity: 0; } 3%, 22% { opacity: 1; } }
@@ -141,5 +155,5 @@
 }
 @media (prefers-reduced-motion: reduce) {
   :is(.faq-list summary, .faq-summary) .icon { transition: none; }
-  .service-visual :is(.silicon-die-picked, .silicon-beam, .silicon-zoom, .silicon-probes, .silicon-sweep, .silicon-measured, .integration-link, .integration-tool, .integration-actions > span) { animation: none !important; }
+  .service-visual :is(.silicon-die-picked, .silicon-beam, .silicon-zoom, .silicon-probe, .silicon-contact, .silicon-sweep, .silicon-measured, .integration-link, .integration-tool, .integration-actions > span) { animation: none !important; }
 }

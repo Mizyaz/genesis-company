@@ -13,31 +13,51 @@
 .workflow-step[data-open="true"] { background: linear-gradient(180deg, color-mix(in srgb, var(--cyan) 12%, transparent), transparent 75%); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cyan) 70%, transparent), 0 0 26px color-mix(in srgb, var(--cyan) 16%, transparent); }
 .workflow-step[data-open="true"]::after { content: ''; position: absolute; inset: auto 0 0; height: 3px; background: var(--gradient); box-shadow: 0 0 14px var(--cyan); }
 
-/* The space for the screen opens smoothly and closes after the screen has gone back into the tube. */
-.workflow-detail { position: relative; display: grid; grid-template-rows: 0fr; transition: grid-template-rows .45s cubic-bezier(.3, .7, .2, 1) .3s; }
-.workflow-detail[data-open="true"] { grid-template-rows: 1fr; transition-delay: .1s; }
-.workflow-detail-inner { min-height: 0; overflow: hidden; }
+/* The room below the cards: the tube crosses it and the screen comes on at its foot. */
+.workflow-detail { --room: 36px; position: relative; display: flow-root; }
 
 /* The tube: a glass tube with a glowing filament and a current running down it, from the card to the screen. */
-.stage-tube { position: absolute; z-index: 3; top: calc(-1 * var(--reach, 0px)); left: var(--tube-x); width: 12px; height: calc(var(--reach, 0px) + 36px); margin-left: -6px; border: 1px solid rgba(65, 220, 232, .55); border-top: 0; border-radius: 0 0 6px 6px; background: linear-gradient(90deg, rgba(65, 220, 232, .08), rgba(214, 252, 255, .2) 50%, rgba(65, 220, 232, .08)); box-shadow: 0 0 14px rgba(65, 220, 232, .35); transform-origin: top; animation: stage-tube-grow .26s ease-out both; }
+.stage-tube { position: absolute; z-index: 3; top: calc(-1 * var(--reach, 0px)); left: var(--tube-x); width: 12px; height: calc(var(--reach, 0px) + var(--room)); margin-left: -6px; border: 1px solid rgba(65, 220, 232, .55); border-top: 0; border-radius: 0 0 6px 6px; background: linear-gradient(90deg, rgba(65, 220, 232, .08), rgba(214, 252, 255, .2) 50%, rgba(65, 220, 232, .08)); box-shadow: 0 0 14px rgba(65, 220, 232, .35); transform-origin: top; animation: stage-tube-grow .26s ease-out both; }
 .stage-tube::before { content: ''; position: absolute; top: 0; bottom: 4px; left: 50%; width: 2px; margin-left: -1px; background: linear-gradient(#e7fbff, #41dce8); box-shadow: 0 0 6px #41dce8, 0 0 12px #b08af4; animation: stage-filament 1.3s steps(1) infinite; }
 .stage-tube::after { content: ''; position: absolute; top: 0; left: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: #fff; box-shadow: 0 0 8px 2px #41dce8; animation: stage-current .9s linear infinite; }
 .stage-tube[data-off="true"] { animation: stage-tube-retract .3s ease-in .28s both; }
 
-/* The screen powers on from the point where the tube lands: a bright line along its top, then the picture rolls down,
-   settles and warms up. It powers off the other way: back into a line, into a dot. */
-.workflow-detail .stage-screen { margin: 36px 0 6px; transform-origin: var(--tube-x) 0; animation: stage-screen-on .75s cubic-bezier(.2, .7, .25, 1) .2s both; }
-.workflow-detail .stage-screen[data-off="true"] { animation: stage-screen-off .42s ease-in both; }
+/* The screen comes on where the tube lands: a bright line grows sideways out of the tube, then the box opens downwards
+   under it. The line stays where it is, the picture unrolls rather than stretches and the page below moves with the box's
+   lower edge. It goes off the other way: the box closes up into the line and the line runs back into the tube. The
+   picture waits (paused) while the page makes room for the box. */
+.workflow-detail .stage-screen { display: grid; grid-template-rows: 1fr; margin: var(--room) 0 6px; padding: 0; transform-origin: var(--tube-x) 0; }
+.stage-screen-frame { min-height: 0; }
+.stage-screen-content { padding: 16px 20px 22px; }
+.workflow-detail[data-motion="on"] .stage-screen[data-phase="wait"] { opacity: 0; grid-template-rows: 0fr; animation: stage-room .3s ease-out both; }
+.workflow-detail[data-motion="on"] .stage-screen[data-phase="wait"] * { animation-play-state: paused !important; }
+.workflow-detail[data-motion="on"] .stage-screen[data-phase="open"] { animation: stage-room .3s ease-out both, stage-screen-on 1s linear .2s both; }
+.workflow-detail[data-motion="on"] .stage-screen[data-phase="switch"] { animation: stage-screen-switch .5s ease-out both; }
+.workflow-detail[data-motion="on"] .stage-screen[data-off="true"] { animation: stage-screen-off .55s linear both; }
 
 @keyframes stage-tube-grow { from { transform: scaleY(0); } }
 @keyframes stage-tube-retract { to { transform: scaleY(0); } }
 @keyframes stage-current { from { top: 0; opacity: 0; } 15%, 85% { opacity: 1; } to { top: 100%; opacity: 0; } }
 @keyframes stage-filament { 0%, 100% { opacity: 1; } 40% { opacity: .7; } 44% { opacity: 1; } 71% { opacity: .82; } }
-@keyframes stage-screen-on { 0% { opacity: 0; transform: scale(.02, .012); filter: brightness(6) saturate(0); } 6% { opacity: 1; } 32% { transform: scale(1, .012); filter: brightness(4.5) saturate(.2); } 70% { transform: scale(1, 1.015); filter: brightness(1.5); } 84% { transform: scale(1, .996); filter: brightness(1.1); } 100% { opacity: 1; transform: none; filter: none; } }
-@keyframes stage-screen-off { 0% { transform: none; filter: none; } 40% { transform: scale(1, .012); filter: brightness(4); } 78% { opacity: 1; transform: scale(.02, .012); filter: brightness(7); } 100% { opacity: 0; transform: scale(0); } }
+@keyframes stage-room { from { margin-top: 0; margin-bottom: 0; } }
+@keyframes stage-screen-on {
+  0% { opacity: 0; transform: scaleX(.02); grid-template-rows: 0fr; filter: brightness(3) saturate(.3); animation-timing-function: cubic-bezier(.25, .7, .3, 1); }
+  4% { opacity: 1; }
+  30% { transform: none; grid-template-rows: 0fr; filter: brightness(3) saturate(.3); animation-timing-function: cubic-bezier(.3, .65, .25, 1); }
+  85% { filter: brightness(1.1); }
+  100% { opacity: 1; transform: none; grid-template-rows: 1fr; filter: none; }
+}
+@keyframes stage-screen-switch { 0% { filter: brightness(2.6) saturate(.3); } 25% { filter: brightness(.6); } 45% { filter: brightness(1.5); } 100% { filter: none; } }
+@keyframes stage-screen-off {
+  0% { grid-template-rows: 1fr; transform: none; filter: none; animation-timing-function: cubic-bezier(.5, 0, .75, .3); }
+  50% { grid-template-rows: 0fr; transform: none; filter: brightness(3) saturate(.3); animation-timing-function: cubic-bezier(.5, 0, .75, .3); }
+  85% { opacity: 1; transform: scaleX(.02); margin-top: var(--room); margin-bottom: 6px; }
+  100% { opacity: 0; transform: scaleX(.02); grid-template-rows: 0fr; filter: brightness(3) saturate(.3); margin-top: 0; margin-bottom: 0; }
+}
 
 @media (max-width: 700px) {
-  .workflow-detail .stage-screen { margin-top: 30px; }
+  .workflow-detail { --room: 30px; }
+  .stage-screen-content { padding: 14px 14px 18px; }
   .workflow-open::before { right: 12px; bottom: 12px; }
 }
 /* Motion stopped: the screen and its picture appear finished; nothing grows, rolls or flickers. */
