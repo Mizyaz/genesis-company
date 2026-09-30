@@ -141,6 +141,18 @@ export function TubePanel({ label, content, onClose, closer }: { label: string; 
 type Rect = { top: number; left: number; width: number; height: number; scene: number };
 type CardState<Part> = { part: Part; off: boolean; run: number; rect: Rect; from: HTMLElement };
 
+/** CSS can cancel a closing animation when motion is stopped. Always finish dismissal,
+ * even without animationend; 750 ms also bounds a missing event beyond either screen's exit. */
+export function useScreenDismissal(closing: boolean, still: boolean, finish: () => void) {
+  const latest = useRef(finish);
+  useEffect(() => { latest.current = finish; }, [finish]);
+  useEffect(() => {
+    if (!closing) return;
+    const timer = window.setTimeout(() => latest.current(), still ? 0 : 750);
+    return () => window.clearTimeout(timer);
+  }, [closing, still]);
+}
+
 /** A tube screen that grows out of the card that was pressed, over its whole illustration (the `.tube-stack`, which
  * grows too, smoothly, when the screen needs more room). The same card, the close button or Escape shrinks it back into
  * the card.
@@ -152,9 +164,11 @@ export function useCardScreen<Part extends string>(enabled: boolean) {
   const still = !enabled || matchMedia('(prefers-reduced-motion: reduce)').matches;
   // The card is inert while its screen is on, so it takes focus back only once the screen is gone.
   const giveBack = (from: HTMLElement) => window.setTimeout(() => from.focus({ preventScroll: true }), 0);
+  const finish = () => { if (state) { setState(null); giveBack(state.from); } };
+  useScreenDismissal(Boolean(state?.off), still, finish);
   const close = () => {
     if (!state || state.off) return;
-    if (still) { setState(null); giveBack(state.from); }
+    if (still) finish();
     else setState({ ...state, off: true });
   };
   const toggle = (part: Part, card: HTMLElement, from: HTMLElement) => {
@@ -166,7 +180,7 @@ export function useCardScreen<Part extends string>(enabled: boolean) {
     setState({ part, off: false, run: runs.current, from, rect: { top: rect.top - box.top, left: rect.left - box.left, width: rect.width, height: rect.height, scene } });
   };
   const ended = (event: AnimationEvent<HTMLElement>) => {
-    if (state?.off && event.target === event.currentTarget && event.animationName === 'tube-collapse') { setState(null); giveBack(state.from); }
+    if (state?.off && event.target === event.currentTarget && event.animationName === 'tube-collapse') finish();
   };
   useEffect(() => {
     if (!state || state.off) return;

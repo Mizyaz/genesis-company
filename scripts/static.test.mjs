@@ -221,7 +221,7 @@ test('every card of both illustrations grows into a tube screen with what GENESI
   assert.doesNotMatch(tube, /tube-card[^{]*\{[^}]*transform: scale/); // Nothing is squashed or stretched.
   // It is removed once folded; with motion stopped it opens and closes at once. Focus goes into the screen and back to the card.
   assert.match(screens, /event\.animationName === 'tube-collapse'/);
-  assert.match(screens, /if \(still\) \{ setState\(null\); giveBack\(state\.from\); \}/);
+  // Stopped/cancelled exits and focus restoration are exercised in browser.spec.mjs.
   assert.match(screens, /event\.key === 'Escape'/);
   assert.match(screens, /closer\.current\?\.focus\(\{ preventScroll: true \}\)/);
   assert.match(screens, /from\.focus\(\{ preventScroll: true \}\)/);
@@ -305,7 +305,7 @@ test('every platform stage opens a tube screen with what GENESIS offers there, a
   assert.match(component, /<TubePanel label=\{label\} content=\{\{ title: stage\.title, image: stage\.id, software: stage\.software \}\} onClose=\{close\} \/>/);
   assert.match(screens, /aria-label=\{t\("Close"\)\}/); // One screen for every card on the site (see the illustrations).
   assert.match(component, /event\.animationName === 'stage-screen-off'/); // It goes back into the tube before it is removed.
-  assert.match(component, /if \(still\) setOpen\(null\)/); // With motion stopped it simply closes.
+  // Closing with motion stopped is exercised in browser.spec.mjs, including Escape.
   assert.match(read('src/pages/Explore.tsx'), /<Workflow stages=\{site\.stages\} label=\{site\.workflow\.softwareLabel\} \/>/);
   // A cathode-ray tube: a bright line grows sideways where the tube lands, then the box opens downwards under it (the
   // line stays put, the picture unrolls rather than stretches, the page below moves with the box's lower edge); back
