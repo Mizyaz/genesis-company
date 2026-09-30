@@ -10,8 +10,9 @@ import { Membership } from '../shared/Membership';
 import { Services } from '../shared/Services';
 import { SwipeDots } from '../shared/SwipeDots';
 
-/** The approach at a glance in the hero, then the membership, the designs, the platform and additional services.
- * Our story is told on the About page. On phones, rows of cards scroll sideways instead of stacking. */
+/** The approach at a glance in the hero, then the membership, the designs, the platform, how the system is shown in
+ * silicon and additional services. Our story is told on the About page. On phones, rows of cards scroll sideways
+ * instead of stacking. */
 export function Explore({ workbenchUrl }: { workbenchUrl?: string }) {
   const { t } = useLanguage();
   const site = useTranslatedContent(siteContent);
@@ -39,6 +40,11 @@ export function Explore({ workbenchUrl }: { workbenchUrl?: string }) {
         <div className="service-loop"><DesignStory content={site.story.loop} brand={<Brand />} /></div>
       </figure>
       <div className="service-scope platform-modules"><p className="eyebrow">{site.workflow.modulesTitle}</p><ul ref={modules} className="swipe-row">{site.workflow.modules.map(module => <li key={module.title}><Icon name={module.icon} /><div><h4>{module.title}</h4><p>{module.detail}</p></div></li>)}</ul><SwipeDots row={modules} count={site.workflow.modules.length} /></div>
+    </section>
+    <section id="silicon" className="content-section silicon-section" aria-labelledby="silicon-title">
+      <div className="section-intro"><SectionHeading eyebrow={site.silicon.eyebrow}><span id="silicon-title">{site.silicon.headline}<br /><span className="gradient-text">{site.silicon.headlineAccent}</span></span></SectionHeading><p>{site.silicon.intro}</p></div>
+      <ol className="silicon-steps">{site.silicon.steps.map(step => <li key={step.title}><Icon name={step.icon} /><h3>{step.title}</h3><p>{step.detail}</p></li>)}</ol>
+      <p className="silicon-record"><Icon name="chip" /><span>{site.silicon.record}</span><a href="#/explore/portfolio">{site.silicon.recordAction} <Icon name="arrow" /></a></p>
     </section>
     <Services content={site.services} contactHref={`mailto:${site.brand.email}?subject=GENESIS%20services`} />
     <section id="contact" className="content-section contact-section"><p className="eyebrow">{t("LET’S BUILD WHAT COMES NEXT")}</p><h2>{t("From design intent.")}<br /><span className="gradient-text">{t("To silicon demonstration.")}</span></h2><div className="contact-actions"><ActionLink href={`mailto:${site.brand.email}?subject=GENESIS%20demo`} icon="mail">{t("Get in touch")}</ActionLink>{workbenchUrl && <ActionLink variant="secondary" href={workbenchUrl} icon="diagonal" data-genesis-handoff>{t("Open workbench")}</ActionLink>}</div></section>

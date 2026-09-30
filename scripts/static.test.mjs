@@ -311,14 +311,14 @@ test('Explore opens with the membership, then the portfolio; services stay data-
     assert.equal(item.stages, undefined);
   }
   const page = read('src/pages/Explore.tsx');
-  const order = ['<section className="company-hero"', '<Membership ', '<section id="portfolio"', '<section id="workflow"', '<Services ', '<section id="contact"'].map(marker => page.indexOf(marker));
+  const order = ['<section className="company-hero"', '<Membership ', '<section id="portfolio"', '<section id="workflow"', '<section id="silicon"', '<Services ', '<section id="contact"'].map(marker => page.indexOf(marker));
   assert.ok(order.every((position, i) => position >= 0 && (i === 0 || position > order[i - 1])), `section order ${order}`);
   assert.match(page, /href="#\/explore\/membership"/); // The hero leads straight to the membership.
   assert.doesNotMatch(page, /id="about"|TeamProfiles/); // About us is a page of its own.
   assert.match(page, /<Services content=\{site.services\}/);
   assert.match(read('src/shared/Services.tsx'), /content.items.map/);
   assert.doesNotMatch(read('src/shared/Services.tsx'), /fetch\s*\(|checkout|payment/);
-  assert.match(read('src/PublicApp.tsx'), /'membership', 'portfolio', 'workflow', 'services'/);
+  assert.match(read('src/PublicApp.tsx'), /'membership', 'portfolio', 'workflow', 'silicon', 'services'/);
   assert.equal(dictionary['From specs'], 'Fikirden');
   assert.equal(dictionary['silicon.'], 'çipe.');
   assert.doesNotMatch(Object.values(dictionary).join('\n'), /Hedeflerden|silikona|DEVRELER\. ALANLAR/i);
@@ -470,7 +470,7 @@ test('every page change and every wait uses the one silicon gate, from the first
 test('public source has no assistant, landing page or engineering service', () => {
   for (const path of ['src/App.tsx', 'src/main.tsx', 'src/pages/Landing.tsx', 'src/assistant', 'server', '.env']) assert.equal(existsSync(resolve(root, path)), false, path);
   const content = JSON.parse(read('src/content/site.json'));
-  assert.deepEqual(Object.keys(content).sort(), ['about', 'brand', 'membership', 'portfolio', 'services', 'stages', 'story', 'workflow'].sort());
+  assert.deepEqual(Object.keys(content).sort(), ['about', 'brand', 'membership', 'portfolio', 'services', 'silicon', 'stages', 'story', 'workflow'].sort());
   const source = walk('src').map(read).join('\n');
   assert.doesNotMatch(source, /localhost|127\.0\.0\.1|\/api\/|VITE_WORKBENCH_URL|codex exec|fetch\s*\(|new WebSocket/);
   assert.match(read('index.html'), /connect-src 'none'/);
@@ -690,6 +690,27 @@ test('pixelated passives look like the ones in our papers: hundreds of pixels, e
   const { glyphOf } = transpiled('src/flight/layout.ts');
   const papers = JSON.parse(read('src/content/publications.json')).filter(paper => /pixelated|three-port/i.test(paper.title));
   assert.deepEqual(papers.map(glyphOf).sort(), ['pixels', 'ports', 'stack']);
+});
+
+test('the membership speaks for a general RFIC design system, and the silicon demonstration names no bands, companies or dates', () => {
+  const content = JSON.parse(read('src/content/site.json'));
+  const dictionary = JSON.parse(read('src/content/tr.json'));
+  const { membership, silicon } = content;
+  // General, not one application: front-ends and specialised circuits, with nothing that narrows it down.
+  const general = [membership.headline, membership.headlineAccent, membership.intro, silicon.eyebrow, silicon.headline, silicon.headlineAccent, silicon.intro,
+    ...silicon.steps.flatMap(step => [step.title, step.detail]), silicon.record, silicon.recordAction];
+  assert.match(membership.intro, /general RFIC design system/);
+  assert.match(membership.headlineAccent, /front-ends to specialised circuits/);
+  assert.doesNotMatch(general.join(' '), /\d|GHz|radar|automotive|GlobalFoundries|STMicro|imec|IC-Link|MPW|partner/i);
+  for (const copy of general) assert.ok(dictionary[copy], copy);
+  // How the system is shown in silicon: specification, design in GENESIS, tape-out, measurement; joined, not numbered.
+  assert.deepEqual(silicon.steps.map(step => step.title), ['Specification', 'Design in GENESIS', 'Tape-out', 'Measurement']);
+  const page = read('src/pages/Explore.tsx');
+  assert.match(page, /<ol className="silicon-steps">\{site\.silicon\.steps\.map\(step => <li key=\{step\.title\}><Icon name=\{step\.icon\} \/><h3>\{step\.title\}<\/h3><p>\{step\.detail\}<\/p><\/li>\)\}<\/ol>/);
+  assert.doesNotMatch(page.slice(page.indexOf('<section id="silicon"'), page.indexOf('<Services ')), /padStart|step-number/);
+  assert.match(page, /<a href="#\/explore\/portfolio">\{site\.silicon\.recordAction\}/); // The record points at the fabricated designs.
+  assert.match(read('src/styles/site.css'), /\.silicon-steps::before \{ content: ''; position: absolute;/);
+  for (const exporter of ['scripts/export-public.mjs'].filter(path => existsSync(resolve(root, path)))) assert.match(read(exporter), /'membership', 'silicon', 'services'/); // The section's content is published.
 });
 
 test('production bundle has no local service client or assistant endpoint', () => {

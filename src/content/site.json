@@ -197,9 +197,9 @@
   ],
   "membership": {
     "eyebrow": "GENESIS MEMBERSHIP",
-    "headline": "Start with a free demo,",
-    "headlineAccent": "then pick your tier.",
-    "intro": "Every tier runs next to your Cadence tools, on your own server. Choose what fits your team; we confirm the details and the price in your offer.",
+    "headline": "One RFIC design system,",
+    "headlineAccent": "from front-ends to specialised circuits.",
+    "intro": "GENESIS is a general RFIC design system: RF front-ends, frequency converters, broadband passives and specialised circuits, from specification to verified layout, in your technology and next to your Cadence tools. Start with a free demo, then choose the tier that fits your team.",
     "tiers": [
       {
         "id": "demo",
@@ -289,6 +289,36 @@
         }
       ]
     }
+  },
+  "silicon": {
+    "eyebrow": "SILICON DEMONSTRATION",
+    "headline": "From verified layout",
+    "headlineAccent": "to measured silicon.",
+    "intro": "GENESIS is demonstrated where RFIC design is judged: in silicon. Demonstrators go through the same flow our members use, from specification to measurement, starting with building blocks and growing into complete front-ends and specialised circuits.",
+    "steps": [
+      {
+        "icon": "document",
+        "title": "Specification",
+        "detail": "Each demonstrator starts from a written specification: the targets the circuit must meet and the conditions they are checked under."
+      },
+      {
+        "icon": "spark",
+        "title": "Design in GENESIS",
+        "detail": "Synthesis, EM-checked passives, circuit simulation and optimization run in GENESIS, next to the foundry PDK and standard CAD tools."
+      },
+      {
+        "icon": "chip",
+        "title": "Tape-out",
+        "detail": "Layout, DRC and LVS sign-off, then fabrication in a commercial foundry technology."
+      },
+      {
+        "icon": "wave",
+        "title": "Measurement",
+        "detail": "On-wafer measurements are compared with the simulated targets. Where silicon differs from simulation, models and constraints are updated."
+      }
+    ],
+    "record": "Our team has taken designs to silicon before: the switch, mixer and divider in our portfolio were fabricated in commercial foundry technologies.",
+    "recordAction": "See the designs"
   },
   "services": {
     "eyebrow": "ADDITIONAL SERVICES",
