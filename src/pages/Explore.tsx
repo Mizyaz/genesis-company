@@ -3,16 +3,16 @@ import { useLanguage, useTranslatedContent } from '../shared/Language';
 import siteContent from '../content/site.json';
 import { ActionLink, Brand, Icon, SectionHeading } from '../shared/ui';
 import { PortfolioCard } from '../shared/PortfolioCard';
-import { StoryScene } from '../shared/StoryScene';
+import { ProductIntro } from '../shared/ProductIntro';
 import { DesignStory } from '../shared/DesignStory';
 import { Workflow } from '../shared/Workflow';
 import { Membership } from '../shared/Membership';
 import { Services } from '../shared/Services';
 import { SwipeDots } from '../shared/SwipeDots';
 
-/** The approach at a glance in the hero, then the membership, the designs, the platform, how the system is shown in
- * silicon and additional services. Our story is told on the About page. On phones, rows of cards scroll sideways
- * instead of stacking. */
+/** The product at a glance in the hero (a prompt becoming an optimized layout), then the membership, the designs, the
+ * platform, how the system is shown in silicon and additional services. Our story is told on the About page. On phones,
+ * rows of cards scroll sideways instead of stacking. */
 export function Explore({ workbenchUrl }: { workbenchUrl?: string }) {
   const { t } = useLanguage();
   const site = useTranslatedContent(siteContent);
@@ -23,7 +23,7 @@ export function Explore({ workbenchUrl }: { workbenchUrl?: string }) {
       <div className="company-hero-image" aria-hidden="true" />
       <div className="company-hero-inner">
         <div className="company-hero-copy"><p className="eyebrow"><span className="short-rule" /> {t("AUTONOMOUS RFIC DESIGN ENGINE")}</p><h1 id="company-heading">{t("From specs")}<br />{t("to")} <span className="gradient-text">{t("silicon.")}</span></h1><p>{t("RF expertise. AI intelligence.")}<br />{t("One connected design loop.")}</p><a className="button button-primary" href="#/explore/membership">{t("View the membership")} <Icon name="down" /></a></div>
-        <StoryScene content={site.story.scene} brand={<Brand />} />
+        <ProductIntro content={site.intro} />
       </div>
     </section>
     <Membership content={site.membership} email={site.brand.email} />

@@ -117,10 +117,7 @@ test('the lead diagram is an animated scene: a designer, AI agents and GENESIS m
   const { story } = JSON.parse(read('src/content/site.json'));
   const dictionary = JSON.parse(read('src/content/tr.json'));
   const scene = read('src/shared/StoryScene.tsx');
-  // It leads both the home page and Explore (in the hero, before the membership).
-  const explore = read('src/pages/Explore.tsx');
-  const sceneAt = explore.indexOf('<StoryScene content={site.story.scene} brand={<Brand />} />');
-  assert.ok(sceneAt > explore.indexOf('<section className="company-hero"') && sceneAt < explore.indexOf('<Membership '), 'scene in the hero');
+  // It leads the home page; Explore's hero shows the product itself (see the product intro).
   assert.match(read('src/pages/Welcome.tsx'), /<StoryScene content=\{site.story.scene\} brand=\{<Brand \/>\} \/>/);
   // More telling without more text: the designer's pen, the agent that checks each candidate, and the chip GENESIS hands back.
   for (const part of ['className="scene-pen"', 'className="scene-agent"', '<OutputArt on={phase === final} />', 'className="scene-die-check"']) assert.ok(scene.includes(part), part);
@@ -134,7 +131,42 @@ test('the lead diagram is an animated scene: a designer, AI agents and GENESIS m
   assert.equal((scene.match(/className="scene-title"/g) || []).length, 2);
   assert.equal((scene.match(/className="sr-only"/g) || []).length, 2);
   for (const copy of [story.scene.caption, story.scene.outcome, ...['expertise', 'agents'].flatMap(key => [story.scene[key].title, story.scene[key].detail])]) assert.ok(dictionary[copy], copy);
+});
+
+test('Explore opens with the product: a prompt to the assistant becomes pixelated matching networks and sized transistors, then an optimized layout', () => {
+  const { intro } = JSON.parse(read('src/content/site.json'));
+  const dictionary = JSON.parse(read('src/content/tr.json'));
+  const explore = read('src/pages/Explore.tsx'), component = read('src/shared/ProductIntro.tsx'), css = read('src/styles/product-intro.css');
+  const at = explore.indexOf('<ProductIntro content={site.intro} />');
+  assert.ok(at > explore.indexOf('<section className="company-hero"') && at < explore.indexOf('<Membership '), 'in the hero');
+  assert.doesNotMatch(explore, /<StoryScene/);
+  // The circuit is drawn from our pixelated layouts: three matching networks with two multi-finger transistors between.
+  assert.match(component, /pixelLayout\(\{/);
+  assert.match(component, /const passiveX = \[34, 128, 222\];/);
+  assert.match(component, /const deviceX = \[94, 188\];/);
+  // Optimizing: pixels flip and the transistor sizes change, iteration by iteration; no figures anywhere.
+  assert.match(component, /className="intro-flips"/);
+  assert.match(component, /scaleY\(\$\{spec\.width\[step\]\}\)/);
+  assert.match(component, /<g key=\{fingers\} className="intro-fingers">/);
+  assert.deepEqual(intro.parts, ['Input match', 'Interstage', 'Output match']);
+  assert.doesNotMatch(JSON.stringify(intro), /\d|GHz|dB|%/);
+  // Honest about what it is, in both languages.
+  assert.match(intro.caption, /^Illustration/);
+  for (const copy of [intro.label, intro.you, intro.prompt, ...intro.steps, ...intro.parts, ...intro.ports, intro.caption, intro.description]) assert.ok(dictionary[copy], copy);
+  // It runs only while seen and moving: types the prompt, sends, draws, optimizes, holds and starts again. Stopped or
+  // reduced motion shows the finished layout; the prompt box never grows while it is typed.
+  assert.match(component, /useVisibleMotion<HTMLElement>\(\)/);
+  assert.match(component, /const view: Run = enabled \? run : \{ phase: 'ready', typed: prompt\.length, step: iterations, cycle: 0 \};/);
+  assert.match(component, /if \(!running\) return;/);
+  assert.doesNotMatch(component, /setInterval|fetch\s*\(/);
+  assert.match(css, /\.product-intro\[data-motion="off"\] \*/);
+  assert.match(css, /\.product-intro\[data-running="false"\] \* \{ animation-play-state: paused !important; \}/);
+  assert.match(css, /\.intro-rest \{ visibility: hidden; \}/);
   assert.match(read('src/styles/site.css'), /\.company-hero-inner \{ display: grid; grid-template-columns: minmax\(0, 1fr\) minmax\(0, 1fr\)/); // Wide text never widens the page.
+  for (const exporter of ['scripts/export-public.mjs'].filter(path => existsSync(resolve(root, path)))) {
+    assert.match(read(exporter), /'src\/shared\/ProductIntro\.tsx', 'src\/styles\/product-intro\.css'/);
+    assert.match(read(exporter), /\['brand', 'intro', /);
+  }
 });
 
 test('every card of both illustrations grows into a tube screen with what GENESIS offers there; the story waits under it', () => {
@@ -173,12 +205,20 @@ test('every card of both illustrations grows into a tube screen with what GENESI
   }
   for (const copy of [story.scene.label, story.loop.label, story.loop.engine.title]) assert.ok(dictionary[copy], copy);
   assert.doesNotMatch(JSON.stringify(parts), /\d+\s*%|\d+x\b|guarante|unlimited|faster|instant/i);
-  // Like a tube powering on: a flash on the card, a bright line across the illustration, then the screen; back into the card.
+  // The card lights up and its box expands from the card's place into the screen (border and all), then the picture
+  // comes on; back into the card. The illustration never moves (nothing in the stack stretches), and the page below
+  // moves only as the box needs more room than the illustration (rows opening with the box, from its height).
   const tube = read('src/styles/tube-screen.css');
-  assert.match(tube, /\.tube-stack > \* \{ grid-area: 1 \/ 1;/);
-  assert.match(tube, /@keyframes tube-expand \{\n  0% \{ clip-path: inset\(var\(--t\) calc\(100% - var\(--l\) - var\(--w\)\) calc\(100% - var\(--t\) - var\(--h\)\) var\(--l\)/);
+  assert.match(tube, /\.tube-stack > \* \{ grid-area: 1 \/ 1; min-width: 0; align-self: start; \}/);
+  assert.match(tube, /@keyframes tube-frame \{ from \{ inset: var\(--t\) calc\(100% - var\(--l\) - var\(--w\)\) calc\(100% - var\(--t\) - var\(--h\)\) var\(--l\);/);
+  assert.match(tube, /\.tube-card \.tube-frame, \.tube-card::before, \.tube-card::after \{ animation: tube-frame /);
+  assert.match(tube, /@keyframes tube-expand \{ from \{ grid-template-rows: 0fr; \} \}/);
+  assert.match(tube, /\.tube-body \{ position: relative; z-index: 1; min-height: var\(--scene, 0px\);/);
   assert.match(tube, /@keyframes tube-collapse/);
   assert.match(tube, /\.tube-flash \{/);
+  assert.match(screens, /<span className="tube-frame" aria-hidden="true"><span className="tube-flash" \/><\/span>/);
+  assert.match(screens, /const scene = stack\.current\?\.firstElementChild\?\.getBoundingClientRect\(\)\.height/);
+  assert.doesNotMatch(tube, /tube-card[^{]*\{[^}]*transform: scale/); // Nothing is squashed or stretched.
   // It is removed once folded; with motion stopped it opens and closes at once. Focus goes into the screen and back to the card.
   assert.match(screens, /event\.animationName === 'tube-collapse'/);
   assert.match(screens, /if \(still\) \{ setState\(null\); giveBack\(state\.from\); \}/);
@@ -267,12 +307,25 @@ test('every platform stage opens a tube screen with what GENESIS offers there, a
   assert.match(component, /event\.animationName === 'stage-screen-off'/); // It goes back into the tube before it is removed.
   assert.match(component, /if \(still\) setOpen\(null\)/); // With motion stopped it simply closes.
   assert.match(read('src/pages/Explore.tsx'), /<Workflow stages=\{site\.stages\} label=\{site\.workflow\.softwareLabel\} \/>/);
-  // A cathode-ray tube: a bright line where the tube lands, then the picture; scanlines; back to a line and a dot.
+  // A cathode-ray tube: a bright line grows sideways where the tube lands, then the box opens downwards under it (the
+  // line stays put, the picture unrolls rather than stretches, the page below moves with the box's lower edge); back
+  // into the line and the tube. If the open box would reach below the fold, the page glides up first, so nothing moves
+  // while it opens; the room for the tube does not collapse into the section above.
   const css = read('src/styles/workflow-detail.css');
-  assert.match(css, /transform-origin: var\(--tube-x\) 0; animation: stage-screen-on/);
-  assert.match(css, /@keyframes stage-screen-on \{ 0% \{ opacity: 0; transform: scale\(\.02, \.012\);[^}]*\} 6% \{ opacity: 1; \} 32% \{ transform: scale\(1, \.012\);/);
+  assert.match(css, /\.workflow-detail \{ --room: 36px; position: relative; display: flow-root; \}/);
+  assert.match(css, /height: calc\(var\(--reach, 0px\) \+ var\(--room\)\)/);
+  assert.match(css, /@keyframes stage-screen-on \{\n  0% \{ opacity: 0; transform: scaleX\(\.02\); grid-template-rows: 0fr;/);
+  assert.match(css, /30% \{ transform: none; grid-template-rows: 0fr;/);
+  assert.match(css, /100% \{ opacity: 1; transform: none; grid-template-rows: 1fr; filter: none; \}/);
+  assert.doesNotMatch(css, /scale\(1, |scaleY\(\.0/); // The picture is never squashed into the line.
+  assert.match(css, /\.stage-screen-frame \{ min-height: 0; \}/);
+  assert.match(css, /\.workflow-detail\[data-motion="on"\] \.stage-screen\[data-phase="wait"\] \* \{ animation-play-state: paused !important; \}/);
   assert.match(css, /@keyframes stage-screen-off/);
   assert.match(css, /@keyframes stage-tube-grow/);
+  assert.match(component, /return glide\(by, \(\) => setPhase\('open'\)\);/);
+  assert.match(component, /const bottom = box\.getBoundingClientRect\(\)\.top \+ room \+ content\.offsetHeight \+ 24;/);
+  assert.match(component, /event\.animationName === 'stage-screen-on' \|\| event\.animationName === 'stage-screen-switch'\)\) reveal\(\)/); // Brought into view once open.
+  assert.doesNotMatch(component, /setTimeout\(\(\) => detail\.current/); // No scrolling while it opens.
   const tube = read('src/styles/tube-screen.css');
   assert.match(tube, /repeating-linear-gradient\(to bottom/);
   // The screen arranges itself by its own width: one column when narrow, the offers side by side when wide.
@@ -281,7 +334,6 @@ test('every platform stage opens a tube screen with what GENESIS offers there, a
   assert.match(tube, /@container \(min-width: 880px\)/);
   assert.match(css, /\.workflow-detail\[data-motion="off"\] \*/);
   assert.match(css, /prefers-reduced-motion: reduce/);
-  assert.match(css, /\.workflow-detail \{ position: relative; display: grid; grid-template-rows: 0fr;/);
 });
 
 test('welcome uses the shared, single-line brand entrance with readable acronym emphasis', () => {
@@ -420,9 +472,23 @@ test('services share contact actions, support keyboard tabs and animate only whe
   assert.match(styles, /data-active='true'/);
   assert.doesNotMatch(styles, /\.button(?:-primary|-secondary)?\s*\{[^}]*background:/);
   assert.doesNotMatch(services, /setInterval|setTimeout/); // Service choice never advances while someone reads.
-  // Silicon: the close-up grows out of the picked die inside one beam, probes land, the sweep measures.
-  for (const part of ['className="silicon-beam"', 'className="silicon-die silicon-die-picked"', 'className="silicon-zoom"', 'className="silicon-probes"', 'className="silicon-measured"']) assert.ok(services.includes(part), part);
-  for (const name of ['silicon-pick', 'silicon-beam', 'silicon-zoom', 'silicon-probe', 'silicon-sweep', 'silicon-measure']) assert.match(styles, new RegExp(`@keyframes ${name} `), name);
+  // Silicon: the close-up grows out of the probed die inside one beam, a GSG probe comes in from each side with its three
+  // tips on the ground-signal-ground pads, the sweep measures; then the prober steps to the next die. Any die can be
+  // picked (the nearest to the tap), or the next one with Enter.
+  const silicon = read('src/shared/SiliconStory.tsx');
+  assert.match(services, /<SiliconStory legend=\{item\.legend \?\? \[\]\} active=\{running\} motion=\{enabled\} \/>/);
+  for (const part of ['className="silicon-beam"', 'className="silicon-die silicon-die-picked"', 'className="silicon-zoom"', 'className="silicon-probe-body"', 'className="silicon-probe-tips"', 'className="silicon-measured"', 'className="silicon-ground"']) assert.ok(silicon.includes(part), part);
+  assert.match(silicon, /const pads = \[68, 88, 108\];/);
+  assert.match(silicon, /const edges = \[\{ side: 'left', pad: 230, tip: 236 \}, \{ side: 'right', pad: 358, tip: 364 \}\] as const;/);
+  assert.match(silicon, /data-signal=\{y === 88 \|\| undefined\}/);
+  assert.match(silicon, /role="button" tabIndex=\{0\} aria-label=\{t\("Probe the next die"\)\} onClick=\{pick\}/);
+  assert.match(silicon, /event\.key === 'Enter' \|\| event\.key === ' '/);
+  assert.match(silicon, /matrixTransform\(matrix\.inverse\(\)\)/);
+  assert.match(silicon, /if \(!active \|\| !motion \|\| !probing\.measured\) return;/); // Steps on only while seen and moving.
+  assert.match(silicon, /<g key=\{probing\.run\} className="silicon-run"/); // Each die runs the story once.
+  for (const name of ['silicon-pick', 'silicon-beam', 'silicon-zoom', 'silicon-probe-left', 'silicon-probe-right', 'silicon-contact', 'silicon-sweep', 'silicon-measure']) assert.match(styles, new RegExp(`@keyframes ${name} `), name);
+  assert.doesNotMatch(styles.slice(styles.indexOf('/* One pass per die'), styles.indexOf('@keyframes integration-link')), /silicon[^;]*infinite/);
+  for (const copy of ['Probe the next die', 'Pick a die to probe it']) assert.ok(JSON.parse(read('src/content/tr.json'))[copy], copy);
   assert.match(styles, /prefers-reduced-motion: reduce\) \{\n(?:  [^\n]*\n)*  \.service-visual :is\(\.silicon-die-picked/);
 });
 
@@ -470,7 +536,7 @@ test('every page change and every wait uses the one silicon gate, from the first
 test('public source has no assistant, landing page or engineering service', () => {
   for (const path of ['src/App.tsx', 'src/main.tsx', 'src/pages/Landing.tsx', 'src/assistant', 'server', '.env']) assert.equal(existsSync(resolve(root, path)), false, path);
   const content = JSON.parse(read('src/content/site.json'));
-  assert.deepEqual(Object.keys(content).sort(), ['about', 'brand', 'membership', 'portfolio', 'services', 'silicon', 'stages', 'story', 'workflow'].sort());
+  assert.deepEqual(Object.keys(content).sort(), ['about', 'brand', 'intro', 'membership', 'portfolio', 'services', 'silicon', 'stages', 'story', 'workflow'].sort());
   const source = walk('src').map(read).join('\n');
   assert.doesNotMatch(source, /localhost|127\.0\.0\.1|\/api\/|VITE_WORKBENCH_URL|codex exec|fetch\s*\(|new WebSocket/);
   assert.match(read('index.html'), /connect-src 'none'/);

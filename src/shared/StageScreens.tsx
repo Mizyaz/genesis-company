@@ -138,11 +138,12 @@ export function TubePanel({ label, content, onClose, closer }: { label: string; 
   </>;
 }
 
-type Rect = { top: number; left: number; width: number; height: number };
+type Rect = { top: number; left: number; width: number; height: number; scene: number };
 type CardState<Part> = { part: Part; off: boolean; run: number; rect: Rect; from: HTMLElement };
 
 /** A tube screen that grows out of the card that was pressed, over its whole illustration (the `.tube-stack`, which
- * grows too when the screen needs more room). The same card, the close button or Escape folds it back into the card.
+ * grows too, smoothly, when the screen needs more room). The same card, the close button or Escape shrinks it back into
+ * the card.
  * With motion stopped it opens and closes at once. Focus moves into the screen and back to the card. */
 export function useCardScreen<Part extends string>(enabled: boolean) {
   const stack = useRef<HTMLDivElement>(null);
@@ -160,8 +161,9 @@ export function useCardScreen<Part extends string>(enabled: boolean) {
     if (state && state.part === part && !state.off) { close(); return; }
     const box = stack.current?.getBoundingClientRect(), rect = card.getBoundingClientRect();
     if (!box) return;
+    const scene = stack.current?.firstElementChild?.getBoundingClientRect().height ?? box.height;
     runs.current += 1;
-    setState({ part, off: false, run: runs.current, from, rect: { top: rect.top - box.top, left: rect.left - box.left, width: rect.width, height: rect.height } });
+    setState({ part, off: false, run: runs.current, from, rect: { top: rect.top - box.top, left: rect.left - box.left, width: rect.width, height: rect.height, scene } });
   };
   const ended = (event: AnimationEvent<HTMLElement>) => {
     if (state?.off && event.target === event.currentTarget && event.animationName === 'tube-collapse') { setState(null); giveBack(state.from); }
@@ -175,8 +177,8 @@ export function useCardScreen<Part extends string>(enabled: boolean) {
   return { stack, state, still, open: Boolean(state && !state.off), toggle, close, ended };
 }
 
-/** The screen itself: it flashes where the card was, folds into a bright line across the illustration and opens into the
- * picture (see `tube-expand`); closing runs it back into the card and out (`tube-collapse`). */
+/** The screen itself: the card lights up and its box expands from the card's place into the screen, then the picture
+ * comes on inside it (see `tube-frame`); closing shrinks it back into the card and out (`tube-collapse`). */
 export function CardScreen({ id, state, still, label, content, onClose, onEnded }: { id: string; state: { off: boolean; run: number; rect: Rect }; still: boolean;
   label: string; content: TubeContent; onClose: () => void; onEnded: (event: AnimationEvent<HTMLElement>) => void }) {
   const closer = useRef<HTMLButtonElement>(null);
@@ -189,8 +191,10 @@ export function CardScreen({ id, state, still, label, content, onClose, onEnded 
   }, [state.run, still]);
   const { rect } = state;
   return <section ref={screen} id={id} className="stage-screen tube-card" data-off={state.off} aria-label={`${label}: ${content.title}`} onAnimationEnd={onEnded}
-    style={{ '--t': `${rect.top}px`, '--l': `${rect.left}px`, '--w': `${rect.width}px`, '--h': `${rect.height}px` } as CSSProperties}>
-    <span className="tube-flash" aria-hidden="true" />
-    <TubePanel label={label} content={content} onClose={onClose} closer={closer} />
+    style={{ '--t': `${rect.top}px`, '--l': `${rect.left}px`, '--w': `${rect.width}px`, '--h': `${rect.height}px`, '--scene': `${rect.scene}px` } as CSSProperties}>
+    <span className="tube-frame" aria-hidden="true"><span className="tube-flash" /></span>
+    <div className="tube-body">
+      <TubePanel label={label} content={content} onClose={onClose} closer={closer} />
+    </div>
   </section>;
 }

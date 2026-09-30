@@ -1,0 +1,87 @@
+/* The product in one picture (ProductIntro.tsx): a prompt to the GENESIS assistant, the circuit it draws and the
+   optimization that follows. Theme colours throughout; the base styles are the finished layout and the animations
+   lead up to it. */
+.product-intro { width: 100%; max-width: 560px; min-width: 0; margin: 0; container-type: inline-size; }
+.intro-panel { overflow: hidden; border: 1px solid var(--border); border-radius: 18px; background: radial-gradient(ellipse at 50% 80%, var(--glow), transparent 70%), linear-gradient(140deg, var(--surface), var(--surface-raised)); box-shadow: var(--shadow); }
+.intro-heading { display: flex; align-items: center; gap: 9px; padding: 14px 18px; border-bottom: 1px solid var(--border-soft); color: var(--muted); font: .65rem var(--font-mono); letter-spacing: .09em; }
+.intro-heading > span:last-child { margin-left: auto; letter-spacing: .04em; }
+.intro-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--cyan); }
+
+/* The prompt: typed at a person's pace into the assistant's input, then sent. The rest of the sentence already takes
+   its place (hidden), so the box never changes height while it is typed. */
+.intro-prompt { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; margin: 16px 18px 0; padding: 12px 12px 12px 14px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); transition: border-color .3s, box-shadow .3s; }
+.intro-prompt[data-sent="true"] { border-color: color-mix(in srgb, var(--cyan) 45%, var(--border)); }
+.intro-who { grid-column: 1; color: var(--subtle); font: 600 .6rem var(--font-mono); letter-spacing: .08em; text-transform: uppercase; }
+.intro-text { grid-column: 1; margin: 0; min-height: 2.9em; color: var(--text); font-size: .9rem; line-height: 1.45; }
+.intro-rest { visibility: hidden; }
+.intro-caret { display: inline-block; width: 2px; height: 1.05em; margin: 0 1px -.18em; background: var(--cyan); }
+.intro-prompt[data-sent="true"] .intro-caret { visibility: hidden; }
+.intro-send { grid-column: 2; grid-row: 1 / 3; align-self: end; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: color-mix(in srgb, var(--cyan) 14%, transparent); color: var(--cyan); }
+.intro-send .icon { width: 16px; height: 16px; }
+
+/* The assistant's answer: what it is doing now, and the optimization's iterations as dots (no figures). */
+.intro-reply { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; margin: 12px 18px 0; min-height: 2.7em; opacity: 0; transition: opacity .35s; }
+.intro-reply[data-on="true"] { opacity: 1; }
+.intro-reply .emblem-mark { width: 22px; height: 20px; }
+.intro-status { display: grid; color: var(--muted); font-size: .8rem; line-height: 1.35; }
+.intro-status > span { grid-area: 1 / 1; align-self: center; opacity: 0; transition: opacity .35s; }
+.intro-status > span[data-on="true"] { opacity: 1; }
+.intro-progress { display: flex; gap: 5px; }
+.intro-progress i { width: 6px; height: 6px; border-radius: 50%; background: var(--border); transition: background .3s, box-shadow .3s; }
+.intro-progress i[data-on="true"] { background: var(--cyan); box-shadow: 0 0 6px color-mix(in srgb, var(--cyan) 60%, transparent); }
+
+/* The circuit, drawn on the assistant's canvas: a faint grid, the ground rails and pads, the line and, along it, the
+   pixelated matching networks with the transistors between them. */
+.intro-circuit { display: block; width: calc(100% - 24px); height: auto; margin: 10px 12px 12px; border-radius: 10px; overflow: visible;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--cyan) 6%, transparent) 1px, transparent 1px) 0 0 / 12px 12px, linear-gradient(color-mix(in srgb, var(--cyan) 6%, transparent) 1px, transparent 1px) 0 0 / 12px 12px, color-mix(in srgb, var(--page) 55%, transparent); }
+.intro-rail { fill: none; stroke: color-mix(in srgb, var(--cyan) 35%, var(--muted)); stroke-width: 2; stroke-linejoin: round; opacity: .55; }
+.intro-pads rect { fill: var(--surface-raised); stroke: var(--muted); stroke-width: 1; }
+.intro-pads rect[data-signal] { stroke: var(--cyan); }
+.intro-port, .intro-part { fill: var(--subtle); font: 600 6.5px var(--font-mono); letter-spacing: .06em; text-anchor: middle; text-transform: uppercase; }
+.intro-line { fill: none; stroke: var(--cyan); stroke-width: 2.2; stroke-linecap: round; }
+.intro-window { fill: color-mix(in srgb, var(--page) 70%, transparent); stroke: color-mix(in srgb, var(--cyan) 30%, var(--border)); stroke-width: 1; }
+.intro-metal rect { fill: var(--cyan); opacity: .88; }
+.intro-flips rect { pointer-events: none; }
+.intro-flips rect[data-on="true"] { fill: #fff; opacity: 0; }
+.intro-flips rect[data-on="false"] { fill: var(--violet); opacity: 0; }
+.intro-active { fill: color-mix(in srgb, var(--violet) 26%, var(--surface)); stroke: var(--violet); stroke-width: 1; }
+.intro-fingers path { stroke: #ffe7a8; stroke-width: 1.5; stroke-linecap: round; }
+:root[data-theme="light"] .intro-fingers path { stroke: #b4781e; }
+.intro-device-body { transform-box: fill-box; transform-origin: center; transition: transform .6s cubic-bezier(.3, .7, .2, 1); }
+.product-intro[data-phase="ready"] .intro-metal { filter: drop-shadow(0 0 3px color-mix(in srgb, var(--cyan) 70%, transparent)); }
+.intro-caption { margin-top: 10px; color: var(--subtle); font-size: .72rem; text-align: center; }
+
+/* Motion: the caret blinks, the send button answers, the circuit is drawn along the signal path, flipped pixels flash
+   (new metal white, removed metal violet), new fingers fade in, and everything clears before the next run. */
+.product-intro[data-motion="on"] .intro-caret { animation: intro-caret 1s steps(1) infinite; }
+.product-intro[data-motion="on"][data-phase="send"] .intro-send { animation: intro-send .5s ease-out both; }
+.product-intro[data-motion="on"] .intro-rail { stroke-dasharray: 1; animation: intro-draw .9s ease-out both; }
+.product-intro[data-motion="on"] :is(.intro-pads, .intro-port) { animation: intro-fade .4s ease-out both; }
+.product-intro[data-motion="on"] .intro-line { stroke-dasharray: 1; animation: intro-draw .3s ease-out calc(.2s + var(--o) * .26s) both; }
+.product-intro[data-motion="on"] .intro-passive :is(.intro-window, .intro-part) { animation: intro-fade .35s ease-out calc(.2s + var(--o) * .26s) both; }
+.product-intro[data-motion="on"] .intro-passive .intro-metal { animation: intro-sweep .55s ease-out calc(.3s + var(--o) * .26s) both; }
+.product-intro[data-motion="on"] .intro-device { transform-box: fill-box; transform-origin: center; animation: intro-pop .45s cubic-bezier(.3, 1.5, .5, 1) calc(.25s + var(--o) * .26s) both; }
+.product-intro[data-motion="on"] .intro-flips rect[data-on="true"] { animation: intro-flip-on .8s ease-out both; }
+.product-intro[data-motion="on"] .intro-flips rect[data-on="false"] { animation: intro-flip-off .8s ease-out both; }
+.product-intro[data-motion="on"] .intro-fingers { animation: intro-fade .45s ease-out both; }
+.product-intro[data-phase="clear"] :is(.intro-drawing, .intro-text, .intro-reply) { opacity: 0; transition: opacity .5s; }
+.product-intro[data-running="false"] * { animation-play-state: paused !important; }
+
+@keyframes intro-caret { 50% { opacity: 0; } }
+@keyframes intro-send { 40% { transform: scale(1.18); background: var(--cyan); color: var(--page); box-shadow: 0 0 16px var(--cyan); } }
+@keyframes intro-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes intro-fade { from { opacity: 0; } }
+@keyframes intro-sweep { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes intro-pop { from { opacity: 0; transform: scale(.4); } }
+@keyframes intro-flip-on { 0% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes intro-flip-off { 0% { opacity: .9; } 100% { opacity: 0; } }
+
+@container (max-width: 420px) {
+  .intro-prompt, .intro-reply { margin-inline: 12px; }
+  .intro-text { font-size: .84rem; }
+  .intro-circuit { width: calc(100% - 16px); margin: 8px; }
+}
+/* Motion stopped or reduced: the finished layout, the whole prompt and the last answer, all still. */
+.product-intro[data-motion="off"] *, .product-intro[data-motion="off"] *::before, .product-intro[data-motion="off"] *::after { animation: none !important; transition: none !important; }
+@media (prefers-reduced-motion: reduce) { .product-intro *, .product-intro *::before, .product-intro *::after { animation: none !important; transition: none !important; } }
+@media (forced-colors: active) { .intro-circuit { background: none; } }
