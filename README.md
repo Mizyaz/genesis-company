@@ -42,6 +42,8 @@ npm ci
 npm run dev
 npm run build
 npm test
+npx playwright install chromium # once, for the browser regression tests
+npm run test:browser            # tests the built site; runs before deployment too
 npm run preview
 ```
 

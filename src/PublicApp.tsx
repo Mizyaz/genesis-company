@@ -10,17 +10,30 @@ import { useLanguage } from './shared/Language';
 import './styles/tokens.css';
 import './styles/site.css';
 
+// Preserve shared links from before About became a separate page.
+const legacyRoutes: Readonly<Record<string, string>> = {
+  '#/explore/about': '#/about',
+  '#/explore/story': '#/about/story',
+  '#/explore/team': '#/about',
+};
+const canonicalRoute = (hash: string) => legacyRoutes[hash] ?? hash;
+
 /** Public entry point: presentation only, without product or assistant imports. */
 export function PublicApp() {
   const { t } = useLanguage();
-  const [route, setRoute] = useState(window.location.hash);
+  const [route, setRoute] = useState(() => canonicalRoute(window.location.hash));
   const { theme, setTheme } = useCompanyAppearance();
   const explore = route.startsWith('#/explore');
   const research = route === '#/publications';
   const about = route === '#/about' || route.startsWith('#/about/');
   const design = route === '#/design';
   useEffect(() => {
-    const change = () => setRoute(window.location.hash);
+    const change = () => {
+      const next = canonicalRoute(window.location.hash);
+      if (next !== window.location.hash) window.history.replaceState(window.history.state, '', next);
+      setRoute(next);
+    };
+    change();
     window.addEventListener('hashchange', change);
     return () => window.removeEventListener('hashchange', change);
   }, []);

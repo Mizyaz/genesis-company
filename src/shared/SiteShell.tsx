@@ -38,8 +38,16 @@ export function SiteShell({ children, explore, workbenchUrl, homeUrl = '#/', cap
   }, []);
   // On small screens the navigation is a panel; following any link in it closes the panel.
   const followLink = (event: MouseEvent<HTMLElement>) => { if ((event.target as HTMLElement).closest('a')) setMenuOpen(false); };
+  const skipToContent = (event: MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault(); // The hash belongs to the router, not to this in-page focus target.
+    const main = document.getElementById('main');
+    if (!main) return;
+    main.tabIndex = -1;
+    main.focus({ preventScroll: true });
+    main.scrollIntoView({ block: 'start', behavior: 'instant' });
+  };
   return <div className={`site-shell ${explore ? 'is-explore' : 'is-landing'}`}>
-    <a className="skip-link" href="#main">{t("Skip to content")}</a>
+    <a className="skip-link" href="#main" onClick={skipToContent}>{t("Skip to content")}</a>
     <ScrollCurrent />
     <header className="site-header" data-menu={menuOpen ? 'open' : 'closed'}>
       <a className="brand-link" href={homeUrl} aria-label={t("GENESIS home")}><Brand /></a>

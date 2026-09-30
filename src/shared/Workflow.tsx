@@ -3,7 +3,7 @@ import { Icon } from './ui';
 import { useVisibleMotion } from './MotionSettings';
 import { SwipeDots } from './SwipeDots';
 import { usePress } from './DesignStory';
-import { TubePanel, type Offer } from './StageScreens';
+import { TubePanel, useScreenDismissal, type Offer } from './StageScreens';
 import '../styles/workflow-detail.css';
 
 type Stage = { id: string; title: string; detail: string; icon: string; software: Offer[] };
@@ -90,13 +90,15 @@ export function Workflow({ stages, label }: { stages: Stage[]; label: string }) 
     return () => { row?.removeEventListener('scroll', request); window.removeEventListener('resize', request); cancelAnimationFrame(frame); };
   }, [open, ref]);
   const still = !enabled || matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const close = () => { if (still) setOpen(null); else setOff(true); };
+  const finish = () => { setOpen(null); setOff(false); };
+  useScreenDismissal(open !== null && off, still, finish);
+  const close = () => { if (still) finish(); else setOff(true); };
   useEffect(() => {
     if (open === null || off) return;
     const key = (event: KeyboardEvent) => { if (event.key === 'Escape') close(); };
     document.addEventListener('keydown', key);
     return () => document.removeEventListener('keydown', key);
-  }, [open, off, run]);
+  }, [open, off, run, still]);
   // Before the screen comes on, the page glides up (the card with it) if the open box would reach below the fold, so the
   // line and the box opening under it stay in view and nothing moves while it opens.
   useEffect(() => {
@@ -121,7 +123,7 @@ export function Workflow({ stages, label }: { stages: Stage[]; label: string }) 
   };
   const ended = (event: AnimationEvent<HTMLElement>) => {
     if (event.target !== event.currentTarget) return;
-    if (off && event.animationName === 'stage-screen-off') { setOpen(null); setOff(false); }
+    if (off && event.animationName === 'stage-screen-off') finish();
     if (!off && (event.animationName === 'stage-screen-on' || event.animationName === 'stage-screen-switch')) reveal();
   };
   const stage = open === null ? null : stages[open];
