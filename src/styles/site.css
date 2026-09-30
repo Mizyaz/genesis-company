@@ -139,6 +139,26 @@ img { display: block; max-width: 100%; }
 .loop-note { display: flex; gap: 14px; align-items: center; margin-top: 25px; font-size: .875rem; }
 .loop-note > .icon { color: var(--cyan); width: 18px; height: 18px; }
 .workflow-section { border-top: 1px solid var(--border-soft); }
+/* Silicon demonstration: four steps joined like a timeline (a column on phones), then the team's silicon record. */
+.silicon-section { border-top: 1px solid var(--border-soft); }
+.silicon-steps { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 28px; margin: 0; padding: 0; list-style: none; }
+.silicon-steps::before { content: ''; position: absolute; top: 22px; left: 22px; right: 22px; height: 1px; background: linear-gradient(90deg, var(--cyan), var(--violet)); opacity: .6; }
+.silicon-steps li { position: relative; min-width: 0; }
+.silicon-steps .icon { position: relative; box-sizing: content-box; width: 20px; height: 20px; padding: 11px; border: 1px solid color-mix(in srgb, var(--cyan) 45%, var(--border)); border-radius: 50%; background: var(--page); color: var(--cyan); }
+.silicon-steps h3 { margin: 18px 0 8px; font-size: 1.05rem; font-weight: 600; letter-spacing: -.01em; }
+.silicon-steps p { margin: 0; color: var(--muted); font-size: .9rem; line-height: 1.7; }
+.silicon-record { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin: 44px 0 0; padding: 16px 20px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--muted); font-size: .9rem; line-height: 1.6; }
+.silicon-record > .icon { flex: none; width: 18px; height: 18px; color: var(--cyan); }
+.silicon-record > span { flex: 1 1 320px; }
+.silicon-record a { display: inline-flex; align-items: center; gap: 6px; color: var(--cyan); font-weight: 600; white-space: nowrap; }
+.silicon-record a .icon { width: 16px; height: 16px; }
+@media (max-width: 800px) {
+  .silicon-steps { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .silicon-steps::before { top: 22px; bottom: 22px; left: 22px; right: auto; width: 1px; height: auto; background: linear-gradient(var(--cyan), var(--violet)); }
+  .silicon-steps li { display: grid; grid-template-columns: 44px minmax(0, 1fr); column-gap: 16px; align-items: start; }
+  .silicon-steps .icon { grid-row: 1 / 3; }
+  .silicon-steps h3 { margin: 10px 0 6px; }
+}
 .platform-loop { margin: 44px auto 0; }
 .platform-loop .service-loop { padding: 22px 20px 16px; }
 .platform-loop .design-story { max-width: 900px; }
