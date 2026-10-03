@@ -154,3 +154,16 @@ Presentation images and role profiles were supplied by the GENESIS team.
 Original layout images remain unchanged; the lighter card previews, preview
 cropping and theme treatment are display-only. Public repository visibility does not grant a license to
 redistribute the layout images or other company materials.
+
+## Introduction films
+
+The original 30-second 3D film remains the default. The player also offers a
+separate 2D illustration using the same transport, soundtrack, theme and clock.
+Its schematic symbols become top-down geometry; transistor sizing, spiral
+dimensions and pixel patterns change together. This is an editorial illustration,
+not a foundry layout or a simulation result. The original music-backed MP4 is
+available through **Download 3D film** at `assets/films/genesis-3d-30s.mp4`.
+
+The 2D inductor glyph adapts Akilaa's [public-domain inductor symbol](https://commons.wikimedia.org/wiki/File:Inductor_symbol.svg),
+scaled and recoloured. The remaining animated geometry is drawn in code. No
+third-party PDK artwork or restrictive stock illustration is bundled.
