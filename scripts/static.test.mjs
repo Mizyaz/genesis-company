@@ -688,6 +688,24 @@ test('the film tells a complete prompt-to-schematic-to-layout story in one minut
 const receiverModel = () => transpiled('src/shared/intro/receiverScene.ts', {
   './timeline': transpiled('src/shared/intro/timeline.ts'), '../pixelLayout': transpiled('src/shared/pixelLayout.ts'),
 });
+test('the illustrated LLM click precedes every sequential component reveal', () => {
+  const { llmClickAt, blockRevealTimes, receiverBlocks, blockPose, requestState } = receiverModel();
+  assert.equal(requestState(1), 'request'); assert.equal(requestState(2.2), 'pressed');
+  assert.equal(requestState(8), 'thinking'); assert.equal(requestState(11), 'ready');
+  assert.equal(blockRevealTimes.length, receiverBlocks.length);
+  for (const portrait of [true, false]) {
+    receiverBlocks.forEach((block, i) => {
+      assert.ok(blockRevealTimes[i] > llmClickAt);
+      assert.equal(blockPose(block, portrait, llmClickAt).opacity, 0);
+      assert.equal(blockPose(block, portrait, blockRevealTimes[i]).opacity, 0);
+      assert.equal(blockPose(block, portrait, blockRevealTimes[i] + .7).opacity, 1);
+      if (i) assert.ok(blockRevealTimes[i] > blockRevealTimes[i - 1] + .7);
+    });
+  }
+  const dictionary = JSON.parse(read('src/content/tr.json'));
+  for (const copy of ['Send to GENESIS', 'Request received', 'Thinking', 'Circuit assembled', 'Illustrated LLM interaction']) assert.ok(dictionary[copy], copy);
+});
+
 test('one receiver preserves block identities and port endpoints in both compositions', () => {
   const { receiverBlocks: blocks, receiverConnections: connections, connectionPath, portPosition, blockPose, placementDuration } = receiverModel();
   assert.deepEqual(blocks.map(block => block.id), ['rf', 'input', 'lna', 'interstage', 'mixer', 'if']);

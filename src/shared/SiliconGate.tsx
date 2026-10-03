@@ -12,7 +12,7 @@ const pageTitle = (hash: string) => ({ explore: 'Discover GENESIS', publications
 const PAGE_LINE = 'Circuit design. Simulation. Optimization.';
 const CLOSE = 420, OPEN = 520, HOLD = 260;
 
-function DiePanel({ side }: { side: 'left' | 'right' }) {
+export function DiePanel({ side }: { side: 'left' | 'right' }) {
   const id = useId().replace(/:/g, '');
   return <div className={`silicon-gate-panel silicon-gate-${side}`}><svg viewBox="0 0 600 900" preserveAspectRatio="none" aria-hidden="true">
     <defs><pattern id={id} width="36" height="36" patternUnits="userSpaceOnUse"><path d="M36 0H0V36" fill="none" className="gate-grid" /><circle cx="2" cy="2" r="1" className="gate-via" /></pattern></defs>
