@@ -35,6 +35,11 @@ export const receiverCandidates = [
 export const candidateTimes = [13.5, 17.5, 21.5] as const;
 export const selectedAt = 24.5;
 export const placementDuration = .9;
+export const llmClickAt = 2.1;
+export const blockRevealTimes = [3.1, 4.3, 5.5, 6.7, 7.9, 9.1] as const;
+export function requestState(time: number) {
+  return time < llmClickAt ? 'request' : time < 2.4 ? 'pressed' : time < 10.6 ? 'thinking' : 'ready';
+}
 
 export function receiverState(time: number) {
   const candidate = time < candidateTimes[1] ? 0 : time < candidateTimes[2] ? 1 : 2;
@@ -49,7 +54,7 @@ export function receiverState(time: number) {
 }
 
 export function blockPose(block: ReceiverBlock, portrait: boolean, time: number) {
-  const index = receiverBlocks.indexOf(block), state = receiverState(time);
+  const index = receiverBlocks.findIndex(item => item.id === block.id), state = receiverState(time);
   const focused = ['input', 'lna', 'interstage'].includes(block.id);
   const focusIndex = ['input', 'lna', 'interstage'].indexOf(block.id);
   const base: Point = portrait ? [104, 40 + index * 88] : [65 + index * 214, 194];
@@ -57,11 +62,12 @@ export function blockPose(block: ReceiverBlock, portrait: boolean, time: number)
   const start = 28.2 + index * .28;
   const placed = ease(start, start + placementDuration, time);
   const lift = time >= 27.5 ? (1 - placed) * state.physical : 0;
+  const appeared = ease(blockRevealTimes[index], blockRevealTimes[index] + .65, time);
   return {
     x: base[0] + (focused ? (target[0] - base[0]) * state.focus : 0) + (portrait ? 0 : (index % 2 ? 22 : -22) * lift),
-    y: base[1] + (focused ? (target[1] - base[1]) * state.focus : 0) - 27 * lift,
+    y: base[1] + (focused ? (target[1] - base[1]) * state.focus : 0) - 27 * lift - 20 * (1 - appeared),
     scale: (portrait ? .61 : 1) * (1 + state.focus * (focused ? .24 : 0)),
-    opacity: ease(.2 + index * .22, .8 + index * .22, time) * (focused ? 1 : 1 - state.focus),
+    opacity: appeared * (focused ? 1 : 1 - state.focus),
     placed,
   };
 }

@@ -30,11 +30,12 @@ test('the logo opens a finite introduction with pause, seek, replay and focus re
   await page.keyboard.press('End');
   await expect(progress).toHaveValue('60');
   await expect(film.locator('.film-ending')).toHaveCSS('opacity', '1');
-  await expect(film.locator('.film-ending p')).toHaveText('RFIC design, from prompt to schematic and layout.');
+  await expect(film.locator('.film-ending p:last-child')).toHaveText('RFIC design, from prompt to schematic and layout.');
+  await expect(film.locator('.film-signature')).toHaveText('Generative Evolution of Silicon Intelligent Systems');
   await expect(film.locator('.film-time')).toHaveText('1:00 / 1:00');
   await film.getByRole('button', { name: 'Replay introduction' }).click();
   await expect.poll(async () => Number(await progress.inputValue())).toBeLessThan(2);
-  await expect(film.locator('.film-ending')).toHaveCSS('opacity', '0');
+  await expect(film.locator('.film-ending')).toHaveCount(0);
   await page.keyboard.press('Escape');
   await expect(film).toHaveCount(0);
   await expect(launcher).toBeFocused();
@@ -45,6 +46,74 @@ test('the logo opens a finite introduction with pause, seek, replay and focus re
   await page.keyboard.press('Escape');
   expect(await page.evaluate(() => window.filmMedia.length)).toBe(2);
   expect(await page.evaluate(() => window.filmMedia.every(media => media.paused && !media.getAttribute('src')))).toBe(true);
+});
+
+test('the film expands from its launcher before its clock starts, and an early close cleans up', async ({ page }) => {
+  await page.goto('/#/');
+  const launcher = page.getByRole('button', { name: 'Watch the GENESIS introduction', exact: true });
+  await expect(launcher).toBeVisible();
+  await page.locator('.silicon-gate').waitFor({ state: 'detached' });
+  // Click and inspect in the same task, before the entrance animation can finish.
+  const start = await launcher.evaluate(button => {
+    button.click();
+    return new Promise(resolve => requestAnimationFrame(() => {
+      const film = document.querySelector('.company-film');
+      const animation = film.getAnimations().find(animation => animation.id === 'film-expand');
+      resolve({ entering: film.dataset.entering, running: film.dataset.running,
+        time: film.querySelector('input').value, frames: animation.effect.getKeyframes().map(frame => frame.clipPath) });
+    }));
+  });
+  expect(start.entering).toBe('true'); expect(start.running).toBe('false'); expect(start.time).toBe('0');
+  expect(start.frames[0]).not.toBe(start.frames[1]);
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.company-film')).toHaveCount(0);
+  await expect(launcher).toBeFocused();
+  await launcher.click();
+  const film = page.locator('.company-film');
+  await expect(film).toHaveAttribute('data-entering', 'false');
+  await expect(film).toHaveAttribute('data-running', 'true');
+  await expect(film.locator('.film-opening')).toHaveCount(0);
+  await page.keyboard.press('Escape');
+});
+
+test('LLM click, thinking and completion seek deterministically, and the paused canvas adapts to the shared theme', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/#/');
+  await page.getByRole('button', { name: 'Watch the GENESIS introduction', exact: true }).click();
+  const film = page.locator('.company-film'), surface = film.locator('canvas');
+  await expect(film).toHaveAttribute('data-entering', 'false');
+  await expect(film.locator('.film-opening')).toHaveCount(0);
+  for (const [time, phase] of [[1, 'request'], [2.2, 'pressed'], [3.7, 'thinking'], [8, 'thinking'], [11, 'ready'], [1, 'request']]) {
+    await film.getByRole('slider').fill(String(time));
+    await expect(film.locator('.film-request')).toHaveAttribute('data-phase', phase);
+    await expect(surface).toHaveAttribute('data-time', time.toFixed(2));
+  }
+  await film.getByRole('slider').fill('19');
+  await expect(film.locator('.film-request')).toHaveCount(0);
+  const pixel = () => surface.evaluate(canvas => Array.from(canvas.getContext('2d').getImageData(2, 2, 1, 1).data).slice(0, 3));
+  await page.evaluate(() => document.documentElement.dataset.theme = 'light');
+  await expect.poll(async () => Math.min(...await pixel())).toBeGreaterThan(210);
+  await expect(film.locator('.film-caption h3')).toHaveCSS('color', 'rgb(11, 35, 60)');
+  await page.evaluate(() => document.documentElement.dataset.theme = 'dark');
+  await expect.poll(async () => Math.max(...await pixel())).toBeLessThan(65);
+  await expect(film.locator('.film-caption h3')).toHaveCSS('color', 'rgb(241, 246, 252)');
+  await expect(surface).toHaveAttribute('data-time', '19.00');
+  await page.keyboard.press('Escape');
+});
+
+test('stopping motion during the film entrance does not leave a shutter or clipping behind', async ({ page }) => {
+  await page.goto('/#/');
+  const launcher = page.getByRole('button', { name: 'Watch the GENESIS introduction', exact: true });
+  await launcher.click();
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const film = page.locator('.company-film');
+  await expect(film).toHaveAttribute('data-entering', 'false');
+  await expect(film).toHaveAttribute('data-running', 'false');
+  await expect(film).toHaveCSS('clip-path', 'none');
+  await expect(film.locator('.film-opening')).toHaveCount(0);
+  await page.keyboard.press('Escape');
+  await expect(launcher).toBeFocused();
 });
 
 test('Turkish mobile intro respects reduced motion and stays inside the screen', async ({ page }) => {
@@ -138,6 +207,7 @@ test('RF positioning shares the film, supports both themes and fits narrow scree
   await section.getByRole('button', { name: /Watch the introduction/ }).click();
   await expect(page.locator('.company-film')).toBeVisible();
   await page.keyboard.press('Escape');
+  await expect(section.getByRole('button', { name: /Watch the introduction/ })).toBeFocused();
   await page.getByRole('button', { name: 'Open menu' }).click();
   await page.getByRole('button', { name: 'Türkçe', exact: true }).click();
   await page.getByRole('button', { name: 'Açık temaya geç' }).click();

@@ -6,7 +6,9 @@ The home page offers Discover (company presentation) and Design (an explicit
 link to the visitor's own installation). All runtime assets are included here.
 Animations, theme and motion preferences run in the browser.
 
-The home-page symbol opens a one-minute RF receiver film. A request becomes one
+The home-page symbol expands through the shared circuit shutters into a one-minute
+RF receiver film. An illustrated click sends a request to GENESIS. Its thinking
+indicator stays active while the components assemble one at a time into one
 persistent chain: RF input, input matching, LNA, interstage matching, mixer and IF
 output, with separate LO and bias connections. Three coordinated candidates change
 transistor sizing and both pixelated passives together. The selected geometry is
@@ -18,7 +20,11 @@ not a live LLM session, simulated circuit or measured result.
 `shared/intro/timeline.ts` defines the shared 60-second editorial clock.
 `receiverScene.ts` owns block identities, ports, the three cached candidates,
 responsive poses and connection endpoints. `circuitFilm.ts` draws this model on a
-fixed drafting plane: horizontal on desktop, vertically composed on phones.
+fixed oblique circuit plane, with raised metal, layered substrates and vias:
+horizontal on desktop, vertically composed on phones. `RequestSequence.tsx` uses
+the same clock, so seeking preserves click/thinking/reveal order. `filmPalette.ts`
+resolves the shared theme tokens; even a paused canvas repaints on a theme change.
+The scene fits below the actual caption height in either language.
 `score.ts` composes
 an original 96 BPM, 24-bar stereo soundtrack. `scripts/render-intro-score.mjs` renders
 it once at build time through Playwright and the host's existing Python/libmp3lame;
@@ -26,9 +32,11 @@ the checked-in MP3 is about 1 MB, and visitors do not synthesize it. Run the scr
 only when changing the composition, with `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` and
 a writable `TMPDIR` if required. Normal builds do not require an audio encoder.
 
-The player in `CompanyIntro.tsx` starts the local soundtrack only after a user click
-and uses the media clock for synchronization. The film starts immediately while
-the track buffers, then the music joins at the current playback offset. Pause, seek,
+The player in `CompanyIntro.tsx` expands from the clicked launcher, reusing
+`SiliconGate`'s die-panel artwork. Its clock and soundtrack wait until that entrance
+finishes. Reduced motion skips the entrance and leaves playback paused. The media
+clock synchronizes the film; if the track is still buffering, music joins at the
+current playback offset. Pause, seek,
 replay, mute and close act on both media. Closing unloads the audio element.
 Audio failure does not prevent silent playback. The canvas is capped at two million
 pixels and 30 fps. Hidden tabs and disabled motion pause the film and music; the
