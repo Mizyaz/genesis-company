@@ -47,6 +47,7 @@ function IntroFilm({ onClose, sound, origin }: { onClose: () => void; sound: Int
   const labels = useRef<HTMLDivElement>(null);
   const film = useRef<CircuitFilm>();
   const [sceneStatus, setSceneStatus] = useState<'loading' | 'ready' | 'unavailable'>('loading');
+  const [variant, setVariant] = useState<'3d' | '2d'>('3d');
   const viewport = useRef<HTMLDivElement>(null);
   const clock = useRef(0);
   const sampling = useRef(1);
@@ -65,13 +66,16 @@ function IntroFilm({ onClose, sound, origin }: { onClose: () => void; sound: Int
     const surface = canvas.current;
     const lost = (event: Event) => { event.preventDefault(); if (active) setSceneStatus('unavailable'); };
     surface?.addEventListener('webglcontextlost', lost);
-    void import('./intro/frontEndFilm').then(({ createCircuitFilm }) => {
+    const renderer = variant === '3d'
+      ? import('./intro/frontEndFilm').then(module => module.createCircuitFilm)
+      : import('./intro/illustrationFilm').then(module => module.createIllustrationFilm);
+    void renderer.then(createCircuitFilm => {
       if (!active || !canvas.current || !labels.current) return;
       try { film.current = createCircuitFilm(canvas.current, labels.current); setSceneStatus('ready'); }
       catch { setSceneStatus('unavailable'); }
     }).catch(() => { if (active) setSceneStatus('unavailable'); });
     return () => { active = false; surface?.removeEventListener('webglcontextlost', lost); film.current?.dispose(); film.current = undefined; };
-  }, []);
+  }, [variant]);
   useEffect(() => {
     let active = true;
     void sound.ready.then(() => { if (active) setAudioStatus(sound.status); });
@@ -131,7 +135,7 @@ function IntroFilm({ onClose, sound, origin }: { onClose: () => void; sound: Int
     const theme = new MutationObserver(() => { palette = readFilmPalette(surface); scene.theme(palette); draw(); });
     theme.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'style', 'class'] });
     return () => { resize.disconnect(); theme.disconnect(); fitScene.current = () => {}; };
-  }, [sceneStatus, t]);
+  }, [sceneStatus, t, variant]);
   useEffect(() => {
     const scene = film.current;
     if (!scene || sceneStatus !== 'ready') return;
@@ -147,7 +151,7 @@ function IntroFilm({ onClose, sound, origin }: { onClose: () => void; sound: Int
         const stalled = lastPaint > 0 && now - lastPaint > 120;
         const before = performance.now(); draw(); lastPaint = now;
         // Preserve the film's timing on weak GPUs. Paused/frame-exact exports stay full quality.
-        if ((stalled || performance.now() - before > 80) && sampling.current > .35) {
+        if (variant === '3d' && (stalled || performance.now() - before > 80) && sampling.current > .35) {
           sampling.current = Math.max(.35, sampling.current * .6); fitScene.current();
         }
       }
@@ -158,7 +162,11 @@ function IntroFilm({ onClose, sound, origin }: { onClose: () => void; sound: Int
     draw();
     if (playing) frame = requestAnimationFrame(tick);
     return () => { cancelAnimationFrame(frame); sound.pause(); };
-  }, [playing, revision, sound, duration, audioStatus, sceneStatus, t]);
+  }, [playing, revision, sound, duration, audioStatus, sceneStatus, t, variant]);
+  const chooseVariant = (next: '3d' | '2d') => {
+    if (next === variant) return;
+    sound.pause(); setSceneStatus('loading'); sampling.current = 1; setVariant(next);
+  };
   const seek = (value: number) => { clock.current = value; setTime(value); setRevision(value => value + 1); };
   const togglePlay = () => {
     void sound.unlock().then(() => setAudioStatus(sound.status));
@@ -170,7 +178,7 @@ function IntroFilm({ onClose, sound, origin }: { onClose: () => void; sound: Int
   };
   const keyboard = (event: KeyboardEvent<HTMLDialogElement>) => {
     if (event.key === 'Tab') {
-      const controls = ref.current?.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled)');
+      const controls = ref.current?.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), a[href]');
       const first = controls?.[0], last = controls?.[controls.length - 1];
       if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
       else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
@@ -179,24 +187,26 @@ function IntroFilm({ onClose, sound, origin }: { onClose: () => void; sound: Int
     if (event.code === 'Space') { event.preventDefault(); togglePlay(); }
   };
   const cue = filmCue(time), caption = introduction.scenes[cue.id];
+  const titles = introduction.illustration;
+  const title = variant === '2d' && cue.id !== 'closing' && cue.id !== 'prompt' ? titles[cue.id] : caption.title;
   const ending = ease(26, 27.2, time);
-  return <dialog ref={ref} className="company-film" aria-labelledby="company-film-title" aria-describedby="company-film-description" onCancel={event => { event.preventDefault(); onClose(); }} onKeyDown={keyboard} data-running={playing} data-entering={entering} data-scene={sceneStatus} data-motion={enabled ? 'on' : 'off'} data-audio={audioStatus} data-muted={muted} data-cue={cue.id}>
+  return <dialog ref={ref} className="company-film" aria-labelledby="company-film-title" aria-describedby="company-film-description" onCancel={event => { event.preventDefault(); onClose(); }} onKeyDown={keyboard} data-running={playing} data-entering={entering} data-scene={sceneStatus} data-motion={enabled ? 'on' : 'off'} data-audio={audioStatus} data-muted={muted} data-cue={cue.id} data-variant={variant}>
     <h2 id="company-film-title" className="film-sr-only">{introduction.title}</h2>
     <p id="company-film-description" className="film-sr-only">{introduction.description}</p>
     <div ref={viewport} className="film-viewport"><div className="film-stage">
-    <canvas ref={canvas} className="film-canvas" aria-hidden="true" style={{ opacity: ease(2.65, 3.2, time) * (1 - ease(25.8, 27.2, time)) }} />
+    <canvas key={variant} ref={canvas} className="film-canvas" aria-hidden="true" style={{ opacity: ease(2.65, 3.2, time) * (1 - ease(25.8, 27.2, time)) }} />
     <div ref={labels} className="film-scene-labels" aria-hidden="true" />
-    {sceneStatus !== 'ready' && <p className="film-scene-status" role="status">{t(sceneStatus === 'loading' ? 'Preparing the 3D scene' : 'This device could not open the 3D scene. Please try a WebGL-enabled browser.')}</p>}
+    {sceneStatus !== 'ready' && <p className="film-scene-status" role="status">{t(sceneStatus === 'loading' ? 'Preparing the film' : variant === '3d' ? 'This device could not open the 3D scene. Please try a WebGL-enabled browser.' : 'This browser could not open the 2D illustration.')}</p>}
     {entering && <div className="film-opening" aria-hidden="true"><DiePanel side="left" /><DiePanel side="right" /></div>}
     <div className="film-story">
     {cue.id !== 'closing' && cue.id !== 'prompt' && <div className="film-caption" key={cue.id} style={{ opacity: enabled ? cue.opacity : 1 }}>
-      <h3 aria-label={caption.title}>{caption.title.split(' ').map((word, i) => {
+      <h3 aria-label={title}>{title.split(' ').map((word, i) => {
         const progress = enabled ? ease(cue.from + i * .055, cue.from + .7 + i * .055, time) : 1;
         return <span key={i} aria-hidden="true" style={{ opacity: progress, transform: `translateY(${(1 - progress) * 13}px)` }}>{word}{' '}</span>;
       })}</h3>
       <p className="film-sr-only">{caption.detail}</p>
     </div>}
-    {time < 3.2 && <RequestSequence time={time} prompt={introduction.prompt} />}
+    {time < 3.2 && <RequestSequence time={time} prompt={variant === '2d' ? titles.prompt : introduction.prompt} />}
     {cue.id === 'closing' && <div className="film-ending" aria-hidden={ending < .5} style={{ opacity: ending, transform: `translateY(${(1 - ending) * 14}px)` }}>
       <span className="film-end-symbol" style={{ transform: `scale(${.82 + .18 * ease(26, 27.3, time)})` }}><EmblemMark /></span>
       <strong style={{ opacity: ease(26.6, 27.6, time), letterSpacing: `${.24 - .12 * ease(26.6, 28, time)}em` }}>GENESIS</strong>
@@ -209,7 +219,15 @@ function IntroFilm({ onClose, sound, origin }: { onClose: () => void; sound: Int
       <input type="range" min="0" max={duration} step=".1" value={time} aria-label={t('Introduction progress')} aria-valuetext={`${Math.floor(time)} / ${duration} ${t('seconds')}`} onChange={event => seek(Number(event.target.value))} />
       <span className="film-time">{filmTime(time)} / {filmTime(duration)}</span>
       <button type="button" className="icon-button" disabled={audioStatus === 'unavailable' || audioStatus === 'loading'} aria-label={t(audioStatus === 'unavailable' ? 'Sound unavailable' : audioStatus === 'blocked' ? 'Enable sound' : muted ? 'Unmute music' : 'Mute music')} onClick={() => void toggleSound()}><Icon name={muted || audioStatus !== 'ready' ? 'muted' : 'volume'} /></button>
-    </div><footer className="film-footer"><span>{audioStatus === 'loading' ? t('Preparing the soundtrack') : !enabled ? t('Animations are off. Scrub to explore the circuit.') : t('Original score')}</span><button className="film-done" type="button" onClick={onClose}>{t('Continue exploring')}<Icon name="arrow" /></button></footer></div>
+    </div><footer className="film-footer">
+      <div className="film-variants" role="group" aria-label={t('Film version')}>
+        <button type="button" aria-pressed={variant === '3d'} onClick={() => chooseVariant('3d')}>3D</button>
+        <button type="button" aria-pressed={variant === '2d'} onClick={() => chooseVariant('2d')}>2D</button>
+      </div>
+      <span>{audioStatus === 'loading' ? t('Preparing the soundtrack') : !enabled ? t('Animations are off. Scrub to explore the circuit.') : t('Original score')}</span>
+      <a className="film-done" href={assetUrl('/assets/films/genesis-3d-30s.mp4')} download="GENESIS-3D-30s.mp4">{t('Download 3D film')}</a>
+      <button className="film-done" type="button" onClick={onClose}>{t('Continue exploring')}<Icon name="arrow" /></button>
+    </footer></div>
   </dialog>;
 }
 

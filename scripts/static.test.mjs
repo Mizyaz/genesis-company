@@ -624,7 +624,7 @@ test('the brand opens a short RF introduction instead of a game', () => {
   assert.match(intro, /resize.disconnect\(\)/);
   assert.match(intro, /sound.pause\(\)/);
   assert.match(intro, /type="range"/);
-  assert.match(intro, /<canvas ref=\{canvas\}/);
+  assert.match(intro, /<canvas key=\{variant\} ref=\{canvas\}/);
   assert.doesNotMatch(intro, /film-chapters|film-copy|secondsPerChapter/);
   assert.match(read('src/styles/company-intro.css'), /prefers-reduced-motion: reduce/);
   assert.match(read('src/pages/Research.tsx'), /<Publications people=\{site.about.people\} papers=\{papers\} \/>/);
@@ -649,6 +649,43 @@ test('the RF positioning and introduction are bilingual and clearly illustrative
 });
 
 const transpiled = (path, dependencies = {}) => { const module = {}; new Function('exports', 'require', ts.transpileModule(read(path), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText)(module, id => dependencies[id] ?? {}); return module; };
+
+test('the separate 2D film resizes connected components together without replacing the 3D original', () => {
+  const { illustrationState, illustrationPixels, illustrationCopy } = transpiled('src/shared/intro/illustrationScene.ts', {
+    './timeline': transpiled('src/shared/intro/timeline.ts'), '../pixelLayout': transpiled('src/shared/pixelLayout.ts'),
+  });
+  const states = Array.from({ length: 9 }, (_, i) => illustrationState(10.15 + i * 1.8));
+  for (const readValue of [s => s.mos.fingers, s => s.mos.width, s => s.mos.height, s => s.coil.size, s => s.coil.width, s => s.pixel.width, s => s.cap.width]) {
+    assert.ok(new Set(states.map(readValue)).size >= 5, 'the geometry actually changes, not just its label');
+  }
+  assert.ok(new Set(illustrationPixels.map(p => JSON.stringify(p.metal))).size >= 5);
+  for (let time = 3; time <= 26; time += .25) {
+    const s = illustrationState(time);
+    assert.deepEqual(s, illustrationState(time), 'seeking is deterministic');
+    for (const [wire, from, to] of [['input', 'input', 'pixelIn'], ['gate', 'pixelOut', 'gate'], ['drain', 'drain', 'coilIn'], ['output', 'coilOut', 'output']]) {
+      const points = s.wires.find(w => w.id === wire).points;
+      assert.deepEqual(points[0], s.pins[from]); assert.deepEqual(points.at(-1), s.pins[to]);
+    }
+    for (const p of Object.values(s.pins)) {
+      const screenX = 640 + (p[0] - s.focusX) * s.zoom;
+      assert.ok(screenX > 32 && screenX < 1248, 'the output and input remain in frame');
+    }
+  }
+  const dictionary = JSON.parse(read('src/content/tr.json'));
+  for (const label of illustrationCopy) assert.ok(dictionary[label], label);
+  for (const sentence of Object.values(JSON.parse(read('src/content/site.json')).introduction.illustration)) {
+    assert.match(sentence, /\.$/); assert.doesNotMatch(sentence, /—|\?/);
+  }
+  const renderer = read('src/shared/intro/illustrationFilm.ts');
+  assert.match(renderer, /getContext\('2d'/); assert.doesNotMatch(renderer, /from 'three'/);
+  const player = read('src/shared/CompanyIntro.tsx');
+  assert.match(player, /useState<'3d' \| '2d'>\('3d'\)/);
+  assert.match(player, /import\('\.\/intro\/illustrationFilm'\)/);
+  assert.match(player, /download="GENESIS-3D-30s.mp4"/);
+  const mp4 = readFileSync(resolve(root, 'public/assets/films/genesis-3d-30s.mp4'));
+  assert.equal(mp4.subarray(4, 8).toString(), 'ftyp');
+  assert.equal(mp4.length, 9_657_818, 'the published 3D export remains unchanged');
+});
 
 test('the original score is finite, deterministic and resolves with the film', () => {
   const timeline = transpiled('src/shared/intro/timeline.ts');

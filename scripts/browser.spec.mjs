@@ -1,5 +1,65 @@
 import { test, expect } from '@playwright/test';
 
+test('2D is a separate theme-adaptive film with resizing, shared seeking and the original MP4 download', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.setViewportSize({ width: 844, height: 390 });
+  const errors = []; page.on('pageerror', error => errors.push(error.message));
+  await page.goto('/#/');
+  await page.getByRole('button', { name: 'Watch the GENESIS introduction', exact: true }).click();
+  const film = page.locator('.company-film'), surface = film.locator('canvas'), progress = film.getByRole('slider');
+  await expect(film).toHaveAttribute('data-scene', 'ready');
+  await progress.fill('12');
+  await film.getByRole('button', { name: '2D', exact: true }).click();
+  await expect(surface).toHaveAttribute('data-renderer', 'canvas2d');
+  await expect(surface).toHaveAttribute('data-time', '12.00');
+  await expect(film.locator('.film-scene-labels')).toBeEmpty();
+  const geometry = () => surface.evaluate(c => [c.dataset.fingers, c.dataset.coilSize, c.dataset.pixelWidth]);
+  const initial = await geometry();
+  await progress.fill('15');
+  await expect(surface).toHaveAttribute('data-time', '15.00');
+  const changed = await geometry();
+  expect(changed.every((value, i) => value !== initial[i])).toBe(true);
+  await expect(film.locator('.film-caption h3')).toHaveAttribute('aria-label', 'The search adjusts transistor sizes and passive geometry together.');
+  const corner = () => surface.evaluate(c => Array.from(c.getContext('2d').getImageData(0, 0, 1, 1).data).slice(0, 3));
+  await page.evaluate(() => document.documentElement.dataset.theme = 'light');
+  await expect.poll(async () => Math.min(...await corner())).toBeGreaterThan(220);
+  await page.evaluate(() => document.documentElement.dataset.theme = 'dark');
+  await expect.poll(async () => Math.max(...await corner())).toBeLessThan(60);
+  const download = film.getByRole('link', { name: 'Download 3D film' });
+  await expect(download).toHaveAttribute('download', 'GENESIS-3D-30s.mp4');
+  expect((await page.request.head(await download.getAttribute('href'))).ok()).toBe(true);
+  // Both controls remain usable on a phone in landscape.
+  for (const control of [download, film.getByRole('button', { name: '2D', exact: true })]) {
+    const bounds = await control.boundingBox();
+    expect(bounds.y).toBeGreaterThanOrEqual(0); expect(bounds.y + bounds.height).toBeLessThanOrEqual(390);
+  }
+  await film.getByRole('button', { name: '3D', exact: true }).click();
+  await expect(surface).toHaveAttribute('data-renderer', 'webgl');
+  await expect(surface).toHaveAttribute('data-time', '15.00');
+  await page.keyboard.press('Escape');
+  expect(errors).toEqual([]);
+});
+
+test('the 2D alternative plays without WebGL and remains synchronized when paused', async ({ page }) => {
+  await page.addInitScript(() => {
+    const get = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function (kind, ...args) { return kind.startsWith('webgl') ? null : get.call(this, kind, ...args); };
+  });
+  await page.goto('/#/');
+  await page.getByRole('button', { name: 'Watch the GENESIS introduction', exact: true }).click();
+  const film = page.locator('.company-film'), progress = film.getByRole('slider');
+  await expect(film).toHaveAttribute('data-scene', 'unavailable');
+  await film.getByRole('button', { name: '2D', exact: true }).click();
+  await expect(film).toHaveAttribute('data-running', 'true');
+  await expect.poll(async () => Number(await progress.inputValue())).toBeGreaterThan(.2);
+  await film.getByRole('button', { name: 'Pause introduction' }).click();
+  await progress.fill('23');
+  await expect(film.locator('canvas')).toHaveAttribute('data-time', '23.00');
+  await page.waitForTimeout(150);
+  await expect(progress).toHaveValue('23');
+  await page.keyboard.press('Escape');
+});
+
 test('the logo opens a finite introduction with pause, seek, replay and focus restoration', async ({ page }) => {
   test.setTimeout(30_000); // Two cold WebGL opens, including shader compilation on software CI.
   await page.addInitScript(() => {

@@ -9,6 +9,13 @@
     "description": "A thirty-second RF design film. A prompt becomes LNA and PA circuits with pixelated matching networks. Active and passive geometry evolve together before the complete RF front end is revealed. This is an illustrated design sequence, not simulated measurement data or a live LLM session.",
     "prompt": "Design an RF front end. Optimize its active and passive circuits together.",
     "closing": "RFIC design, from prompt to schematic and layout.",
+    "illustration": {
+      "prompt": "Design an RF amplifier with conventional and pixelated matching networks.",
+      "schematic": "The design brief becomes a connected circuit.",
+      "joint": "The search adjusts transistor sizes and passive geometry together.",
+      "layout": "Every connection follows the changing geometry.",
+      "verify": "The complete circuit is refined as one design."
+    },
     "scenes": {
       "prompt": { "label": "RFIC × LLM", "title": "Describe your front end.", "detail": "GENESIS turns your intent into a design plan." },
       "schematic": { "label": "BUILDING THE LNA", "title": "An idea becomes a circuit.", "detail": "Transistors, matching networks and bias circuits. One receive amplifier." },
