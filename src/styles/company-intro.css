@@ -1,0 +1,81 @@
+/* Shared brand tokens, no WebGL or game UI. The film is a timed, accessible introduction. */
+.company-film { position: fixed; inset: 0; width: min(1050px, calc(100vw - 40px)); max-height: calc(100dvh - 40px); margin: auto; padding: 0; color: var(--text); background: var(--page); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); overflow: auto; }
+.company-film::backdrop { background: #030d1de0; }
+.film-header, .film-footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 28px; }
+.film-header { font-size: .8rem; border-bottom: 1px solid var(--border-soft); }
+.film-divider { margin: 0 12px; color: var(--subtle); }
+.film-story { padding: 32px 40px 12px; }
+.film-copy { max-width: 650px; min-height: 165px; margin: 0 auto; text-align: center; }
+.film-copy h2 { margin: 10px 0 12px; font-size: clamp(1.65rem, 3.4vw, 2.65rem); font-weight: 550; line-height: 1.16; letter-spacing: -.035em; }
+.film-copy > p:last-child { margin: 0 auto; max-width: 570px; font-size: 1rem; line-height: 1.65; color: var(--muted); }
+.film-story > svg { max-height: 290px; }
+.film-transport { display: flex; gap: 16px; align-items: center; padding: 8px 28px 16px; }
+.film-transport input { flex: 1; min-width: 0; accent-color: var(--cyan); cursor: pointer; }
+.film-transport button:disabled { opacity: .4; }
+.film-time, .intro-duration { font-family: var(--font-mono); font-size: .75rem; color: var(--muted); white-space: nowrap; }
+.film-chapters { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); padding: 0 28px; }
+.film-chapters button { border: 0; border-top: 2px solid var(--border); padding: 14px 8px; background: none; color: var(--muted); font: inherit; font-size: .8rem; cursor: pointer; }
+.film-chapters button span { display: block; margin-bottom: 4px; font-family: var(--font-mono); font-size: .7rem; opacity: .7; }
+.film-chapters button[aria-current] { border-color: var(--cyan); color: var(--text); }
+.film-footer { padding-top: 16px; font-size: .75rem; color: var(--muted); border-top: 1px solid var(--border-soft); }
+.film-done { display: inline-flex; gap: 10px; align-items: center; background: none; color: var(--text); border: 0; font: inherit; cursor: pointer; padding: 8px 0; }
+.film-done .icon { width: 16px; height: 16px; }
+.rf-design-scene { display: block; width: 100%; height: auto; overflow: visible; }
+.rf-design-scene text { fill: var(--muted); font: 13px var(--font-sans); text-anchor: middle; }
+.rf-grid { stroke: var(--border); stroke-width: 1; opacity: .28; fill: none; }
+.rf-die { fill: var(--surface); stroke: var(--border); stroke-width: 1.5; }
+.rf-pad { fill: color-mix(in srgb, var(--cyan) 16%, var(--surface)); stroke: var(--cyan); stroke-width: 1; }
+.rf-ground { stroke: var(--subtle); opacity: .38; fill: none; stroke-width: 2; }
+.rf-metal, .rf-coil { stroke: var(--cyan); fill: none; stroke-width: 3; stroke-linecap: square; stroke-linejoin: round; }
+.rf-coil { stroke: var(--violet); stroke-width: 2; }
+.rf-active { fill: color-mix(in srgb, var(--violet) 15%, var(--surface)); stroke: var(--violet); }
+.rf-gate { stroke: var(--violet); stroke-width: 2.5; fill: none; }
+.rf-detail, .rf-dimension { fill: none; stroke: var(--subtle); stroke-width: 1.5; }
+.rf-outline, .rf-sheet, .rf-chart { fill: var(--surface); stroke: var(--border); stroke-width: 2; }
+.rf-wave { fill: none; stroke: var(--cyan); stroke-width: 2; opacity: .5; }
+.rf-target { fill: none; stroke: var(--subtle); stroke-dasharray: 4 5; stroke-width: 1; }
+.rf-response { fill: none; stroke: var(--violet); stroke-width: 2.5; }
+.rf-design-scene[data-verified="true"] .rf-response { stroke: var(--cyan); }
+.rf-check { stroke: var(--cyan); fill: none; stroke-width: 2; }
+.rf-schematic { stroke: var(--muted); stroke-width: 2; fill: none; stroke-linecap: round; }
+.rf-junction { fill: var(--muted); }
+.rf-signal { fill: none; stroke: var(--cyan); stroke-width: 2.5; }
+[data-running="true"][data-motion="on"] .rf-scene-enter { animation: rf-scene-in .6s ease-out both; }
+[data-running="true"][data-motion="on"] .rf-schematic .rf-signal { stroke-dasharray: 12 88; animation: rf-signal-pass 3s linear infinite; }
+.rf-physics { display: grid; grid-template-columns: 1fr 1.1fr; align-items: center; gap: 48px; border-top: 1px solid var(--border-soft); }
+.rf-physics-copy h2 { font-size: clamp(1.9rem, 3.5vw, 3.1rem); line-height: 1.15; letter-spacing: -.035em; font-weight: 550; margin: 16px 0 22px; }
+.rf-physics-copy > p:not(.eyebrow) { color: var(--muted); line-height: 1.8; margin-bottom: 26px; }
+.rf-physics-visual { min-width: 0; margin: 0; }
+.rf-verification { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px 24px; font-size: .8rem; }
+.rf-verification span { display: inline-flex; align-items: center; gap: 8px; }
+.rf-verification .icon { width: 17px; height: 17px; color: var(--cyan); }
+.rf-verification [data-verified="false"] .icon { color: var(--violet); }
+.rf-physics-visual figcaption { text-align: center; font-size: .7rem; margin-top: 20px; color: var(--subtle); }
+[data-running="false"] .rf-design-scene *, [data-motion="off"] .rf-design-scene * { animation: none !important; }
+@keyframes rf-scene-in { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+@keyframes rf-signal-pass { to { stroke-dashoffset: -100; } }
+@media (max-width: 760px) {
+  .rf-physics { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .company-film { width: calc(100vw - 20px); max-height: calc(100dvh - 20px); border-radius: 12px; }
+  .film-header, .film-footer { padding: 12px 16px; }
+  .film-header { font-size: .7rem; }
+  .film-divider { margin: 0 6px; }
+  .film-story { padding: 24px 16px 8px; }
+  .film-copy { min-height: 183px; }
+  .film-copy > p:last-child { font-size: .9rem; }
+  .film-copy .eyebrow { font-size: .65rem; }
+  .film-chapters { padding: 0 12px; }
+  .film-chapters button { font-size: .65rem; padding: 12px 3px; overflow-wrap: anywhere; }
+  .film-transport { padding: 4px 16px 12px; gap: 10px; }
+  .film-footer { align-items: flex-start; font-size: .7rem; }
+  .film-footer > span { max-width: 55%; }
+  .film-done { padding: 0; white-space: nowrap; }
+}
+@media (max-height: 550px) and (min-width: 650px) {
+  .film-story { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 18px 28px; align-items: center; }
+  .film-copy { text-align: left; min-height: 0; }
+  .film-copy h2 { font-size: 1.6rem; }
+  .film-copy > p:last-child { font-size: .85rem; }
+  .film-story > svg { max-height: 200px; }
+}
+@media (prefers-reduced-motion: reduce) { .rf-design-scene * { animation: none !important; transition: none !important; } }

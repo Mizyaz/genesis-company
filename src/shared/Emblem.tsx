@@ -1,5 +1,4 @@
-import { forwardRef, useEffect, useId, useRef, useState, type CSSProperties, type MouseEvent } from 'react';
-import { createPortal } from 'react-dom';
+import { forwardRef, useId, type CSSProperties } from 'react';
 import { useVisibleMotion } from './MotionSettings';
 import { cellPath, emblem, emblemBox, emblemMark } from './emblem';
 import '../styles/emblem.css';
@@ -21,26 +20,12 @@ export function EmblemMark() {
   </svg>;
 }
 
-/** The GENESIS symbol, large and lit, as the button that starts the signal flight. It boots pixel by pixel from the
- * core, glows and a current runs up through it now and then. Pressed, it charges, flashes across the screen and hands
- * over to the flight. With motion stopped or reduced it starts the flight at once. */
+/** The shared GENESIS symbol opens its supplied introduction without a flash or a delayed handoff. */
 export const EmblemLauncher = forwardRef<HTMLButtonElement, { label: string; onLaunch: () => void }>(function EmblemLauncher({ label, onLaunch }, ref) {
   const { ref: seen, enabled, running } = useVisibleMotion<HTMLSpanElement>();
   const id = `emblem-${useId().replace(/:/g, '')}`;
-  const [firing, setFiring] = useState(false);
-  const [flash, setFlash] = useState<{ x: number; y: number; run: number } | null>(null);
-  const timers = useRef<number[]>([]);
-  useEffect(() => () => timers.current.forEach(window.clearTimeout), []);
-  const fire = (event: MouseEvent<HTMLButtonElement>) => {
-    if (firing) return;
-    if (!enabled || matchMedia('(prefers-reduced-motion: reduce)').matches) { onLaunch(); return; }
-    const box = event.currentTarget.getBoundingClientRect();
-    setFiring(true);
-    timers.current.push(window.setTimeout(() => setFlash({ x: box.left + box.width / 2, y: box.top + box.height * .55, run: Date.now() }), 380));
-    timers.current.push(window.setTimeout(() => { setFiring(false); onLaunch(); }, 620));
-  };
   return <span ref={seen} className="emblem" data-motion={enabled ? 'on' : 'off'} data-running={running}>
-    <button ref={ref} type="button" className="emblem-launch" data-firing={firing || undefined} aria-label={label} onClick={fire}
+    <button ref={ref} type="button" className="emblem-launch" aria-label={label} onClick={onLaunch}
       style={{ '--emblem-ratio': `${big.box.width} / ${big.box.height}`, '--emblem-mask': maskImage } as CSSProperties}>
       <span className="emblem-mesh" aria-hidden="true" />
       <span className="emblem-art" aria-hidden="true">
@@ -65,7 +50,5 @@ export const EmblemLauncher = forwardRef<HTMLButtonElement, { label: string; onL
         <span className="emblem-current" />
       </span>
     </button>
-    {flash && createPortal(<span key={flash.run} className="emblem-flash" aria-hidden="true" onAnimationEnd={() => setFlash(null)}
-      style={{ '--x': `${flash.x}px`, '--y': `${flash.y}px` } as CSSProperties} />, document.body)}
   </span>;
 });

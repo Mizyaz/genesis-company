@@ -1,5 +1,74 @@
 import { test, expect } from '@playwright/test';
 
+test('the logo opens a finite introduction with pause, seek, replay and focus restoration', async ({ page }) => {
+  await page.goto('/#/');
+  const launcher = page.getByRole('button', { name: 'Watch the GENESIS introduction' });
+  await launcher.click();
+  const film = page.locator('.company-film');
+  const progress = film.getByRole('slider');
+  await expect(film).toBeVisible();
+  await expect(film).toHaveAttribute('data-running', 'true');
+  await expect.poll(async () => Number(await progress.inputValue())).toBeGreaterThan(.2);
+  await film.getByRole('button', { name: 'Pause introduction' }).click();
+  const stopped = await progress.inputValue();
+  await expect(film).toHaveAttribute('data-running', 'false');
+  await page.waitForTimeout(250);
+  await expect(progress).toHaveValue(stopped);
+  await film.getByRole('button', { name: '05 The handoff' }).click();
+  await expect(film.locator('h2')).toHaveText('From schematic to tape-out.');
+  await progress.focus();
+  await page.keyboard.press('End');
+  await expect(progress).toHaveValue('25');
+  await film.getByRole('button', { name: 'Replay introduction' }).click();
+  await expect(film.locator('h2')).toHaveText('A chip starts with a purpose.');
+  await page.keyboard.press('Escape');
+  await expect(film).toHaveCount(0);
+  await expect(launcher).toBeFocused();
+  await expect(page.locator('canvas')).toHaveCount(0);
+});
+
+test('Turkish mobile intro respects reduced motion and stays inside the screen', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.addInitScript(() => {
+    localStorage.setItem('genesis.company.language', 'tr');
+    localStorage.setItem('genesis.company.theme', 'light');
+  });
+  await page.goto('/#/');
+  await page.getByRole('button', { name: 'GENESIS tanıtımını izle' }).click();
+  const film = page.locator('.company-film');
+  await expect(film).toHaveAttribute('data-running', 'false');
+  await expect(film.locator('h2')).toHaveText('Her çip bir ihtiyaca cevap verir.');
+  await film.getByRole('button', { name: '04 Kontrol' }).click();
+  await expect(film.locator('h2')).toHaveText('Kontrol et. Geliştir. Yeniden dene.');
+  expect(await film.evaluate(node => node.scrollWidth <= node.clientWidth)).toBe(true);
+  expect(await film.evaluate(node => node.getBoundingClientRect().right <= innerWidth)).toBe(true);
+  // The native dialog keeps keyboard focus away from the page behind it.
+  await film.getByRole('button', { name: 'Keşfetmeye devam et' }).focus();
+  await page.keyboard.press('Tab');
+  await expect(film.getByRole('button', { name: 'Tanıtımı kapat' })).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('button', { name: 'GENESIS tanıtımını izle' })).toBeFocused();
+});
+
+test('RF positioning shares the film, supports both themes and fits narrow screens', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.setViewportSize({ width: 360, height: 800 });
+  await page.goto('/#/explore');
+  await expect(page.locator('h1')).toHaveText('From schematicto tape-out.');
+  const section = page.locator('.rf-physics');
+  await expect(section.locator('h2')).toHaveText('Every physical change has an electrical consequence.');
+  await section.getByRole('button', { name: /Watch the introduction/ }).click();
+  await expect(page.locator('.company-film')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: 'Open menu' }).click();
+  await page.getByRole('button', { name: 'Türkçe', exact: true }).click();
+  await page.getByRole('button', { name: 'Açık temaya geç' }).click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  await expect(page.locator('h1')).toContainText('üretime hazır çipe.');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
 const screens = [
   { name: 'welcome card', route: '#/', trigger: '.story-scene-figure button', panel: '.story-scene-figure .tube-card' },
   { name: 'design-loop card', route: '#/explore', trigger: '.design-story .story-press', panel: '.design-story .tube-card' },

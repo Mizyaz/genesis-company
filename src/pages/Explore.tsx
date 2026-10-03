@@ -4,6 +4,7 @@ import siteContent from '../content/site.json';
 import { ActionLink, Brand, Icon, SectionHeading } from '../shared/ui';
 import { PortfolioCard } from '../shared/PortfolioCard';
 import { ProductIntro } from '../shared/ProductIntro';
+import { RFPhysics } from '../shared/CompanyIntro';
 import { DesignStory } from '../shared/DesignStory';
 import { Workflow } from '../shared/Workflow';
 import { Membership } from '../shared/Membership';
@@ -22,10 +23,11 @@ export function Explore({ workbenchUrl }: { workbenchUrl?: string }) {
     <section className="company-hero" aria-labelledby="company-heading">
       <div className="company-hero-image" aria-hidden="true" />
       <div className="company-hero-inner">
-        <div className="company-hero-copy"><p className="eyebrow"><span className="short-rule" /> {t("AUTONOMOUS RFIC DESIGN ENGINE")}</p><h1 id="company-heading">{t("From specs")}<br />{t("to")} <span className="gradient-text">{t("silicon.")}</span></h1><p>{t("RF expertise. AI intelligence.")}<br />{t("One connected design loop.")}</p><a className="button button-primary" href="#/explore/membership">{t("View the membership")} <Icon name="down" /></a></div>
+        <div className="company-hero-copy"><p className="eyebrow"><span className="short-rule" /> {t("AUTONOMOUS RFIC DESIGN")}</p><h1 id="company-heading">{t("From schematic")}<br /><span className="gradient-text">{t("to tape-out.")}</span></h1><p>{t("Circuit sizing, passive synthesis and physical implementation, connected through electromagnetic verification.")}</p><a className="button button-primary" href="#/explore/membership">{t("View the membership")} <Icon name="down" /></a></div>
         <ProductIntro content={site.intro} />
       </div>
     </section>
+    <RFPhysics />
     <Membership content={site.membership} email={site.brand.email} />
     <section id="portfolio" className="content-section portfolio-section">
       <div className="section-intro"><SectionHeading eyebrow={t('RFIC PORTFOLIO')}>{t("From individual blocks")}<br />{t("to")} <span className="gradient-text">{t("complete circuits.")}</span></SectionHeading><p>{t("RF switches, frequency converters and broadband passives for mmWave systems.")}</p></div>
