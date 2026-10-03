@@ -1,25 +1,28 @@
-/* Shared brand tokens, no WebGL or game UI. The film is a timed, accessible introduction. */
-.company-film { position: fixed; inset: 0; width: min(1050px, calc(100vw - 40px)); max-height: calc(100dvh - 40px); margin: auto; padding: 0; color: var(--text); background: var(--page); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); overflow: auto; }
-.company-film::backdrop { background: #030d1de0; }
-.film-header, .film-footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 18px 28px; }
-.film-header { font-size: .8rem; border-bottom: 1px solid var(--border-soft); }
-.film-divider { margin: 0 12px; color: var(--subtle); }
-.film-story { padding: 32px 40px 12px; }
-.film-copy { max-width: 650px; min-height: 165px; margin: 0 auto; text-align: center; }
-.film-copy h2 { margin: 10px 0 12px; font-size: clamp(1.65rem, 3.4vw, 2.65rem); font-weight: 550; line-height: 1.16; letter-spacing: -.035em; }
-.film-copy > p:last-child { margin: 0 auto; max-width: 570px; font-size: 1rem; line-height: 1.65; color: var(--muted); }
-.film-story > svg { max-height: 290px; }
-.film-transport { display: flex; gap: 16px; align-items: center; padding: 8px 28px 16px; }
-.film-transport input { flex: 1; min-width: 0; accent-color: var(--cyan); cursor: pointer; }
+/* The player shares the site's controls/fonts. Its silicon surface has photographic dark materials in either theme. */
+.company-film { --cyan: #65e6ee; --violet: #b6a0ff; --text: #eef7ff; --muted: #a7bbcb; color-scheme: dark; position: fixed; inset: 0; width: min(1440px, calc(100vw - 40px)); height: min(900px, calc(100dvh - 40px)); max-width: none; max-height: none; margin: auto; padding: 0; color: var(--text); background: #041325; border: 1px solid #48617a66; border-radius: 16px; box-shadow: 0 32px 100px #0009; overflow: hidden; }
+.company-film::backdrop { background: #020912ed; backdrop-filter: blur(12px); }
+.film-canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+.film-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.film-header, .film-footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.film-header { position: absolute; inset: 0 0 auto; padding: 18px 28px; font-size: .7rem; letter-spacing: .08em; background: linear-gradient(#04101bc2, transparent); }
+.film-header > span { display: flex; align-items: center; gap: 12px; }
+.film-header .emblem-mark { width: 24px; height: 24px; }
+.film-divider { color: #7792a3; }
+.company-film .icon-button { color: #d7eaf6; border-color: #68839a44; background: #13273880; width: 40px; height: 40px; }
+.company-film .icon-button:hover { background: #23425b; border-color: #82c5d1; }
+.company-film :focus-visible { outline: 2px solid #65e6ee; outline-offset: 4px; }
+.film-ending { position: absolute; inset: 16% 20px auto; display: flex; flex-direction: column; align-items: center; pointer-events: none; text-align: center; }
+.film-ending .emblem-mark { width: clamp(40px, 5vw, 65px); height: clamp(40px, 5vw, 65px); margin-bottom: 12px; filter: drop-shadow(0 0 15px #41dce830); }
+.film-ending strong { font-size: clamp(2.6rem, 5.5vw, 5.1rem); font-weight: 550; line-height: 1.1; letter-spacing: .18em; padding-left: .18em; background: linear-gradient(105deg, #79e7ee, #e0f7ff 45%, #b4a0ed); background-clip: text; -webkit-background-clip: text; color: transparent; }
+.film-ending p { font-size: clamp(.9rem, 1.5vw, 1.15rem); font-weight: 350; letter-spacing: .06em; margin: 16px 0 0; color: #bdd1dd; }
+.film-controls { position: absolute; inset: auto 0 0; padding: 48px 28px 18px; background: linear-gradient(transparent, #03101cee 45%); }
+.film-transport { display: flex; gap: 16px; align-items: center; }
+.film-transport input { flex: 1; min-width: 0; height: 3px; accent-color: var(--cyan); cursor: pointer; }
 .film-transport button:disabled { opacity: .4; }
-.film-time, .intro-duration { font-family: var(--font-mono); font-size: .75rem; color: var(--muted); white-space: nowrap; }
-.film-chapters { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); padding: 0 28px; }
-.film-chapters button { border: 0; border-top: 2px solid var(--border); padding: 14px 8px; background: none; color: var(--muted); font: inherit; font-size: .8rem; cursor: pointer; }
-.film-chapters button span { display: block; margin-bottom: 4px; font-family: var(--font-mono); font-size: .7rem; opacity: .7; }
-.film-chapters button[aria-current] { border-color: var(--cyan); color: var(--text); }
-.film-footer { padding-top: 16px; font-size: .75rem; color: var(--muted); border-top: 1px solid var(--border-soft); }
-.film-done { display: inline-flex; gap: 10px; align-items: center; background: none; color: var(--text); border: 0; font: inherit; cursor: pointer; padding: 8px 0; }
-.film-done .icon { width: 16px; height: 16px; }
+.film-time, .intro-duration { font-family: var(--font-mono); font-size: .7rem; color: var(--muted); white-space: nowrap; }
+.film-footer { padding-top: 14px; font-size: .65rem; color: #91a8b9; }
+.film-done { display: inline-flex; gap: 10px; align-items: center; background: none; color: #d4e2ea; border: 0; font: inherit; cursor: pointer; padding: 4px 0; }
+.film-done .icon { width: 14px; height: 14px; }
 .rf-design-scene { display: block; width: 100%; height: auto; overflow: visible; }
 .rf-design-scene text { fill: var(--muted); font: 13px var(--font-sans); text-anchor: middle; }
 .rf-grid { stroke: var(--border); stroke-width: 1; opacity: .28; fill: none; }
@@ -56,26 +59,22 @@
 @keyframes rf-signal-pass { to { stroke-dashoffset: -100; } }
 @media (max-width: 760px) {
   .rf-physics { grid-template-columns: minmax(0, 1fr); gap: 20px; }
-  .company-film { width: calc(100vw - 20px); max-height: calc(100dvh - 20px); border-radius: 12px; }
-  .film-header, .film-footer { padding: 12px 16px; }
-  .film-header { font-size: .7rem; }
-  .film-divider { margin: 0 6px; }
-  .film-story { padding: 24px 16px 8px; }
-  .film-copy { min-height: 183px; }
-  .film-copy > p:last-child { font-size: .9rem; }
-  .film-copy .eyebrow { font-size: .65rem; }
-  .film-chapters { padding: 0 12px; }
-  .film-chapters button { font-size: .65rem; padding: 12px 3px; overflow-wrap: anywhere; }
-  .film-transport { padding: 4px 16px 12px; gap: 10px; }
-  .film-footer { align-items: flex-start; font-size: .7rem; }
-  .film-footer > span { max-width: 55%; }
-  .film-done { padding: 0; white-space: nowrap; }
+  .company-film { width: 100vw; height: 100dvh; border: 0; border-radius: 0; }
+  .film-header { padding: max(12px, env(safe-area-inset-top)) 16px 12px; font-size: .6rem; }
+  .film-header > span { gap: 8px; }
+  .film-controls { padding: 42px 16px max(16px, env(safe-area-inset-bottom)); }
+  .film-transport { gap: 10px; }
+  .film-footer { align-items: flex-start; gap: 20px; font-size: .6rem; }
+  .film-footer > span { max-width: 50%; }
+  .film-ending { top: 13%; }
 }
 @media (max-height: 550px) and (min-width: 650px) {
-  .film-story { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 18px 28px; align-items: center; }
-  .film-copy { text-align: left; min-height: 0; }
-  .film-copy h2 { font-size: 1.6rem; }
-  .film-copy > p:last-child { font-size: .85rem; }
-  .film-story > svg { max-height: 200px; }
+  .company-film { height: 100dvh; width: 100vw; border: 0; border-radius: 0; }
+  .film-header { padding: 8px 16px; }
+  .film-footer { display: none; }
+  .film-controls { padding: 32px 16px 8px; }
+  .film-ending { top: 17%; }
+  .film-ending .emblem-mark { display: none; }
+  .film-ending strong { font-size: 2.4rem; }
 }
 @media (prefers-reduced-motion: reduce) { .rf-design-scene * { animation: none !important; transition: none !important; } }
