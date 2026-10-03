@@ -1,12 +1,12 @@
-/** Shared editorial clock for geometry, captions and the 24-bar soundtrack. */
-export const FILM_SECONDS = 60;
+/** One 16:9 editorial master. Geometry, typography and the 16-bar score share this clock. */
+export const FILM_SECONDS = 30;
 export const filmCues = [
-  { id: 'prompt', from: 0, to: 5 },
-  { id: 'schematic', from: 5, to: 20 },
-  { id: 'joint', from: 20, to: 35 },
-  { id: 'layout', from: 35, to: 47 },
-  { id: 'verify', from: 47, to: 57 },
-  { id: 'closing', from: 57, to: FILM_SECONDS },
+  { id: 'prompt', from: 0, to: 3 },
+  { id: 'schematic', from: 3, to: 8 },
+  { id: 'joint', from: 8, to: 18 },
+  { id: 'layout', from: 18, to: 22 },
+  { id: 'verify', from: 22, to: 26 },
+  { id: 'closing', from: 26, to: FILM_SECONDS },
 ] as const;
 export const ease = (a: number, b: number, time: number) => {
   const x = Math.max(0, Math.min(1, (time - a) / (b - a)));

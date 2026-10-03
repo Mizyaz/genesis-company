@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test('the logo opens a finite introduction with pause, seek, replay and focus restoration', async ({ page }) => {
+  test.setTimeout(30_000); // Two cold WebGL opens, including shader compilation on software CI.
   await page.addInitScript(() => {
     const NativeAudio = window.Audio;
     window.filmMedia = [];
@@ -28,11 +29,11 @@ test('the logo opens a finite introduction with pause, seek, replay and focus re
   await expect(film).toHaveAttribute('data-muted', 'false');
   await progress.focus();
   await page.keyboard.press('End');
-  await expect(progress).toHaveValue('60');
+  await expect(progress).toHaveValue('30');
   await expect(film.locator('.film-ending')).toHaveCSS('opacity', '1');
-  await expect(film.locator('.film-ending p:last-child')).toHaveText('RFIC design, from prompt to schematic and layout.');
+  await expect(film.locator('.film-ending strong')).toHaveText('GENESIS');
   await expect(film.locator('.film-signature')).toHaveText('Generative Evolution of Silicon Intelligent Systems');
-  await expect(film.locator('.film-time')).toHaveText('1:00 / 1:00');
+  await expect(film.locator('.film-time')).toHaveText('0:30 / 0:30');
   await film.getByRole('button', { name: 'Replay introduction' }).click();
   await expect.poll(async () => Number(await progress.inputValue())).toBeLessThan(2);
   await expect(film.locator('.film-ending')).toHaveCount(0);
@@ -85,7 +86,7 @@ test('LLM click and thinking seek deterministically, and the paused WebGL scene 
   await expect(film).toHaveAttribute('data-scene', 'ready');
   await expect(film).toHaveAttribute('data-entering', 'false');
   await expect(film.locator('.film-opening')).toHaveCount(0);
-  for (const [time, phase] of [[1, 'request'], [2.2, 'pressed'], [3.7, 'thinking'], [8, 'thinking'], [11, 'thinking'], [1, 'request']]) {
+  for (const [time, phase] of [[1, 'request'], [2.2, 'pressed'], [2.5, 'thinking'], [1, 'request']]) {
     await film.getByRole('slider').fill(String(time));
     await expect(film.locator('.film-request')).toHaveAttribute('data-phase', phase);
     await expect(surface).toHaveAttribute('data-time', time.toFixed(2));
@@ -98,10 +99,10 @@ test('LLM click and thinking seek deterministically, and the paused WebGL scene 
   });
   await page.evaluate(() => document.documentElement.dataset.theme = 'light');
   await expect.poll(async () => Math.min(...await background())).toBeGreaterThan(.8);
-  await expect(film.locator('.film-caption h3')).toHaveCSS('color', 'rgb(11, 35, 60)');
+  await expect(film.locator('.film-caption h3')).toHaveCSS('color', 'rgb(241, 248, 255)');
   await page.evaluate(() => document.documentElement.dataset.theme = 'dark');
   await expect.poll(async () => Math.max(...await background())).toBeLessThan(.25);
-  await expect(film.locator('.film-caption h3')).toHaveCSS('color', 'rgb(241, 246, 252)');
+  await expect(film.locator('.film-caption h3')).toHaveCSS('color', 'rgb(241, 248, 255)');
   await expect(surface).toHaveAttribute('data-time', '21.00');
   await expect(surface).toHaveAttribute('data-renderer', 'webgl');
   await page.keyboard.press('Escape');
@@ -137,7 +138,7 @@ test('Turkish mobile intro respects reduced motion and stays inside the screen',
   await film.getByRole('slider').focus();
   await page.keyboard.press('End');
   await expect(film.locator('.film-ending')).toHaveCSS('opacity', '1');
-  await expect(film.locator('canvas')).toHaveAttribute('data-time', '60.00');
+  await expect(film.locator('canvas')).toHaveAttribute('data-time', '30.00');
   expect(await film.evaluate(node => node.scrollWidth <= node.clientWidth)).toBe(true);
   expect(await film.evaluate(node => node.getBoundingClientRect().right <= innerWidth)).toBe(true);
   // The native dialog keeps keyboard focus away from the page behind it.
@@ -186,12 +187,13 @@ test('the score contains stereo music, stays synchronized after seeking and stop
     for (const sample of samples) { peak = Math.max(peak, Math.abs(sample)); sum += sample * sample; }
     return { duration: buffer.duration, channels: buffer.numberOfChannels, peak, rms: Math.sqrt(sum / samples.length) };
   }, (await response.body()).toString('base64'));
-  expect(score.duration).toBeGreaterThanOrEqual(60); expect(score.duration).toBeLessThan(60.15); expect(score.channels).toBe(2);
+  expect(score.duration).toBeGreaterThanOrEqual(30); expect(score.duration).toBeLessThan(30.15); expect(score.channels).toBe(2);
   expect(score.peak).toBeGreaterThan(.03); expect(score.peak).toBeLessThan(.95);
   expect(score.rms).toBeGreaterThan(.005);
   await film.getByRole('slider').fill('17');
-  await expect.poll(() => page.evaluate(() => window.filmMedia.currentTime)).toBeGreaterThanOrEqual(17);
-  expect(await page.evaluate(() => Math.abs(window.filmMedia.currentTime - Number(document.querySelector('.film-transport input').value)))).toBeLessThan(.25);
+  // First use of all materials can compile shaders on software WebGL CI.
+  await expect.poll(() => page.evaluate(() => window.filmMedia.currentTime), { timeout: 10_000 }).toBeGreaterThanOrEqual(17);
+  await expect.poll(() => page.evaluate(() => Math.abs(window.filmMedia.currentTime - Number(document.querySelector('.film-transport input').value))), { timeout: 10_000 }).toBeLessThan(.25);
   expect(await page.evaluate(() => window.filmMedia.paused)).toBe(false);
   await page.evaluate(() => { Object.defineProperty(document, 'hidden', { value: true, configurable: true }); document.dispatchEvent(new Event('visibilitychange')); });
   await expect(film).toHaveAttribute('data-running', 'false');
@@ -222,7 +224,7 @@ test('RF positioning shares the film, supports both themes and fits narrow scree
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
-test('the one-minute front-end film has readable assembly and joint-design captions in both languages', async ({ page }) => {
+test('the thirty-second front-end film has readable assembly and joint-design captions in both languages', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   for (const language of ['en', 'tr']) {
     await page.setViewportSize(language === 'tr' ? { width: 390, height: 844 } : { width: 1440, height: 960 });
@@ -232,17 +234,25 @@ test('the one-minute front-end film has readable assembly and joint-design capti
     await page.getByRole('button', { name: language === 'tr' ? 'GENESIS tanıtımını izle' : 'Watch the GENESIS introduction' }).click();
     const film = page.locator('.company-film');
     await expect(film).toHaveAttribute('data-scene', 'ready');
+    const frame = await film.locator('.film-viewport').boundingBox();
+    expect(frame.width / frame.height).toBeCloseTo(16 / 9, 2);
+    await expect(film.locator('.film-ending')).toHaveCount(0);
+    await expect(film.locator('.film-request')).toBeVisible();
     const captions = language === 'tr'
-      ? ['Nasıl bir RF ön uç istiyorsunuz?', 'Yükselteç şekilleniyor.', 'Sırada verici kolu var.', 'Devreler bir bütüne dönüşüyor.', 'Tasarım birlikte iyileşiyor.']
-      : ['Describe your front end.', 'An amplifier takes shape.', 'Now, the transmit path.', 'The circuits become a system.', 'Refine the connected design.'];
-    const times = [3, 12, 28, 40, 52], cues = ['prompt', 'schematic', 'joint', 'layout', 'verify'];
+      ? ['Bir fikir devreye dönüşür.', 'Aktif ve pasif elemanlar, tek tasarım.', 'Devreler birleşir, RF ön uç ortaya çıkar.', 'Fikirden fiziksel tasarıma.']
+      : ['An idea becomes a circuit.', 'Active. Passive. Designed together.', 'One connected RF front end.', 'From intent to implementation.'];
+    const times = [5, 11, 19, 24], cues = ['schematic', 'joint', 'layout', 'verify'];
     for (let i = 0; i < times.length; i++) {
       await film.getByRole('slider').fill(String(times[i]));
       await expect(film).toHaveAttribute('data-cue', cues[i]);
       await expect(film.getByRole('heading', { name: captions[i], exact: true })).toBeVisible();
       await expect(film.locator('canvas')).toHaveAttribute('data-time', `${times[i]}.00`);
       expect(await film.evaluate(node => node.scrollWidth <= node.clientWidth)).toBe(true);
+      await expect(film.locator('.film-ending')).toHaveCount(0);
     }
+    await film.getByRole('slider').fill('29');
+    await expect(film.locator('.film-ending strong')).toHaveText('GENESIS');
+    await expect(film.locator('.film-signature')).toHaveText('Generative Evolution of Silicon Intelligent Systems');
     await page.keyboard.press('Escape');
   }
 });

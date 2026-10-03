@@ -6,15 +6,15 @@
   },
   "introduction": {
     "title": "GENESIS: from an RFIC prompt to schematic and layout",
-    "description": "One RF front end takes shape over sixty seconds. Transistors, matching networks and bias circuits form complete LNA and PA circuits. Receive and transmit paths meet at an antenna switch. Pixelated metal and device dimensions evolve together as the layout grows. This is an illustrated design sequence, not simulated measurement data or a live LLM session.",
-    "prompt": "Design an RF front end with receive and transmit paths.",
+    "description": "A thirty-second RF design film. A prompt becomes LNA and PA circuits with pixelated matching networks. Active and passive geometry evolve together before the complete RF front end is revealed. This is an illustrated design sequence, not simulated measurement data or a live LLM session.",
+    "prompt": "Design an RF front end. Optimize its active and passive circuits together.",
     "closing": "RFIC design, from prompt to schematic and layout.",
     "scenes": {
       "prompt": { "label": "RFIC × LLM", "title": "Describe your front end.", "detail": "GENESIS turns your intent into a design plan." },
-      "schematic": { "label": "BUILDING THE LNA", "title": "An amplifier takes shape.", "detail": "Transistors, matching networks and bias circuits. One receive amplifier." },
-      "joint": { "label": "JOINT AI DESIGN", "title": "Now, the transmit path.", "detail": "The PA grows as active devices and pixelated passives evolve together." },
-      "layout": { "label": "CIRCUITS → FRONT END", "title": "The circuits become a system.", "detail": "LNA, PA, mixers and an antenna switch. Connected receive and transmit paths." },
-      "verify": { "label": "RF DESIGN LOOP", "title": "Refine the connected design.", "detail": "Metal patterns, device sizes and connections keep evolving together." },
+      "schematic": { "label": "BUILDING THE LNA", "title": "An idea becomes a circuit.", "detail": "Transistors, matching networks and bias circuits. One receive amplifier." },
+      "joint": { "label": "JOINT AI DESIGN", "title": "Active. Passive. Designed together.", "detail": "The PA grows as active devices and pixelated passives evolve together." },
+      "layout": { "label": "CIRCUITS → FRONT END", "title": "One connected RF front end.", "detail": "LNA, PA, mixers and an antenna switch. Connected receive and transmit paths." },
+      "verify": { "label": "RF DESIGN LOOP", "title": "From intent to implementation.", "detail": "Metal patterns, device sizes and connections keep evolving together." },
       "closing": { "label": "GENESIS", "title": "One front end. Designed together.", "detail": "From your request to a connected physical design." }
     }
   },

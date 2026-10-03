@@ -653,24 +653,24 @@ const transpiled = (path, dependencies = {}) => { const module = {}; new Functio
 test('the original score is finite, deterministic and resolves with the film', () => {
   const timeline = transpiled('src/shared/intro/timeline.ts');
   const { composeScore, FILM_SECONDS, BPM } = transpiled('src/shared/intro/score.ts', { './timeline': timeline });
-  assert.equal(FILM_SECONDS, 60);
-  assert.equal(24 * 4 * 60 / BPM, FILM_SECONDS);
+  assert.equal(FILM_SECONDS, 30);
+  assert.equal(16 * 4 * 60 / BPM, FILM_SECONDS);
   const notes = composeScore();
   assert.deepEqual(notes, composeScore());
-  assert.ok(notes.length > 200 && notes.length < 400);
+  assert.ok(notes.length > 200 && notes.length < 600);
   assert.ok(notes.every(note => note.at >= 0 && note.at < FILM_SECONDS && note.length > 0 && note.level > 0 && Math.abs(note.pan) <= 1));
-  assert.deepEqual([...new Set(notes.map(note => note.voice))].sort(), ['bass', 'bell', 'pad', 'tick']);
-  assert.ok(notes.some(note => note.at >= 57 && note.voice === 'bell'));
-  assert.ok(!notes.some(note => note.at >= 55 && note.voice === 'tick'));
+  assert.deepEqual([...new Set(notes.map(note => note.voice))].sort(), ['bass', 'bell', 'hat', 'kick', 'pad', 'tick']);
+  assert.ok(notes.some(note => note.at >= 27 && note.voice === 'bell'));
+  assert.ok(!notes.some(note => note.at >= 26.25 && note.voice === 'tick'));
   const score = read('src/shared/intro/score.ts');
   assert.doesNotMatch(score, /fetch\(|https?:|setInterval/);
   assert.match(score, /removeAttribute\('src'\)/);
   assert.ok(existsSync(resolve(root, 'public/assets/genesis-intro-score.mp3')));
   const musicBytes = statSync(resolve(root, 'public/assets/genesis-intro-score.mp3')).size;
-  assert.ok(musicBytes > 500_000 && musicBytes < 1_500_000, 'bounded pre-rendered stereo track');
+  assert.ok(musicBytes > 350_000 && musicBytes < 800_000, 'bounded pre-rendered stereo track');
 });
 
-test('the film tells a complete prompt-to-schematic-to-layout story in one minute', () => {
+test('the film tells a complete prompt-to-schematic-to-layout story in thirty seconds', () => {
   const { filmCues, filmCue, filmTime, FILM_SECONDS } = transpiled('src/shared/intro/timeline.ts');
   assert.deepEqual(filmCues.map(cue => cue.id), ['prompt', 'schematic', 'joint', 'layout', 'verify', 'closing']);
   assert.equal(filmCues[0].from, 0);
@@ -679,27 +679,27 @@ test('the film tells a complete prompt-to-schematic-to-layout story in one minut
   for (let time = 0; time <= FILM_SECONDS; time += .1) {
     const cue = filmCue(time); assert.ok(cue.opacity >= 0 && cue.opacity <= 1);
   }
-  assert.equal(filmCue(60).id, 'closing');
+  assert.equal(filmCue(30).id, 'closing');
   assert.equal(filmTime(60), '1:00'); assert.equal(filmTime(59.9), '0:59');
   assert.equal(filmCue(5).id, 'schematic', 'the request does not spend ten seconds drifting');
-  assert.equal(filmCue(23).id, 'joint');
-  assert.equal(filmCue(38).id, 'layout');
+  assert.equal(filmCue(11).id, 'joint');
+  assert.equal(filmCue(19).id, 'layout');
 });
 
 const frontEndModel = () => transpiled('src/shared/intro/frontEndScene.ts', {
   './timeline': transpiled('src/shared/intro/timeline.ts'), '../pixelLayout': transpiled('src/shared/pixelLayout.ts'),
 });
-test('assembly spans the minute and starts after the illustrated LLM click', () => {
+test('assembly fills the film before the closing brand reveal and starts after the illustrated LLM click', () => {
   const { llmClickAt, parts, partState, requestState } = frontEndModel();
   assert.equal(requestState(1), 'request'); assert.equal(requestState(2.2), 'pressed');
-  assert.equal(requestState(59), 'thinking'); assert.equal(requestState(60), 'ready');
+  assert.equal(requestState(25), 'thinking'); assert.equal(requestState(26), 'ready');
   parts.forEach(part => {
     assert.ok(part.start > llmClickAt);
     assert.equal(partState(part, llmClickAt).appear, 0);
     assert.equal(partState(part, part.start).appear, 0);
-    assert.equal(partState(part, part.start + 1.5).appear, 1);
+    assert.equal(partState(part, part.start + .8).appear, 1);
   });
-  assert.ok(Math.max(...parts.map(part => part.start)) > 55);
+  assert.ok(Math.max(...parts.map(part => part.start)) > 20);
   const dictionary = JSON.parse(read('src/content/tr.json'));
   for (const copy of ['Send to GENESIS', 'Request received', 'Thinking', 'Circuit assembled', 'Illustrated LLM interaction']) assert.ok(dictionary[copy], copy);
 });
@@ -716,7 +716,7 @@ test('LNA and PA contain complete amplifier structures and retain port connectio
     assert.equal(children.filter(part => part.kind === 'choke').length, 1);
   }
   assert.equal(parts.filter(part => part.kind === 'mixer').length, 2);
-  for (let time = 0; time <= 60; time += .5) for (const edge of connections) {
+  for (let time = 0; time <= 30; time += .5) for (const edge of connections) {
     const state = connectionState(edge, time);
     assert.deepEqual(state.points[0], portPosition(edge.from, time));
     assert.deepEqual(state.points.at(-1), portPosition(edge.to, time));
@@ -725,18 +725,18 @@ test('LNA and PA contain complete amplifier structures and retain port connectio
   }
 });
 
-test('pixel topology, footprint and transistor sizing change together through the final second', () => {
+test('pixel topology, footprint and transistor sizing change together until the final product shot', () => {
   const { parts, partState, pixelCandidates, designTimes, designState, sceneCopy } = frontEndModel();
-  assert.ok(designTimes.at(-1) >= 59); assert.equal(designState(60).blend, 1);
+  assert.ok(designTimes.at(-1) >= 24); assert.equal(designState(26).blend, 1);
   for (const part of parts.filter(part => part.kind === 'pixel')) {
     const variants = pixelCandidates.get(part.id);
     assert.ok(variants.length >= 12);
     for (let i = 1; i < variants.length; i++) assert.notDeepEqual(variants[i].metal, variants[i - 1].metal);
-    assert.notEqual(partState(part, 55).width, partState(part, 60).width);
+    assert.notEqual(partState(part, 22).width, partState(part, 26).width);
   }
   for (const part of parts.filter(part => part.kind === 'mos')) {
-    assert.notEqual(partState(part, 55).fingers, partState(part, 60).fingers);
-    assert.notEqual(partState(part, 55).fingerLength, partState(part, 60).fingerLength);
+    assert.notEqual(partState(part, 22).fingers, partState(part, 26).fingers);
+    assert.notEqual(partState(part, 22).fingerLength, partState(part, 26).fingerLength);
   }
   const dictionary = JSON.parse(read('src/content/tr.json'));
   sceneCopy.forEach(copy => assert.ok(dictionary[copy], `Scene translation: ${copy}`));

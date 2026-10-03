@@ -26,7 +26,7 @@ export function CompanyIntro({ symbol = false }: { symbol?: boolean }) {
   useEffect(() => () => sound.current?.dispose(), []);
   return <>
     {symbol ? <EmblemLauncher ref={launcher} label={t('Watch the GENESIS introduction')} onLaunch={launch} />
-      : <button ref={launcher} type="button" className="button button-secondary" onClick={launch}><Icon name="play" />{t('Watch the introduction')}<span className="intro-duration">1:00</span></button>}
+      : <button ref={launcher} type="button" className="button button-secondary" onClick={launch}><Icon name="play" />{t('Watch the introduction')}<span className="intro-duration">{filmTime(FILM_SECONDS)}</span></button>}
     {open && sound.current && createPortal(<IntroFilm onClose={close} sound={sound.current} origin={origin.current} />, document.body)}
   </>;
 }
@@ -47,11 +47,19 @@ function IntroFilm({ onClose, sound, origin }: { onClose: () => void; sound: Int
   const labels = useRef<HTMLDivElement>(null);
   const film = useRef<CircuitFilm>();
   const [sceneStatus, setSceneStatus] = useState<'loading' | 'ready' | 'unavailable'>('loading');
-  const story = useRef<HTMLDivElement>(null);
+  const viewport = useRef<HTMLDivElement>(null);
   const clock = useRef(0);
-  const size = useRef({ width: 1, height: 1, ratio: 1, contentTop: 0 });
+  const sampling = useRef(1);
+  const fitScene = useRef(() => {});
   const duration = FILM_SECONDS;
   const playing = running && !entering && !paused && sceneStatus === 'ready' && time < duration;
+  useLayoutEffect(() => {
+    const node = viewport.current;
+    if (!node) return;
+    const fit = () => node.style.setProperty('--film-scale', String(node.clientWidth / 1280));
+    fit(); const observer = new ResizeObserver(fit); observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
   useEffect(() => {
     let active = true;
     const surface = canvas.current;
@@ -107,35 +115,49 @@ function IntroFilm({ onClose, sound, origin }: { onClose: () => void; sound: Int
     let palette = readFilmPalette(surface);
     scene.theme(palette);
     const draw = () => {
-      scene.render(clock.current, size.current.contentTop, t);
+      scene.render(clock.current, t);
     };
-    const resize = new ResizeObserver(() => {
-      const width = surface.clientWidth, height = surface.clientHeight;
-      if (!width || !height) return;
-      // Bounded backing store, including high-DPI phones. No offscreen scene textures.
-      const ratio = Math.min(devicePixelRatio || 1, 1.5, Math.sqrt(1_400_000 / (width * height)));
-      const contentTop = (story.current?.getBoundingClientRect().bottom ?? 0) - surface.getBoundingClientRect().top + 24;
-      size.current = { width, height, ratio, contentTop };
-      scene.resize(width, height, ratio); draw();
-    });
-    resize.observe(surface);
-    if (story.current) resize.observe(story.current);
+    const fit = () => {
+      const displayWidth = viewport.current?.clientWidth ?? 1280;
+      // One landscape composition. Only sampling density changes on small screens.
+      const ratio = Math.min((devicePixelRatio || 1) * displayWidth / 1280, 1.5, Math.sqrt(1_800_000 / (1280 * 720)));
+      scene.resize(1280, 720, ratio * sampling.current);
+    };
+    fitScene.current = fit;
+    fit();
+    const resize = new ResizeObserver(() => { fit(); draw(); });
+    if (viewport.current) resize.observe(viewport.current);
     // The shared theme can change while paused. Repaint without changing the film's clock.
     const theme = new MutationObserver(() => { palette = readFilmPalette(surface); scene.theme(palette); draw(); });
     theme.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'style', 'class'] });
+    return () => { resize.disconnect(); theme.disconnect(); fitScene.current = () => {}; };
+  }, [sceneStatus, t]);
+  useEffect(() => {
+    const scene = film.current;
+    if (!scene || sceneStatus !== 'ready') return;
+    const draw = () => scene.render(clock.current, t);
+    if (!playing && sampling.current !== 1) { sampling.current = 1; fitScene.current(); }
     let frame = 0, lastPaint = 0, lastLabel = 0;
     const offset = clock.current, started = performance.now();
     if (playing) sound.play(offset); else sound.pause();
     const tick = (now: number) => {
       clock.current = Math.min(duration, sound.position ?? offset + (now - started) / 1000);
       // 30 fps is intentional: this film stays light on mobile and on shared machines.
-      if (now - lastPaint >= 1000 / 30 || clock.current === duration) { draw(); lastPaint = now; }
+      if (now - lastPaint >= 1000 / 30 || clock.current === duration) {
+        const stalled = lastPaint > 0 && now - lastPaint > 120;
+        const before = performance.now(); draw(); lastPaint = now;
+        // Preserve the film's timing on weak GPUs. Paused/frame-exact exports stay full quality.
+        if ((stalled || performance.now() - before > 80) && sampling.current > .35) {
+          sampling.current = Math.max(.35, sampling.current * .6); fitScene.current();
+        }
+      }
+      clock.current = Math.min(duration, sound.position ?? clock.current);
       if (now - lastLabel >= 100 || clock.current === duration) { setTime(clock.current); lastLabel = now; }
       if (clock.current < duration) frame = requestAnimationFrame(tick);
     };
     draw();
     if (playing) frame = requestAnimationFrame(tick);
-    return () => { cancelAnimationFrame(frame); resize.disconnect(); theme.disconnect(); sound.pause(); };
+    return () => { cancelAnimationFrame(frame); sound.pause(); };
   }, [playing, revision, sound, duration, audioStatus, sceneStatus, t]);
   const seek = (value: number) => { clock.current = value; setTime(value); setRevision(value => value + 1); };
   const togglePlay = () => {
@@ -157,35 +179,37 @@ function IntroFilm({ onClose, sound, origin }: { onClose: () => void; sound: Int
     if (event.code === 'Space') { event.preventDefault(); togglePlay(); }
   };
   const cue = filmCue(time), caption = introduction.scenes[cue.id];
-  const ending = ease(57, 60, time);
+  const ending = ease(26, 27.2, time);
   return <dialog ref={ref} className="company-film" aria-labelledby="company-film-title" aria-describedby="company-film-description" onCancel={event => { event.preventDefault(); onClose(); }} onKeyDown={keyboard} data-running={playing} data-entering={entering} data-scene={sceneStatus} data-motion={enabled ? 'on' : 'off'} data-audio={audioStatus} data-muted={muted} data-cue={cue.id}>
     <h2 id="company-film-title" className="film-sr-only">{introduction.title}</h2>
     <p id="company-film-description" className="film-sr-only">{introduction.description}</p>
-    <canvas ref={canvas} className="film-canvas" aria-hidden="true" />
+    <div ref={viewport} className="film-viewport"><div className="film-stage">
+    <canvas ref={canvas} className="film-canvas" aria-hidden="true" style={{ opacity: ease(2.65, 3.2, time) * (1 - ease(25.8, 27.2, time)) }} />
     <div ref={labels} className="film-scene-labels" aria-hidden="true" />
     {sceneStatus !== 'ready' && <p className="film-scene-status" role="status">{t(sceneStatus === 'loading' ? 'Preparing the 3D scene' : 'This device could not open the 3D scene. Please try a WebGL-enabled browser.')}</p>}
     {entering && <div className="film-opening" aria-hidden="true"><DiePanel side="left" /><DiePanel side="right" /></div>}
-    <header className="film-header"><span><EmblemMark />GENESIS <span className="film-divider">/</span> {t('A short introduction')}</span><button ref={closeButton} type="button" className="icon-button" onClick={onClose} aria-label={t('Close introduction')}><Icon name="close" /></button></header>
-    <div ref={story} className="film-story">
-    {cue.id !== 'closing' && <div className="film-caption" key={cue.id} style={{ opacity: enabled ? cue.opacity : 1 }}>
-      <p className="film-cue-label">{caption.label}</p>
+    <div className="film-story">
+    {cue.id !== 'closing' && cue.id !== 'prompt' && <div className="film-caption" key={cue.id} style={{ opacity: enabled ? cue.opacity : 1 }}>
       <h3 aria-label={caption.title}>{caption.title.split(' ').map((word, i) => {
         const progress = enabled ? ease(cue.from + i * .055, cue.from + .7 + i * .055, time) : 1;
         return <span key={i} aria-hidden="true" style={{ opacity: progress, transform: `translateY(${(1 - progress) * 13}px)` }}>{word}{' '}</span>;
       })}</h3>
-      <p className="film-caption-detail">{caption.detail}</p>
+      <p className="film-sr-only">{caption.detail}</p>
     </div>}
-    {time < 20 && <RequestSequence time={time} prompt={introduction.prompt} />}
+    {time < 3.2 && <RequestSequence time={time} prompt={introduction.prompt} />}
     {cue.id === 'closing' && <div className="film-ending" aria-hidden={ending < .5} style={{ opacity: ending, transform: `translateY(${(1 - ending) * 14}px)` }}>
-      <EmblemMark /><strong>GENESIS</strong><p className="film-signature" lang="en" style={{ opacity: ease(57.5, 59, time) }}>Generative Evolution of Silicon Intelligent Systems</p><p>{introduction.closing}</p>
+      <span className="film-end-symbol" style={{ transform: `scale(${.82 + .18 * ease(26, 27.3, time)})` }}><EmblemMark /></span>
+      <strong style={{ opacity: ease(26.6, 27.6, time), letterSpacing: `${.24 - .12 * ease(26.6, 28, time)}em` }}>GENESIS</strong>
+      <p className="film-signature" lang="en" style={{ opacity: ease(27.25, 28.3, time) }}>Generative Evolution of Silicon Intelligent Systems</p>
     </div>}
-    </div>
+    </div></div></div>
+    <header className="film-header"><button ref={closeButton} type="button" className="icon-button" onClick={onClose} aria-label={t('Close introduction')}><Icon name="close" /></button></header>
     <div className="film-controls"><div className="film-transport">
       <button type="button" className="icon-button" disabled={!enabled || entering || sceneStatus !== 'ready'} aria-label={t(time >= duration ? 'Replay introduction' : playing ? 'Pause introduction' : 'Play introduction')} onClick={togglePlay}><Icon name={playing ? 'pause' : 'play'} /></button>
       <input type="range" min="0" max={duration} step=".1" value={time} aria-label={t('Introduction progress')} aria-valuetext={`${Math.floor(time)} / ${duration} ${t('seconds')}`} onChange={event => seek(Number(event.target.value))} />
       <span className="film-time">{filmTime(time)} / {filmTime(duration)}</span>
       <button type="button" className="icon-button" disabled={audioStatus === 'unavailable' || audioStatus === 'loading'} aria-label={t(audioStatus === 'unavailable' ? 'Sound unavailable' : audioStatus === 'blocked' ? 'Enable sound' : muted ? 'Unmute music' : 'Mute music')} onClick={() => void toggleSound()}><Icon name={muted || audioStatus !== 'ready' ? 'muted' : 'volume'} /></button>
-    </div><footer className="film-footer"><span>{audioStatus === 'loading' ? t('Preparing the soundtrack') : !enabled ? t('Animations are off. Scrub to explore the circuit.') : t('Original music · GENESIS')}</span><button className="film-done" type="button" onClick={onClose}>{t('Continue exploring')}<Icon name="arrow" /></button></footer></div>
+    </div><footer className="film-footer"><span>{audioStatus === 'loading' ? t('Preparing the soundtrack') : !enabled ? t('Animations are off. Scrub to explore the circuit.') : t('Original score')}</span><button className="film-done" type="button" onClick={onClose}>{t('Continue exploring')}<Icon name="arrow" /></button></footer></div>
   </dialog>;
 }
 
