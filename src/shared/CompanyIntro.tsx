@@ -61,7 +61,7 @@ function IntroFilm({ onClose, sound }: { onClose: () => void; sound: IntroSound 
     const draw = () => {
       const { width, height, ratio } = size.current;
       context.setTransform(ratio, 0, 0, ratio, 0, 0);
-      renderCircuitFilm(context, width, height, clock.current);
+      renderCircuitFilm(context, width, height, clock.current, t);
       surface.dataset.time = clock.current.toFixed(2);
     };
     const resize = new ResizeObserver(() => {
@@ -70,6 +70,7 @@ function IntroFilm({ onClose, sound }: { onClose: () => void; sound: IntroSound 
       // Bounded backing store, including high-DPI phones. No offscreen scene textures.
       const ratio = Math.min(devicePixelRatio || 1, 1.75, Math.sqrt(2_000_000 / (width * height)));
       size.current = { width, height, ratio };
+      surface.dataset.font = getComputedStyle(surface).getPropertyValue('--font-sans').trim() || 'sans-serif';
       surface.width = Math.round(width * ratio); surface.height = Math.round(height * ratio); draw();
     });
     resize.observe(surface);
@@ -86,7 +87,7 @@ function IntroFilm({ onClose, sound }: { onClose: () => void; sound: IntroSound 
     draw();
     if (playing) frame = requestAnimationFrame(tick);
     return () => { cancelAnimationFrame(frame); resize.disconnect(); sound.pause(); };
-  }, [playing, revision, sound, duration, audioStatus]);
+  }, [playing, revision, sound, duration, audioStatus, t]);
   const seek = (value: number) => { clock.current = value; setTime(value); setRevision(value => value + 1); };
   const togglePlay = () => {
     void sound.unlock().then(() => setAudioStatus(sound.status));
@@ -121,7 +122,7 @@ function IntroFilm({ onClose, sound }: { onClose: () => void; sound: IntroSound 
       })}</h3>
       <p className="film-caption-detail">{caption.detail}</p>
       {cue.id === 'prompt' && <div className="film-prompt" aria-label={introduction.prompt}>
-        <Icon name="spark" /><p aria-hidden="true">{introduction.prompt.slice(0, enabled ? Math.ceil(ease(1, 6.5, time) * introduction.prompt.length) : introduction.prompt.length)}<span className="film-caret" style={{ opacity: enabled && time < 7.5 ? .45 + .55 * Math.sin(time * 4) ** 2 : 0 }} /></p>
+        <Icon name="spark" /><p aria-hidden="true">{introduction.prompt.slice(0, enabled ? Math.ceil(ease(.3, 1.5, time) * introduction.prompt.length) : introduction.prompt.length)}<span className="film-caret" style={{ opacity: enabled && time < 2 ? .45 + .55 * Math.sin(time * 4) ** 2 : 0 }} /></p>
       </div>}
     </div>}
     <div className="film-ending" aria-hidden={ending < .5} style={{ opacity: ending, transform: `translateY(${(1 - ending) * 14}px)` }}>

@@ -671,7 +671,7 @@ test('the original score is finite, deterministic and resolves with the film', (
 
 test('the film tells a complete prompt-to-schematic-to-layout story in one minute', () => {
   const { filmCues, filmCue, filmTime, FILM_SECONDS } = transpiled('src/shared/intro/timeline.ts');
-  assert.deepEqual(filmCues.map(cue => cue.id), ['prompt', 'schematic', 'passives', 'layout', 'verify', 'closing']);
+  assert.deepEqual(filmCues.map(cue => cue.id), ['prompt', 'schematic', 'joint', 'layout', 'verify', 'closing']);
   assert.equal(filmCues[0].from, 0);
   assert.equal(filmCues.at(-1).to, FILM_SECONDS);
   filmCues.forEach((cue, i) => { assert.ok(cue.to - cue.from >= 5); if (i) assert.equal(cue.from, filmCues[i - 1].to); });
@@ -680,11 +680,49 @@ test('the film tells a complete prompt-to-schematic-to-layout story in one minut
   }
   assert.equal(filmCue(60).id, 'closing');
   assert.equal(filmTime(60), '1:00'); assert.equal(filmTime(59.9), '0:59');
-  const film = read('src/shared/intro/circuitFilm.ts');
-  assert.match(film, /from '..\/pixelLayout'/);
-  for (const kind of ['amplifier', 'mixer', 'switch', 'divider', 'coupler']) assert.ok(film.includes(`kind: '${kind}'`));
-  assert.match(film, /function schematic\(/);
-  assert.match(film, /matchingVariants/);
+  assert.equal(filmCue(5).id, 'schematic', 'the request does not spend ten seconds drifting');
+  assert.equal(filmCue(13).id, 'joint');
+  assert.equal(filmCue(28).id, 'layout');
+});
+
+const receiverModel = () => transpiled('src/shared/intro/receiverScene.ts', {
+  './timeline': transpiled('src/shared/intro/timeline.ts'), '../pixelLayout': transpiled('src/shared/pixelLayout.ts'),
+});
+test('one receiver preserves block identities and port endpoints in both compositions', () => {
+  const { receiverBlocks: blocks, receiverConnections: connections, connectionPath, portPosition, blockPose, placementDuration } = receiverModel();
+  assert.deepEqual(blocks.map(block => block.id), ['rf', 'input', 'lna', 'interstage', 'mixer', 'if']);
+  assert.equal(connections.length, blocks.length - 1);
+  assert.ok(blocks.find(block => block.id === 'mixer').ports.includes('lo'));
+  assert.ok(blocks.filter(block => block.ports.includes('bias')).length === 2);
+  assert.ok(placementDuration <= 1.2);
+  for (const portrait of [false, true]) for (const time of [0, 8, 16, 22, 27.7, 28.8, 30, 38, 48.4, 58]) {
+    connections.forEach((edge, i) => {
+      const a = blocks.find(block => block.id === edge.from.block), b = blocks.find(block => block.id === edge.to.block);
+      assert.ok(a.ports.includes(edge.from.port)); assert.ok(b.ports.includes(edge.to.port));
+      const route = connectionPath(i, portrait, time);
+      assert.deepEqual(route[0], portPosition(a, edge.from.port, portrait, time));
+      assert.deepEqual(route.at(-1), portPosition(b, edge.to.port, portrait, time));
+      assert.ok(route.flat().every(Number.isFinite));
+    });
+    if (time >= 38) blocks.forEach(block => assert.equal(blockPose(block, portrait, time).placed, 1));
+  }
+});
+
+test('joint candidates change active and both passive designs together, then stay frozen', () => {
+  const { receiverCandidates: candidates, receiverState, receiverCopy } = receiverModel();
+  assert.deepEqual(candidates.map(candidate => candidate.id), ['A', 'B', 'C']);
+  for (let i = 1; i < candidates.length; i++) {
+    assert.notEqual(candidates[i].fingers, candidates[i - 1].fingers);
+    assert.notEqual(candidates[i].width, candidates[i - 1].width);
+    for (let p = 0; p < 2; p++) assert.notDeepEqual(candidates[i].passives[p].layout.metal, candidates[i - 1].passives[p].layout.metal);
+  }
+  assert.deepEqual([14, 18, 22].map(time => receiverState(time).candidate), [0, 1, 2]);
+  for (let time = 24.5; time <= 60; time += .1) {
+    assert.equal(receiverState(time).candidate, 2); assert.equal(receiverState(time).selected, true);
+  }
+  const dictionary = JSON.parse(read('src/content/tr.json'));
+  receiverCopy.forEach(copy => assert.ok(dictionary[copy], `Receiver translation: ${copy}`));
+  assert.doesNotMatch(read('src/shared/intro/circuitFilm.ts'), /Math.random|c.rotate\(|shadowBlur|incomingCircuits|coilPoints/);
 });
 
 test('the GENESIS symbol stays consistent and opens without a full-screen flash', () => {

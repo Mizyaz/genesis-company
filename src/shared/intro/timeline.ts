@@ -1,11 +1,11 @@
 /** Shared editorial clock for geometry, captions and the 24-bar soundtrack. */
 export const FILM_SECONDS = 60;
 export const filmCues = [
-  { id: 'prompt', from: 0, to: 10 },
-  { id: 'schematic', from: 10, to: 22.5 },
-  { id: 'passives', from: 22.5, to: 35 },
-  { id: 'layout', from: 35, to: 47.5 },
-  { id: 'verify', from: 47.5, to: 55 },
+  { id: 'prompt', from: 0, to: 5 },
+  { id: 'schematic', from: 5, to: 12.5 },
+  { id: 'joint', from: 12.5, to: 27.5 },
+  { id: 'layout', from: 27.5, to: 42.5 },
+  { id: 'verify', from: 42.5, to: 55 },
   { id: 'closing', from: 55, to: FILM_SECONDS },
 ] as const;
 export const ease = (a: number, b: number, time: number) => {
