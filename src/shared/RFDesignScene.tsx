@@ -1,6 +1,6 @@
 import { useLanguage } from './Language';
 
-/** A deliberately illustrative circuit, shared by the introduction and the RF explanation. No simulated data. */
+/** Lightweight artwork for the inline RF explanation. No simulated data. */
 function Chip({ refined = false }: { refined?: boolean }) {
   return <g className="rf-chip">
     <rect className="rf-die" x="200" y="60" width="320" height="240" rx="12" />

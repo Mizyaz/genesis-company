@@ -1,12 +1,20 @@
 import { test, expect } from '@playwright/test';
 
 test('the logo opens a finite introduction with pause, seek, replay and focus restoration', async ({ page }) => {
+  await page.addInitScript(() => {
+    const NativeAudioContext = window.AudioContext;
+    window.filmAudioContexts = [];
+    window.AudioContext = class extends NativeAudioContext {
+      constructor(...args) { super(...args); window.filmAudioContexts.push(this); }
+    };
+  });
   await page.goto('/#/');
   const launcher = page.getByRole('button', { name: 'Watch the GENESIS introduction' });
   await launcher.click();
   const film = page.locator('.company-film');
   const progress = film.getByRole('slider');
   await expect(film).toBeVisible();
+  await expect(film).toHaveAttribute('data-audio', 'ready');
   await expect(film).toHaveAttribute('data-running', 'true');
   await expect.poll(async () => Number(await progress.inputValue())).toBeGreaterThan(.2);
   await film.getByRole('button', { name: 'Pause introduction' }).click();
@@ -14,17 +22,28 @@ test('the logo opens a finite introduction with pause, seek, replay and focus re
   await expect(film).toHaveAttribute('data-running', 'false');
   await page.waitForTimeout(250);
   await expect(progress).toHaveValue(stopped);
-  await film.getByRole('button', { name: '05 The handoff' }).click();
-  await expect(film.locator('h2')).toHaveText('From schematic to tape-out.');
+  await film.getByRole('button', { name: 'Mute music' }).click();
+  await expect(film).toHaveAttribute('data-muted', 'true');
+  await film.getByRole('button', { name: 'Unmute music' }).click();
+  await expect(film).toHaveAttribute('data-muted', 'false');
   await progress.focus();
   await page.keyboard.press('End');
-  await expect(progress).toHaveValue('25');
+  await expect(progress).toHaveValue('30');
+  await expect(film.locator('.film-ending')).toHaveCSS('opacity', '1');
+  await expect(film.locator('.film-ending p')).toHaveText('From schematic to tape-out.');
   await film.getByRole('button', { name: 'Replay introduction' }).click();
-  await expect(film.locator('h2')).toHaveText('A chip starts with a purpose.');
+  await expect.poll(async () => Number(await progress.inputValue())).toBeLessThan(2);
+  await expect(film.locator('.film-ending')).toHaveCSS('opacity', '0');
   await page.keyboard.press('Escape');
   await expect(film).toHaveCount(0);
   await expect(launcher).toBeFocused();
   await expect(page.locator('canvas')).toHaveCount(0);
+  expect(await page.evaluate(() => window.filmAudioContexts.every(context => context.state === 'closed'))).toBe(true);
+  await launcher.click();
+  await expect(page.locator('.company-film')).toHaveAttribute('data-audio', 'ready');
+  await page.keyboard.press('Escape');
+  expect(await page.evaluate(() => window.filmAudioContexts.length)).toBe(2);
+  expect(await page.evaluate(() => window.filmAudioContexts.every(context => context.state === 'closed'))).toBe(true);
 });
 
 test('Turkish mobile intro respects reduced motion and stays inside the screen', async ({ page }) => {
@@ -38,9 +57,11 @@ test('Turkish mobile intro respects reduced motion and stays inside the screen',
   await page.getByRole('button', { name: 'GENESIS tanıtımını izle' }).click();
   const film = page.locator('.company-film');
   await expect(film).toHaveAttribute('data-running', 'false');
-  await expect(film.locator('h2')).toHaveText('Her çip bir ihtiyaca cevap verir.');
-  await film.getByRole('button', { name: '04 Kontrol' }).click();
-  await expect(film.locator('h2')).toHaveText('Kontrol et. Geliştir. Yeniden dene.');
+  await expect(film.locator('h2')).toHaveText('GENESIS: bir devre hayat buluyor');
+  await film.getByRole('slider').focus();
+  await page.keyboard.press('End');
+  await expect(film.locator('.film-ending')).toHaveCSS('opacity', '1');
+  await expect(film.locator('canvas')).toHaveAttribute('data-time', '30.00');
   expect(await film.evaluate(node => node.scrollWidth <= node.clientWidth)).toBe(true);
   expect(await film.evaluate(node => node.getBoundingClientRect().right <= innerWidth)).toBe(true);
   // The native dialog keeps keyboard focus away from the page behind it.
@@ -49,6 +70,66 @@ test('Turkish mobile intro respects reduced motion and stays inside the screen',
   await expect(film.getByRole('button', { name: 'Tanıtımı kapat' })).toBeFocused();
   await page.keyboard.press('Escape');
   await expect(page.getByRole('button', { name: 'GENESIS tanıtımını izle' })).toBeFocused();
+});
+
+test('the circuit film works without audio support and freezes with the global motion preference', async ({ page }) => {
+  await page.addInitScript(() => { window.AudioContext = undefined; });
+  await page.goto('/#/');
+  await page.getByRole('button', { name: 'Watch the GENESIS introduction' }).click();
+  const film = page.locator('.company-film');
+  await expect(film).toHaveAttribute('data-audio', 'unavailable');
+  await expect(film).toHaveAttribute('data-running', 'true');
+  await expect(film.getByRole('button', { name: 'Sound unavailable' })).toBeDisabled();
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await expect(film).toHaveAttribute('data-running', 'false');
+  const time = await film.locator('canvas').getAttribute('data-time');
+  await page.waitForTimeout(200);
+  expect(await film.locator('canvas').getAttribute('data-time')).toBe(time);
+  await page.keyboard.press('Escape');
+});
+
+test('the score contains stereo music, stays synchronized after seeking and stops in a hidden tab', async ({ page }) => {
+  await page.addInitScript(() => {
+    const NativeAudioContext = window.AudioContext;
+    window.filmPlayback = { active: 0, offsets: [], peak: 0, rms: 0, duration: 0, channels: 0 };
+    window.AudioContext = class extends NativeAudioContext {
+      createBufferSource() {
+        const source = super.createBufferSource(), start = source.start.bind(source), stop = source.stop.bind(source);
+        source.start = (...args) => {
+          const state = window.filmPlayback;
+          state.active++; state.offsets.push(args[1]);
+          if (!state.duration) {
+            state.duration = source.buffer.duration; state.channels = source.buffer.numberOfChannels;
+            const samples = source.buffer.getChannelData(0); let sum = 0;
+            for (const sample of samples) { state.peak = Math.max(state.peak, Math.abs(sample)); sum += sample * sample; }
+            state.rms = Math.sqrt(sum / samples.length);
+          }
+          return start(...args);
+        };
+        source.stop = (...args) => { window.filmPlayback.active--; return stop(...args); };
+        return source;
+      }
+    };
+  });
+  await page.goto('/#/');
+  await page.getByRole('button', { name: 'Watch the GENESIS introduction' }).click();
+  const film = page.locator('.company-film');
+  await expect(film).toHaveAttribute('data-running', 'true');
+  const score = await page.evaluate(() => window.filmPlayback);
+  expect(score.duration).toBe(30); expect(score.channels).toBe(2);
+  expect(score.peak).toBeGreaterThan(.03); expect(score.peak).toBeLessThan(.95);
+  expect(score.rms).toBeGreaterThan(.005); expect(score.active).toBe(1);
+  await film.getByRole('slider').fill('17');
+  await expect.poll(() => page.evaluate(() => window.filmPlayback.offsets.at(-1))).toBe(17);
+  expect(await page.evaluate(() => window.filmPlayback.active)).toBe(1);
+  await page.evaluate(() => { Object.defineProperty(document, 'hidden', { value: true, configurable: true }); document.dispatchEvent(new Event('visibilitychange')); });
+  await expect(film).toHaveAttribute('data-running', 'false');
+  expect(await page.evaluate(() => window.filmPlayback.active)).toBe(0);
+  await page.evaluate(() => { delete document.hidden; document.dispatchEvent(new Event('visibilitychange')); });
+  await expect(film).toHaveAttribute('data-running', 'true');
+  expect(await page.evaluate(() => window.filmPlayback.active)).toBe(1);
+  await page.keyboard.press('Escape');
+  expect(await page.evaluate(() => window.filmPlayback.active)).toBe(0);
 });
 
 test('RF positioning shares the film, supports both themes and fits narrow screens', async ({ page }) => {

@@ -6,13 +6,20 @@ The home page offers Discover (company presentation) and Design (an explicit
 link to the visitor's own installation). All runtime assets are included here.
 Animations, theme and motion preferences run in the browser.
 
-The home-page symbol opens a 25-second illustrated introduction, not an interactive
-game or a recorded simulation. Its five chapters explain the application, circuit,
-layout, verification and fabrication handoff in English and Turkish. Playback stops
-at the end, pauses when the tab is hidden, and respects the shared motion preference.
-With reduced motion, chapters remain available as stills. The RF explanation on
-Explore reuses the same lightweight circuit artwork and pauses outside the viewport.
-No 3D engine, video service or engineering-server connection is needed.
+The home-page symbol opens a 30-second continuous circuit film. A signal reveals
+metal traces, spiral inductors, capacitor plates and transistor fingers on one
+silicon surface, finishing with the GENESIS identity. This is an illustration, not
+a simulated circuit or a measured result. There are no chapter cards or game controls.
+
+`shared/intro/circuitFilm.ts` owns the canvas geometry and camera. `score.ts` composes
+and renders an original 96 BPM, 12-bar stereo soundtrack using Web Audio. The player
+in `CompanyIntro.tsx` starts audio only after a user click and uses the audio clock
+for synchronization. Pause, seek, replay, mute and close act on both media. Closing
+releases the AudioContext; a single decoded score (<11 MB) is reused on reopening.
+Audio failure does not prevent silent playback. The canvas is capped at two million
+pixels and 30 fps. Hidden tabs and disabled motion pause the film and music; the
+scrubber still provides still frames. Labels and accessible descriptions support
+English and Turkish. No additional package, video service or server is required.
 
 Design first asks whether GENESIS is installed. No leads to the team's contact
 email; Yes asks which port to use. Only a port number (1 to 65535) is entered,

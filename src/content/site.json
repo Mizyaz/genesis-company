@@ -5,13 +5,9 @@
     "email": "islam.guven@uclouvain.be"
   },
   "introduction": {
-    "chapters": [
-      { "label": "The need", "title": "A chip starts with a purpose.", "detail": "From a phone's radio to a satellite link, you define what your chip needs to do." },
-      { "label": "The circuit", "title": "GENESIS develops the circuit.", "detail": "GENESIS adjusts the components together to balance signal quality, power consumption and size." },
-      { "label": "The layout", "title": "The circuit takes physical shape.", "detail": "Components become shapes and connections on silicon. Their position affects how radio signals behave." },
-      { "label": "The checks", "title": "Check the design. Refine the result.", "detail": "The system checks manufacturing rules and signal performance, then refines the design when needed." },
-      { "label": "The handoff", "title": "From schematic to tape-out.", "detail": "Tape-out is the handoff of verified design files to the chip manufacturer, ready for fabrication." }
-    ]
+    "title": "GENESIS: a circuit comes to life",
+    "description": "A continuous illustrated journey across a circuit: a signal reveals inductors, capacitors and transistors. Their geometry evolves together before the completed chip and GENESIS identity emerge. Original electronic music accompanies the film. This is a visual interpretation, not simulated measurement data.",
+    "closing": "From schematic to tape-out."
   },
   "rfPhysics": {
     "label": "BUILT AROUND RF PHYSICS",

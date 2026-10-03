@@ -615,14 +615,17 @@ test('the brand opens a short RF introduction instead of a game', () => {
   assert.equal(JSON.parse(read('package.json')).dependencies.three, undefined);
   assert.match(read('src/pages/Welcome.tsx'), /symbol=\{<CompanyIntro symbol \/>\}/);
   const intro = read('src/shared/CompanyIntro.tsx');
-  assert.match(intro, /secondsPerChapter = 5/);
+  assert.match(intro, /FILM_SECONDS/);
   assert.match(intro, /showModal\(\)/);
   assert.match(intro, /onCancel=/);
   assert.match(intro, /launcher.current\?\.focus\(\)/);
   assert.match(intro, /useVisibleMotion<HTMLDialogElement>/);
-  assert.match(intro, /window.clearInterval\(timer\)/);
+  assert.match(intro, /cancelAnimationFrame\(frame\)/);
+  assert.match(intro, /resize.disconnect\(\)/);
+  assert.match(intro, /sound.pause\(\)/);
   assert.match(intro, /type="range"/);
-  assert.match(intro, /aria-current=\{i === index \? 'step'/);
+  assert.match(intro, /<canvas ref=\{canvas\}/);
+  assert.doesNotMatch(intro, /film-chapters|film-copy|secondsPerChapter/);
   assert.match(read('src/styles/company-intro.css'), /prefers-reduced-motion: reduce/);
   assert.match(read('src/pages/Research.tsx'), /<Publications people=\{site.about.people\} papers=\{papers\} \/>/);
 });
@@ -630,21 +633,36 @@ test('the brand opens a short RF introduction instead of a game', () => {
 test('the RF positioning and introduction are bilingual and clearly illustrative', () => {
   const { introduction, rfPhysics } = JSON.parse(read('src/content/site.json'));
   const dictionary = JSON.parse(read('src/content/tr.json'));
-  assert.equal(introduction.chapters.length, 5);
-  for (const text of [...introduction.chapters.flatMap(Object.values), ...Object.values(rfPhysics)]) {
+  for (const text of [...Object.values(introduction), ...Object.values(rfPhysics)]) {
     assert.ok(dictionary[text], text);
     assert.doesNotMatch(text, /—|CLI|JSON|empire|DRC|LVS/);
   }
-  assert.match(introduction.chapters[4].detail, /Tape-out is the handoff/);
+  assert.match(introduction.description, /not simulated measurement data/);
   assert.match(read('src/pages/Explore.tsx'), /t\("From schematic"\)/);
   assert.match(read('src/pages/Explore.tsx'), /<RFPhysics \/>/);
   const intro = read('src/shared/CompanyIntro.tsx');
   assert.match(intro, /Illustrated workflow/);
-  assert.match(intro, /<RFDesignScene stage=\{index\}/);
+  assert.match(intro, /renderCircuitFilm\(context/);
   assert.match(intro, /<RFDesignScene stage=\{3\}/);
 });
 
 const transpiled = path => { const module = {}; new Function('exports', 'require', ts.transpileModule(read(path), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText)(module, () => ({})); return module; };
+
+test('the original score is finite, deterministic and resolves with the film', () => {
+  const { composeScore, FILM_SECONDS, BPM } = transpiled('src/shared/intro/score.ts');
+  assert.equal(FILM_SECONDS, 30);
+  assert.equal(12 * 4 * 60 / BPM, FILM_SECONDS);
+  const notes = composeScore();
+  assert.deepEqual(notes, composeScore());
+  assert.ok(notes.length > 90 && notes.length < 200);
+  assert.ok(notes.every(note => note.at >= 0 && note.at < FILM_SECONDS && note.length > 0 && note.level > 0 && Math.abs(note.pan) <= 1));
+  assert.deepEqual([...new Set(notes.map(note => note.voice))].sort(), ['bass', 'bell', 'pad', 'tick']);
+  assert.ok(notes.some(note => note.at >= 27 && note.voice === 'bell'));
+  assert.ok(!notes.some(note => note.at >= 25 && note.voice === 'tick'));
+  const score = read('src/shared/intro/score.ts');
+  assert.doesNotMatch(score, /fetch\(|https?:|setInterval/);
+  assert.match(score, /this.context\?\.close\(\)/);
+});
 
 test('the GENESIS symbol stays consistent and opens without a full-screen flash', () => {
   const { emblem, emblemMark, drawEmblem } = transpiled('src/shared/emblem.ts');
