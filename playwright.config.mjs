@@ -12,8 +12,10 @@ export default defineConfig({
     baseURL,
     viewport: { width: 1440, height: 1000 },
     trace: 'retain-on-failure',
-    launchOptions: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH
-      ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH } : {},
+    launchOptions: {
+      ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH } : {}),
+      args: ['--enable-unsafe-swiftshader'], // Software WebGL in headless CI only.
+    },
   },
   webServer: {
     command: `npm run preview -- --host 127.0.0.1 --port ${port} --strictPort`,
