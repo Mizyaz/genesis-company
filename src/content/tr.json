@@ -1,4 +1,11 @@
 {
+  "A thirty-second RF design film. A prompt becomes LNA and PA circuits with pixelated matching networks. Active and passive geometry evolve together before the complete RF front end is revealed. This is an illustrated design sequence, not simulated measurement data or a live LLM session.": "Otuz saniyelik bir RF tasarım filmi. Yazılan istek, piksel tabanlı eşleme ağları içeren LNA ve PA devrelerine dönüşür. Aktif ve pasif elemanlar birlikte değişir, ardından RF ön ucun bütünü görünür. Bu temsili bir tasarım akışıdır; simülasyon sonucu veya canlı bir LLM oturumu değildir.",
+  "Design an RF front end. Optimize its active and passive circuits together.": "Bir RF ön uç tasarla. Aktif ve pasif devrelerini birlikte optimize et.",
+  "An idea becomes a circuit.": "Bir fikir devreye dönüşür.",
+  "One connected RF front end.": "Devreler birleşir, RF ön uç ortaya çıkar.",
+  "From intent to implementation.": "Fikirden fiziksel tasarıma.",
+  "Original score": "Özgün müzik",
+  "Active. Passive. Designed together.": "Aktif ve pasif elemanlar, tek tasarım.",
   "AUTONOMOUS RFIC DESIGN": "OTONOM RFIC TASARIMI",
   "From schematic": "Şematikten",
   "to tape-out.": "üretime hazır çipe.",

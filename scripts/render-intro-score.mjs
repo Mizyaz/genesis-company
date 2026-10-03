@@ -63,4 +63,4 @@ if (encoded.error) throw encoded.error;
 if (encoded.status !== 0) throw new Error(encoded.stderr.toString());
 const destination = new URL('../public/assets/genesis-intro-score.mp3', import.meta.url);
 await writeFile(destination, encoded.stdout);
-console.log(`Rendered original 60-second stereo score: ${encoded.stdout.length} bytes → ${destination.pathname}`);
+console.log(`Rendered original stereo score: ${encoded.stdout.length} bytes → ${destination.pathname}`);

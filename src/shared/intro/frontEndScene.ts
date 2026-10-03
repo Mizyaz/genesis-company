@@ -11,39 +11,39 @@ export type Part = {
 };
 export const llmClickAt = 2.1;
 export function requestState(time: number) {
-  return time < llmClickAt ? 'request' : time < 2.5 ? 'pressed' : time < 60 ? 'thinking' : 'ready';
+  return time < llmClickAt ? 'request' : time < 2.35 ? 'pressed' : time < 26 ? 'thinking' : 'ready';
 }
 const amplifier = (circuit: 'lna' | 'pa', z: number, start: number): Part[] => {
   const reverse = circuit === 'pa';
   const xs = reverse ? [4, 1, -2, -5, -8] : [-8, -5, -2, 1, 4];
   return [
     ...xs.map((x, i): Part => ({ id: `${circuit}-${i}`, circuit, kind: i % 2 ? 'mos' : 'pixel',
-      x, z, start: start + i * 2, seed: 7 + i * 13 + (reverse ? 9 : 0), power: reverse })),
+      x, z, start: start + i * .55, seed: 7 + i * 13 + (reverse ? 9 : 0), power: reverse })),
     ...[1, 3].map((i): Part => ({ id: `${circuit}-decouple-${i}`, circuit, kind: 'capacitor',
-      x: xs[i], z: z + (reverse ? 3.5 : -3.5), start: start + 9 + i * .7 })),
-    { id: `${circuit}-choke`, circuit, kind: 'choke', x: -2, z: z + (reverse ? 3.5 : -3.5), start: start + 12 },
+      x: xs[i], z: z + (reverse ? 3.5 : -3.5), start: start + 2.5 + i * .18 })),
+    { id: `${circuit}-choke`, circuit, kind: 'choke', x: -2, z: z + (reverse ? 3.5 : -3.5), start: start + 3.2 },
   ];
 };
 export const parts: readonly Part[] = [
-  { id: 'rf', circuit: 'interfaces', kind: 'pad', x: -18.5, z: 0, start: 3.2 },
-  { id: 'tr', circuit: 'switch', kind: 'switch', x: -14, z: 0, start: 4.4 },
-  ...amplifier('lna', -5, 6),
-  ...amplifier('pa', 5, 22),
-  { id: 'rx-mixer', circuit: 'rxMixer', kind: 'mixer', x: 11, z: -5, start: 36 },
-  { id: 'tx-mixer', circuit: 'txMixer', kind: 'mixer', x: 11, z: 5, start: 39 },
-  { id: 'lo', circuit: 'interfaces', kind: 'pad', x: 15.5, z: 0, start: 43 },
-  { id: 'rx', circuit: 'interfaces', kind: 'pad', x: 18.5, z: -5, start: 44.5 },
-  { id: 'tx', circuit: 'interfaces', kind: 'pad', x: 18.5, z: 5, start: 46.5 },
-  { id: 'bias-rx', circuit: 'interfaces', kind: 'pad', x: -7, z: -11, start: 49 },
-  { id: 'bias-tx', circuit: 'interfaces', kind: 'pad', x: -7, z: 11, start: 52 },
-  { id: 'control', circuit: 'interfaces', kind: 'pad', x: -18.5, z: 10, start: 55.5 },
+  { id: 'rf', circuit: 'interfaces', kind: 'pad', x: -18.5, z: 0, start: 3 },
+  { id: 'tr', circuit: 'switch', kind: 'switch', x: -14, z: 0, start: 3.25 },
+  ...amplifier('lna', -5, 3.3),
+  ...amplifier('pa', 5, 8),
+  { id: 'rx-mixer', circuit: 'rxMixer', kind: 'mixer', x: 11, z: -5, start: 17.5 },
+  { id: 'tx-mixer', circuit: 'txMixer', kind: 'mixer', x: 11, z: 5, start: 18.2 },
+  { id: 'lo', circuit: 'interfaces', kind: 'pad', x: 15.5, z: 0, start: 19.2 },
+  { id: 'rx', circuit: 'interfaces', kind: 'pad', x: 18.5, z: -5, start: 19.8 },
+  { id: 'tx', circuit: 'interfaces', kind: 'pad', x: 18.5, z: 5, start: 20.2 },
+  { id: 'bias-rx', circuit: 'interfaces', kind: 'pad', x: -7, z: -11, start: 20.8 },
+  { id: 'bias-tx', circuit: 'interfaces', kind: 'pad', x: -7, z: 11, start: 21.4 },
+  { id: 'control', circuit: 'interfaces', kind: 'pad', x: -18.5, z: 10, start: 22 },
 ];
 export const circuits = [
-  { id: 'lna', name: 'LNA', role: 'Receive amplifier', x: -2, z: -5, start: 6, label: [-2, 0, -11] },
-  { id: 'pa', name: 'PA', role: 'Transmit amplifier', x: -2, z: 5, start: 22, label: [-2, 0, 11] },
-  { id: 'rxMixer', name: 'RX', role: 'Downconversion', x: 11, z: -5, start: 36, label: [11, 0, -10] },
-  { id: 'txMixer', name: 'TX', role: 'Upconversion', x: 11, z: 5, start: 39, label: [11, 0, 10] },
-  { id: 'switch', name: 'T/R', role: 'Antenna switch', x: -14, z: 0, start: 4.4, label: [-15, 0, 3.5] },
+  { id: 'lna', name: 'LNA', role: 'Receive amplifier', x: -2, z: -5, start: 3.3, label: [-2, 1, -10.8] },
+  { id: 'pa', name: 'PA', role: 'Transmit amplifier', x: -2, z: 5, start: 8, label: [-2, 1, 11] },
+  { id: 'rxMixer', name: 'RX', role: 'Downconversion', x: 11, z: -5, start: 17.5, label: [11, 1, -9] },
+  { id: 'txMixer', name: 'TX', role: 'Upconversion', x: 11, z: 5, start: 18.2, label: [11, 1, 9] },
+  { id: 'switch', name: 'T/R', role: 'Antenna switch', x: -14, z: 0, start: 3.25, label: [-15, 1, 3.5] },
 ] as const;
 export const hierarchy = { id: 'front-end', children: circuits.map(circuit => ({ ...circuit,
   children: parts.filter(part => part.circuit === circuit.id).map(part => part.id),
@@ -51,14 +51,14 @@ export const hierarchy = { id: 'front-end', children: circuits.map(circuit => ({
 
 // Candidate geometry is cached once. Every scene frame is a deterministic sample of the same design history.
 const fills = [.42, .52, .47, .57, .49, .60, .51, .56, .45, .54, .59, .50, .57, .53, .61];
-export const designTimes = fills.map((_, i) => 10 + i * 3.5);
+export const designTimes = fills.map((_, i) => 5 + i * 1.42);
 export const pixelCandidates = new Map(parts.filter(part => part.kind === 'pixel').map(part => [part.id,
-  fills.map(fill => pixelLayout({ columns: 18, rows: 18, seed: part.seed!, fill, mirror: 'across',
-    ports: [{ side: 'left', at: 8 }, { side: 'right', at: 8 }] })),
+  fills.map(fill => pixelLayout({ columns: 24, rows: 24, seed: part.seed!, fill, mirror: 'across',
+    ports: [{ side: 'left', at: 11 }, { side: 'right', at: 11 }] })),
 ]));
 export function designState(time: number) {
-  const index = Math.max(0, Math.min(fills.length - 1, Math.floor((time - 10) / 3.5)));
-  return { index, before: Math.max(0, index - 1), blend: ease(designTimes[index], Math.min(60, designTimes[index] + 1.15), time) };
+  const index = Math.max(0, Math.min(fills.length - 1, Math.floor((time - 5) / 1.42)));
+  return { index, before: Math.max(0, index - 1), blend: ease(designTimes[index], designTimes[index] + .7, time) };
 }
 export function partState(part: Part, time: number) {
   const { index, before, blend } = designState(time);
@@ -70,8 +70,8 @@ export function partState(part: Part, time: number) {
   };
   const a = sizing(before), b = sizing(index), lerp = (x: number, y: number) => x + (y - x) * blend;
   const fingers = time < part.start ? a.fingers : b.fingers;
-  const appear = ease(part.start, part.start + 1.5, time);
-  return { appear, lift: (1 - appear) * 3.5,
+  const appear = ease(part.start, part.start + .8, time);
+  return { appear, lift: (1 - appear) * 1.15,
     width: part.kind === 'pixel' ? lerp(a.pixelWidth, b.pixelWidth) : part.kind === 'mos' ? .35 + fingers * .105 : part.kind === 'mixer' ? 3.5 : part.kind === 'switch' ? 2.5 : 1.7,
     depth: part.kind === 'pixel' ? lerp(a.pixelDepth, b.pixelDepth) : part.kind === 'mos' ? lerp(a.length, b.length) : part.kind === 'mixer' ? 3.5 : 1.7,
     fingers, fingerLength: lerp(a.length, b.length), index, before, blend,
@@ -116,15 +116,26 @@ export function portPosition(endpoint: Endpoint, time: number): Point3 {
 }
 export function connectionState(edge: Connection, time: number) {
   const a = partById.get(edge.from.id)!, b = partById.get(edge.to.id)!;
-  const start = Math.max(a.start, b.start) + 1.15;
-  return { progress: ease(start, Math.min(60, start + 2), time), points: [portPosition(edge.from, time), ...(edge.path ?? []), portPosition(edge.to, time)] };
+  const start = Math.max(a.start, b.start) + .45;
+  return { progress: ease(start, start + .8, time), points: [portPosition(edge.from, time), ...(edge.path ?? []), portPosition(edge.to, time)] };
 }
+// Editorial camera marks, identical at every screen size. Close-ups reveal geometry; the pullback reveals hierarchy.
+const shots = [
+  { at: 0, x: -6, z: -5, distance: 23, azimuth: -.55, elevation: .64 },
+  { at: 3, x: -6, z: -5, distance: 23, azimuth: -.55, elevation: .64 },
+  { at: 7, x: -2, z: -5, distance: 24, azimuth: -.16, elevation: .86 },
+  { at: 9, x: -2, z: 5, distance: 24, azimuth: .22, elevation: .80 },
+  { at: 11.8, x: -2, z: 5, distance: 23, azimuth: .38, elevation: .73 },
+  { at: 13.2, x: -4.7, z: -5, distance: 11.5, azimuth: -.5, elevation: .68 },
+  { at: 16.8, x: -2.7, z: -5, distance: 12.5, azimuth: -.24, elevation: .79 },
+  { at: 20.5, x: 0, z: 0, distance: 53, azimuth: -.35, elevation: .87 },
+  { at: 25.6, x: 0, z: 0, distance: 51, azimuth: -.14, elevation: .92 },
+  { at: 30, x: 0, z: 0, distance: 62, azimuth: -.08, elevation: .96 },
+];
 export function cameraState(time: number) {
-  const input = ease(4.8, 8, time), pa = ease(20, 25, time), whole = ease(30, 35, time), settle = ease(53, 60, time);
-  // Frame the arriving input first; widen before mixers arrive, not after they leave the close-up.
-  return { x: -14.5 + input * 12.5 + whole * 2, z: -5 * input + pa * 10 - whole * 5,
-    width: 12 + input * 7 + whole * 23 + settle * 1, depth: 10 + input * 2 + whole * 14,
-    // A slow, small change in viewing angle reveals actual sidewalls, not a skewed image.
-    azimuth: -.13 + .12 * ease(6, 20, time) + .12 * whole };
+  const index = Math.max(1, shots.findIndex(shot => shot.at >= Math.min(30, time)));
+  const a = shots[index - 1], b = shots[index], p = ease(a.at, b.at, time);
+  const mix = (key: 'x' | 'z' | 'distance' | 'azimuth' | 'elevation') => a[key] + (b[key] - a[key]) * p;
+  return { x: mix('x'), z: mix('z'), distance: mix('distance'), azimuth: mix('azimuth'), elevation: mix('elevation') };
 }
 export const sceneCopy = ['Receive amplifier', 'Transmit amplifier', 'Downconversion', 'Upconversion', 'Antenna switch', 'RF', 'LO', 'Bias', 'Control'] as const;

@@ -1,48 +1,49 @@
-/** Original 24-bar composition. No third-party samples or remote music service. */
+/** Original 16-bar electronic score. No third-party samples or remote music service. */
 import { FILM_SECONDS } from './timeline';
 export { FILM_SECONDS } from './timeline';
-export const BPM = 96;
+export const BPM = 128;
 const beat = 60 / BPM;
-export type Note = { at: number; length: number; midi: number; level: number; pan: number; voice: 'pad' | 'bell' | 'bass' | 'tick' };
+export type Note = { at: number; length: number; midi: number; level: number; pan: number; voice: 'pad' | 'bell' | 'bass' | 'tick' | 'kick' | 'hat' };
 
 export function composeScore(): Note[] {
   const notes: Note[] = [];
   // Dmaj9, Bm9, Gmaj9, Asus4. Open voicings leave space for the three-note signature.
   const harmony = [[50, 57, 61, 64], [47, 54, 57, 61], [43, 54, 57, 62], [45, 52, 59, 62]];
-  for (let bar = 0; bar < 24; bar++) {
-    const chord = harmony[bar >= 22 ? 0 : bar % 4];
+  for (let bar = 0; bar < 16; bar++) {
+    const chord = harmony[bar >= 14 ? 0 : bar % 4];
     const at = bar * 4 * beat;
-    chord.forEach((midi, i) => notes.push({ at, length: 3.05, midi, level: .034, pan: (i - 1.5) * .4, voice: 'pad' }));
-    if (bar > 3 && bar < 22) {
-      notes.push({ at: at + .025, length: 1.25, midi: chord[0] - 12, level: .13, pan: 0, voice: 'bass' });
-      notes.push({ at: at + 2.5 * beat, length: .7, midi: chord[0] - 12, level: .075, pan: 0, voice: 'bass' });
+    chord.forEach((midi, i) => notes.push({ at, length: 2.1, midi, level: .024, pan: (i - 1.5) * .4, voice: 'pad' }));
+    if (bar >= 2 && bar < 14) {
+      for (const step of [0, 1.5, 2.5, 3.5]) notes.push({ at: at + step * beat, length: .3, midi: chord[0] - 12, level: step ? .075 : .12, pan: 0, voice: 'bass' });
+      for (let i = 0; i < 4; i++) notes.push({ at: at + i * beat, length: .24, midi: 34, level: .32, pan: 0, voice: 'kick' });
+      for (let i = 0; i < (bar >= 6 ? 8 : 4); i++) notes.push({ at: at + (i + .5) * beat * (bar >= 6 ? .5 : 1), length: i % 2 ? .10 : .06, midi: 90, level: i % 2 ? .045 : .025, pan: i % 2 ? .2 : -.2, voice: 'hat' });
     }
-    if (bar > 7 && bar < 21) {
+    if (bar > 4 && bar < 14) {
       for (let i = 0; i < 4; i++) {
         notes.push({ at: at + (i + .5) * beat, length: .16, midi: 84 + i * 2, level: i % 2 ? .026 : .016, pan: i % 2 ? .45 : -.45, voice: 'tick' });
       }
     }
     // Deliberate space between phrases. The last two bars resolve instead of looping.
-    const melody = bar >= 22 ? [81, 76, 74] : bar % 4 === 2 ? [78, 76, 73] : [74, 76, 81];
-    if (bar % 2 === 0 || bar === 23) melody.forEach((midi, i) => notes.push({
-      at: at + [.5, 1.75, 3][i] * beat, length: 1.5, midi, level: bar >= 22 ? .085 : .072, pan: (i - 1) * .24, voice: 'bell',
+    const melody = bar >= 14 ? [81, 76, 74] : bar % 4 === 2 ? [78, 76, 73] : [74, 76, 81];
+    if (bar % 2 === 0 || bar === 15) melody.forEach((midi, i) => notes.push({
+      at: at + [.5, 1.75, 3][i] * beat, length: 1.2, midi, level: bar >= 14 ? .075 : .045, pan: (i - 1) * .24, voice: 'bell',
     }));
     // Pixel synthesis adds a light counter-melody; the layout reveal opens its register.
-    if (bar >= 9 && bar < 19) for (let i = 0; i < 4; i++) notes.push({
-      at: at + (i + .25) * beat, length: .85, midi: chord[(i + bar) % 4] + (bar >= 14 ? 24 : 12),
-      level: .022, pan: Math.sin(i * 1.5) * .5, voice: 'bell',
+    if (bar >= 5 && bar < 14) for (let i = 0; i < 8; i++) notes.push({
+      at: at + (i + .25) * beat / 2, length: .3, midi: chord[(i + bar) % 4] + (bar >= 10 ? 24 : 12),
+      level: i % 3 ? .014 : .028, pan: Math.sin(i * 1.5) * .5, voice: 'bell',
     });
   }
   return notes;
 }
 
-/** Build-time synthesis only. A full stereo PCM render is < 22 MB. */
+/** Build-time synthesis only. A full stereo PCM render is < 11 MB. */
 export async function renderScore(): Promise<AudioBuffer> {
   const context = new OfflineAudioContext(2, FILM_SECONDS * 44100, 44100);
   const master = context.createGain();
   master.gain.setValueAtTime(0, 0);
-  master.gain.linearRampToValueAtTime(.65, 1.5);
-  master.gain.setValueAtTime(.65, FILM_SECONDS - 3);
+  master.gain.linearRampToValueAtTime(.65, .4);
+  master.gain.setValueAtTime(.65, FILM_SECONDS - 1.2);
   master.gain.linearRampToValueAtTime(0, FILM_SECONDS);
   const compressor = context.createDynamicsCompressor();
   compressor.threshold.value = -14;
@@ -52,31 +53,38 @@ export async function renderScore(): Promise<AudioBuffer> {
   // Crossfeed taps give the plucks a restrained stereo tail without large convolution buffers.
   const wet = context.createGain();
   wet.gain.value = .19;
-  for (const [seconds, pan, level] of [[.3125, -.65, .6], [.625, .65, .35], [.9375, -.3, .18]]) {
+  for (const [seconds, pan, level] of [[beat * .75, -.65, .6], [beat * 1.5, .65, .35], [beat * 2.25, -.3, .18]]) {
     const delay = context.createDelay(1);
     delay.delayTime.value = seconds;
     const position = context.createStereoPanner(); position.pan.value = pan;
     const gain = context.createGain(); gain.gain.value = level;
     wet.connect(delay).connect(position).connect(gain).connect(master);
   }
+  const noise = context.createBuffer(1, 44100, 44100), samples = noise.getChannelData(0);
+  let seed = 24381;
+  for (let i = 0; i < samples.length; i++) { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; samples[i] = seed / 2147483648 - 1; }
   for (const note of composeScore()) {
     const { at, length, level, voice } = note;
     const end = Math.min(FILM_SECONDS, at + length);
     const envelope = context.createGain();
     const position = context.createStereoPanner(); position.pan.value = note.pan;
-    const filter = context.createBiquadFilter(); filter.type = 'lowpass';
-    filter.frequency.value = voice === 'pad' ? 900 : voice === 'bass' ? 260 : 6000;
+    const filter = context.createBiquadFilter(); filter.type = voice === 'hat' ? 'highpass' : 'lowpass';
+    filter.frequency.value = voice === 'pad' ? 1400 : voice === 'bass' ? 480 : voice === 'kick' ? 350 : voice === 'hat' ? 8000 : 6200;
     envelope.gain.setValueAtTime(0, at);
-    envelope.gain.linearRampToValueAtTime(level, at + (voice === 'pad' ? .8 : .012));
+    envelope.gain.linearRampToValueAtTime(level, Math.min(end - .001, at + (voice === 'pad' ? .3 : .004)));
     envelope.gain.exponentialRampToValueAtTime(.0001, end);
     envelope.connect(filter).connect(position).connect(master);
     if (voice === 'bell' || voice === 'tick') position.connect(wet);
+    if (voice === 'hat') {
+      const source = context.createBufferSource(); source.buffer = noise; source.connect(envelope); source.start(at); source.stop(end); continue;
+    }
     const frequency = 440 * 2 ** ((note.midi - 69) / 12);
     const partials = voice === 'pad' ? [[1, -.055, .55], [1, .055, .45]] : voice === 'bell' ? [[1, 0, .78], [2.002, 0, .16], [3.01, 0, .06]] : [[1, 0, 1]];
     for (const [ratio, detune, strength] of partials) {
       const oscillator = context.createOscillator();
       oscillator.type = voice === 'pad' ? 'triangle' : 'sine';
       oscillator.frequency.value = frequency * ratio;
+      if (voice === 'kick') { oscillator.frequency.setValueAtTime(115, at); oscillator.frequency.exponentialRampToValueAtTime(42, Math.min(end, at + .10)); }
       oscillator.detune.value = detune * 100;
       const gain = context.createGain(); gain.gain.value = strength;
       oscillator.connect(gain).connect(envelope);
