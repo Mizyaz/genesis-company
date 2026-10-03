@@ -633,8 +633,9 @@ test('the brand opens a short RF introduction instead of a game', () => {
 test('the RF positioning and introduction are bilingual and clearly illustrative', () => {
   const { introduction, rfPhysics } = JSON.parse(read('src/content/site.json'));
   const dictionary = JSON.parse(read('src/content/tr.json'));
-  for (const text of [...Object.values(introduction), ...Object.values(rfPhysics)]) {
-    assert.ok(dictionary[text], text);
+  const strings = value => typeof value === 'string' ? [value] : Object.values(value).flatMap(strings);
+  for (const text of strings({ introduction, rfPhysics })) {
+    assert.ok(text === 'GENESIS' || dictionary[text], text);
     assert.doesNotMatch(text, /—|CLI|JSON|empire|DRC|LVS/);
   }
   assert.match(introduction.description, /not simulated measurement data/);
@@ -646,22 +647,44 @@ test('the RF positioning and introduction are bilingual and clearly illustrative
   assert.match(intro, /<RFDesignScene stage=\{3\}/);
 });
 
-const transpiled = path => { const module = {}; new Function('exports', 'require', ts.transpileModule(read(path), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText)(module, () => ({})); return module; };
+const transpiled = (path, dependencies = {}) => { const module = {}; new Function('exports', 'require', ts.transpileModule(read(path), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText)(module, id => dependencies[id] ?? {}); return module; };
 
 test('the original score is finite, deterministic and resolves with the film', () => {
-  const { composeScore, FILM_SECONDS, BPM } = transpiled('src/shared/intro/score.ts');
-  assert.equal(FILM_SECONDS, 30);
-  assert.equal(12 * 4 * 60 / BPM, FILM_SECONDS);
+  const timeline = transpiled('src/shared/intro/timeline.ts');
+  const { composeScore, FILM_SECONDS, BPM } = transpiled('src/shared/intro/score.ts', { './timeline': timeline });
+  assert.equal(FILM_SECONDS, 60);
+  assert.equal(24 * 4 * 60 / BPM, FILM_SECONDS);
   const notes = composeScore();
   assert.deepEqual(notes, composeScore());
-  assert.ok(notes.length > 90 && notes.length < 200);
+  assert.ok(notes.length > 200 && notes.length < 400);
   assert.ok(notes.every(note => note.at >= 0 && note.at < FILM_SECONDS && note.length > 0 && note.level > 0 && Math.abs(note.pan) <= 1));
   assert.deepEqual([...new Set(notes.map(note => note.voice))].sort(), ['bass', 'bell', 'pad', 'tick']);
-  assert.ok(notes.some(note => note.at >= 27 && note.voice === 'bell'));
-  assert.ok(!notes.some(note => note.at >= 25 && note.voice === 'tick'));
+  assert.ok(notes.some(note => note.at >= 57 && note.voice === 'bell'));
+  assert.ok(!notes.some(note => note.at >= 55 && note.voice === 'tick'));
   const score = read('src/shared/intro/score.ts');
   assert.doesNotMatch(score, /fetch\(|https?:|setInterval/);
-  assert.match(score, /this.context\?\.close\(\)/);
+  assert.match(score, /removeAttribute\('src'\)/);
+  assert.ok(existsSync(resolve(root, 'public/assets/genesis-intro-score.mp3')));
+  const musicBytes = statSync(resolve(root, 'public/assets/genesis-intro-score.mp3')).size;
+  assert.ok(musicBytes > 500_000 && musicBytes < 1_500_000, 'bounded pre-rendered stereo track');
+});
+
+test('the film tells a complete prompt-to-schematic-to-layout story in one minute', () => {
+  const { filmCues, filmCue, filmTime, FILM_SECONDS } = transpiled('src/shared/intro/timeline.ts');
+  assert.deepEqual(filmCues.map(cue => cue.id), ['prompt', 'schematic', 'passives', 'layout', 'verify', 'closing']);
+  assert.equal(filmCues[0].from, 0);
+  assert.equal(filmCues.at(-1).to, FILM_SECONDS);
+  filmCues.forEach((cue, i) => { assert.ok(cue.to - cue.from >= 5); if (i) assert.equal(cue.from, filmCues[i - 1].to); });
+  for (let time = 0; time <= FILM_SECONDS; time += .1) {
+    const cue = filmCue(time); assert.ok(cue.opacity >= 0 && cue.opacity <= 1);
+  }
+  assert.equal(filmCue(60).id, 'closing');
+  assert.equal(filmTime(60), '1:00'); assert.equal(filmTime(59.9), '0:59');
+  const film = read('src/shared/intro/circuitFilm.ts');
+  assert.match(film, /from '..\/pixelLayout'/);
+  for (const kind of ['amplifier', 'mixer', 'switch', 'divider', 'coupler']) assert.ok(film.includes(`kind: '${kind}'`));
+  assert.match(film, /function schematic\(/);
+  assert.match(film, /matchingVariants/);
 });
 
 test('the GENESIS symbol stays consistent and opens without a full-screen flash', () => {

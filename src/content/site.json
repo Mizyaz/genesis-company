@@ -5,9 +5,18 @@
     "email": "islam.guven@uclouvain.be"
   },
   "introduction": {
-    "title": "GENESIS: a circuit comes to life",
-    "description": "A continuous illustrated journey across a circuit: a signal reveals inductors, capacitors and transistors. Their geometry evolves together before the completed chip and GENESIS identity emerge. Original electronic music accompanies the film. This is a visual interpretation, not simulated measurement data.",
-    "closing": "From schematic to tape-out."
+    "title": "GENESIS: from an RFIC prompt to schematic and layout",
+    "description": "An illustrated RFIC request becomes a schematic and then a physical layout. Amplifier, mixer and switch circuits arrive from around the scene. Connected pixelated metal patterns evolve with the transistors. Original music accompanies the one-minute film. This is a visual interpretation, not simulated measurement data or a live LLM session.",
+    "prompt": "Design an RF front end with pixelated matching networks.",
+    "closing": "RFIC design, from prompt to schematic and layout.",
+    "scenes": {
+      "prompt": { "label": "RFIC × LLM", "title": "Start with your RFIC idea.", "detail": "Tell GENESIS what you want to build." },
+      "schematic": { "label": "PROMPT → SCHEMATIC", "title": "Your words become a circuit.", "detail": "An LLM interprets the request. Design tools build the schematic." },
+      "passives": { "label": "PIXELATED PASSIVES", "title": "Shape the signal.", "detail": "Explore metal patterns alongside transistor sizes." },
+      "layout": { "label": "SCHEMATIC → LAYOUT", "title": "A circuit takes physical shape.", "detail": "Matching networks, devices and connections come together." },
+      "verify": { "label": "RF DESIGN LOOP", "title": "Refine the design together.", "detail": "Check the layout and RF behavior. Improve both." },
+      "closing": { "label": "GENESIS", "title": "From prompt to physical design.", "detail": "RFIC design, guided by your intent." }
+    }
   },
   "rfPhysics": {
     "label": "BUILT AROUND RF PHYSICS",

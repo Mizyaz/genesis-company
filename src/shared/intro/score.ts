@@ -1,5 +1,6 @@
-/** Original 12-bar score. No recording, remote service or third-party music. */
-export const FILM_SECONDS = 30;
+/** Original 24-bar composition. No third-party samples or remote music service. */
+import { FILM_SECONDS } from './timeline';
+export { FILM_SECONDS } from './timeline';
 export const BPM = 96;
 const beat = 60 / BPM;
 export type Note = { at: number; length: number; midi: number; level: number; pan: number; voice: 'pad' | 'bell' | 'bass' | 'tick' };
@@ -8,35 +9,40 @@ export function composeScore(): Note[] {
   const notes: Note[] = [];
   // Dmaj9, Bm9, Gmaj9, Asus4. Open voicings leave space for the three-note signature.
   const harmony = [[50, 57, 61, 64], [47, 54, 57, 61], [43, 54, 57, 62], [45, 52, 59, 62]];
-  for (let bar = 0; bar < 12; bar++) {
-    const chord = harmony[bar >= 10 ? 0 : bar % 4];
+  for (let bar = 0; bar < 24; bar++) {
+    const chord = harmony[bar >= 22 ? 0 : bar % 4];
     const at = bar * 4 * beat;
     chord.forEach((midi, i) => notes.push({ at, length: 3.05, midi, level: .034, pan: (i - 1.5) * .4, voice: 'pad' }));
-    if (bar > 1 && bar < 10) {
+    if (bar > 3 && bar < 22) {
       notes.push({ at: at + .025, length: 1.25, midi: chord[0] - 12, level: .13, pan: 0, voice: 'bass' });
       notes.push({ at: at + 2.5 * beat, length: .7, midi: chord[0] - 12, level: .075, pan: 0, voice: 'bass' });
     }
-    if (bar > 3 && bar < 10) {
+    if (bar > 7 && bar < 21) {
       for (let i = 0; i < 4; i++) {
         notes.push({ at: at + (i + .5) * beat, length: .16, midi: 84 + i * 2, level: i % 2 ? .026 : .016, pan: i % 2 ? .45 : -.45, voice: 'tick' });
       }
     }
     // Deliberate space between phrases. The last two bars resolve instead of looping.
-    const melody = bar >= 10 ? [81, 76, 74] : bar % 2 ? [78, 76, 73] : [74, 76, 81];
-    if (bar % 2 === 0 || bar === 11) melody.forEach((midi, i) => notes.push({
-      at: at + [.5, 1.75, 3][i] * beat, length: 1.5, midi, level: bar >= 10 ? .085 : .072, pan: (i - 1) * .24, voice: 'bell',
+    const melody = bar >= 22 ? [81, 76, 74] : bar % 4 === 2 ? [78, 76, 73] : [74, 76, 81];
+    if (bar % 2 === 0 || bar === 23) melody.forEach((midi, i) => notes.push({
+      at: at + [.5, 1.75, 3][i] * beat, length: 1.5, midi, level: bar >= 22 ? .085 : .072, pan: (i - 1) * .24, voice: 'bell',
     }));
+    // Pixel synthesis adds a light counter-melody; the layout reveal opens its register.
+    if (bar >= 9 && bar < 19) for (let i = 0; i < 4; i++) notes.push({
+      at: at + (i + .25) * beat, length: .85, midi: chord[(i + bar) % 4] + (bar >= 14 ? 24 : 12),
+      level: .022, pan: Math.sin(i * 1.5) * .5, voice: 'bell',
+    });
   }
   return notes;
 }
 
-/** A small offline render gives pause/seek/replay exact audiovisual alignment. Stereo PCM is < 11 MB. */
+/** Build-time synthesis only. A full stereo PCM render is < 22 MB. */
 export async function renderScore(): Promise<AudioBuffer> {
   const context = new OfflineAudioContext(2, FILM_SECONDS * 44100, 44100);
   const master = context.createGain();
   master.gain.setValueAtTime(0, 0);
   master.gain.linearRampToValueAtTime(.65, 1.5);
-  master.gain.setValueAtTime(.65, 27);
+  master.gain.setValueAtTime(.65, FILM_SECONDS - 3);
   master.gain.linearRampToValueAtTime(0, FILM_SECONDS);
   const compressor = context.createDynamicsCompressor();
   compressor.threshold.value = -14;
@@ -91,63 +97,47 @@ export async function renderScore(): Promise<AudioBuffer> {
   return buffer;
 }
 
-let renderedScore: Promise<AudioBuffer> | undefined;
 export type AudioStatus = 'loading' | 'ready' | 'blocked' | 'unavailable' | 'closed';
 
-/** Construct only inside the user's click. Closing the film closes its AudioContext. */
+/** Play the pre-rendered original score from this static site. No synthesis cost for visitors. */
 export class IntroSound {
-  private context: AudioContext | undefined;
-  private gain: GainNode | undefined;
-  private source: AudioBufferSourceNode | undefined;
-  private buffer: AudioBuffer | undefined;
-  private anchor = 0;
-  private offset = 0;
+  private media: HTMLAudioElement | undefined;
   private active = false;
   private disposed = false;
-  private muted = false;
+  private cleanup = () => {};
   status: AudioStatus = 'loading';
   readonly ready: Promise<void>;
 
-  constructor() {
+  constructor(url: string) {
     try {
-      this.context = new AudioContext();
-      this.gain = this.context.createGain();
-      this.gain.gain.value = .8;
-      this.gain.connect(this.context.destination);
-      void this.context.resume().catch(() => { if (!this.disposed) this.status = 'blocked'; });
-      renderedScore ??= renderScore().catch(error => { renderedScore = undefined; throw error; });
-      this.ready = renderedScore.then(buffer => {
-        if (this.disposed) return;
-        this.buffer = buffer;
-        this.status = this.context?.state === 'running' ? 'ready' : 'blocked';
-      }).catch(() => { if (!this.disposed) this.status = 'unavailable'; });
+      const media = new Audio(url); this.media = media;
+      media.preload = 'auto'; media.volume = .8;
+      this.ready = new Promise(resolve => {
+        const loaded = () => { if (this.status !== 'blocked') this.status = 'ready'; resolve(); };
+        const failed = () => { this.status = 'unavailable'; resolve(); };
+        media.addEventListener('canplay', loaded, { once: true });
+        media.addEventListener('error', failed, { once: true });
+        this.cleanup = () => { media.removeEventListener('canplay', loaded); media.removeEventListener('error', failed); };
+      });
+      // Acquire playback permission in the original click, including mobile browsers.
+      void this.unlock();
     } catch { this.status = 'unavailable'; this.ready = Promise.resolve(); }
   }
 
-  get position() { return this.active && this.context?.state === 'running' ? Math.min(FILM_SECONDS, this.offset + this.context.currentTime - this.anchor) : null; }
+  get position() { return this.active && this.media && !this.media.paused && this.media.readyState >= 2 ? Math.min(FILM_SECONDS, this.media.currentTime) : null; }
   async unlock() {
-    if (!this.context || this.disposed || this.status === 'unavailable') return;
-    try { await this.context.resume(); if (!this.disposed) this.status = this.buffer ? 'ready' : 'loading'; }
-    catch { if (!this.disposed) this.status = 'blocked'; }
+    if (!this.media || this.disposed || this.status === 'unavailable') return;
+    try { await this.media.play(); if (!this.disposed) { this.status = 'ready'; if (!this.active) this.media?.pause(); } }
+    catch (error) { if (!this.disposed && (error as DOMException).name !== 'AbortError') this.status = (error as DOMException).name === 'NotAllowedError' ? 'blocked' : 'unavailable'; }
   }
   play(offset: number) {
-    this.pause();
-    if (!this.context || !this.buffer || this.context.state !== 'running' || this.disposed || offset >= FILM_SECONDS) return;
-    this.source = this.context.createBufferSource(); this.source.buffer = this.buffer;
-    this.source.connect(this.gain!);
-    this.offset = offset; this.anchor = this.context.currentTime; this.active = true;
-    this.source.start(0, offset);
+    if (!this.media || this.disposed || offset >= FILM_SECONDS || this.status === 'unavailable') return;
+    this.media.currentTime = offset; this.active = true; void this.unlock();
   }
-  pause() {
-    if (this.source) { this.source.stop(); this.source.disconnect(); this.source = undefined; }
-    this.active = false;
-  }
-  setMuted(value: boolean) {
-    this.muted = value;
-    if (this.context && this.gain) this.gain.gain.setTargetAtTime(this.muted ? 0 : .8, this.context.currentTime, .025);
-  }
+  pause() { this.active = false; this.media?.pause(); }
+  setMuted(value: boolean) { if (this.media) this.media.muted = value; }
   dispose() {
     this.disposed = true; this.pause(); this.status = 'closed';
-    this.gain?.disconnect(); void this.context?.close().catch(() => {});
+    this.cleanup(); this.media?.removeAttribute('src'); this.media?.load(); this.media = undefined;
   }
 }
