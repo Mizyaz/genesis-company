@@ -18,6 +18,7 @@ const paths: Record<string, ReactNode> = {
   moon: <path d="M20 14A8 8 0 0 1 10 4a8 8 0 1 0 10 10Z" />,
   close: <path d="m6 6 12 12M6 18 18 6" />,
   play: <path d="m8 5 11 7-11 7Z" fill="currentColor" stroke="none" />,
+  pause: <path d="M7 5h3v14H7zM14 5h3v14h-3z" fill="currentColor" stroke="none" />,
   stop: <rect x="6" y="6" width="12" height="12" rx="1.5" fill="currentColor" stroke="none" />,
   mail: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 6 9 7 9-7" /></>,
   check: <path d="m5 12.5 4.5 4.5L19 7.5" />,

@@ -278,7 +278,7 @@ test('on phones rows of cards scroll sideways, sections are named not numbered, 
   assert.match(wireCss, /clip-path: inset\(-8px calc\(\(1 - var\(--progress\)\) \* 100%\) -8px 0\)/);
   assert.match(wireCss, /\.scroll-current\[data-motion="off"\] \*/);
   assert.match(wireCss, /prefers-reduced-motion: reduce/);
-  assert.ok(40 < 1000 && /z-index: 1000/.test(read('src/styles/research-flight.css')), 'the flight covers the wire');
+  assert.match(read('src/shared/CompanyIntro.tsx'), /showModal\(\)/, 'the introduction uses the native top layer');
 });
 
 test('every platform stage opens a tube screen with what GENESIS offers there, animated, without new claims', () => {
@@ -374,7 +374,7 @@ test('Explore opens with the membership, then the portfolio; services stay data-
   assert.equal(dictionary['From specs'], 'Fikirden');
   assert.equal(dictionary['silicon.'], 'çipe.');
   assert.doesNotMatch(Object.values(dictionary).join('\n'), /Hedeflerden|silikona|DEVRELER\. ALANLAR/i);
-  assert.match(read('src/styles/site.css'), /font-size: clamp\(2.75rem, 12vw, 4.6rem\)/);
+  assert.match(read('src/styles/site.css'), /font-size: clamp\(2.35rem, 9.5vw, 4rem\)/);
   for (const copy of [content.story.headline, content.story.intro, ...content.story.paragraphs]) assert.ok(dictionary[copy], copy);
   assert.equal(content.story.paragraphs.length, 2);
   assert.match(read('src/pages/About.tsx'), /site.story.paragraphs.map/);
@@ -522,10 +522,7 @@ test('every page change and every wait uses the one silicon gate, from the first
   assert.match(html, /M61 83H67L75 65L85 96L94 76H100/);
   assert.match(gate, /M61 83H67L75 65L85 96L94 76H100/);
   // Waits ask for the gate instead of drawing their own loading text; code changes page through it.
-  const flight = read('src/shared/ResearchFlight.tsx'), viewer = read('src/shared/ImageViewer.tsx');
-  assert.match(flight, /holdGate\(\{ title: 'Loading the city'/);
-  assert.match(flight, /release\(\(\) => \{ setRevealed\(true\); flight.start\(\); \}\)/);
-  assert.match(flight, /navigate\('#\/explore'\)/);
+  const viewer = read('src/shared/ImageViewer.tsx');
   assert.match(viewer, /holdGate\(\{ title: 'Loading image', subtitle: title, delay: \d+ \}\)/);
   // Only the gate itself may set the address directly (and only when no gate is on the page).
   for (const path of walk('src').filter(path => /\.tsx?$/.test(path) && path !== 'src/shared/gate.ts')) {
@@ -536,7 +533,7 @@ test('every page change and every wait uses the one silicon gate, from the first
 test('public source has no assistant, landing page or engineering service', () => {
   for (const path of ['src/App.tsx', 'src/main.tsx', 'src/pages/Landing.tsx', 'src/assistant', 'server', '.env']) assert.equal(existsSync(resolve(root, path)), false, path);
   const content = JSON.parse(read('src/content/site.json'));
-  assert.deepEqual(Object.keys(content).sort(), ['about', 'brand', 'intro', 'membership', 'portfolio', 'services', 'silicon', 'stages', 'story', 'workflow'].sort());
+  assert.deepEqual(Object.keys(content).sort(), ['about', 'brand', 'intro', 'introduction', 'rfPhysics', 'membership', 'portfolio', 'services', 'silicon', 'stages', 'story', 'workflow'].sort());
   const source = walk('src').map(read).join('\n');
   assert.doesNotMatch(source, /localhost|127\.0\.0\.1|\/api\/|VITE_WORKBENCH_URL|codex exec|fetch\s*\(|new WebSocket/);
   assert.match(read('index.html'), /connect-src 'none'/);
@@ -612,118 +609,56 @@ test('About us and research are pages of their own; İslam Güven leads the team
   assert.match(library, /<PublicationActions key=\{selected.id\}/);
 });
 
-test('the research page flies a signal through a city of our papers: one building per paper, on a timeline, with a visit prompt', () => {
-  const research = read('src/pages/Research.tsx');
-  assert.match(research, /<ResearchFlight papers=\{papers\} onShowPaper=/);
-  assert.match(research, /<Publications people=\{site.about.people\} papers=\{papers\} focus=\{focus\}/);
-  // three.js loads only when the flight starts; nothing on the page imports it.
-  const flight = read('src/shared/ResearchFlight.tsx');
-  assert.match(flight, /import\('\.\.\/flight\/world'\)/);
-  for (const path of walk('src').filter(path => /\.tsx?$/.test(path) && !path.startsWith('src/flight/'))) {
-    assert.doesNotMatch(read(path), /from 'three'|^import \{[^}]*\} from '\.\.\/flight\/world'/m, path);
-  }
-  assert.equal(JSON.parse(read('package.json')).dependencies.three, '0.186.1');
-  // Every paper is a building in its empire; later years stand further along the timeline; nothing overlaps.
-  const load = path => { const module = {}; new Function('exports', 'require', ts.transpileModule(read(path), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText)(module, () => ({})); return module; };
-  const papers = JSON.parse(read('src/content/publications.json'));
-  const { layoutCity, empireOf } = load('src/flight/layout.ts');
-  const city = layoutCity(papers);
-  assert.equal(city.buildings.length, papers.length);
-  assert.deepEqual(new Set(city.buildings.map(b => b.paper.id)).size, papers.length);
-  assert.deepEqual([...new Set(papers.map(empireOf))].sort(), ['circuit', 'drone', 'signal']);
-  for (const b of city.buildings) for (const other of city.buildings) {
-    if (b !== other) assert.ok(Math.hypot(b.x - other.x, b.z - other.z) > b.radius + other.radius + 1, `${b.paper.id} / ${other.paper.id}`);
-    if (other.paper.year > b.paper.year) assert.ok(other.z < b.z, `${other.paper.id} after ${b.paper.id}`);
-  }
-  assert.ok(city.years.every((year, i) => !i || year.z < city.years[i - 1].z && year.year === city.years[i - 1].year + 1));
-  assert.ok(city.buildings.every(b => b.glyph !== 'chip'), 'every paper gets a picture for its topic');
-  // The visit prompt appears after a short stay next to a building and leads to the paper or GENESIS.
-  const world = read('src/flight/world.ts');
-  const dwell = Number(world.match(/export const DWELL_SECONDS = ([\d.]+)/)[1]);
-  assert.ok(dwell >= 0.8 && dwell <= 3);
-  assert.match(flight, /t\("Would you like to visit\?"\)/);
-  assert.match(flight, /href=\{publicationUrl\(prompt.paper\)\} target="_blank" rel="noopener noreferrer"/);
-  assert.match(flight, /role="dialog" aria-modal="true"/);
-  assert.match(flight, /reducedMotion: !motion/);
-  assert.match(read('src/styles/research-flight.css'), /prefers-reduced-motion: reduce/);
-  // Crisp pieces only: prisms, boxes and flat rings; no spheres or blobs in the city.
-  assert.doesNotMatch(world.replace(/new THREE\.SphereGeometry\(1800[^)]*\)/, ''), /SphereGeometry|TorusKnot|Capsule|IcosahedronGeometry\(\s*[\d.]+\s*,\s*[1-9]/);
-  assert.doesNotMatch([world, read('src/flight/art.ts'), read('src/flight/layout.ts')].join('\n'), /fetch\s*\(|https?:\/\//);
-  assert.ok(existsSync(resolve(root, 'public/assets/research-flight.webp')));
+test('the brand opens a short RF introduction instead of a game', () => {
+  const source = walk('src').map(read).join('\n');
+  assert.doesNotMatch(source, /ResearchFlight|FlightSymbol|takeRequestedPaper|from ['"]three['"]/);
+  assert.equal(JSON.parse(read('package.json')).dependencies.three, undefined);
+  assert.match(read('src/pages/Welcome.tsx'), /symbol=\{<CompanyIntro symbol \/>\}/);
+  const intro = read('src/shared/CompanyIntro.tsx');
+  assert.match(intro, /secondsPerChapter = 5/);
+  assert.match(intro, /showModal\(\)/);
+  assert.match(intro, /onCancel=/);
+  assert.match(intro, /launcher.current\?\.focus\(\)/);
+  assert.match(intro, /useVisibleMotion<HTMLDialogElement>/);
+  assert.match(intro, /window.clearInterval\(timer\)/);
+  assert.match(intro, /type="range"/);
+  assert.match(intro, /aria-current=\{i === index \? 'step'/);
+  assert.match(read('src/styles/company-intro.css'), /prefers-reduced-motion: reduce/);
+  assert.match(read('src/pages/Research.tsx'), /<Publications people=\{site.about.people\} papers=\{papers\} \/>/);
 });
 
-test('the signal flight is fully playable on a phone: one thumb flies, arrows rise and sink, tap to fly, a timeline scrubber, both orientations', () => {
-  const flight = read('src/shared/ResearchFlight.tsx'), world = read('src/flight/world.ts');
-  // The first finger flies from wherever it lands, left or right; a second finger rises and sinks; further fingers tap.
-  assert.match(flight, /const role = !roles\.includes\('fly'\) \? 'fly' : event\.pointerType === 'touch' && !roles\.includes\('lift'\) \? 'lift' : 'tap';/);
-  assert.doesNotMatch(flight, /clientWidth \/ 2/);
-  assert.match(flight, /handle.current\?.setInput\(\{ turn: respond\(x\), forward: -respond\(y\) \}\)/);
-  assert.match(flight, /handle.current\?.setInput\(\{ lift: -respond\(y\) \}\)/);
-  // A small dead zone and a soft centre for fine steering, full at the edge.
-  const respond = new Function(`return ${flight.match(/const respond = (\(value: number\) => [^;]+);/)[1].replace(': number', '')}`)();
-  assert.equal(respond(0.1), 0);
-  assert.ok(respond(0.4) > 0 && respond(0.4) < 0.3 && Math.abs(respond(1) - 1) < 1e-9 && respond(-1) === -1);
-  // The arrows rise and sink while held, in the row on a computer and under the right thumb on a touch screen.
-  assert.match(flight, /\{!coarse && lifts\}/);
-  assert.match(flight, /\{coarse && <div className="flight-lifts">\{lifts\}<\/div>\}/);
-  // Letting go brakes (sooner beside a building, to visit it); flying on into a building hops over its roof.
-  assert.match(world, /const brake = input\.forward \? 1\.7 : focus \? 4\.2 : 3\.2;/);
-  assert.match(world, /if \(input\.forward > 0\) vel\.y = Math\.max\(vel\.y, HOP\);/);
-  assert.match(world, /thrust = input\.forward > 0 \? input\.forward : input\.forward \* 0\.5/);
-  // A tap (or click) that does not move flies to the building under it; the engine picks walls, roofs and posters.
-  assert.match(flight, /!touch.moved && event.timeStamp - touch.at < \d+ && handle.current\?.pick\(event.clientX, event.clientY\)/);
-  assert.match(read('src/flight/world.ts'), /pick\(clientX: number, clientY: number\): boolean/);
-  // The timeline is a scrubber; letting go flies there, sliding off cancels.
-  assert.match(flight, /onPointerUp: \(event: ReactPointerEvent<HTMLDivElement>\) => \{[\s\S]*?handle.current\?.flyTo\(paper.id\)/);
-  // The game owns every gesture: no page zoom, scroll, selection or long-press menu; a pad shows where a thumb can go.
-  assert.match(flight, /onContextMenu=\{event => event.preventDefault\(\)\}/);
-  assert.match(flight, /data-touch=\{coarse \|\| undefined\}/);
-  const css = read('src/styles/research-flight.css');
-  assert.match(css, /\.flight-overlay \{[^}]*touch-action: none;[^}]*-webkit-touch-callout: none;/);
-  assert.match(css, /\.flight-pad-fly \{/);
-  assert.match(css, /\.flight-lifts \{ position: absolute; right:/);
-  assert.doesNotMatch(css + flight, /flight-pad-lift/);
-  assert.match(css, /@media \(orientation: landscape\) and \(max-height: 520px\)/);
-  assert.match(flight, /requestFullscreen/);
+test('the RF positioning and introduction are bilingual and clearly illustrative', () => {
+  const { introduction, rfPhysics } = JSON.parse(read('src/content/site.json'));
+  const dictionary = JSON.parse(read('src/content/tr.json'));
+  assert.equal(introduction.chapters.length, 5);
+  for (const text of [...introduction.chapters.flatMap(Object.values), ...Object.values(rfPhysics)]) {
+    assert.ok(dictionary[text], text);
+    assert.doesNotMatch(text, /—|CLI|JSON|empire|DRC|LVS/);
+  }
+  assert.match(introduction.chapters[4].detail, /Tape-out is the handoff/);
+  assert.match(read('src/pages/Explore.tsx'), /t\("From schematic"\)/);
+  assert.match(read('src/pages/Explore.tsx'), /<RFPhysics \/>/);
+  const intro = read('src/shared/CompanyIntro.tsx');
+  assert.match(intro, /Illustrated workflow/);
+  assert.match(intro, /<RFDesignScene stage=\{index\}/);
+  assert.match(intro, /<RFDesignScene stage=\{3\}/);
 });
 
 const transpiled = path => { const module = {}; new Function('exports', 'require', ts.transpileModule(read(path), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText)(module, () => ({})); return module; };
 
-test('the GENESIS symbol is a pixelated front end, the logo everywhere, and pressing it starts the signal flight', () => {
+test('the GENESIS symbol stays consistent and opens without a full-screen flash', () => {
   const { emblem, emblemMark, drawEmblem } = transpiled('src/shared/emblem.ts');
-  // Detailed, not a few pixels: a 64-pixel crest (and a 32-pixel logo) with metal, transistor fingers and ports, mirrored.
   for (const [grid, size] of [[emblem, 64], [emblemMark, 32]]) {
     assert.equal(grid.length, size);
-    assert.ok(grid.every(row => row.length === size && row.every((cell, c) => cell === row[size - 1 - c])), `${size}: mirror-symmetric`);
+    assert.ok(grid.every(row => row.length === size && row.every((cell, c) => cell === row[size - 1 - c])));
   }
   const count = kind => emblem.flat().filter(cell => cell === kind).length;
-  assert.ok(count(1) > 900 && count(2) > 100 && count(3) === 32, 'metal, fingers and eight ports');
-  assert.deepEqual(drawEmblem(64), emblem, 'fixed shapes and seed: the same symbol every time');
-  // The logo is the symbol: the header, the cards and the favicon; the old wave image is no longer published.
-  assert.match(read('src/shared/ui.tsx'), /\{mark && <EmblemMark \/>\}<span>GENESIS<\/span>/);
-  assert.doesNotMatch(walk('src').filter(path => /\.(tsx?|css)$/.test(path)).map(read).join('\n'), /brand-mark|\.brand img/);
-  for (const exporter of ['scripts/export-public.mjs'].filter(path => existsSync(resolve(root, path)))) assert.doesNotMatch(read(exporter), /brand-mark\.webp/);
-  assert.match(read('public/favicon.svg'), /<linearGradient id="g"[^]*<path d="M\d/);
-  // Pressing the large symbol starts the flight: on the home page above the name, and on the research page's card.
-  const welcome = read('src/pages/Welcome.tsx'), flight = read('src/shared/ResearchFlight.tsx'), symbol = read('src/shared/Emblem.tsx');
-  assert.match(welcome, /<BrandIntro headingId="welcome-heading" symbol=\{<FlightSymbol papers=\{papers\} library="research" onShowPaper=\{id => \{ requestPaper\(id\); navigate\('#\/publications'\); \}\} \/>\} \/>/);
-  assert.match(read('src/shared/CircuitIdentity.tsx'), /\{symbol\}\n    <h1 id=\{headingId\}><ElectricBrand mark=\{!symbol\} \/><\/h1>/);
-  assert.match(flight, /<EmblemLauncher ref=\{launcher\} label=\{t\("Fly through our research"\)\} onLaunch=\{\(\) => setOpen\(true\)\} \/>/);
-  assert.doesNotMatch(symbol + read('src/styles/emblem.css'), /emblem-hint/); // Nothing written under the symbol.
-  assert.match(flight, /<div className="flight-launch-preview">\n      <img [^\n]*\/>\n      <FlightSymbol papers=\{papers\} onShowPaper=\{onShowPaper\} \/>/);
-  const card = flight.slice(flight.indexOf('export function ResearchFlight('), flight.indexOf('function FlightOverlay('));
-  assert.doesNotMatch(card, /<button|Launch the signal/); // No start button: the symbol is the way in.
-  assert.match(read('src/pages/Research.tsx'), /useEffect\(\(\) => \{ const id = takeRequestedPaper\(\); if \(id\) setFocus\(\{ id, at: Date\.now\(\) \}\); \}, \[\]\);/);
-  // It charges, flashes over the closing gate and hands over; with motion stopped or reduced it starts at once.
-  assert.match(symbol, /if \(!enabled \|\| matchMedia\('\(prefers-reduced-motion: reduce\)'\)\.matches\) \{ onLaunch\(\); return; \}/);
-  assert.match(flight, /window\.requestAnimationFrame\(\(\) => launcher\.current\?\.focus\(\)\)/);
-  const css = read('src/styles/emblem.css');
-  assert.ok(Number(css.match(/\.emblem-flash \{ position: fixed; z-index: (\d+);/)[1]) > Number(read('src/styles/silicon-gate.css').match(/\.silicon-gate \{[^}]*z-index: (\d+)/)[1]));
-  assert.match(css, /\.emblem\[data-motion="off"\] \*/);
-  assert.match(css, /prefers-reduced-motion: reduce/);
-  assert.match(css, /\.emblem\[data-running="false"\] \*/);
-  const dictionary = JSON.parse(read('src/content/tr.json'));
-  for (const copy of ['Fly through our research', 'Press the symbol to take off. Keyboard, mouse or one thumb on a phone; stay next to a building to visit its paper.', 'Read the summary on the research page']) assert.ok(dictionary[copy], copy);
+  assert.ok(count(1) > 900 && count(2) > 100 && count(3) === 32);
+  assert.deepEqual(drawEmblem(64), emblem);
+  const symbol = read('src/shared/Emblem.tsx');
+  assert.match(symbol, /onClick=\{onLaunch\}/);
+  assert.doesNotMatch(symbol, /setTimeout|createPortal|setFlash/);
+  assert.match(read('src/styles/emblem.css'), /prefers-reduced-motion: reduce/);
 });
 
 test('pixelated passives look like the ones in our papers: hundreds of pixels, every port connected, mirrored where symmetric', () => {
@@ -746,16 +681,11 @@ test('pixelated passives look like the ones in our papers: hundreds of pixels, e
   assert.ok(divider.columns * divider.rows >= 300, 'the EM screen shows a few hundred pixels, not a toy grid');
   assert.ok(divider.metal.every((row, r) => row.every((on, c) => on === divider.metal[divider.rows - 1 - r][c])), 'an equal split is symmetric');
   assert.ok(coupler.metal.every((row, r) => row.every((on, c) => on === coupler.metal[r][coupler.columns - 1 - c] && on === coupler.metal[coupler.rows - 1 - r][c])));
-  // They are what the site draws: the EM and layout screens, and the posters of our pixelated papers in the flight.
-  const screens = read('src/shared/StageScreens.tsx'), art = read('src/flight/art.ts');
+  // These layouts remain in the EM and physical-design screens, independent of the introductory film.
+  const screens = read('src/shared/StageScreens.tsx');
   assert.match(screens, /pixelPassives\.divider/);
   assert.match(screens, /pixelPassives\.frontEnd/);
   assert.doesNotMatch(screens, /const pixels = \[/);
-  for (const use of ['pixelPassives.coupler', 'pixelPassives.threePort', '{ lower, upper } = pixelPassives']) assert.ok(art.includes(use), use);
-  assert.match(art, /emblemMark\.forEach/); // The GENESIS sign at the end of the timeline carries the symbol.
-  const { glyphOf } = transpiled('src/flight/layout.ts');
-  const papers = JSON.parse(read('src/content/publications.json')).filter(paper => /pixelated|three-port/i.test(paper.title));
-  assert.deepEqual(papers.map(glyphOf).sort(), ['pixels', 'ports', 'stack']);
 });
 
 test('the membership speaks for a general RFIC design system, and the silicon demonstration names no bands, companies or dates', () => {

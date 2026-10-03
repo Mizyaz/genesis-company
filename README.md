@@ -6,6 +6,14 @@ The home page offers Discover (company presentation) and Design (an explicit
 link to the visitor's own installation). All runtime assets are included here.
 Animations, theme and motion preferences run in the browser.
 
+The home-page symbol opens a 25-second illustrated introduction, not an interactive
+game or a recorded simulation. Its five chapters explain the application, circuit,
+layout, verification and fabrication handoff in English and Turkish. Playback stops
+at the end, pauses when the tab is hidden, and respects the shared motion preference.
+With reduced motion, chapters remain available as stills. The RF explanation on
+Explore reuses the same lightweight circuit artwork and pauses outside the viewport.
+No 3D engine, video service or engineering-server connection is needed.
+
 Design first asks whether GENESIS is installed. No leads to the team's contact
 email; Yes asks which port to use. Only a port number (1 to 65535) is entered,
 never a URL. The port is remembered in the visitor's browser after opening the

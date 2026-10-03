@@ -4,6 +4,22 @@
     "descriptor": "Autonomous RFIC design engine",
     "email": "islam.guven@uclouvain.be"
   },
+  "introduction": {
+    "chapters": [
+      { "label": "The need", "title": "A chip starts with a purpose.", "detail": "From a phone's radio to a satellite link, you define what your chip needs to do." },
+      { "label": "The circuit", "title": "GENESIS develops the circuit.", "detail": "GENESIS adjusts the components together to balance signal quality, power consumption and size." },
+      { "label": "The layout", "title": "The circuit takes physical shape.", "detail": "Components become shapes and connections on silicon. Their position affects how radio signals behave." },
+      { "label": "The checks", "title": "Check the design. Refine the result.", "detail": "The system checks manufacturing rules and signal performance, then refines the design when needed." },
+      { "label": "The handoff", "title": "From schematic to tape-out.", "detail": "Tape-out is the handoff of verified design files to the chip manufacturer, ready for fabrication." }
+    ]
+  },
+  "rfPhysics": {
+    "label": "BUILT AROUND RF PHYSICS",
+    "title": "Every physical change has an electrical consequence.",
+    "detail": "Moving a connection can change how a radio signal behaves. GENESIS brings circuit choices, physical design and electromagnetic checks into the same loop, so layout changes are checked against the performance you need.",
+    "physical": "Manufacturing rules",
+    "performance": "Signal performance"
+  },
   "intro": {
     "label": "DESIGN SESSION",
     "you": "You",
@@ -628,8 +644,8 @@
   },
   "workflow": {
     "headline": "RF design.",
-    "headlineAccent": "From concept to layout.",
-    "intro": "Circuit design, EM simulation and optimization, connected from the first idea to physical verification.",
+    "headlineAccent": "From schematic to tape-out.",
+    "intro": "Develop the circuit, shape its physical design and check its performance in one autonomous RFIC workflow.",
     "visualLabel": "DESIGN LOOP",
     "softwareLabel": "In GENESIS",
     "modulesTitle": "What GENESIS does",

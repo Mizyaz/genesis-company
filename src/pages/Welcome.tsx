@@ -3,9 +3,7 @@ import siteContent from '../content/site.json';
 import { Brand, Icon } from '../shared/ui';
 import { StoryScene } from '../shared/StoryScene';
 import { BrandIntro } from '../shared/CircuitIdentity';
-import { FlightSymbol, requestPaper } from '../shared/ResearchFlight';
-import { navigate } from '../shared/gate';
-import papers from '../content/publications.json';
+import { CompanyIntro } from '../shared/CompanyIntro';
 import '../styles/welcome.css';
 
 /** Public gateway. No product state or assistant transport is imported. */
@@ -16,7 +14,7 @@ export function Welcome() {
     <div className="landing-atmosphere" aria-hidden="true" />
     <section className="welcome-content" aria-labelledby="welcome-heading">
       <p className="eyebrow">{t("RF DESIGN. SIMULATION. AI.")}</p>
-      <BrandIntro headingId="welcome-heading" symbol={<FlightSymbol papers={papers} library="research" onShowPaper={id => { requestPaper(id); navigate('#/publications'); }} />} />
+      <BrandIntro headingId="welcome-heading" symbol={<CompanyIntro symbol />} />
       <p className="welcome-intro">{t("Explore what we build. Or start your next design.")}</p>
       <div className="welcome-choices">
         <a className="welcome-choice" href="#/explore"><Icon name="wave" /><span><strong>{t("Discover")}</strong><small>{t("Our approach, our circuits and our platform.")}</small></span><Icon name="arrow" /></a>
