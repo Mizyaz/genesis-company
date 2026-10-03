@@ -146,7 +146,7 @@ test('RF positioning shares the film, supports both themes and fits narrow scree
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
-test('the one-minute film has readable prompt, schematic, pixel synthesis and layout captions in both languages', async ({ page }) => {
+test('the one-minute receiver film has readable prompt, schematic, joint design and layout captions in both languages', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   for (const language of ['en', 'tr']) {
     await page.setViewportSize(language === 'tr' ? { width: 390, height: 844 } : { width: 1440, height: 960 });
@@ -156,9 +156,9 @@ test('the one-minute film has readable prompt, schematic, pixel synthesis and la
     await page.getByRole('button', { name: language === 'tr' ? 'GENESIS tanıtımını izle' : 'Watch the GENESIS introduction' }).click();
     const film = page.locator('.company-film');
     const captions = language === 'tr'
-      ? ['Nasıl bir RFIC istiyorsunuz?', 'Tarifiniz devreye dönüşüyor.', 'Sinyale biçim verin.', 'Devre fiziksel biçimini alıyor.', 'Tasarımı bir bütün olarak geliştirin.']
-      : ['Start with your RFIC idea.', 'Your words become a circuit.', 'Shape the signal.', 'A circuit takes physical shape.', 'Refine the design together.'];
-    const times = [6, 17, 29, 43, 51], cues = ['prompt', 'schematic', 'passives', 'layout', 'verify'];
+      ? ['Nasıl bir alıcı istiyorsunuz?', 'Tarifiniz devreye dönüşür.', 'Aktif ve pasif elemanlar birlikte tasarlanır.', 'Şematikten fiziksel yerleşime.', 'Alıcının tamamını birlikte değerlendir.']
+      : ['Describe the receiver.', 'Your request becomes a circuit.', 'Active and passive. Designed together.', 'From circuit to physical layout.', 'Evaluate the complete front end.'];
+    const times = [3, 9, 19, 39, 51], cues = ['prompt', 'schematic', 'joint', 'layout', 'verify'];
     for (let i = 0; i < times.length; i++) {
       await film.getByRole('slider').fill(String(times[i]));
       await expect(film).toHaveAttribute('data-cue', cues[i]);

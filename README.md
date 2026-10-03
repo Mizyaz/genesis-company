@@ -6,16 +6,20 @@ The home page offers Discover (company presentation) and Design (an explicit
 link to the visitor's own installation). All runtime assets are included here.
 Animations, theme and motion preferences run in the browser.
 
-The home-page symbol opens a one-minute continuous RFIC film: a typed request to an
-LLM becomes a schematic, pixelated passive synthesis, and then a physical layout.
-Amplifier, mixer, switch, divider and coupler illustrations arrive from around the
-same plane. Matching networks reuse `pixelLayout.ts`; deterministic candidates show
-the patterns evolving. Short bilingual captions explain each transformation. This
-is an illustration, not a live LLM session, simulated circuit or measured result.
-There are no chapter cards or game controls.
+The home-page symbol opens a one-minute RF receiver film. A request becomes one
+persistent chain: RF input, input matching, LNA, interstage matching, mixer and IF
+output, with separate LO and bias connections. Three coordinated candidates change
+transistor sizing and both pixelated passives together. The selected geometry is
+frozen before precise placement and port-to-port routing. Circuit/EM feedback then
+illustrates one local route revision. The complete receiver remains in the closing
+frame. Short bilingual captions explain the sequence. This is an illustration,
+not a live LLM session, simulated circuit or measured result.
 
 `shared/intro/timeline.ts` defines the shared 60-second editorial clock.
-`circuitFilm.ts` owns the canvas geometry and camera. `score.ts` composes
+`receiverScene.ts` owns block identities, ports, the three cached candidates,
+responsive poses and connection endpoints. `circuitFilm.ts` draws this model on a
+fixed drafting plane: horizontal on desktop, vertically composed on phones.
+`score.ts` composes
 an original 96 BPM, 24-bar stereo soundtrack. `scripts/render-intro-score.mjs` renders
 it once at build time through Playwright and the host's existing Python/libmp3lame;
 the checked-in MP3 is about 1 MB, and visitors do not synthesize it. Run the script
