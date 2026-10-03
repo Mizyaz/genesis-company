@@ -5,8 +5,9 @@ import { useLanguage, useTranslatedContent } from './Language';
 import { useVisibleMotion } from './MotionSettings';
 import { EmblemLauncher, EmblemMark } from './Emblem';
 import { RFDesignScene } from './RFDesignScene';
-import { Icon } from './ui';
-import { renderCircuitFilm, ease } from './intro/circuitFilm';
+import { Icon, assetUrl } from './ui';
+import { renderCircuitFilm } from './intro/circuitFilm';
+import { ease, filmCue, filmTime } from './intro/timeline';
 import { IntroSound, FILM_SECONDS, type AudioStatus } from './intro/score';
 import '../styles/company-intro.css';
 
@@ -16,12 +17,12 @@ export function CompanyIntro({ symbol = false }: { symbol?: boolean }) {
   const [open, setOpen] = useState(false);
   const launcher = useRef<HTMLButtonElement>(null);
   const sound = useRef<IntroSound>();
-  const launch = () => { sound.current = new IntroSound(); setOpen(true); };
+  const launch = () => { sound.current = new IntroSound(assetUrl('/assets/genesis-intro-score.mp3')); setOpen(true); };
   const close = () => { sound.current?.dispose(); sound.current = undefined; setOpen(false); window.requestAnimationFrame(() => launcher.current?.focus()); };
   useEffect(() => () => sound.current?.dispose(), []);
   return <>
     {symbol ? <EmblemLauncher ref={launcher} label={t('Watch the GENESIS introduction')} onLaunch={launch} />
-      : <button ref={launcher} type="button" className="button button-secondary" onClick={launch}><Icon name="play" />{t('Watch the introduction')}<span className="intro-duration">30s</span></button>}
+      : <button ref={launcher} type="button" className="button button-secondary" onClick={launch}><Icon name="play" />{t('Watch the introduction')}<span className="intro-duration">1:00</span></button>}
     {open && sound.current && createPortal(<IntroFilm onClose={close} sound={sound.current} />, document.body)}
   </>;
 }
@@ -40,7 +41,7 @@ function IntroFilm({ onClose, sound }: { onClose: () => void; sound: IntroSound 
   const clock = useRef(0);
   const size = useRef({ width: 1, height: 1, ratio: 1 });
   const duration = FILM_SECONDS;
-  const playing = running && !paused && time < duration && audioStatus !== 'loading';
+  const playing = running && !paused && time < duration;
   useEffect(() => {
     let active = true;
     void sound.ready.then(() => { if (active) setAudioStatus(sound.status); });
@@ -85,7 +86,7 @@ function IntroFilm({ onClose, sound }: { onClose: () => void; sound: IntroSound 
     draw();
     if (playing) frame = requestAnimationFrame(tick);
     return () => { cancelAnimationFrame(frame); resize.disconnect(); sound.pause(); };
-  }, [playing, revision, sound, duration]);
+  }, [playing, revision, sound, duration, audioStatus]);
   const seek = (value: number) => { clock.current = value; setTime(value); setRevision(value => value + 1); };
   const togglePlay = () => {
     void sound.unlock().then(() => setAudioStatus(sound.status));
@@ -105,19 +106,31 @@ function IntroFilm({ onClose, sound }: { onClose: () => void; sound: IntroSound 
     if (event.target instanceof HTMLInputElement || event.target instanceof HTMLButtonElement) return;
     if (event.code === 'Space') { event.preventDefault(); togglePlay(); }
   };
-  const ending = ease(24, 27, time);
-  return <dialog ref={ref} className="company-film" aria-labelledby="company-film-title" aria-describedby="company-film-description" onCancel={event => { event.preventDefault(); onClose(); }} onKeyDown={keyboard} data-running={playing} data-motion={enabled ? 'on' : 'off'} data-audio={audioStatus} data-muted={muted}>
+  const cue = filmCue(time), caption = introduction.scenes[cue.id];
+  const ending = ease(55, 58, time);
+  return <dialog ref={ref} className="company-film" aria-labelledby="company-film-title" aria-describedby="company-film-description" onCancel={event => { event.preventDefault(); onClose(); }} onKeyDown={keyboard} data-running={playing} data-motion={enabled ? 'on' : 'off'} data-audio={audioStatus} data-muted={muted} data-cue={cue.id}>
     <h2 id="company-film-title" className="film-sr-only">{introduction.title}</h2>
     <p id="company-film-description" className="film-sr-only">{introduction.description}</p>
     <canvas ref={canvas} className="film-canvas" aria-hidden="true" />
     <header className="film-header"><span><EmblemMark />GENESIS <span className="film-divider">/</span> {t('A short introduction')}</span><button ref={closeButton} type="button" className="icon-button" onClick={onClose} aria-label={t('Close introduction')}><Icon name="close" /></button></header>
+    {cue.id !== 'closing' && <div className="film-caption" key={cue.id} style={{ opacity: enabled ? cue.opacity : 1 }}>
+      <p className="film-cue-label">{caption.label}</p>
+      <h3 aria-label={caption.title}>{caption.title.split(' ').map((word, i) => {
+        const progress = enabled ? ease(cue.from + i * .055, cue.from + .7 + i * .055, time) : 1;
+        return <span key={i} aria-hidden="true" style={{ opacity: progress, transform: `translateY(${(1 - progress) * 13}px)` }}>{word}{' '}</span>;
+      })}</h3>
+      <p className="film-caption-detail">{caption.detail}</p>
+      {cue.id === 'prompt' && <div className="film-prompt" aria-label={introduction.prompt}>
+        <Icon name="spark" /><p aria-hidden="true">{introduction.prompt.slice(0, enabled ? Math.ceil(ease(1, 6.5, time) * introduction.prompt.length) : introduction.prompt.length)}<span className="film-caret" style={{ opacity: enabled && time < 7.5 ? .45 + .55 * Math.sin(time * 4) ** 2 : 0 }} /></p>
+      </div>}
+    </div>}
     <div className="film-ending" aria-hidden={ending < .5} style={{ opacity: ending, transform: `translateY(${(1 - ending) * 14}px)` }}>
       <EmblemMark /><strong>GENESIS</strong><p>{introduction.closing}</p>
     </div>
     <div className="film-controls"><div className="film-transport">
-      <button type="button" className="icon-button" disabled={!enabled || audioStatus === 'loading'} aria-label={t(time >= duration ? 'Replay introduction' : playing ? 'Pause introduction' : 'Play introduction')} onClick={togglePlay}><Icon name={playing ? 'pause' : 'play'} /></button>
+      <button type="button" className="icon-button" disabled={!enabled} aria-label={t(time >= duration ? 'Replay introduction' : playing ? 'Pause introduction' : 'Play introduction')} onClick={togglePlay}><Icon name={playing ? 'pause' : 'play'} /></button>
       <input type="range" min="0" max={duration} step=".1" value={time} aria-label={t('Introduction progress')} aria-valuetext={`${Math.floor(time)} / ${duration} ${t('seconds')}`} onChange={event => seek(Number(event.target.value))} />
-      <span className="film-time">0:{String(Math.floor(time)).padStart(2, '0')} / 0:{duration}</span>
+      <span className="film-time">{filmTime(time)} / {filmTime(duration)}</span>
       <button type="button" className="icon-button" disabled={audioStatus === 'unavailable' || audioStatus === 'loading'} aria-label={t(audioStatus === 'unavailable' ? 'Sound unavailable' : audioStatus === 'blocked' ? 'Enable sound' : muted ? 'Unmute music' : 'Mute music')} onClick={() => void toggleSound()}><Icon name={muted || audioStatus !== 'ready' ? 'muted' : 'volume'} /></button>
     </div><footer className="film-footer"><span>{audioStatus === 'loading' ? t('Preparing the soundtrack') : !enabled ? t('Animations are off. Scrub to explore the circuit.') : t('Original music · GENESIS')}</span><button className="film-done" type="button" onClick={onClose}>{t('Continue exploring')}<Icon name="arrow" /></button></footer></div>
   </dialog>;

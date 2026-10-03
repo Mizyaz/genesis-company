@@ -1,10 +1,11 @@
 /** One continuous, deterministic circuit plane. Geometry and camera share the score's clock.
  * These fields illustrate RF behavior; they are not electromagnetic simulation results.
  */
+import { pixelLayout, pixelPassives, type PixelLayout } from '../pixelLayout';
+import { ease } from './timeline';
 type Point = [number, number];
 const cyan = '#65e6ee', violet = '#b6a0ff', gold = '#e4c796';
 const tau = Math.PI * 2;
-export const ease = (a: number, b: number, time: number) => { const x = Math.max(0, Math.min(1, (time - a) / (b - a))); return x * x * (3 - 2 * x); };
 
 function path(c: CanvasRenderingContext2D, points: Point[], color: string | CanvasGradient, width = 1, portion = 1) {
   if (points.length < 2 || portion <= 0) return;
@@ -127,6 +128,120 @@ const traces: { points: Point[]; start: number; width: number }[] = [
   { points: [[70, 160], [70, 244]], start: 13.5, width: 5 },
 ];
 
+// Reuse the site's connected, seeded passive generator. Candidates are illustrative, not PDK results.
+const matchingVariants = [pixelPassives.frontEnd, ...[19, 43].map(seed => pixelLayout({
+  columns: 12, rows: 14, seed, mirror: 'across', ports: [{ side: 'left', at: 6 }, { side: 'right', at: 6 }],
+}))];
+function pixelated(c: CanvasRenderingContext2D, x: number, y: number, layout: PixelLayout, time: number, evolve = false) {
+  c.save(); c.translate(x, y);
+  const size = 176, cw = size / layout.columns, ch = size / layout.rows;
+  plate(c, -101, -101, 202, 202, '#183440');
+  c.fillStyle = '#030e19'; c.fillRect(-88, -88, size, size);
+  const iteration = time < 29 ? 0 : time < 32 ? 1 : 2;
+  const from = evolve ? matchingVariants[iteration] : layout;
+  const to = evolve ? matchingVariants[Math.min(2, iteration + 1)] : layout;
+  const morph = evolve && iteration < 2 ? ease(iteration ? 31 : 28, iteration ? 32 : 29, time) : 0;
+  const reveal = evolve ? ease(23, 27, time) : 1;
+  const color = c.createLinearGradient(-90, -90, 90, 90);
+  color.addColorStop(0, '#cae8d1'); color.addColorStop(.45, cyan); color.addColorStop(1, '#748ab3');
+  const baseAlpha = c.globalAlpha;
+  for (let r = 0; r < layout.rows; r++) for (let col = 0; col < layout.columns; col++) {
+    const xx = -88 + col * cw, yy = -88 + r * ch;
+    c.globalAlpha = baseAlpha; c.strokeStyle = '#557b9535'; c.lineWidth = .6; c.strokeRect(xx, yy, cw, ch);
+    const fill = Number(from.metal[r][col]) * (1 - morph) + Number(to.metal[r][col]) * morph;
+    const on = Math.max(0, Math.min(1, reveal * (layout.columns + 4) - col)) * fill;
+    if (!on) continue;
+    c.globalAlpha = baseAlpha * on;
+    c.fillStyle = '#071422'; c.fillRect(xx + .6, yy + 3, cw - 1, ch - 1);
+    c.fillStyle = color; c.fillRect(xx + .4, yy + .4, cw - .8, ch - .8);
+    c.fillStyle = '#e5ffff70'; c.fillRect(xx + .7, yy + .7, cw - 1.4, .7);
+    if (from.metal[r][col] !== to.metal[r][col] && morph > 0 && morph < 1) {
+      c.fillStyle = `rgba(234,248,255,${Math.sin(morph * Math.PI) * .75})`; c.fillRect(xx, yy, cw, ch);
+    }
+  }
+  c.globalAlpha = baseAlpha;
+  for (const port of layout.ports) {
+    const along = -88 + (port.at + (port.width ?? 2) / 2) * (port.side === 'left' || port.side === 'right' ? ch : cw);
+    const points: Point[] = port.side === 'left' ? [[-106, along], [-88, along]] : port.side === 'right' ? [[88, along], [106, along]]
+      : port.side === 'top' ? [[along, -106], [along, -88]] : [[along, 88], [along, 106]];
+    metal(c, points, 10, reveal);
+  }
+  for (let i = 0; i < 16; i++) { via(c, -95 + i * 12.6, -95); via(c, -95 + i * 12.6, 95); }
+  if (time > 27 && time < 55 && evolve) {
+    const phase = (time * .22) % 1;
+    halo(c, -75 + phase * 150, 0, 100, cyan, .3);
+    c.strokeStyle = '#8ee9e84a'; c.lineWidth = 1;
+    c.beginPath(); c.ellipse(0, 0, 98 + Math.sin(time) * 8, 102 + Math.cos(time) * 6, -.3, 0, tau); c.stroke();
+  }
+  c.restore();
+}
+
+function schematic(c: CanvasRenderingContext2D, time: number) {
+  const progress = ease(10, 20, time);
+  traces.forEach(({ points }, i) => path(c, points, '#91dbe3', 1.8, Math.max(0, progress * 2 - i * .055)));
+  for (const x of [-245, 260]) {
+    const winding: Point[] = [[x - 88, 0], [x - 64, 0]];
+    for (let i = 0; i <= 100; i++) winding.push([x - 64 + i * 1.28, -Math.abs(Math.sin(i / 100 * Math.PI * 4)) * 27]);
+    winding.push([x + 103, 0]); path(c, winding, gold, 2.5, progress);
+  }
+  for (const [x, y] of [[-110, -160], [135, 160]]) {
+    for (const s of [-1, 1]) { path(c, [[x + s * 46, y], [x + s * 9, y]], cyan, 1.8, progress); path(c, [[x + s * 9, y - 27], [x + s * 9, y + 27]], cyan, 2.5, progress); }
+  }
+  for (const x of [-42, 70]) {
+    path(c, [[x - 34, -44], [x - 34, 0], [x - 12, 0]], violet, 2, progress);
+    path(c, [[x - 12, -28], [x - 12, 28]], violet, 2.5, progress);
+    path(c, [[x, -28], [x, 28]], violet, 2.5, progress);
+    path(c, [[x, -22], [x + 25, -22], [x + 25, -44]], violet, 2, progress);
+    path(c, [[x, 22], [x + 34, 22], [x + 34, 44]], violet, 2, progress);
+    path(c, [[x + 11, 16], [x + 19, 22], [x + 11, 28]], violet, 1.8, progress);
+  }
+}
+
+function mixer(c: CanvasRenderingContext2D, time: number) {
+  for (const [x, y] of [[-45, -45], [45, -45], [45, 45], [-45, 45]]) {
+    c.save(); c.translate(x, y); c.scale(.48, .48); transistor(c, 0, 0, 18, 0); c.restore();
+  }
+  metal(c, [[-94, 0], [-45, 0], [-45, -45], [45, 45], [94, 45]], 4, 1, violet);
+  metal(c, [[-94, 45], [-45, 45], [45, -45], [45, 0], [94, 0]], 4, 1);
+  halo(c, 0, 0, 110, violet, .15 + Math.sin(time) * .05);
+}
+function rfSwitch(c: CanvasRenderingContext2D) {
+  metal(c, [[-95, 0], [-50, 0], [-50, -44], [93, -44]], 5, 1);
+  metal(c, [[-50, 0], [-50, 44], [93, 44]], 5, 1, violet);
+  for (const y of [-44, 44]) { c.save(); c.translate(18, y); c.scale(.48, .48); transistor(c, 0, 0, 18, 0); c.restore(); }
+}
+const arrivals = [
+  { kind: 'amplifier', from: [-860, -280], to: [-42, 0], start: 1, end: 17, scale: .7 },
+  { kind: 'mixer', from: [880, -350], to: [260, -170], start: 5, end: 22, scale: .63 },
+  { kind: 'switch', from: [-860, 380], to: [-255, 170], start: 9, end: 26, scale: .63 },
+  { kind: 'divider', from: [900, 330], to: [260, 0], start: 17, end: 29, scale: .95 },
+  { kind: 'coupler', from: [-830, -350], to: [-245, 0], start: 20, end: 30, scale: .95 },
+] as const;
+function incomingCircuits(c: CanvasRenderingContext2D, time: number, portrait: boolean) {
+  arrivals.forEach(item => {
+    if (time < item.start) return;
+    const travel = ease(item.start, item.end, time);
+    const persistent = item.kind === 'mixer' || item.kind === 'switch';
+    const fade = persistent ? 1 : 1 - ease(item.end - 1, item.end + 3, time);
+    if (!fade) return;
+    // The arrivals stay below the text on phones instead of starting outside their tall viewport.
+    const originX = item.from[0] * (portrait ? .42 : 1), originY = item.from[1] * (portrait ? .7 : 1);
+    const x = originX + (item.to[0] - originX) * travel;
+    const y = originY + (item.to[1] - originY) * travel;
+    c.save(); c.globalAlpha *= ease(item.start, item.start + 2, time) * fade;
+    c.translate(x, y); c.rotate((1 - travel) * (item.from[0] < 0 ? -.17 : .17)); c.scale(item.scale, item.scale);
+    if (item.kind === 'divider' || item.kind === 'coupler') pixelated(c, 0, 0, item.kind === 'divider' ? pixelPassives.divider : pixelPassives.coupler, time);
+    else if (item.kind === 'mixer') mixer(c, time);
+    else if (item.kind === 'switch') rfSwitch(c);
+    else {
+      c.save(); c.translate(-65, 0); c.scale(.63, .63); coil(c, 0, 0, 18, 0, gold); c.restore();
+      transistor(c, 48, 0, 18, 0); metal(c, [[0, 0], [14, 0], [14, -44]], 5, 1);
+      capacitor(c, 130, 0, 18, 0);
+    }
+    c.restore();
+  });
+}
+
 function signal(c: CanvasRenderingContext2D, time: number) {
   const coherent = ease(16, 22, time), fade = ease(.1, 2.5, time) * (1 - ease(24, 29, time));
   const front = -640 + ease(0, 15, time) * 1250;
@@ -154,21 +269,23 @@ export function renderCircuitFilm(c: CanvasRenderingContext2D, width: number, he
   background.addColorStop(0, '#122b3d'); background.addColorStop(.5, '#071725'); background.addColorStop(1, '#020911');
   c.fillStyle = background; c.fillRect(0, 0, width, height);
   const portrait = width / height < .85;
-  const opening = 1 - ease(1, 11, time), ending = ease(21, 27, time);
-  const fit = portrait ? Math.min(width / 720, height / 1470) : Math.min(width / 1320, height / 850);
-  const scale = fit * (1.05 + opening * .62 - ending * (portrait ? .28 : .24));
+  const opening = 1 - ease(4, 22, time), ending = ease(52, 58, time);
+  const fit = portrait ? Math.min(width / 780, height / 1830) : Math.min(width / 1570, height / 1130);
+  const scale = fit * ((portrait ? .98 : 1.05) - opening * .1 - ending * .12);
+  const build = ease(31, 47, time) * 21, physical = ease(30, 39, time);
   c.save();
-  c.translate(width * (.5 + opening * .12), height * (.5 + ending * (portrait ? .1 : .14)));
+  c.beginPath(); c.rect(0, height * .30, width, height * .60); c.clip();
+  c.translate(width * .5, height * .61);
   c.scale(scale, scale);
-  c.rotate(portrait ? -Math.PI / 2 + .09 : -.17 + ease(0, 30, time) * .055);
-  c.transform(1, 0, -.18, .8, opening * 115, 0);
+  c.rotate(portrait ? -Math.PI / 2 + .09 : -.17 + ease(0, 60, time) * .055);
+  c.transform(1, 0, -.18 * physical, 1 - physical * .2, 0, 0);
   c.globalAlpha = 1 - ending * .25;
   // A fine etched substrate continues beyond the die. No unrelated floating particle field.
   c.strokeStyle = '#678fa012'; c.lineWidth = .6;
   for (let x = -1100; x <= 1100; x += 32) path(c, [[x, -800], [x, 800]], '#678fa012', .6);
   for (let y = -800; y <= 800; y += 32) path(c, [[-1100, y], [1100, y]], '#678fa012', .6);
-  const body = ease(2, 15, time);
-  c.save(); c.globalAlpha *= .2 + body * .8;
+  const body = ease(34, 47, time);
+  c.save(); c.globalAlpha *= body;
   for (let layer = 8; layer >= 0; layer--) { c.fillStyle = layer ? '#06101b' : '#0a1e2d'; c.fillRect(-470, -275 + layer * 2, 940, 550); }
   const reflection = c.createLinearGradient(-450, -275, 450, 275);
   reflection.addColorStop(0, '#759da322'); reflection.addColorStop(.5, '#5c95b505'); reflection.addColorStop(1, '#7875b01b');
@@ -188,24 +305,33 @@ export function renderCircuitFilm(c: CanvasRenderingContext2D, width: number, he
   }
   for (const x of [-439, 409]) for (let i = 0; i < 7; i++) plate(c, x, -182 + i * 58, 30, 24, '#335063');
   c.restore();
+  c.save(); c.globalAlpha *= ease(10, 13, time) * (1 - ease(31, 40, time)); schematic(c, time); c.restore();
+  c.save(); c.globalAlpha *= physical;
   traces.forEach(({ points, start, width: stroke }) => {
     path(c, points, '#57778338', .7);
-    metal(c, points, stroke, ease(start, start + 3, time));
-    if (time > start + 2 && time < 26) {
-      c.save(); c.globalAlpha *= .55 * ease(start + 2, start + 4, time) * (1 - ending);
+    metal(c, points, stroke, ease(start, start + 3, build));
+    if (build > start + 2 && time < 57) {
+      c.save(); c.globalAlpha *= .55 * ease(start + 2, start + 4, build) * (1 - ending);
       c.setLineDash([12, 160]); c.lineDashOffset = -time * 42;
       path(c, points, '#edfff3', 1.5); c.restore();
     }
   });
-  coil(c, -245, 0, time, 2.5, gold);
-  coil(c, 260, 0, time, 9.5, cyan);
-  capacitor(c, -110, -160, time, 6.5);
-  capacitor(c, 135, 160, time, 10);
-  transistor(c, -42, 0, time, 7.5);
-  transistor(c, 70, 0, time, 9);
-  signal(c, time);
+  capacitor(c, -110, -160, build, 6.5);
+  capacitor(c, 135, 160, build, 10);
+  transistor(c, -42, 0, build, 7.5);
+  transistor(c, 70, 0, build, 9);
+  // The arriving mixer and switch become part of the same layout, not floating cards.
+  metal(c, [[206, -170], [135, -170], [135, 0]], 4, ease(40, 46, time), violet);
+  metal(c, [[-196, 142], [-170, 142], [-170, 0]], 4, ease(41, 47, time));
+  c.restore();
+  incomingCircuits(c, time, portrait);
+  c.save(); c.globalAlpha *= ease(23, 27, time);
+  pixelated(c, -245, 0, pixelPassives.frontEnd, time, true);
+  pixelated(c, 260, 0, pixelPassives.frontEnd, time, true);
+  c.restore();
+  signal(c, Math.max(0, (time - 8) * .55));
   // A single, soft grazing reflection reveals the completed physical structure.
-  const sweep = ease(18, 24, time);
+  const sweep = ease(47.5, 53.5, time);
   if (sweep > 0 && sweep < 1) {
     c.save(); c.beginPath(); c.rect(-469, -274, 938, 548); c.clip();
     const x = -700 + sweep * 1500;

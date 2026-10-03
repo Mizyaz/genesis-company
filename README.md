@@ -6,16 +6,26 @@ The home page offers Discover (company presentation) and Design (an explicit
 link to the visitor's own installation). All runtime assets are included here.
 Animations, theme and motion preferences run in the browser.
 
-The home-page symbol opens a 30-second continuous circuit film. A signal reveals
-metal traces, spiral inductors, capacitor plates and transistor fingers on one
-silicon surface, finishing with the GENESIS identity. This is an illustration, not
-a simulated circuit or a measured result. There are no chapter cards or game controls.
+The home-page symbol opens a one-minute continuous RFIC film: a typed request to an
+LLM becomes a schematic, pixelated passive synthesis, and then a physical layout.
+Amplifier, mixer, switch, divider and coupler illustrations arrive from around the
+same plane. Matching networks reuse `pixelLayout.ts`; deterministic candidates show
+the patterns evolving. Short bilingual captions explain each transformation. This
+is an illustration, not a live LLM session, simulated circuit or measured result.
+There are no chapter cards or game controls.
 
-`shared/intro/circuitFilm.ts` owns the canvas geometry and camera. `score.ts` composes
-and renders an original 96 BPM, 12-bar stereo soundtrack using Web Audio. The player
-in `CompanyIntro.tsx` starts audio only after a user click and uses the audio clock
-for synchronization. Pause, seek, replay, mute and close act on both media. Closing
-releases the AudioContext; a single decoded score (<11 MB) is reused on reopening.
+`shared/intro/timeline.ts` defines the shared 60-second editorial clock.
+`circuitFilm.ts` owns the canvas geometry and camera. `score.ts` composes
+an original 96 BPM, 24-bar stereo soundtrack. `scripts/render-intro-score.mjs` renders
+it once at build time through Playwright and the host's existing Python/libmp3lame;
+the checked-in MP3 is about 1 MB, and visitors do not synthesize it. Run the script
+only when changing the composition, with `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` and
+a writable `TMPDIR` if required. Normal builds do not require an audio encoder.
+
+The player in `CompanyIntro.tsx` starts the local soundtrack only after a user click
+and uses the media clock for synchronization. The film starts immediately while
+the track buffers, then the music joins at the current playback offset. Pause, seek,
+replay, mute and close act on both media. Closing unloads the audio element.
 Audio failure does not prevent silent playback. The canvas is capped at two million
 pixels and 30 fps. Hidden tabs and disabled motion pause the film and music; the
 scrubber still provides still frames. Labels and accessible descriptions support
