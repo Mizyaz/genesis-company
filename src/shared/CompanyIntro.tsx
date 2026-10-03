@@ -7,7 +7,7 @@ import { EmblemLauncher, EmblemMark } from './Emblem';
 import { RFDesignScene } from './RFDesignScene';
 import { DiePanel } from './SiliconGate';
 import { Icon, assetUrl } from './ui';
-import { renderCircuitFilm } from './intro/circuitFilm';
+import type { CircuitFilm } from './intro/frontEndFilm';
 import { readFilmPalette } from './intro/filmPalette';
 import { RequestSequence } from './intro/RequestSequence';
 import { ease, filmCue, filmTime } from './intro/timeline';
@@ -44,11 +44,26 @@ function IntroFilm({ onClose, sound, origin }: { onClose: () => void; sound: Int
   const [revision, setRevision] = useState(0);
   const closeButton = useRef<HTMLButtonElement>(null);
   const canvas = useRef<HTMLCanvasElement>(null);
+  const labels = useRef<HTMLDivElement>(null);
+  const film = useRef<CircuitFilm>();
+  const [sceneStatus, setSceneStatus] = useState<'loading' | 'ready' | 'unavailable'>('loading');
   const story = useRef<HTMLDivElement>(null);
   const clock = useRef(0);
   const size = useRef({ width: 1, height: 1, ratio: 1, contentTop: 0 });
   const duration = FILM_SECONDS;
-  const playing = running && !entering && !paused && time < duration;
+  const playing = running && !entering && !paused && sceneStatus === 'ready' && time < duration;
+  useEffect(() => {
+    let active = true;
+    const surface = canvas.current;
+    const lost = (event: Event) => { event.preventDefault(); if (active) setSceneStatus('unavailable'); };
+    surface?.addEventListener('webglcontextlost', lost);
+    void import('./intro/frontEndFilm').then(({ createCircuitFilm }) => {
+      if (!active || !canvas.current || !labels.current) return;
+      try { film.current = createCircuitFilm(canvas.current, labels.current); setSceneStatus('ready'); }
+      catch { setSceneStatus('unavailable'); }
+    }).catch(() => { if (active) setSceneStatus('unavailable'); });
+    return () => { active = false; surface?.removeEventListener('webglcontextlost', lost); film.current?.dispose(); film.current = undefined; };
+  }, []);
   useEffect(() => {
     let active = true;
     void sound.ready.then(() => { if (active) setAudioStatus(sound.status); });
@@ -87,29 +102,26 @@ function IntroFilm({ onClose, sound, origin }: { onClose: () => void; sound: Int
     return () => { active = false; window.clearTimeout(fallback); animations.forEach(animation => animation.cancel()); };
   }, [enabled, origin, ref]);
   useEffect(() => {
-    const surface = canvas.current, context = surface?.getContext('2d', { alpha: false });
-    if (!surface || !context) return;
+    const surface = canvas.current, scene = film.current;
+    if (!surface || !scene || sceneStatus !== 'ready') return;
     let palette = readFilmPalette(surface);
+    scene.theme(palette);
     const draw = () => {
-      const { width, height, ratio, contentTop } = size.current;
-      context.setTransform(ratio, 0, 0, ratio, 0, 0);
-      renderCircuitFilm(context, width, height, clock.current, t, palette, contentTop);
-      surface.dataset.time = clock.current.toFixed(2);
+      scene.render(clock.current, size.current.contentTop, t);
     };
     const resize = new ResizeObserver(() => {
       const width = surface.clientWidth, height = surface.clientHeight;
       if (!width || !height) return;
       // Bounded backing store, including high-DPI phones. No offscreen scene textures.
-      const ratio = Math.min(devicePixelRatio || 1, 1.75, Math.sqrt(2_000_000 / (width * height)));
+      const ratio = Math.min(devicePixelRatio || 1, 1.5, Math.sqrt(1_400_000 / (width * height)));
       const contentTop = (story.current?.getBoundingClientRect().bottom ?? 0) - surface.getBoundingClientRect().top + 24;
       size.current = { width, height, ratio, contentTop };
-      surface.dataset.font = getComputedStyle(surface).getPropertyValue('--font-sans').trim() || 'sans-serif';
-      surface.width = Math.round(width * ratio); surface.height = Math.round(height * ratio); draw();
+      scene.resize(width, height, ratio); draw();
     });
     resize.observe(surface);
     if (story.current) resize.observe(story.current);
     // The shared theme can change while paused. Repaint without changing the film's clock.
-    const theme = new MutationObserver(() => { palette = readFilmPalette(surface); draw(); });
+    const theme = new MutationObserver(() => { palette = readFilmPalette(surface); scene.theme(palette); draw(); });
     theme.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'style', 'class'] });
     let frame = 0, lastPaint = 0, lastLabel = 0;
     const offset = clock.current, started = performance.now();
@@ -124,7 +136,7 @@ function IntroFilm({ onClose, sound, origin }: { onClose: () => void; sound: Int
     draw();
     if (playing) frame = requestAnimationFrame(tick);
     return () => { cancelAnimationFrame(frame); resize.disconnect(); theme.disconnect(); sound.pause(); };
-  }, [playing, revision, sound, duration, audioStatus, t]);
+  }, [playing, revision, sound, duration, audioStatus, sceneStatus, t]);
   const seek = (value: number) => { clock.current = value; setTime(value); setRevision(value => value + 1); };
   const togglePlay = () => {
     void sound.unlock().then(() => setAudioStatus(sound.status));
@@ -145,11 +157,13 @@ function IntroFilm({ onClose, sound, origin }: { onClose: () => void; sound: Int
     if (event.code === 'Space') { event.preventDefault(); togglePlay(); }
   };
   const cue = filmCue(time), caption = introduction.scenes[cue.id];
-  const ending = ease(55, 58, time);
-  return <dialog ref={ref} className="company-film" aria-labelledby="company-film-title" aria-describedby="company-film-description" onCancel={event => { event.preventDefault(); onClose(); }} onKeyDown={keyboard} data-running={playing} data-entering={entering} data-motion={enabled ? 'on' : 'off'} data-audio={audioStatus} data-muted={muted} data-cue={cue.id}>
+  const ending = ease(57, 60, time);
+  return <dialog ref={ref} className="company-film" aria-labelledby="company-film-title" aria-describedby="company-film-description" onCancel={event => { event.preventDefault(); onClose(); }} onKeyDown={keyboard} data-running={playing} data-entering={entering} data-scene={sceneStatus} data-motion={enabled ? 'on' : 'off'} data-audio={audioStatus} data-muted={muted} data-cue={cue.id}>
     <h2 id="company-film-title" className="film-sr-only">{introduction.title}</h2>
     <p id="company-film-description" className="film-sr-only">{introduction.description}</p>
     <canvas ref={canvas} className="film-canvas" aria-hidden="true" />
+    <div ref={labels} className="film-scene-labels" aria-hidden="true" />
+    {sceneStatus !== 'ready' && <p className="film-scene-status" role="status">{t(sceneStatus === 'loading' ? 'Preparing the 3D scene' : 'This device could not open the 3D scene. Please try a WebGL-enabled browser.')}</p>}
     {entering && <div className="film-opening" aria-hidden="true"><DiePanel side="left" /><DiePanel side="right" /></div>}
     <header className="film-header"><span><EmblemMark />GENESIS <span className="film-divider">/</span> {t('A short introduction')}</span><button ref={closeButton} type="button" className="icon-button" onClick={onClose} aria-label={t('Close introduction')}><Icon name="close" /></button></header>
     <div ref={story} className="film-story">
@@ -161,13 +175,13 @@ function IntroFilm({ onClose, sound, origin }: { onClose: () => void; sound: Int
       })}</h3>
       <p className="film-caption-detail">{caption.detail}</p>
     </div>}
-    {time < 12.5 && <RequestSequence time={time} prompt={introduction.prompt} />}
+    {time < 20 && <RequestSequence time={time} prompt={introduction.prompt} />}
     {cue.id === 'closing' && <div className="film-ending" aria-hidden={ending < .5} style={{ opacity: ending, transform: `translateY(${(1 - ending) * 14}px)` }}>
-      <EmblemMark /><strong>GENESIS</strong><p className="film-signature" lang="en" style={{ opacity: ease(56, 57.6, time) }}>Generative Evolution of Silicon Intelligent Systems</p><p>{introduction.closing}</p>
+      <EmblemMark /><strong>GENESIS</strong><p className="film-signature" lang="en" style={{ opacity: ease(57.5, 59, time) }}>Generative Evolution of Silicon Intelligent Systems</p><p>{introduction.closing}</p>
     </div>}
     </div>
     <div className="film-controls"><div className="film-transport">
-      <button type="button" className="icon-button" disabled={!enabled || entering} aria-label={t(time >= duration ? 'Replay introduction' : playing ? 'Pause introduction' : 'Play introduction')} onClick={togglePlay}><Icon name={playing ? 'pause' : 'play'} /></button>
+      <button type="button" className="icon-button" disabled={!enabled || entering || sceneStatus !== 'ready'} aria-label={t(time >= duration ? 'Replay introduction' : playing ? 'Pause introduction' : 'Play introduction')} onClick={togglePlay}><Icon name={playing ? 'pause' : 'play'} /></button>
       <input type="range" min="0" max={duration} step=".1" value={time} aria-label={t('Introduction progress')} aria-valuetext={`${Math.floor(time)} / ${duration} ${t('seconds')}`} onChange={event => seek(Number(event.target.value))} />
       <span className="film-time">{filmTime(time)} / {filmTime(duration)}</span>
       <button type="button" className="icon-button" disabled={audioStatus === 'unavailable' || audioStatus === 'loading'} aria-label={t(audioStatus === 'unavailable' ? 'Sound unavailable' : audioStatus === 'blocked' ? 'Enable sound' : muted ? 'Unmute music' : 'Mute music')} onClick={() => void toggleSound()}><Icon name={muted || audioStatus !== 'ready' ? 'muted' : 'volume'} /></button>

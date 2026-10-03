@@ -5,6 +5,11 @@
 .film-opening { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
 .film-opening .silicon-gate-panel { animation: none; }
 .film-canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+.film-scene-labels { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.film-circuit-label { position: absolute; top: 0; left: 0; text-align: center; white-space: nowrap; text-shadow: 0 1px 8px var(--page); }
+.film-circuit-label strong { display: block; color: var(--text); font: 550 .95rem var(--font-sans); letter-spacing: .08em; }
+.film-circuit-label span { display: block; color: var(--muted); font-size: .65rem; margin-top: 3px; }
+.film-scene-status { position: absolute; inset: 48% 12% auto; margin: 0; text-align: center; color: var(--muted); }
 .film-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .film-header, .film-footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .film-header { position: absolute; z-index: 3; inset: 0 0 auto; padding: 18px 28px; font-size: .7rem; letter-spacing: .08em; background: linear-gradient(var(--page), transparent); }
@@ -20,7 +25,9 @@
 .film-caption h3 { max-width: 1000px; margin: 0 auto; font-size: clamp(1.8rem, 3.2vw, 2.8rem); font-weight: 450; letter-spacing: -.035em; line-height: 1.16; color: var(--text); }
 .film-caption h3 span { display: inline-block; white-space: pre; }
 .film-caption-detail { max-width: 650px; margin: 16px auto 0; color: var(--muted); font-size: clamp(.85rem, 1.3vw, 1rem); line-height: 1.6; }
-.film-request { max-width: 570px; margin: 20px auto 0; }
+.film-request { display: grid; max-width: 570px; margin: 20px auto 0; }
+.film-request-inner, .film-request-prompt > div { min-height: 0; overflow: hidden; }
+.film-request-prompt { display: grid; }
 .film-request-text { margin: 0 0 12px; text-align: center; min-height: 1.5em; font-size: .88rem; color: var(--text); }
 .film-request-row { display: flex; align-items: center; justify-content: center; gap: 24px; }
 .film-llm { position: relative; display: flex; gap: 12px; align-items: center; padding: 12px 16px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); box-shadow: var(--shadow); }
@@ -100,6 +107,8 @@
   .film-llm { gap: 8px; padding: 10px 12px; }
   .film-request-brand small { font-size: .5rem; }
   .film-request-status { font-size: .65rem; }
+  .film-circuit-label strong { font-size: .7rem; }
+  .film-circuit-label span { font-size: .5rem; }
   .film-ending p { max-width: 320px; line-height: 1.5; }
 }
 @media (max-height: 550px) and (min-width: 650px) {

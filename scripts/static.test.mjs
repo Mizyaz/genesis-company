@@ -611,8 +611,8 @@ test('About us and research are pages of their own; İslam Güven leads the team
 
 test('the brand opens a short RF introduction instead of a game', () => {
   const source = walk('src').map(read).join('\n');
-  assert.doesNotMatch(source, /ResearchFlight|FlightSymbol|takeRequestedPaper|from ['"]three['"]/);
-  assert.equal(JSON.parse(read('package.json')).dependencies.three, undefined);
+  assert.doesNotMatch(source, /ResearchFlight|FlightSymbol|takeRequestedPaper/);
+  assert.equal(JSON.parse(read('package.json')).dependencies.three, '0.180.0');
   assert.match(read('src/pages/Welcome.tsx'), /symbol=\{<CompanyIntro symbol \/>\}/);
   const intro = read('src/shared/CompanyIntro.tsx');
   assert.match(intro, /FILM_SECONDS/);
@@ -643,7 +643,8 @@ test('the RF positioning and introduction are bilingual and clearly illustrative
   assert.match(read('src/pages/Explore.tsx'), /<RFPhysics \/>/);
   const intro = read('src/shared/CompanyIntro.tsx');
   assert.match(intro, /Illustrated workflow/);
-  assert.match(intro, /renderCircuitFilm\(context/);
+  assert.match(intro, /import\('\.\/intro\/frontEndFilm'\)/);
+  assert.match(intro, /film.current\?\.dispose\(\)/);
   assert.match(intro, /<RFDesignScene stage=\{3\}/);
 });
 
@@ -674,73 +675,75 @@ test('the film tells a complete prompt-to-schematic-to-layout story in one minut
   assert.deepEqual(filmCues.map(cue => cue.id), ['prompt', 'schematic', 'joint', 'layout', 'verify', 'closing']);
   assert.equal(filmCues[0].from, 0);
   assert.equal(filmCues.at(-1).to, FILM_SECONDS);
-  filmCues.forEach((cue, i) => { assert.ok(cue.to - cue.from >= 5); if (i) assert.equal(cue.from, filmCues[i - 1].to); });
+  filmCues.forEach((cue, i) => { assert.ok(cue.to - cue.from >= 3); if (i) assert.equal(cue.from, filmCues[i - 1].to); });
   for (let time = 0; time <= FILM_SECONDS; time += .1) {
     const cue = filmCue(time); assert.ok(cue.opacity >= 0 && cue.opacity <= 1);
   }
   assert.equal(filmCue(60).id, 'closing');
   assert.equal(filmTime(60), '1:00'); assert.equal(filmTime(59.9), '0:59');
   assert.equal(filmCue(5).id, 'schematic', 'the request does not spend ten seconds drifting');
-  assert.equal(filmCue(13).id, 'joint');
-  assert.equal(filmCue(28).id, 'layout');
+  assert.equal(filmCue(23).id, 'joint');
+  assert.equal(filmCue(38).id, 'layout');
 });
 
-const receiverModel = () => transpiled('src/shared/intro/receiverScene.ts', {
+const frontEndModel = () => transpiled('src/shared/intro/frontEndScene.ts', {
   './timeline': transpiled('src/shared/intro/timeline.ts'), '../pixelLayout': transpiled('src/shared/pixelLayout.ts'),
 });
-test('the illustrated LLM click precedes every sequential component reveal', () => {
-  const { llmClickAt, blockRevealTimes, receiverBlocks, blockPose, requestState } = receiverModel();
+test('assembly spans the minute and starts after the illustrated LLM click', () => {
+  const { llmClickAt, parts, partState, requestState } = frontEndModel();
   assert.equal(requestState(1), 'request'); assert.equal(requestState(2.2), 'pressed');
-  assert.equal(requestState(8), 'thinking'); assert.equal(requestState(11), 'ready');
-  assert.equal(blockRevealTimes.length, receiverBlocks.length);
-  for (const portrait of [true, false]) {
-    receiverBlocks.forEach((block, i) => {
-      assert.ok(blockRevealTimes[i] > llmClickAt);
-      assert.equal(blockPose(block, portrait, llmClickAt).opacity, 0);
-      assert.equal(blockPose(block, portrait, blockRevealTimes[i]).opacity, 0);
-      assert.equal(blockPose(block, portrait, blockRevealTimes[i] + .7).opacity, 1);
-      if (i) assert.ok(blockRevealTimes[i] > blockRevealTimes[i - 1] + .7);
-    });
-  }
+  assert.equal(requestState(59), 'thinking'); assert.equal(requestState(60), 'ready');
+  parts.forEach(part => {
+    assert.ok(part.start > llmClickAt);
+    assert.equal(partState(part, llmClickAt).appear, 0);
+    assert.equal(partState(part, part.start).appear, 0);
+    assert.equal(partState(part, part.start + 1.5).appear, 1);
+  });
+  assert.ok(Math.max(...parts.map(part => part.start)) > 55);
   const dictionary = JSON.parse(read('src/content/tr.json'));
   for (const copy of ['Send to GENESIS', 'Request received', 'Thinking', 'Circuit assembled', 'Illustrated LLM interaction']) assert.ok(dictionary[copy], copy);
 });
 
-test('one receiver preserves block identities and port endpoints in both compositions', () => {
-  const { receiverBlocks: blocks, receiverConnections: connections, connectionPath, portPosition, blockPose, placementDuration } = receiverModel();
-  assert.deepEqual(blocks.map(block => block.id), ['rf', 'input', 'lna', 'interstage', 'mixer', 'if']);
-  assert.equal(connections.length, blocks.length - 1);
-  assert.ok(blocks.find(block => block.id === 'mixer').ports.includes('lo'));
-  assert.ok(blocks.filter(block => block.ports.includes('bias')).length === 2);
-  assert.ok(placementDuration <= 1.2);
-  for (const portrait of [false, true]) for (const time of [0, 8, 16, 22, 27.7, 28.8, 30, 38, 48.4, 58]) {
-    connections.forEach((edge, i) => {
-      const a = blocks.find(block => block.id === edge.from.block), b = blocks.find(block => block.id === edge.to.block);
-      assert.ok(a.ports.includes(edge.from.port)); assert.ok(b.ports.includes(edge.to.port));
-      const route = connectionPath(i, portrait, time);
-      assert.deepEqual(route[0], portPosition(a, edge.from.port, portrait, time));
-      assert.deepEqual(route.at(-1), portPosition(b, edge.to.port, portrait, time));
-      assert.ok(route.flat().every(Number.isFinite));
-    });
-    if (time >= 38) blocks.forEach(block => assert.equal(blockPose(block, portrait, time).placed, 1));
+test('LNA and PA contain complete amplifier structures and retain port connections during resizing', () => {
+  const { hierarchy, parts, connections, connectionState, portPosition } = frontEndModel();
+  assert.equal(hierarchy.id, 'front-end');
+  for (const id of ['lna', 'pa']) {
+    const circuit = hierarchy.children.find(child => child.id === id);
+    const children = circuit.children.map(id => parts.find(part => part.id === id));
+    assert.equal(children.filter(part => part.kind === 'mos').length, 2);
+    assert.equal(children.filter(part => part.kind === 'pixel').length, 3);
+    assert.equal(children.filter(part => part.kind === 'capacitor').length, 2);
+    assert.equal(children.filter(part => part.kind === 'choke').length, 1);
+  }
+  assert.equal(parts.filter(part => part.kind === 'mixer').length, 2);
+  for (let time = 0; time <= 60; time += .5) for (const edge of connections) {
+    const state = connectionState(edge, time);
+    assert.deepEqual(state.points[0], portPosition(edge.from, time));
+    assert.deepEqual(state.points.at(-1), portPosition(edge.to, time));
+    assert.ok(state.points.flat().every(Number.isFinite));
+    assert.ok(state.progress >= 0 && state.progress <= 1);
   }
 });
 
-test('joint candidates change active and both passive designs together, then stay frozen', () => {
-  const { receiverCandidates: candidates, receiverState, receiverCopy } = receiverModel();
-  assert.deepEqual(candidates.map(candidate => candidate.id), ['A', 'B', 'C']);
-  for (let i = 1; i < candidates.length; i++) {
-    assert.notEqual(candidates[i].fingers, candidates[i - 1].fingers);
-    assert.notEqual(candidates[i].width, candidates[i - 1].width);
-    for (let p = 0; p < 2; p++) assert.notDeepEqual(candidates[i].passives[p].layout.metal, candidates[i - 1].passives[p].layout.metal);
+test('pixel topology, footprint and transistor sizing change together through the final second', () => {
+  const { parts, partState, pixelCandidates, designTimes, designState, sceneCopy } = frontEndModel();
+  assert.ok(designTimes.at(-1) >= 59); assert.equal(designState(60).blend, 1);
+  for (const part of parts.filter(part => part.kind === 'pixel')) {
+    const variants = pixelCandidates.get(part.id);
+    assert.ok(variants.length >= 12);
+    for (let i = 1; i < variants.length; i++) assert.notDeepEqual(variants[i].metal, variants[i - 1].metal);
+    assert.notEqual(partState(part, 55).width, partState(part, 60).width);
   }
-  assert.deepEqual([14, 18, 22].map(time => receiverState(time).candidate), [0, 1, 2]);
-  for (let time = 24.5; time <= 60; time += .1) {
-    assert.equal(receiverState(time).candidate, 2); assert.equal(receiverState(time).selected, true);
+  for (const part of parts.filter(part => part.kind === 'mos')) {
+    assert.notEqual(partState(part, 55).fingers, partState(part, 60).fingers);
+    assert.notEqual(partState(part, 55).fingerLength, partState(part, 60).fingerLength);
   }
   const dictionary = JSON.parse(read('src/content/tr.json'));
-  receiverCopy.forEach(copy => assert.ok(dictionary[copy], `Receiver translation: ${copy}`));
-  assert.doesNotMatch(read('src/shared/intro/circuitFilm.ts'), /Math.random|c.rotate\(|shadowBlur|incomingCircuits|coilPoints/);
+  sceneCopy.forEach(copy => assert.ok(dictionary[copy], `Scene translation: ${copy}`));
+  const renderer = read('src/shared/intro/frontEndFilm.ts');
+  assert.match(renderer, /new WebGLRenderer/); assert.match(renderer, /new PerspectiveCamera/);
+  assert.match(renderer, /new InstancedMesh/); assert.match(renderer, /renderer.forceContextLoss/);
+  assert.doesNotMatch(renderer, /getContext\('2d'|CanvasTexture|Math.random/);
 });
 
 test('the GENESIS symbol stays consistent and opens without a full-screen flash', () => {

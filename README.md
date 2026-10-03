@@ -7,21 +7,22 @@ link to the visitor's own installation). All runtime assets are included here.
 Animations, theme and motion preferences run in the browser.
 
 The home-page symbol expands through the shared circuit shutters into a one-minute
-RF receiver film. An illustrated click sends a request to GENESIS. Its thinking
-indicator stays active while the components assemble one at a time into one
-persistent chain: RF input, input matching, LNA, interstage matching, mixer and IF
-output, with separate LO and bias connections. Three coordinated candidates change
-transistor sizing and both pixelated passives together. The selected geometry is
-frozen before precise placement and port-to-port routing. Circuit/EM feedback then
-illustrates one local route revision. The complete receiver remains in the closing
-frame. Short bilingual captions explain the sequence. This is an illustration,
+RF front-end film. An illustrated click sends a request to GENESIS, then devices
+assemble into amplifier circuits, not single devices labelled as amplifiers.
+Each LNA/PA circuit contains two transistor stages, three pixelated matching
+networks and bias/decoupling elements. These join mixers and an antenna switch to
+form receive and transmit paths. Fifteen coordinated design states change pixel
+patterns, physical footprints, finger count and finger length through the final
+second. Connections follow resized ports. The camera moves from circuit detail to
+the connected front end. Short bilingual captions explain the sequence. This is an illustration,
 not a live LLM session, simulated circuit or measured result.
 
 `shared/intro/timeline.ts` defines the shared 60-second editorial clock.
-`receiverScene.ts` owns block identities, ports, the three cached candidates,
-responsive poses and connection endpoints. `circuitFilm.ts` draws this model on a
-fixed oblique circuit plane, with raised metal, layered substrates and vias:
-horizontal on desktop, vertically composed on phones. `RequestSequence.tsx` uses
+`frontEndScene.ts` owns the device/circuit/system hierarchy, cached binary pixel
+candidates, sizing states, ports and camera shots. `frontEndFilm.ts` is a lazy-loaded
+Three.js renderer with extruded mesh geometry, perspective, lighting and shadows.
+Instanced metal cells keep draw calls bounded. Phones view the same geometry from
+a different camera angle, without changing electrical topology. `RequestSequence.tsx` uses
 the same clock, so seeking preserves click/thinking/reveal order. `filmPalette.ts`
 resolves the shared theme tokens; even a paused canvas repaints on a theme change.
 The scene fits below the actual caption height in either language.
@@ -38,10 +39,12 @@ finishes. Reduced motion skips the entrance and leaves playback paused. The medi
 clock synchronizes the film; if the track is still buffering, music joins at the
 current playback offset. Pause, seek,
 replay, mute and close act on both media. Closing unloads the audio element.
-Audio failure does not prevent silent playback. The canvas is capped at two million
+Audio failure does not prevent silent playback. WebGL failure pauses the film and
+shows an explanatory message; closing releases GPU resources. The canvas is capped at 1.4 million
 pixels and 30 fps. Hidden tabs and disabled motion pause the film and music; the
 scrubber still provides still frames. Labels and accessible descriptions support
-English and Turkish. No additional package, video service or server is required.
+English and Turkish. Three.js is bundled locally and loads only when the film opens.
+No video service, CDN, PDK or runtime server connection is required.
 
 Design first asks whether GENESIS is installed. No leads to the team's contact
 email; Yes asks which port to use. Only a port number (1 to 65535) is entered,

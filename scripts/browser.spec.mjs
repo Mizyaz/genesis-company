@@ -76,29 +76,34 @@ test('the film expands from its launcher before its clock starts, and an early c
   await page.keyboard.press('Escape');
 });
 
-test('LLM click, thinking and completion seek deterministically, and the paused canvas adapts to the shared theme', async ({ page }) => {
+test('LLM click and thinking seek deterministically, and the paused WebGL scene adapts to the shared theme', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/#/');
   await page.getByRole('button', { name: 'Watch the GENESIS introduction', exact: true }).click();
   const film = page.locator('.company-film'), surface = film.locator('canvas');
+  await expect(film).toHaveAttribute('data-scene', 'ready');
   await expect(film).toHaveAttribute('data-entering', 'false');
   await expect(film.locator('.film-opening')).toHaveCount(0);
-  for (const [time, phase] of [[1, 'request'], [2.2, 'pressed'], [3.7, 'thinking'], [8, 'thinking'], [11, 'ready'], [1, 'request']]) {
+  for (const [time, phase] of [[1, 'request'], [2.2, 'pressed'], [3.7, 'thinking'], [8, 'thinking'], [11, 'thinking'], [1, 'request']]) {
     await film.getByRole('slider').fill(String(time));
     await expect(film.locator('.film-request')).toHaveAttribute('data-phase', phase);
     await expect(surface).toHaveAttribute('data-time', time.toFixed(2));
   }
-  await film.getByRole('slider').fill('19');
+  await film.getByRole('slider').fill('21');
   await expect(film.locator('.film-request')).toHaveCount(0);
-  const pixel = () => surface.evaluate(canvas => Array.from(canvas.getContext('2d').getImageData(2, 2, 1, 1).data).slice(0, 3));
+  const background = () => surface.evaluate(canvas => {
+    const gl = canvas.getContext('webgl2');
+    return Array.from(gl.getParameter(gl.COLOR_CLEAR_VALUE)).slice(0, 3);
+  });
   await page.evaluate(() => document.documentElement.dataset.theme = 'light');
-  await expect.poll(async () => Math.min(...await pixel())).toBeGreaterThan(210);
+  await expect.poll(async () => Math.min(...await background())).toBeGreaterThan(.8);
   await expect(film.locator('.film-caption h3')).toHaveCSS('color', 'rgb(11, 35, 60)');
   await page.evaluate(() => document.documentElement.dataset.theme = 'dark');
-  await expect.poll(async () => Math.max(...await pixel())).toBeLessThan(65);
+  await expect.poll(async () => Math.max(...await background())).toBeLessThan(.25);
   await expect(film.locator('.film-caption h3')).toHaveCSS('color', 'rgb(241, 246, 252)');
-  await expect(surface).toHaveAttribute('data-time', '19.00');
+  await expect(surface).toHaveAttribute('data-time', '21.00');
+  await expect(surface).toHaveAttribute('data-renderer', 'webgl');
   await page.keyboard.press('Escape');
 });
 
@@ -126,6 +131,7 @@ test('Turkish mobile intro respects reduced motion and stays inside the screen',
   await page.goto('/#/');
   await page.getByRole('button', { name: 'GENESIS tanıtımını izle' }).click();
   const film = page.locator('.company-film');
+  await expect(film).toHaveAttribute('data-scene', 'ready');
   await expect(film).toHaveAttribute('data-running', 'false');
   await expect(film.locator('h2')).toHaveText('GENESIS: RFIC fikrinden şematik ve yerleşime');
   await film.getByRole('slider').focus();
@@ -216,7 +222,7 @@ test('RF positioning shares the film, supports both themes and fits narrow scree
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
-test('the one-minute receiver film has readable prompt, schematic, joint design and layout captions in both languages', async ({ page }) => {
+test('the one-minute front-end film has readable assembly and joint-design captions in both languages', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   for (const language of ['en', 'tr']) {
     await page.setViewportSize(language === 'tr' ? { width: 390, height: 844 } : { width: 1440, height: 960 });
@@ -225,10 +231,11 @@ test('the one-minute receiver film has readable prompt, schematic, joint design 
     await page.reload();
     await page.getByRole('button', { name: language === 'tr' ? 'GENESIS tanıtımını izle' : 'Watch the GENESIS introduction' }).click();
     const film = page.locator('.company-film');
+    await expect(film).toHaveAttribute('data-scene', 'ready');
     const captions = language === 'tr'
-      ? ['Nasıl bir alıcı istiyorsunuz?', 'Tarifiniz devreye dönüşür.', 'Aktif ve pasif elemanlar birlikte tasarlanır.', 'Şematikten fiziksel yerleşime.', 'Alıcının tamamını birlikte değerlendir.']
-      : ['Describe the receiver.', 'Your request becomes a circuit.', 'Active and passive. Designed together.', 'From circuit to physical layout.', 'Evaluate the complete front end.'];
-    const times = [3, 9, 19, 39, 51], cues = ['prompt', 'schematic', 'joint', 'layout', 'verify'];
+      ? ['Nasıl bir RF ön uç istiyorsunuz?', 'Yükselteç şekilleniyor.', 'Sırada verici kolu var.', 'Devreler bir bütüne dönüşüyor.', 'Tasarım birlikte iyileşiyor.']
+      : ['Describe your front end.', 'An amplifier takes shape.', 'Now, the transmit path.', 'The circuits become a system.', 'Refine the connected design.'];
+    const times = [3, 12, 28, 40, 52], cues = ['prompt', 'schematic', 'joint', 'layout', 'verify'];
     for (let i = 0; i < times.length; i++) {
       await film.getByRole('slider').fill(String(times[i]));
       await expect(film).toHaveAttribute('data-cue', cues[i]);
@@ -238,6 +245,25 @@ test('the one-minute receiver film has readable prompt, schematic, joint design 
     }
     await page.keyboard.press('Escape');
   }
+});
+
+test('a missing WebGL context stops playback honestly and leaves the close control usable', async ({ page }) => {
+  await page.addInitScript(() => {
+    const original = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function (type, ...args) {
+      return type.startsWith('webgl') ? null : original.call(this, type, ...args);
+    };
+  });
+  await page.goto('/#/');
+  const launcher = page.getByRole('button', { name: 'Watch the GENESIS introduction', exact: true });
+  await launcher.click();
+  const film = page.locator('.company-film');
+  await expect(film).toHaveAttribute('data-scene', 'unavailable');
+  await expect(film).toHaveAttribute('data-running', 'false');
+  await expect(film.getByRole('status')).toContainText('WebGL-enabled browser');
+  await expect(film.getByRole('button', { name: 'Play introduction' })).toBeDisabled();
+  await film.getByRole('button', { name: 'Close introduction' }).click();
+  await expect(launcher).toBeFocused();
 });
 
 const screens = [

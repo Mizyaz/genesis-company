@@ -1,4 +1,4 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-// three.js ships in its own chunk, loaded only when the research flight starts.
+// The 3D renderer is imported only when the introduction is opened.
 export default defineConfig({ plugins: [react()], base: './', build: { chunkSizeWarningLimit: 700 } });
