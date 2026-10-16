@@ -167,3 +167,19 @@ available through **Download 3D film** at `assets/films/genesis-3d-30s.mp4`.
 The 2D inductor glyph adapts Akilaa's [public-domain inductor symbol](https://commons.wikimedia.org/wiki/File:Inductor_symbol.svg),
 scaled and recoloured. The remaining animated geometry is drawn in code. No
 third-party PDK artwork or restrictive stock illustration is bundled.
+
+## Additional product film
+
+The company page also offers a separate 44-second product film at
+`#/explore/product-film`, linked from the welcome page. It uses native inline
+video controls, loads on demand, and includes English/Turkish captions, a text
+transcript and an MP4 download. Its original instrumental score is embedded.
+Leaving the player off-screen, hiding the page or opening a dialog pauses it.
+There is no autoplay. The existing introduction, 3D/2D choices, score and
+`genesis-3d-30s.mp4` remain unchanged.
+
+The added `public/assets/films/genesis-product-44s.mp4` is the approved 44-second,
+1280×720, 30 fps master (SHA-256
+`c5e93f9adc3a3f62e8f6f9d8bd0916a3d66832db9d4bdafb36c5e63e0ea4039a`).
+The workflow is illustrated; timings are qualified user-reported results and
+depend on circuit, PDK and compute. The poster is a frame from the same master.
