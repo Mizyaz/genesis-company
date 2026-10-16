@@ -226,6 +226,8 @@ test('the circuit film works without audio support and freezes with the global m
 });
 
 test('the score contains stereo music, stays synchronized after seeking and stops in a hidden tab', async ({ page }) => {
+  // Cold software-WebGL compilation on hosted CI can exceed the default 20-second test budget.
+  test.setTimeout(60_000);
   await page.addInitScript(() => {
     const NativeAudio = window.Audio;
     window.Audio = function (...args) {
@@ -285,6 +287,8 @@ test('RF positioning shares the film, supports both themes and fits narrow scree
 });
 
 test('the thirty-second front-end film has readable assembly and joint-design captions in both languages', async ({ page }) => {
+  // Cold software-WebGL compilation on hosted CI can exceed the default 20-second test budget.
+  test.setTimeout(60_000);
   await page.emulateMedia({ reducedMotion: 'reduce' });
   for (const language of ['en', 'tr']) {
     await page.setViewportSize(language === 'tr' ? { width: 390, height: 844 } : { width: 1440, height: 960 });
