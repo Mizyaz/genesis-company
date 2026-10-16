@@ -901,3 +901,29 @@ test('product links accept only a valid port and carry the selected theme', asyn
   assert.equal(productLink(' 1 ', 'dark'), `http://${hostname}:1/?theme=dark`);
   for (const port of ['', '0', '65536', '-1', '4.3', '1e3', 'abc', 'https://example.test', 'javascript:alert(1)']) assert.equal(productLink(port, 'dark'), null, port);
 });
+
+test('the supplemental product film is on-demand, accessible and independent of the original', async () => {
+  const { createHash } = await import('node:crypto');
+  const fileHash = path => createHash('sha256').update(readFileSync(resolve(root, path))).digest('hex');
+  assert.equal(fileHash('public/assets/films/genesis-product-44s.mp4'), 'c5e93f9adc3a3f62e8f6f9d8bd0916a3d66832db9d4bdafb36c5e63e0ea4039a');
+  const player = read('src/shared/ProductFilm.tsx');
+  assert.match(player, /controls playsInline preload="none"/);
+  assert.doesNotMatch(player, /autoPlay|from 'three'|import\('\.\/intro/);
+  assert.match(player, /aria-labelledby="product-film-title"/);
+  assert.match(player, /download="GENESIS-product-film-44s.mp4"/);
+  assert.match(player, /visibilitychange/);
+  assert.match(player, /visibility.disconnect\(\); dialogs.disconnect\(\)/);
+  assert.match(read('src/pages/Welcome.tsx'), /href="#\/explore\/product-film"/);
+  assert.match(read('src/pages/Explore.tsx'), /<RFPhysics \/>\s*<ProductFilm \/>/);
+  const dictionary = JSON.parse(read('src/content/tr.json'));
+  const parsed = ts.createSourceFile('ProductFilm.tsx', player, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const transcript = parsed.statements.find(statement => statement.declarationList?.declarations[0]?.name.getText(parsed) === 'transcript').declarationList.declarations[0].initializer.elements;
+  for (const line of transcript) assert.ok(dictionary[line.text], `Transcript translation: ${line.text}`);
+  for (const language of ['en', 'tr']) {
+    const captions = read(`public/assets/films/genesis-product-44s.${language}.vtt`);
+    assert.ok(captions.startsWith('WEBVTT\n\n'));
+    const cues = [...captions.matchAll(/00:00:(\d{2})\.000 --> 00:00:(\d{2})\.000/g)].map(match => match.slice(1).map(Number));
+    assert.equal(cues.length, 11); assert.equal(cues[0][0], 0); assert.equal(cues.at(-1)[1], 44);
+    cues.forEach(([from, to], i) => { assert.ok(to > from); if (i) assert.equal(from, cues[i - 1][1]); });
+  }
+});

@@ -4,6 +4,7 @@ import siteContent from '../content/site.json';
 import { ActionLink, Brand, Icon, SectionHeading } from '../shared/ui';
 import { PortfolioCard } from '../shared/PortfolioCard';
 import { ProductIntro } from '../shared/ProductIntro';
+import { ProductFilm } from '../shared/ProductFilm';
 import { RFPhysics } from '../shared/CompanyIntro';
 import { DesignStory } from '../shared/DesignStory';
 import { Workflow } from '../shared/Workflow';
@@ -28,6 +29,7 @@ export function Explore({ workbenchUrl }: { workbenchUrl?: string }) {
       </div>
     </section>
     <RFPhysics />
+    <ProductFilm />
     <Membership content={site.membership} email={site.brand.email} />
     <section id="portfolio" className="content-section portfolio-section">
       <div className="section-intro"><SectionHeading eyebrow={t('RFIC PORTFOLIO')}>{t("From individual blocks")}<br />{t("to")} <span className="gradient-text">{t("complete circuits.")}</span></SectionHeading><p>{t("RF switches, frequency converters and broadband passives for mmWave systems.")}</p></div>
