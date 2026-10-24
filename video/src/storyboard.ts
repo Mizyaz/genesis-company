@@ -6,17 +6,20 @@ export const TRANSITION_FRAMES = 12;
 export type Transition = 'fade' | 'slide' | 'wipe';
 /** Where the camera ends up inside the app window: transform origin in % of the window and the final scale. */
 export type Focus = { x: number; y: number; scale: number; from?: number };
-export type Scene = { id: string; seconds: number; title?: string; focus?: Focus; enter: Transition };
+/** `title` names the app stage on screen; `detail` names the design, block or number the frame shows. A scene holds
+ * still unless `focus` is set, which is kept for a detail too small to read at full window size. */
+export type Scene = { id: string; seconds: number; title?: string; detail?: string; focus?: Focus; enter: Transition };
 
 export const scenes: Scene[] = [
-  { id: 'S1_prompt', seconds: 6, title: 'Start with an idea', enter: 'fade', focus: { x: 50, y: 52, scale: 1.25 } },
-  { id: 'S2_reply', seconds: 8, title: 'Talk to it like an engineer', enter: 'slide', focus: { x: 92, y: 38, scale: 1.7, from: .2 } },
-  { id: 'S3_schematic', seconds: 6, title: 'A real circuit, not a sketch', enter: 'fade', focus: { x: 50, y: 45, scale: 1.12 } },
-  { id: 'S4_blocks', seconds: 6, title: 'Inspect the blocks inside', enter: 'fade', focus: { x: 40, y: 30, scale: 1.35, from: .45 } },
-  { id: 'S5_agent_tools', seconds: 8, title: 'Ask the agent. See its tools.', enter: 'fade', focus: { x: 18, y: 45, scale: 1.3, from: .35 } },
-  { id: 'S6_results', seconds: 7, title: 'Measured against your targets', enter: 'wipe', focus: { x: 22, y: 30, scale: 1.45, from: .3 } },
-  { id: 'S7_layout', seconds: 7, title: 'Down to the layout', enter: 'fade', focus: { x: 52, y: 50, scale: 1.6, from: .25 } },
-  { id: 'S8_finishing', seconds: 4.5, enter: 'fade', focus: { x: 50, y: 45, scale: 1.06 } },
+  { id: 'S1_prompt', seconds: 6, title: 'Your prompt', detail: '“I want a broadband RF switch with low loss and high isolation.”', enter: 'fade' },
+  { id: 'S2_reply', seconds: 8, title: 'Circuit Assistant', detail: 'Reads the Maestro plan: one testbench “full” with two S-parameter tests, port2_on and port3_on.', enter: 'slide' },
+  { id: 'S3_schematic', seconds: 6, title: 'Schematic', detail: 'spdt_series_shunt_noC1 on GF22FDX: FETs M1–M4, coils L1–L3 · 24 parts, 27 wires.', enter: 'fade' },
+  { id: 'S4_blocks', seconds: 6, title: 'Blocks', detail: 'The DUT opens into Input and Upper branch, 5 blocks each: coils, RF pads, interconnects.', enter: 'fade' },
+  { id: 'S5_agent_tools', seconds: 8, title: 'Analyses & Variables', detail: '2 S-parameter tests on testbench “full”, one per bias state: port2_on and port3_on.', enter: 'fade' },
+  { id: 'S6_results', seconds: 7, title: 'Optimize', detail: 'S21 target ≥ −2 dB · CMA-ES, 337 evaluations · 8 of 18 targets met.', enter: 'wipe' },
+  // The one zoom: the density layout is small inside its viewer.
+  { id: 'S7_layout', seconds: 7, title: 'Floorplan', detail: 'The chip layout Cadence captured after the density stage.', enter: 'fade', focus: { x: 50, y: 54, scale: 1.45, from: .3 } },
+  { id: 'S8_finishing', seconds: 4.5, enter: 'fade' },
 ];
 export const OPENING_SECONDS = 4;
 export const END_CARD_SECONDS = 3.5;

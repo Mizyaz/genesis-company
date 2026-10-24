@@ -597,5 +597,16 @@
   "For supported designs: layout within one hour, with DRC and LVS passed.": "Desteklenen tasarımlar için: DRC ve LVS kontrollerinden geçmiş yerleşim bir saat içinde.",
   "Optimization under one day versus the usual prior one-week workflow.": "Önceki yaklaşık bir haftalık iş akışına kıyasla bir günden kısa optimizasyon.",
   "User-reported results. Timings depend on circuit, PDK and compute.": "Kullanıcı tarafından bildirilen sonuçlar. Süreler devreye, PDK’ya ve hesaplama kaynaklarına bağlıdır.",
-  "GENESIS. Generative Silicon Intelligence Systems. RFIC design, on demand. From your specs to checked layout.": "GENESIS. Generative Silicon Intelligence Systems. İhtiyacınıza göre RFIC tasarımı. Şartnamenizden kontrol edilmiş yerleşime."
+  "GENESIS. Generative Silicon Intelligence Systems. RFIC design, on demand. From your specs to checked layout.": "GENESIS. Generative Silicon Intelligence Systems. İhtiyacınıza göre RFIC tasarımı. Şartnamenizden kontrol edilmiş yerleşime.",
+  "GENESIS. Whatever you want to design.": "GENESIS. Ne tasarlamak isterseniz.",
+  "Recorded in the GENESIS workbench: the first request, the schematic and its blocks, the analysis, saved results and the chip layout.": "GENESIS çalışma alanında kaydedildi: ilk istek, şematik ve blokları, analiz, kaydedilmiş sonuçlar ve çip yerleşimi.",
+  "Screen recordings of the GENESIS workbench with original music. Results and layouts shown are saved records from earlier runs.": "Özgün müzik eşliğinde GENESIS çalışma alanının ekran kayıtları. Gösterilen sonuçlar ve yerleşimler önceki çalışmalardan kaydedilmiş kayıtlardır.",
+  "The opening shows the GENESIS emblem.": "Açılışta GENESIS amblemi görünür.",
+  "Your prompt: “I want a broadband RF switch with low loss and high isolation.”": "İsteminiz: “I want a broadband RF switch with low loss and high isolation.” (düşük kayıplı, yüksek yalıtımlı geniş bantlı bir RF anahtar)",
+  "Circuit Assistant: it reads the Maestro plan, one testbench “full” with two S-parameter tests, port2_on and port3_on.": "Circuit Assistant: Maestro planını okur; “full” test düzeneğinde iki S-parametre testi var, port2_on ve port3_on.",
+  "Schematic: spdt_series_shunt_noC1 on GF22FDX, FETs M1–M4 and coils L1–L3, 24 parts and 27 wires.": "Şematik: GF22FDX üzerinde spdt_series_shunt_noC1; M1–M4 FET’leri ve L1–L3 bobinleri, 24 parça ve 27 bağlantı.",
+  "Blocks: the DUT opens into Input and Upper branch, 5 blocks each: coils, RF pads, interconnects.": "Bloklar: DUT, her biri 5 bloklu Input ve Upper branch olarak açılır: bobinler, RF pedleri, ara bağlantılar.",
+  "Analyses & Variables: 2 S-parameter tests on testbench “full”, one per bias state, port2_on and port3_on.": "Analizler ve Değişkenler: “full” test düzeneğinde her kutuplama durumu için bir S-parametre testi, toplam 2: port2_on ve port3_on.",
+  "Optimize: S21 target ≥ −2 dB; CMA-ES ran 337 evaluations and 8 of 18 targets are met.": "Optimizasyon: S21 hedefi ≥ −2 dB; CMA-ES 337 değerlendirme yaptı ve 18 hedeften 8’i karşılandı.",
+  "Floorplan: the chip layout Cadence captured after the density stage.": "Yerleşim: Cadence’in yoğunluk aşamasından sonra aldığı çip yerleşimi."
 }

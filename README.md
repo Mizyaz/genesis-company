@@ -178,8 +178,8 @@ Leaving the player off-screen, hiding the page or opening a dialog pauses it.
 There is no autoplay. The existing introduction, 3D/2D choices, score and
 `genesis-3d-30s.mp4` remain unchanged.
 
-The added `public/assets/films/genesis-product-44s.mp4` is the approved 44-second,
-1280×720, 30 fps master (SHA-256
-`c5e93f9adc3a3f62e8f6f9d8bd0916a3d66832db9d4bdafb36c5e63e0ea4039a`).
-The workflow is illustrated; timings are qualified user-reported results and
-depend on circuit, PDK and compute. The poster is a frame from the same master.
+`public/assets/films/genesis-product-60s.mp4` is a 60-second, 1280×720, 30 fps film of the real GENESIS
+workbench, rendered from screen recordings by the Remotion project in `video/` (`node video/render.mjs --inputs
+<footage folder> --audio <score.wav>`, then scaled to 720p). Scene order, titles and timing are in
+`video/src/storyboard.ts`; footage comes only through the folder's `clips/manifest.json`. Results and layouts in the
+film are saved records from earlier runs. The poster is a frame from the same film.

@@ -19,7 +19,7 @@ function Footage({ clip, frames }: { clip: Clip; frames: number }) {
 export function AppScene({ scene, clip, index, count }: { scene: Scene; clip: Clip; index: number; count: number }) {
   const frame = useCurrentFrame(), { fps, durationInFrames, width: W, height: H } = useVideoConfig();
   const visible = durationInFrames - TRANSITION_FRAMES;
-  const f = scene.focus ?? { x: 50, y: 50, scale: 1.04 };
+  const f = scene.focus ?? { x: 50, y: 50, scale: 1 };
   const zoom = interpolate(frame, [visible * (f.from ?? 0), visible], [1, f.scale], { ...clamp, easing: Easing.inOut(Easing.cubic) });
   const camera = { transform: `scale(${zoom})`, transformOrigin: `${f.x}% ${f.y}%` };
 
@@ -37,7 +37,8 @@ export function AppScene({ scene, clip, index, count }: { scene: Scene; clip: Cl
     <div style={{ position: 'absolute', left: 80, width: winX - 150, top: 0, height: H, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 22, opacity: text, transform: `translateY(${(1 - enter) * 16}px)` }}>
       <div style={{ fontFamily: 'Inter', fontSize: 22, letterSpacing: '.16em', color: C.cyan, fontVariantNumeric: 'tabular-nums' }}>{String(index + 1).padStart(2, '0')} / {String(count).padStart(2, '0')}</div>
       <div style={{ width: 72, height: 4, borderRadius: 2, background: GRADIENT }} />
-      <div style={{ fontFamily: 'Inter', fontWeight: 650, fontSize: 60, lineHeight: 1.12, color: C.text, letterSpacing: '-.01em' }}>{scene.title}</div>
+      <div style={{ fontFamily: 'Inter', fontWeight: 650, fontSize: 54, lineHeight: 1.12, color: C.text, letterSpacing: '-.01em' }}>{scene.title}</div>
+      {scene.detail && <div style={{ fontFamily: 'Inter', fontSize: 29, lineHeight: 1.4, color: C.muted }}>{scene.detail}</div>}
     </div>
     <div style={{ position: 'absolute', left: winX, top: WINDOW.top, width: winW, height: WINDOW.height, borderRadius: 14, overflow: 'hidden', border: `1px solid ${C.border}`, boxShadow: `0 30px 90px #0008, 0 0 60px ${C.cyan}22` }}>
       <div style={{ position: 'absolute', inset: 0, ...camera }}>
