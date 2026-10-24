@@ -44,7 +44,8 @@ const wing: Point[] = [[20.5, 30], [10, 28.5], [2, 22.5], [6.5, 33], [11.5, 37.5
 const ports: Point[] = [[2.5, 23], [2, 44.5], [11, 54], [3, 13]];
 
 /** The symbol as a grid of cells, `size` cells across. The small grid (the logo) keeps the shapes and drops the finest
- * texture: no holes in the passives and no slots in the feed lines. */
+ * texture: no holes in the passives and no slots in the feed lines; its core is solid metal set apart by a one-cell gap,
+ * with the transistor slots cut in. */
 export function drawEmblem(size: 64 | 32, seed = 5): Cell[][] {
   const unit = 64 / size, half = size / 2, fine = size === 64;
   let state = seed;
@@ -79,7 +80,8 @@ export function drawEmblem(size: 64 | 32, seed = 5): Cell[][] {
   // The core: a guard ring, a row of vias, then the transistor fingers between two gate bars.
   for (let r = 0; r < size; r++) for (let c = 0; c < half; c++) if (zone[r][c] === 'core') {
     const [, y] = centre(c, r), finger = (half - c) % 2 === 1, bar = (at: number) => Math.abs(y - at) < unit / 2;
-    if (edge(r, c)) grid[r][c] = 1;
+    if (!fine) grid[r][c] = edge(r, c) || (y > 31 && y < 44 && !finger && !edge(r, c, 2)) ? 0 : 1;
+    else if (edge(r, c)) grid[r][c] = 1;
     else if (edge(r, c, 2)) grid[r][c] = 0;
     else if (bar(30.5) || bar(44.5)) grid[r][c] = 1;
     else if (y >= 26 && y < 29) grid[r][c] = fine && c % 2 === 0 ? 1 : 0;
