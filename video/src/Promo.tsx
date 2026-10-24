@@ -5,8 +5,7 @@ import { slide } from '@remotion/transitions/slide';
 import { wipe } from '@remotion/transitions/wipe';
 import { loadFont } from '@remotion/fonts';
 import { ChapterScene, shotStart, type Clip } from './AppScene';
-import { EndCard, Opening } from './Brand';
-import { chapters, chapterSeconds, END_CARD_SECONDS, OPENING_SECONDS, sequenceFrames, totalFrames, TRANSITION_FRAMES, type Transition } from './storyboard';
+import { chapters, chapterSeconds, sequenceFrames, totalFrames, TRANSITION_FRAMES, type Transition } from './storyboard';
 
 export type PromoProps = { clips: Clip[] };
 
@@ -28,15 +27,13 @@ const timing = linearTiming({ durationInFrames: TRANSITION_FRAMES });
 
 export function Promo({ clips }: PromoProps) {
   const byId = new Map(clips.map(c => [c.scene_id, c]));
+  // The film opens on the recorded landing page and closes on the recorded finishing screen: no drawn title cards.
   return <TransitionSeries>
-    <TransitionSeries.Sequence name="Opening" durationInFrames={sequenceFrames(OPENING_SECONDS)}><Opening /></TransitionSeries.Sequence>
     {chapters.flatMap((chapter, i) => [
-      <TransitionSeries.Transition key={`${chapter.id}-in`} presentation={presentation(chapter.enter)} timing={timing} />,
-      <TransitionSeries.Sequence key={chapter.id} name={chapter.id} durationInFrames={sequenceFrames(chapterSeconds(chapter))}>
+      ...(i ? [<TransitionSeries.Transition key={`${chapter.id}-in`} presentation={presentation(chapter.enter)} timing={timing} />] : []),
+      <TransitionSeries.Sequence key={chapter.id} name={chapter.id} durationInFrames={sequenceFrames(chapterSeconds(chapter), i === chapters.length - 1)}>
         <ChapterScene chapter={chapter} clips={byId} index={i} count={chapters.filter(c => c.title).length} />
       </TransitionSeries.Sequence>,
     ])}
-    <TransitionSeries.Transition presentation={fade()} timing={timing} />
-    <TransitionSeries.Sequence name="End card" durationInFrames={sequenceFrames(END_CARD_SECONDS, true)}><EndCard /></TransitionSeries.Sequence>
   </TransitionSeries>;
 }

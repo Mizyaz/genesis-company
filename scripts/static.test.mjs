@@ -757,26 +757,35 @@ test('product links accept only a valid port and carry the selected theme', asyn
   for (const port of ['', '0', '65536', '-1', '4.3', '1e3', 'abc', 'https://example.test', 'javascript:alert(1)']) assert.equal(productLink(port, 'dark'), null, port);
 });
 
-test('the product film is on-demand and accessible', async () => {
-  assert.ok(readFileSync(resolve(root, 'public/assets/films/genesis-product-58s.mp4')).length < 10e6);
+test('the two films are on-demand and accessible', async () => {
   const player = read('src/shared/ProductFilm.tsx');
   assert.match(player, /controls playsInline preload="none"/);
   assert.doesNotMatch(player, /autoPlay/);
-  assert.match(player, /aria-labelledby="product-film-title"/);
-  assert.match(player, /download="GENESIS-product-film-58s.mp4"/);
+  assert.match(player, /aria-labelledby=\{`\$\{film.id\}-title`\}/);
+  assert.match(player, /download=\{`GENESIS-\$\{film.asset.replace\('genesis-', ''\)\}.mp4`\}/);
   assert.match(player, /visibilitychange/);
   assert.match(player, /visibility.disconnect\(\); dialogs.disconnect\(\)/);
   assert.match(read('src/pages/Welcome.tsx'), /href="#\/explore\/product-film"/);
   assert.match(read('src/pages/Explore.tsx'), /<RFPhysics \/>\s*<ProductFilm \/>/);
   const dictionary = JSON.parse(read('src/content/tr.json'));
   const parsed = ts.createSourceFile('ProductFilm.tsx', player, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
-  const transcript = parsed.statements.find(statement => statement.declarationList?.declarations[0]?.name.getText(parsed) === 'transcript').declarationList.declarations[0].initializer.elements;
-  for (const line of transcript) assert.ok(dictionary[line.text], `Transcript translation: ${line.text}`);
-  for (const language of ['en', 'tr']) {
-    const captions = read(`public/assets/films/genesis-product-58s.${language}.vtt`);
-    assert.ok(captions.startsWith('WEBVTT\n\n'));
-    const cues = [...captions.matchAll(/00:00:(\d{2}\.\d{3}) --> 00:00:(\d{2}\.\d{3})/g)].map(match => match.slice(1).map(Number));
-    assert.equal(cues.length, 11); assert.equal(cues[0][0], 0); assert.equal(cues.at(-1)[1], 58.5);
-    cues.forEach(([from, to], i) => { assert.ok(to > from); if (i) assert.equal(from, cues[i - 1][1]); });
+  const films = parsed.statements.find(statement => statement.declarationList?.declarations[0]?.name.getText(parsed) === 'films').declarationList.declarations[0].initializer.elements;
+  const field = (film, name) => film.properties.find(p => p.name.getText(parsed) === name).initializer;
+  // Each film: its asset under 10 MB, every line translated, and contiguous captions from 0 to its end, one cue per line.
+  const ends = { 'product-film': 73.2, 'how-it-works-film': 66.8 };
+  assert.deepEqual(films.map(film => field(film, 'id').text).sort(), Object.keys(ends).sort());
+  for (const film of films) {
+    const id = field(film, 'id').text, asset = field(film, 'asset').text, transcript = field(film, 'transcript').elements;
+    assert.ok(readFileSync(resolve(root, `public/assets/films/${asset}.mp4`)).length < 10e6, asset);
+    assert.ok(existsSync(resolve(root, `public/assets/films/${asset}-poster.jpg`)), asset);
+    for (const name of ['eyebrow', 'title', 'description', 'note', 'download', 'opening']) assert.ok(dictionary[field(film, name).text], `${id} ${name} translation`);
+    for (const line of transcript) assert.ok(dictionary[line.text], `Transcript translation: ${line.text}`);
+    for (const language of ['en', 'tr']) {
+      const captions = read(`public/assets/films/${asset}.${language}.vtt`);
+      assert.ok(captions.startsWith('WEBVTT\n\n'));
+      const cues = [...captions.matchAll(/00:(\d{2}):(\d{2}\.\d{3}) --> 00:(\d{2}):(\d{2}\.\d{3})/g)].map(m => [m[1] * 60 + +m[2], m[3] * 60 + +m[4]]);
+      assert.equal(cues.length, transcript.length + 1, asset); assert.equal(cues[0][0], 0); assert.ok(Math.abs(cues.at(-1)[1] - ends[id]) < 1e-6, asset);
+      cues.forEach(([from, to], i) => { assert.ok(to > from); if (i) assert.equal(from, cues[i - 1][1]); });
+    }
   }
 });

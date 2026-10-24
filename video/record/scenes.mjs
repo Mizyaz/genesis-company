@@ -1,6 +1,7 @@
 // The promo's recorded scenes. setup() brings the workbench to the scene's starting state off camera; film() is the
 // on-camera action and marks where each shot starts; shows names what the frames contain, for the manifest and the
 // scene table. Typing is quick and model waits are cut, so the clips hold only what the app does.
+import { readFileSync } from 'node:fs';
 const TEMPLATE = 'SPDT · Series–shunt · no input capacitor';
 const PROMPT = 'I want a broadband RF switch with low loss and high isolation.';
 const QUESTION = 'What analyses and bias states are configured in my current circuit? Check its actual Maestro plan and explain the setup briefly.';
@@ -33,9 +34,133 @@ async function regenerateBlocks(page) {
   await page.locator('.circuit-arrangement').waitFor({ timeout: 120000 });
 }
 const stage = (page, name) => page.locator('.workflow-stages').getByRole('button', { name, exact: true }).click();
+/** Cuts the model's thinking out of the clip: the recording pauses until GENESIS has answered. */
+async function untilAnswered(page, rec) {
+  rec.pause();
+  await page.waitForTimeout(800);
+  await page.waitForFunction(() => !/Shaping your design|answering another request/.test(document.body.innerText), null, { timeout: 300000, polling: 300 });
+  // The reply has finished revealing (its text, cards and any proposal), so the next check sees all of it.
+  await page.waitForFunction(() => [...document.querySelectorAll('.assistant-reply')].pop()?.dataset.replyPhase === 'complete', null, { timeout: 60000, polling: 300 }).catch(() => {});
+  await page.waitForTimeout(600);
+  await rec.resume();
+}
+const BAND = 'Broadband, DC to 110 GHz, on GF22FDX.';
+const { circuits } = JSON.parse(readFileSync(new URL('./circuits.json', import.meta.url), 'utf8'));
+const SHAPE = 'Your circuit, taking shape';
+
+/** Sends the prompt on the landing page and answers GENESIS until its schematic proposal arrives. A question with choice
+ * cards gets the first card named in design.choose, else the recommended one; a question without cards gets the first
+ * answer whose topic matches it, else "Use your recommendation.". Each answer is kept in evidence.answers. Model waits are cut. */
+async function converse(page, rec, design, evidence) {
+  evidence.answers = [];
+  const box = page.getByPlaceholder('Describe your circuit…');
+  await box.fill(design.prompt);
+  rec.mark('typed');
+  await hold(page, 1.4);
+  await box.press('Enter');
+  await untilAnswered(page, rec);
+  // A proposal is a reply that can be approved; a template-based one also shows its construction card.
+  const approve = () => page.locator('.assistant-message.assistant').last().getByRole('button', { name: /Approve · open schematic/ });
+  // The app's own check can reject a proposal; its message goes back to the model, as a user would send it.
+  const rejected = () => page.locator('.assistant-message.assistant').last().getByText(/^Proposal needs correction/);
+  for (let step = 1; !(await approve().count()) || await rejected().count(); step++) {
+    if (step > 8) throw new Error(`No valid schematic proposal after eight answers: ${design.prompt}`);
+    rec.mark(`answer${step}`);
+    if (await rejected().count()) {
+      const reason = (await rejected().last().innerText()).replace(/^Proposal needs correction:\s*/, '');
+      await hold(page, 2.2);
+      evidence.answers.push({ step, text: `The preview rejected the proposal: ${reason} Please return the complete corrected schematic.` });
+      await box.fill(evidence.answers.at(-1).text);
+      await hold(page, .8);
+      await box.press('Enter');
+      await untilAnswered(page, rec);
+      continue;
+    }
+    const cards = 'button.choice-select:visible:not([disabled])';
+    let pick = null;
+    for (const name of [...design.choose.map(n => `${cards}[aria-label="Explore ${n}"]`), `${cards}:has(.choice-recommendation)`]) {
+      if (await page.locator(name).count()) { pick = page.locator(name).last(); break; }
+    }
+    if (pick) {
+      await pick.scrollIntoViewIfNeeded();
+      await hold(page, 2.6);
+      evidence.answers.push({ step, card: (await pick.getAttribute('aria-label')).replace(/^Explore /, '') });
+      await pick.click();
+    } else {
+      // Answer the question GENESIS asks (its last sentence ending in a question mark), not the whole reply.
+      const reply = await page.locator('.assistant-message.assistant').last().innerText();
+      const asked = (reply.match(/[^.?!]*\?/g)?.pop() ?? reply).toLowerCase();
+      const answer = design.answers.find(([topic]) => new RegExp(topic).test(asked))?.[1] ?? 'Use your recommendation.';
+      evidence.answers.push({ step, text: answer });
+      await hold(page, 2.2);
+      await box.fill(answer);
+      await hold(page, .8);
+      await box.press('Enter');
+    }
+    await untilAnswered(page, rec);
+  }
+  const card = (await page.getByText(SHAPE, { exact: false }).count()) ? page.getByText(SHAPE, { exact: false }).last() : approve();
+  await card.evaluate(e => e.scrollIntoView({ block: 'start', behavior: 'smooth' }));
+  rec.mark('proposal');
+}
+/** Approves the proposal into the workbench, fits the schematic and marks it; the approved draft (the workbench's own
+ * export JSON) goes into the take's evidence, so the same circuit can be laid out later. */
+async function approveSchematic(page, rec, evidence) {
+  await page.getByRole('button', { name: /Approve · open schematic/ }).last().click();
+  await page.locator('[data-stage=schematic] [data-part-id]').first().waitFor({ timeout: 60000 });
+  await hold(page, 1.2);
+  await page.getByRole('button', { name: 'Fit', exact: true }).first().click().catch(() => {});
+  rec.mark('schematic');
+  evidence.circuit = JSON.parse(await page.locator('.schematic-runner details pre').first().textContent());
+}
+const landing = async (page, base) => {
+  await page.goto(`${base}/`, { waitUntil: 'domcontentloaded' });
+};
+const connect = page => page.getByRole('button', { name: /^Use gpt/ }).first().click();
+
 const scrollTo = (locator, block) => locator.evaluate((e, b) => e.scrollIntoView({ block: b, behavior: 'smooth' }), block);
 
 export const recordedScenes = [
+  {
+    id: 'S1_conversation', shows: `One take on the real landing page: the light and the chat box come in, the prompt "${PROMPT}" is sent to gpt-5.6-luna, GENESIS's questions are answered (named or recommended choice cards are clicked; the band is "${BAND}"), its schematic proposal takes shape and is approved into the workbench, then Color and Regenerate blocks & TB open the Blocks stage. Model waits are cut`,
+    async setup(page) { await page.goto('about:blank'); },
+    async film(page, base, rec, evidence) {
+      rec.mark('landing');
+      await landing(page, base);
+      await hold(page, 4.2);
+      await connect(page);
+      await hold(page, .5);
+      await converse(page, rec, { ...circuits.find(c => c.id === 'A_spdt'), prompt: PROMPT }, evidence);
+      await hold(page, 6);
+      await page.getByRole('button', { name: /Approve · open schematic/ }).last().click();
+      await page.locator('[data-stage=schematic] [data-part-id]').first().waitFor({ timeout: 60000 });
+      rec.mark('schematic');
+      await hold(page, 4.5);
+      rec.mark('blocks');
+      await visible(page, /Next: Colou?r blocks/).click();
+      await hold(page, 1.6);
+      await visible(page, 'Regenerate blocks & TB').click();
+      rec.pause();
+      await page.locator('.circuit-arrangement').waitFor({ timeout: 180000 });
+      await hold(page, .5);
+      await rec.resume();
+      await hold(page, 2.5);
+      await scrollTo(page.locator('.circuit-arrangement'), 'end');
+      await hold(page, 3.5);
+    },
+  },
+  // Any circuit you want: one take per circuit in circuits.json, from the prompt to its schematic proposal.
+  ...circuits.map(design => ({
+    id: design.id, shows: `A real conversation on the landing page: "${design.prompt}" is sent to gpt-5.6-luna, GENESIS's questions are answered and its schematic proposal for the ${design.title.toLowerCase()} arrives and is approved into the workbench schematic. Model waits are cut`,
+    async setup(page, base) { await landing(page, base); await hold(page, 4); await connect(page); await hold(page, 1); },
+    async film(page, base, rec, evidence) {
+      await hold(page, .4);
+      await converse(page, rec, design, evidence);
+      await hold(page, 2.5);
+      await approveSchematic(page, rec, evidence);
+      await hold(page, 7);
+    },
+  })),
   {
     id: 'S1_prompt', shows: `Landing page; the prompt "${PROMPT}" is typed`,
     async setup(page, base) { await page.goto(`${base}/`, { waitUntil: 'networkidle' }); await hold(page, 3); },
@@ -138,15 +263,15 @@ export const recordedScenes = [
     },
   },
   {
-    id: 'C5_3d', shows: 'The offline 3D viewer (circuit_3d.html) the floorplan flow writes for chip C1, opened from the chip showcase; density fill and side panels hidden; orbit and zoom by mouse',
+    id: 'C5_3d', shows: 'The offline 3D viewer (circuit_3d.html) the floorplan flow writes for chip C1, opened from the chip showcase; density fill hidden; orbit by mouse',
     async setup(page, base) {
-      await page.goto(`${base}/api/report/chip-showcase/c1/viewer`, { waitUntil: 'load', timeout: 240000 });
+      // GENESIS_VIEWER_URL films a freshly written circuit_3d.html (served statically) instead of the showcase's copy.
+      await page.goto(process.env.GENESIS_VIEWER_URL ?? `${base}/api/report/chip-showcase/c1/viewer`, { waitUntil: 'load', timeout: 240000 });
       await page.locator('canvas').first().waitFor();
       await hold(page, 4);
-      // The fill envelopes take most of the draw time in a browser without a GPU; the chip itself stays whole.
-      await page.locator('label, li, div').filter({ has: page.locator('input[type=checkbox]') }).filter({ hasText: 'Density fill' }).last().locator('input[type=checkbox]').first().uncheck();
-      await page.getByTitle('Show or hide the layer panel').click();
-      await page.getByTitle('Show or hide the settings panel').click();
+      // Density fill off (the fill envelopes take most of the draw time without a GPU; the chip itself stays whole). The
+      // viewer opens with its side panels closed.
+      await page.evaluate(() => { const fill = document.querySelector('#fill-toggle'); if (fill?.getAttribute('aria-pressed') === 'true') fill.click(); });
       await hold(page, 1);
       await page.keyboard.press('f');
       await hold(page, 2);

@@ -48,7 +48,7 @@ function Footage({ clip, start, frames, focus, speed = 1 }: { clip: Clip; start:
 }
 
 /** A caption whose words rise in one after another; GENESIS is drawn in the brand gradient. */
-function Caption({ text }: { text: string }) {
+export function Caption({ text }: { text: string }) {
   const frame = useCurrentFrame();
   return <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 62, lineHeight: 1.1, letterSpacing: '-.015em', color: C.text, textShadow: '0 4px 30px #000a' }}>
     {text.split(' ').map((word, i) => {
@@ -61,13 +61,31 @@ function Caption({ text }: { text: string }) {
   </div>;
 }
 
+/** The grid chapter: its shots play together, one per quarter of the frame, each labelled; the tiles come in one by one. */
+function Grid({ chapter, clips, frames }: { chapter: Chapter; clips: Map<string, Clip>; frames: number }) {
+  const frame = useCurrentFrame(), { width, height } = useVideoConfig(), gap = 24, top = 36, w = (width - 3 * gap) / 2, h = (height - 300 - top - gap) / 2;
+  return <>{chapter.shots.map((shot, i) => {
+    const clip = clips.get(shot.clip)!, t = interpolate(frame - i * 5, [0, 14], [0, 1], { ...clamp, easing: Easing.out(Easing.cubic) });
+    return <div key={i} style={{ position: 'absolute', left: gap + (i % 2) * (w + gap), top: top + Math.floor(i / 2) * (h + gap), width: w, height: h,
+      borderRadius: 18, overflow: 'hidden', border: `1px solid ${C.border}`, boxShadow: '0 18px 50px #0009', opacity: t, transform: `scale(${.94 + .06 * t})` }}>
+      <Video src={staticFile(clip.file)} muted trimBefore={Math.round(shotStart(shot, clip) * FPS)} playbackRate={Math.min(1, (clip.duration_s - shotStart(shot, clip)) * FPS / frames)}
+        style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      <div style={{ position: 'absolute', left: 16, top: 14, padding: '8px 16px', borderRadius: 999, background: '#041325d9', border: `1px solid ${C.border}`,
+        fontFamily: 'Inter', fontWeight: 650, fontSize: 30, color: C.text }}>{shot.caption}</div>
+    </div>;
+  })}</>;
+}
+
 export function ChapterScene({ chapter, clips, index, count }: { chapter: Chapter; clips: Map<string, Clip>; index: number; count: number }) {
   const frame = useCurrentFrame(), { durationInFrames } = useVideoConfig();
-  const starts = shotStarts(chapter), visible = durationInFrames - TRANSITION_FRAMES;
-  const band = interpolate(frame, [4, 16], [0, 1], { ...clamp, easing: Easing.out(Easing.cubic) }) * interpolate(frame, [visible - 8, visible], [1, 0], clamp);
+  const starts = chapter.grid ? [0] : shotStarts(chapter), visible = durationInFrames - TRANSITION_FRAMES;
+  // The caption band comes in with the chapter's first captioned shot, so an uncaptioned opening plays clean.
+  const first = chapter.grid ? 0 : starts[chapter.shots.findIndex(s => s.caption)] ?? 0;
+  const band = interpolate(frame, [first + 4, first + 16], [0, 1], { ...clamp, easing: Easing.out(Easing.cubic) }) * interpolate(frame, [visible - 8, visible], [1, 0], clamp);
 
   return <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: C.page }}>
-    {chapter.shots.map((shot, i) => {
+    {chapter.grid && <Grid chapter={chapter} clips={clips} frames={durationInFrames} />}
+    {!chapter.grid && chapter.shots.map((shot, i) => {
       const clip = clips.get(shot.clip)!, start = starts[i], last = i === chapter.shots.length - 1;
       const frames = last ? durationInFrames - start : starts[i + 1] - start;
       const fades = i > 0 && chapter.shots[i - 1].clip !== shot.clip;
@@ -86,7 +104,7 @@ export function ChapterScene({ chapter, clips, index, count }: { chapter: Chapte
             <div key={i} style={{ width: 34, height: 5, borderRadius: 3, background: i < index ? C.cyan : i === index ? GRADIENT : '#ffffff26' }} />)}</div>
           <span>{String(index + 1).padStart(2, '0')} · {chapter.title}</span>
         </div>
-        {chapter.shots.map((shot, i) => <Sequence key={i} from={starts[i]} durationInFrames={i < chapter.shots.length - 1 ? starts[i + 1] - starts[i] : undefined} layout="none">
+        {chapter.grid ? <Caption text={chapter.grid} /> : chapter.shots.map((shot, i) => <Sequence key={i} from={starts[i]} durationInFrames={i < chapter.shots.length - 1 ? starts[i + 1] - starts[i] : undefined} layout="none">
           <Caption text={shot.caption} />
         </Sequence>)}
       </div>

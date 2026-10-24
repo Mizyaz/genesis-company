@@ -1,0 +1,40 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:05.100
+[Original instrumental music] The film opens on the GENESIS landing page: light from the top and the chat box.
+
+00:00:05.100 --> 00:00:09.100
+Tell GENESIS what you want to design: “I want a broadband RF switch with low loss and high isolation.”
+
+00:00:09.100 --> 00:00:14.900
+GENESIS asks what your circuit needs: an SPDT, the series–shunt topology, and the band, DC to 110 GHz on GF22FDX.
+
+00:00:14.900 --> 00:00:21.100
+GENESIS proposes the schematic: 25 parts, proposed and not yet applied.
+
+00:00:21.100 --> 00:00:25.600
+GENESIS draws it on your PDK: the approved schematic opens in the workbench on GF22FDX.
+
+00:00:25.600 --> 00:00:33.200
+GENESIS turns it into blocks and a testbench: block groups and colours, then blocks and testbench regenerated.
+
+00:00:33.200 --> 00:00:37.200
+GENESIS sets up every analysis and bias state: S-parameters with Port 2 ON and with Port 3 ON.
+
+00:00:37.200 --> 00:00:42.700
+GENESIS optimizes toward your targets: the test matrix of circuit variants and operating states.
+
+00:00:42.700 --> 00:00:48.100
+GENESIS places, routes and tiles the layout: Placement, Routing, Tiling and Verify, each with its record.
+
+00:00:48.100 --> 00:00:53.700
+GENESIS checks it with Calibre DRC and LVS: LVS correct and 124 DRC markers listed by rule.
+
+00:00:53.700 --> 00:01:00.200
+GENESIS builds your chip in 3D: the floorplan flow writes a 3D model of chip C1, shown here as a time-lapse.
+
+00:01:00.200 --> 00:01:07.200
+GENESIS designs any circuit you want: an RF switch, a low-noise amplifier, a mixer and a power amplifier, each from its own recorded conversation.
+
+00:01:07.200 --> 00:01:13.200
+GENESIS. Whatever you want to design.

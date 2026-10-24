@@ -1,0 +1,40 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:05.100
+[Özgün enstrümantal müzik] Film GENESIS giriş sayfasıyla açılır: yukarıdan gelen ışık ve sohbet kutusu.
+
+00:00:05.100 --> 00:00:09.100
+GENESIS’e ne tasarlamak istediğinizi söyleyin: “Düşük kayıplı ve yüksek yalıtımlı geniş bantlı bir RF anahtar istiyorum.”
+
+00:00:09.100 --> 00:00:14.900
+GENESIS devrenizin neye ihtiyacı olduğunu sorar: bir SPDT, seri–şönt topoloji ve bant, GF22FDX üzerinde DC’den 110 GHz’e.
+
+00:00:14.900 --> 00:00:21.100
+GENESIS şematiği önerir: 25 parça, önerildi ve henüz uygulanmadı.
+
+00:00:21.100 --> 00:00:25.600
+GENESIS onu PDK’nız üzerinde çizer: onaylanan şematik GF22FDX üzerinde çalışma alanında açılır.
+
+00:00:25.600 --> 00:00:33.200
+GENESIS onu bloklara ve bir test düzeneğine dönüştürür: blok grupları ve renkleri, ardından yeniden üretilen bloklar ve test düzeneği.
+
+00:00:33.200 --> 00:00:37.200
+GENESIS her analizi ve bias durumunu kurar: Port 2 ON ve Port 3 ON durumlarında S-parametreleri.
+
+00:00:37.200 --> 00:00:42.700
+GENESIS hedeflerinize doğru optimize eder: devre varyantları ve çalışma durumlarından oluşan test matrisi.
+
+00:00:42.700 --> 00:00:48.100
+GENESIS yerleşimi yerleştirir, yönlendirir ve döşer: Yerleştirme, Yönlendirme, Döşeme ve Doğrulama, her biri kendi kaydıyla.
+
+00:00:48.100 --> 00:00:53.700
+GENESIS onu Calibre DRC ve LVS ile kontrol eder: LVS doğru ve kurala göre listelenen 124 DRC işareti.
+
+00:00:53.700 --> 00:01:00.200
+GENESIS çipinizi 3B olarak oluşturur: yerleşim akışı C1 çipinin 3B modelini yazar; burada hızlandırılmış olarak gösterilir.
+
+00:01:00.200 --> 00:01:07.200
+GENESIS istediğiniz her devreyi tasarlar: bir RF anahtar, bir düşük gürültülü yükselteç, bir karıştırıcı ve bir güç yükselteci, her biri kendi kaydedilmiş konuşmasından.
+
+00:01:07.200 --> 00:01:13.200
+GENESIS. Ne tasarlamak isterseniz.

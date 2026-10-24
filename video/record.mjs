@@ -4,6 +4,9 @@
 // as high-quality JPEGs at 2x device scale (2560x1440, so a zoom in the film stays sharp), and FFmpeg turns them into a 30 fps H.264 clip. A frame
 // arrives only when the page repaints, so each frame is held until the next one; the last is held to the scene end.
 // The clips and clips/manifest.json land in <out>; render.mjs --inputs <out> uses them. Recordings stay outside git.
+// Each clip also gets clips/<scene>.evidence.json: the served build's hashes before and after the take (a rebuild during
+// the take fails it), every write request the page made, each assistant reply, page errors and the recorder's own hash.
+// Writes outside WRITES are refused, so a take can never start a native job. An existing clip is kept unless --replace.
 import { chromium } from '@playwright/test';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -19,6 +22,18 @@ const ffmpeg = process.env.FFMPEG ?? '/home/isguven/miniconda/envs/pyg-env-cpu.H
 const chrome = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH ?? '/home/isguven/.cache/ms-playwright/chromium_headless_shell-1223/chrome-headless-shell-linux64/chrome-headless-shell';
 const VIEWPORT = { width: 1280, height: 720 }, SCALE = 2, FPS = 30;
 const screencast = view => ({ format: 'jpeg', quality: 92, maxWidth: view.width * SCALE, maxHeight: view.height * SCALE, everyNthFrame: 1 });
+// The only writes a take may make: the assistant, the block planner and the live analysis check.
+const WRITES = ['/api/assistant', '/api/blocks/plan', '/api/analysis/check'];
+const sha256 = data => createHash('sha256').update(data).digest('hex');
+const recorder = sha256(readFileSync(new URL(import.meta.url)) + readFileSync(new URL('./record/scenes.mjs', import.meta.url)));
+/** Hashes the served page and its scripts, so a take can prove the build did not change under it. */
+async function servedBuild(page) {
+  const html = await (await page.request.get(`${base}/`)).body();
+  const scripts = [...html.toString().matchAll(/<script[^>]+src="([^"]+)"/g)].map(m => new URL(m[1], `${base}/`).href);
+  const hashes = {};
+  for (const url of scripts) hashes[url] = sha256(await (await page.request.get(url)).body());
+  return { html: sha256(html), scripts: hashes };
+}
 const unknown = wanted?.filter(id => !recordedScenes.some(s => s.id === id)) ?? [];
 if (unknown.length) throw new Error(`Unknown scenes: ${unknown.join(', ')}`);
 
@@ -56,8 +71,8 @@ function camera(page, frames, view) {
     /** Names the clip time where a shot starts (storyboard `from`). */
     mark(name) { marks[name] = Number((now() - t0).toFixed(3)); },
     pause() { paused = true; pausedAt = Date.now() / 1000; },
-    // A restarted screencast always sends the current frame, so the clip resumes on what happened during the pause.
-    async resume() { await cdp.send('Page.stopScreencast'); skipped += Date.now() / 1000 - pausedAt; paused = false; await cdp.send('Page.startScreencast', screencast(view)); },
+    // A restarted screencast and a nudged repaint send the current frame, so the clip resumes on what happened during the pause.
+    async resume() { await cdp.send('Page.stopScreencast'); skipped += Date.now() / 1000 - pausedAt; paused = false; await cdp.send('Page.startScreencast', screencast(view)); await repaint(); },
     async stop(file) {
       const t1 = now();
       await cdp.send('Page.stopScreencast'); await cdp.detach();
@@ -87,16 +102,45 @@ try {
     const page = await context.newPage();
     const rec = camera(page, `${out}/clips/${scene.id}_frames`, view);
     const file = `clips/${scene.id}.mp4`;
+    if (existsSync(`${out}/${file}`) && !argv.includes('--replace')) throw new Error(`${out}/${file} exists; keep the take or pass --replace`);
+    const evidence = { scene_id: scene.id, recorder_sha256: recorder, writes: [], replies: [], errors: [] };
+    page.on('pageerror', error => evidence.errors.push(String(error)));
+    await context.route('**/api/**', route => {
+      const request = route.request(), path = new URL(request.url()).pathname;
+      if (['GET', 'HEAD'].includes(request.method())) return route.continue();
+      evidence.writes.push({ method: request.method(), path });
+      if (WRITES.includes(path)) return route.continue();
+      evidence.errors.push(`Refused write ${request.method()} ${path}`);
+      return route.abort();
+    });
+    page.on('response', async response => {
+      if (new URL(response.url()).pathname !== '/api/assistant' || response.request().method() !== 'POST') return;
+      const reply = await response.json().catch(() => null);
+      evidence.replies.push({ status: response.status(), model: reply?.model ?? null, message: reply?.message ?? reply?.error ?? null, edits: reply?.edits?.length ?? 0, choices: reply?.choiceCards?.map(c => c.title ?? c.label ?? null) ?? [], elapsed_ms: reply?.elapsedMs ?? null });
+    });
+    evidence.build_before = await servedBuild(page);
     console.log(`[${scene.id}] setting up`);
     await scene.setup(page, base);
     console.log(`[${scene.id}] recording`);
     await rec.start();
-    await scene.film(page, base, rec);
+    try { await scene.film(page, base, rec, evidence); } catch (error) {
+      // A failed take keeps its evidence and a screenshot of where it stopped; its clip is not written.
+      evidence.failure = String(error);
+      evidence.page_text = (await page.evaluate(() => document.body.innerText).catch(() => '')).slice(-3000);
+      await page.screenshot({ path: `${out}/clips/${scene.id}.failure.png` }).catch(() => {});
+      writeFileSync(`${out}/clips/${scene.id}.evidence.json`, JSON.stringify(evidence, null, 2) + '\n');
+      throw error;
+    }
     const { duration, marks } = await rec.stop(`${out}/${file}`);
+    evidence.build_after = await servedBuild(page);
+    if (JSON.stringify(evidence.build_after) !== JSON.stringify(evidence.build_before)) evidence.errors.push('The served build changed during the take');
+    writeFileSync(`${out}/clips/${scene.id}.evidence.json`, JSON.stringify(evidence, null, 2) + '\n');
+    if (evidence.errors.length) throw new Error(`[${scene.id}] take failed, see clips/${scene.id}.evidence.json: ${evidence.errors.join('; ')}`);
     const clip = {
       scene_id: scene.id, file, fps: FPS, width: view.width * SCALE, height: view.height * SCALE,
       duration_s: Number(duration.toFixed(3)), in_s: 0, marks, ui_state: scene.shows, app_commit: arg('app-commit', 'unknown'),
-      app_url: base, recorded_at: new Date().toISOString(), sha256: createHash('sha256').update(readFileSync(`${out}/${file}`)).digest('hex'),
+      app_url: base, recorded_at: new Date().toISOString(), sha256: sha256(readFileSync(`${out}/${file}`)),
+      evidence_sha256: sha256(readFileSync(`${out}/clips/${scene.id}.evidence.json`)),
     };
     manifest.clips = [...manifest.clips.filter(c => c.scene_id !== scene.id), clip];
     writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n');

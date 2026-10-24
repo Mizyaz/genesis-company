@@ -11,20 +11,25 @@ export type Focus = { x: number; y: number; scale: number; at: number; hold: num
  * does in it; GENESIS is drawn in the brand gradient. `speed` plays a slow recording faster (a time-lapse of the real
  * footage), for views that render slowly without a GPU. */
 export type Shot = { clip: string; from?: string; seconds: number; caption: string; focus?: Focus; speed?: number };
-/** A chapter groups its shots under one tag; a chapter without a title plays its shot with no caption. */
-export type Chapter = { id: string; title?: string; enter: Transition; shots: Shot[] };
+/** A chapter groups its shots under one tag; a chapter without a title plays its shot with no caption. A `grid` chapter
+ * plays its shots at the same time, side by side in a 2x2 grid, each under its own caption as a label, with `grid` as
+ * the chapter's caption. */
+export type Chapter = { id: string; title?: string; enter: Transition; shots: Shot[]; grid?: string };
 
 export const chapters: Chapter[] = [
   {
+    // One take on the real site: the landing light and chat box, the prompt, GENESIS's questions, its proposal.
     id: 'start', title: 'Start', enter: 'fade', shots: [
-      { clip: 'S1_prompt', seconds: 4, caption: 'Tell GENESIS what you want to design.', focus: { x: 50, y: 72, scale: 1.5, at: 1.9, hold: 1.3 } },
-      { clip: 'S2_assistant', seconds: 6.5, caption: 'GENESIS understands your flow.', focus: { x: 84, y: 56, scale: 1.55, at: 2.4, hold: 2.4 } },
+      { clip: 'S1_conversation', from: 'landing', seconds: 5.1, caption: '' },
+      { clip: 'S1_conversation', from: 'typed', seconds: 4, caption: 'Tell GENESIS what you want to design.', focus: { x: 50, y: 40, scale: 1.4, at: .2, hold: 1.2 } },
+      { clip: 'S1_conversation', from: 'answer2', seconds: 5.8, caption: 'GENESIS asks what your circuit needs.' },
+      { clip: 'S1_conversation', from: 'proposal', seconds: 6.2, caption: 'GENESIS proposes the schematic.' },
     ],
   },
   {
     id: 'design', title: 'Design', enter: 'slide', shots: [
-      { clip: 'C2_design', from: 'schematic', seconds: 4, caption: 'GENESIS draws the schematic on your PDK.', focus: { x: 52, y: 62, scale: 1.6, at: .9, hold: 2 } },
-      { clip: 'C2_design', from: 'blocks', seconds: 6, caption: 'GENESIS turns it into blocks and a testbench.' },
+      { clip: 'S1_conversation', from: 'schematic', seconds: 4.5, caption: 'GENESIS draws it on your PDK.' },
+      { clip: 'S1_conversation', from: 'blocks', seconds: 7.6, caption: 'GENESIS turns it into blocks and a testbench.' },
     ],
   },
   {
@@ -40,15 +45,23 @@ export const chapters: Chapter[] = [
       { clip: 'C5_3d', from: 'orbit', seconds: 6.5, speed: 4.5, caption: 'GENESIS builds your chip in 3D.', focus: { x: 50, y: 48, scale: 1.45, at: 2.6, hold: 2.4 } },
     ],
   },
-  { id: 'finishing', enter: 'fade', shots: [{ clip: 'S8_finishing', seconds: 4, caption: '' }] },
+  {
+    // Four real conversations, each from its approved schematic; the labels name the circuit asked for.
+    id: 'any', title: 'Any circuit', enter: 'fade', grid: 'GENESIS designs any circuit you want.', shots: [
+      { clip: 'A_spdt', from: 'schematic', seconds: 7, caption: 'RF switch' },
+      { clip: 'A_lna', from: 'schematic', seconds: 7, caption: 'Low-noise amplifier' },
+      { clip: 'A_mixer', from: 'schematic', seconds: 7, caption: 'Mixer' },
+      { clip: 'A_pa', from: 'schematic', seconds: 7, caption: 'Power amplifier' },
+    ],
+  },
+  // The app's own finishing screen: the light from above, the emblem and GENESIS.
+  { id: 'finishing', enter: 'fade', shots: [{ clip: 'S8_finishing', seconds: 6, caption: '' }] },
 ];
-export const OPENING_SECONDS = 3.5;
-export const END_CARD_SECONDS = 3.5;
 /** Seconds the camera takes to push in or pull out. */
 export const FOCUS_MOVE_SECONDS = .4;
 
-export const chapterSeconds = (chapter: Chapter) => chapter.shots.reduce((sum, s) => sum + s.seconds, 0);
+export const chapterSeconds = (chapter: Chapter) => chapter.grid ? Math.max(...chapter.shots.map(s => s.seconds)) : chapter.shots.reduce((sum, s) => sum + s.seconds, 0);
 /** A sequence runs one transition longer than its chapter, so each chapter's seconds are what the viewer sees and the
  * film is exactly the sum of them. The last sequence has nothing to hand over to. */
 export const sequenceFrames = (seconds: number, last = false) => Math.round(seconds * FPS) + (last ? 0 : TRANSITION_FRAMES);
-export const totalFrames = () => Math.round((OPENING_SECONDS + chapters.reduce((sum, c) => sum + chapterSeconds(c), 0) + END_CARD_SECONDS) * FPS);
+export const totalFrames = () => Math.round(chapters.reduce((sum, c) => sum + chapterSeconds(c), 0) * FPS);

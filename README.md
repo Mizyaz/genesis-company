@@ -110,17 +110,26 @@ Original layout images remain unchanged; the lighter card previews, preview
 cropping and theme treatment are display-only. Public repository visibility does not grant a license to
 redistribute the layout images or other company materials.
 
-## Product film
+## Films
 
-The company page has one film, at `#/explore/product-film`, opened from the home-page symbol, the welcome page link
-and the RF physics section. It uses native inline video controls, loads on demand, and includes English/Turkish
-captions, a text transcript and an MP4 download. Its original instrumental score is embedded. Leaving the player
-off-screen, hiding the page or opening a dialog pauses it. There is no autoplay.
+The company page has two films. The product film, at `#/explore/product-film`, opens from the home-page symbol, the
+welcome page link and the RF physics section; the 2D film follows it at `#/explore/how-it-works-film`. Both use native
+inline video controls, load on demand, and include English/Turkish captions, a text transcript and an MP4 download,
+with the original instrumental score embedded. Leaving a player off-screen, hiding the page or opening a dialog pauses
+it. There is no autoplay. Both are rendered by the Remotion project in `video/` at 1080p and scaled to 1280×720.
 
-`public/assets/films/genesis-product-58s.mp4` is a 58-second, 1280×720, 30 fps film of the real GENESIS
-workbench in four chapters (Start, Design, Analysis, Floorplan); Floorplan ends in the 3D viewer the flow writes for
-the chip, played as a time-lapse because it renders slowly without a GPU. It is rendered from screen recordings by
-the Remotion project in `video/`. `node video/record.mjs` records the clips from a running workbench; `node
-video/render.mjs --inputs <footage folder> --audio <score.wav>` renders the film, which is then scaled to 720p.
-Chapters, captions, zooms and timing are in `video/src/storyboard.ts`; footage comes only through the folder's
-`clips/manifest.json`. Results and layouts in the film are saved records from earlier runs. The poster is a frame from the same film.
+`public/assets/films/genesis-product-73s.mp4` (73 s) is the product film: screen recordings of the GENESIS site and
+workbench. It opens on the landing page, where a recorded conversation answers GENESIS's questions and approves its
+proposed schematic, then follows the chapters Start, Design, Analysis and Floorplan, ending in the 3D viewer the flow
+writes for chip C1 (a time-lapse, since it renders slowly without a GPU) and four more circuits, each from its own
+recorded conversation. `node video/record.mjs` records the clips from a running site and workbench; every clip keeps an
+`evidence.json` with the replies, the answers sent and the build hashes. `node video/render.mjs --inputs <footage
+folder> --audio <score.wav>` renders the film. Chapters, captions and timing are in `video/src/storyboard.ts`.
+
+`public/assets/films/genesis-story-67s.mp4` (67 s) is the 2D film. It draws the same flow from saved records: the
+recorded SPDT conversation and its schematic, the blocks and the testbenches of chip C1, the C1 layout stage by stage
+from its GDS, the Calibre DRC/LVS result of that GDS and its metal layers. `node video/story/layout_layers.mjs --scene
+<viewer scene.json> --out <folder>` draws the layout stages and layers; `node video/story/collect.mjs --footage <footage
+folder> --circuit <circuit.json> --verify <verify/record.json> --out <folder>` writes `story.json` (it refuses a verify
+record for another GDS); `node video/render.mjs --composition GenesisStory --inputs <folder> --audio <score.wav>`
+renders it. Scenes and timing are in `video/src/Story.tsx`. Each poster is a frame from its film.
