@@ -34,7 +34,7 @@ const films: Film[] = [
     description: 'A 2D film of the GENESIS flow, drawn from saved records: a recorded conversation, the SPDT schematic and its blocks, the testbenches, the C1 chip layout stage by stage, its Calibre checks and its layers.',
     note: 'An illustration with original music. Every schematic, layout layer and check result it shows is read from a GENESIS record.',
     download: 'Download the 2D film',
-    opening: 'The film opens on the GENESIS light and name, with the chat box.',
+    opening: 'The film opens as the GENESIS symbol lights up under the landing page sunrise, then its name and the chat box.',
     transcript: [
       'Tell GENESIS what you want to design: “Design a broadband SPDT RF switch, DC to 110 GHz.”',
       'GENESIS asks what your circuit needs: series–shunt, series or distributed and tuned; series–shunt is chosen.',

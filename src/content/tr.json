@@ -573,7 +573,7 @@
   "A 2D film of the GENESIS flow, drawn from saved records: a recorded conversation, the SPDT schematic and its blocks, the testbenches, the C1 chip layout stage by stage, its Calibre checks and its layers.": "GENESIS akışının kayıtlardan çizilen 2B filmi: kaydedilmiş bir konuşma, SPDT şematiği ve blokları, test düzenekleri, aşama aşama C1 çip yerleşimi, Calibre kontrolleri ve katmanları.",
   "An illustration with original music. Every schematic, layout layer and check result it shows is read from a GENESIS record.": "Özgün müzik eşliğinde bir çizim. Gösterilen her şematik, yerleşim katmanı ve kontrol sonucu bir GENESIS kaydından okunur.",
   "Download the 2D film": "2B filmi indir",
-  "The film opens on the GENESIS light and name, with the chat box.": "Film GENESIS ışığı ve adıyla, sohbet kutusuyla açılır.",
+  "The film opens as the GENESIS symbol lights up under the landing page sunrise, then its name and the chat box.": "Film, landing sayfasının gün doğumu altında GENESIS sembolünün yanmasıyla açılır; ardından adı ve sohbet kutusu gelir.",
   "GENESIS asks what your circuit needs: an SPDT, the series–shunt topology, and the band, DC to 110 GHz on GF22FDX.": "GENESIS devrenizin neye ihtiyacı olduğunu sorar: bir SPDT, seri–şönt topoloji ve bant, GF22FDX üzerinde DC’den 110 GHz’e.",
   "GENESIS proposes the schematic: 25 parts, proposed and not yet applied.": "GENESIS şematiği önerir: 25 parça, önerildi ve henüz uygulanmadı.",
   "GENESIS draws it on your PDK: the approved schematic opens in the workbench on GF22FDX.": "GENESIS onu PDK’nız üzerinde çizer: onaylanan şematik GF22FDX üzerinde çalışma alanında açılır.",

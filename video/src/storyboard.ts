@@ -10,7 +10,8 @@ export type Focus = { x: number; y: number; scale: number; at: number; hold: num
 /** One shot plays `seconds` of `clip`, from its mark `from` (the clip start without one). `caption` says what GENESIS
  * does in it; GENESIS is drawn in the brand gradient. `speed` plays a slow recording faster (a time-lapse of the real
  * footage), for views that render slowly without a GPU. */
-export type Shot = { clip: string; from?: string; seconds: number; caption: string; focus?: Focus; speed?: number };
+/** `after` starts the shot that many seconds past its mark, e.g. past a page's first blank frames. */
+export type Shot = { clip: string; from?: string; after?: number; seconds: number; caption: string; focus?: Focus; speed?: number };
 /** A chapter groups its shots under one tag; a chapter without a title plays its shot with no caption. A `grid` chapter
  * plays its shots at the same time, side by side in a 2x2 grid, each under its own caption as a label, with `grid` as
  * the chapter's caption. */
@@ -20,7 +21,7 @@ export const chapters: Chapter[] = [
   {
     // One take on the real site: the landing light and chat box, the prompt, GENESIS's questions, its proposal.
     id: 'start', title: 'Start', enter: 'fade', shots: [
-      { clip: 'S1_conversation', from: 'landing', seconds: 5.1, caption: '' },
+      { clip: 'S1_conversation', from: 'landing', after: .4, seconds: 5.1, caption: '' },
       { clip: 'S1_conversation', from: 'typed', seconds: 4, caption: 'Tell GENESIS what you want to design.', focus: { x: 50, y: 40, scale: 1.4, at: .2, hold: 1.2 } },
       { clip: 'S1_conversation', from: 'answer2', seconds: 5.8, caption: 'GENESIS asks what your circuit needs.' },
       { clip: 'S1_conversation', from: 'proposal', seconds: 6.2, caption: 'GENESIS proposes the schematic.' },

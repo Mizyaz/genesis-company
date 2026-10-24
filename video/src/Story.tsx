@@ -4,6 +4,7 @@ import { fade } from '@remotion/transitions/fade';
 import { loadFont } from '@remotion/fonts';
 import { Caption } from './AppScene';
 import { C, GRADIENT } from './Brand';
+import { LitEmblem, Sunrise } from './story/Landing';
 import { fit, mix, Schematic, type Drawing } from './story/Schematic';
 import { FPS } from './storyboard';
 
@@ -48,16 +49,6 @@ export const storyMetadata: CalculateMetadataFunction<StoryProps> = async () => 
   const [story, layout] = await Promise.all(['story.json', 'layout.json'].map(async f => (await fetch(staticFile(f))).json()));
   return { durationInFrames: storyFrames(), props: { story, layout } };
 };
-
-/** The landing page's light: a warm glow from the top with slow rays, at strength k. */
-function Sun({ k }: { k: number }) {
-  const frame = useCurrentFrame();
-  return <AbsoluteFill style={{ pointerEvents: 'none' }}>
-    <AbsoluteFill style={{ opacity: k, background: 'radial-gradient(ellipse 62% 58% at 50% -10%, #fff1cfcc 0%, #ffd9a055 18%, #6fb9ed30 42%, #04132500 72%)' }} />
-    <AbsoluteFill style={{ opacity: k * .5, background: `repeating-conic-gradient(from ${frame * .08}deg at 50% -12%, #ffffff12 0deg 3deg, #ffffff00 3deg 11deg)`,
-      maskImage: 'radial-gradient(ellipse 70% 75% at 50% -10%, #000 0%, #0000 75%)', WebkitMaskImage: 'radial-gradient(ellipse 70% 75% at 50% -10%, #000 0%, #0000 75%)' }} />
-  </AbsoluteFill>;
-}
 
 function Wordmark({ size }: { size: number }) {
   return <div style={{ fontFamily: 'Inter', fontWeight: 800, fontSize: size, letterSpacing: '.08em', background: GRADIENT, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>GENESIS</div>;
@@ -116,10 +107,11 @@ function Ask({ story }: { story: StoryData }) {
   const shown = items.filter(i => i.at <= frame).length;
   const scroll = interpolate(frame, [sent + 120, sent + 150], [0, 160], clamp) * (shown > 3 ? 1 : 0);
   return <AbsoluteFill style={{ background: C.page }}>
-    <Sun k={out(frame, 0, 40) * (1 - .55 * ease(frame, sent, sent + 30))} />
-    <div style={{ position: 'absolute', left: 0, right: 0, top: 300 - (1 - title) * 60, display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: out(frame, 14, 40) * title }}>
-      <Wordmark size={120} />
-      <div style={{ marginTop: 12, fontFamily: 'Inter', fontSize: 34, color: C.muted }}>Whatever you want to design.</div>
+    <Sunrise k={1 - .55 * ease(frame, sent, sent + 30)} />
+    <div style={{ position: 'absolute', left: 0, right: 0, top: 66 - (1 - title) * 60, display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: title }}>
+      <LitEmblem width={240} />
+      <div style={{ marginTop: 18, opacity: out(frame, 14, 40), filter: `blur(${(1 - out(frame, 14, 40)) * 7}px)`, transform: `translateY(${(1 - out(frame, 14, 40)) * 3}px)` }}><Wordmark size={120} /></div>
+      <div style={{ marginTop: 12, fontFamily: 'Inter', fontSize: 34, color: C.muted, opacity: out(frame, 14, 40) }}>Whatever you want to design.</div>
     </div>
     <div style={{ position: 'absolute', left: 260, width: 1400, top: 56 - scroll, display: 'flex', flexDirection: 'column', gap: 20 }}>
       {items.map((item, i) => frame >= item.at && <div key={i} style={{ display: 'flex', flexDirection: 'column' }}>{item.node(out(frame, item.at, item.at + 12))}</div>)}
@@ -337,10 +329,11 @@ function AnyScene({ story }: { story: StoryData }) {
 function EndScene() {
   const frame = useCurrentFrame();
   return <AbsoluteFill style={{ background: C.page }}>
-    <Sun k={out(frame, 0, 50)} />
-    <div style={{ position: 'absolute', left: 0, right: 0, top: 390, display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: out(frame, 18, 46), transform: `translateY(${(1 - out(frame, 18, 46)) * 24}px)` }}>
-      <Wordmark size={150} />
-      <div style={{ marginTop: 18, fontFamily: 'Inter', fontSize: 44, color: C.text }}>Whatever you want to design.</div>
+    <Sunrise />
+    <div style={{ position: 'absolute', left: 0, right: 0, top: 170, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <LitEmblem width={360} from={6} />
+      <div style={{ marginTop: 26, display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: out(frame, 18, 46), transform: `translateY(${(1 - out(frame, 18, 46)) * 24}px)` }}><Wordmark size={150} />
+      <div style={{ marginTop: 18, fontFamily: 'Inter', fontSize: 44, color: C.text }}>Whatever you want to design.</div></div>
     </div>
   </AbsoluteFill>;
 }

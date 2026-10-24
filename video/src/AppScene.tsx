@@ -10,10 +10,10 @@ const SHOT_FADE = 8;
 
 /** Where a shot starts in its clip, in seconds; a missing mark fails the render. */
 export function shotStart(shot: Shot, clip: Clip) {
-  if (!shot.from) return clip.in_s ?? 0;
+  if (!shot.from) return (clip.in_s ?? 0) + (shot.after ?? 0);
   const mark = clip.marks?.[shot.from];
   if (mark === undefined) throw new Error(`Clip ${clip.scene_id} has no mark "${shot.from}"`);
-  return (clip.in_s ?? 0) + mark;
+  return (clip.in_s ?? 0) + mark + (shot.after ?? 0);
 }
 
 /** Frame where each shot starts inside its chapter. */
