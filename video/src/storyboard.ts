@@ -8,8 +8,9 @@ export type Transition = 'fade' | 'slide' | 'wipe';
  * and carries it above the caption; it holds for `hold` seconds and pulls back out. */
 export type Focus = { x: number; y: number; scale: number; at: number; hold: number };
 /** One shot plays `seconds` of `clip`, from its mark `from` (the clip start without one). `caption` says what GENESIS
- * does in it; GENESIS is drawn in the brand gradient. */
-export type Shot = { clip: string; from?: string; seconds: number; caption: string; focus?: Focus };
+ * does in it; GENESIS is drawn in the brand gradient. `speed` plays a slow recording faster (a time-lapse of the real
+ * footage), for views that render slowly without a GPU. */
+export type Shot = { clip: string; from?: string; seconds: number; caption: string; focus?: Focus; speed?: number };
 /** A chapter groups its shots under one tag; a chapter without a title plays its shot with no caption. */
 export type Chapter = { id: string; title?: string; enter: Transition; shots: Shot[] };
 
@@ -34,8 +35,9 @@ export const chapters: Chapter[] = [
   },
   {
     id: 'floorplan', title: 'Floorplan', enter: 'slide', shots: [
-      { clip: 'C4_floorplan', from: 'placement', seconds: 7.2, caption: 'GENESIS places, routes and tiles the layout.' },
-      { clip: 'C4_floorplan', from: 'verify', seconds: 7.6, caption: 'GENESIS checks it with Calibre DRC and LVS.', focus: { x: 78, y: 68, scale: 1.8, at: .15, hold: 1 } },
+      { clip: 'C4_floorplan', from: 'placement', seconds: 5.4, caption: 'GENESIS places, routes and tiles the layout.' },
+      { clip: 'C4_floorplan', from: 'verify', seconds: 5.6, caption: 'GENESIS checks it with Calibre DRC and LVS.', focus: { x: 78, y: 68, scale: 1.8, at: .15, hold: 1 } },
+      { clip: 'C5_3d', from: 'orbit', seconds: 6.5, speed: 4.5, caption: 'GENESIS builds your chip in 3D.', focus: { x: 50, y: 48, scale: 1.45, at: 2.6, hold: 2.4 } },
     ],
   },
   { id: 'finishing', enter: 'fade', shots: [{ clip: 'S8_finishing', seconds: 4, caption: '' }] },

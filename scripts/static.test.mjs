@@ -278,7 +278,6 @@ test('on phones rows of cards scroll sideways, sections are named not numbered, 
   assert.match(wireCss, /clip-path: inset\(-8px calc\(\(1 - var\(--progress\)\) \* 100%\) -8px 0\)/);
   assert.match(wireCss, /\.scroll-current\[data-motion="off"\] \*/);
   assert.match(wireCss, /prefers-reduced-motion: reduce/);
-  assert.match(read('src/shared/CompanyIntro.tsx'), /showModal\(\)/, 'the introduction uses the native top layer');
 });
 
 test('every platform stage opens a tube screen with what GENESIS offers there, animated, without new claims', () => {
@@ -533,7 +532,7 @@ test('every page change and every wait uses the one silicon gate, from the first
 test('public source has no assistant, landing page or engineering service', () => {
   for (const path of ['src/App.tsx', 'src/main.tsx', 'src/pages/Landing.tsx', 'src/assistant', 'server', '.env']) assert.equal(existsSync(resolve(root, path)), false, path);
   const content = JSON.parse(read('src/content/site.json'));
-  assert.deepEqual(Object.keys(content).sort(), ['about', 'brand', 'intro', 'introduction', 'rfPhysics', 'membership', 'portfolio', 'services', 'silicon', 'stages', 'story', 'workflow'].sort());
+  assert.deepEqual(Object.keys(content).sort(), ['about', 'brand', 'intro', 'rfPhysics', 'membership', 'portfolio', 'services', 'silicon', 'stages', 'story', 'workflow'].sort());
   const source = walk('src').map(read).join('\n');
   assert.doesNotMatch(source, /localhost|127\.0\.0\.1|\/api\/|VITE_WORKBENCH_URL|codex exec|fetch\s*\(|new WebSocket/);
   assert.match(read('index.html'), /connect-src 'none'/);
@@ -609,179 +608,35 @@ test('About us and research are pages of their own; İslam Güven leads the team
   assert.match(library, /<PublicationActions key=\{selected.id\}/);
 });
 
-test('the brand opens a short RF introduction instead of a game', () => {
+test('the brand opens the product film; the old 3D and 2D introduction films are gone', () => {
   const source = walk('src').map(read).join('\n');
   assert.doesNotMatch(source, /ResearchFlight|FlightSymbol|takeRequestedPaper/);
-  assert.equal(JSON.parse(read('package.json')).dependencies.three, '0.180.0');
-  assert.match(read('src/pages/Welcome.tsx'), /symbol=\{<CompanyIntro symbol \/>\}/);
+  assert.equal(JSON.parse(read('package.json')).dependencies.three, undefined);
+  for (const path of ['src/shared/intro', 'src/styles/company-intro.css', 'public/assets/films/genesis-3d-30s.mp4', 'public/assets/genesis-intro-score.mp3']) assert.equal(existsSync(resolve(root, path)), false, path);
+  assert.match(read('src/pages/Welcome.tsx'), /symbol=\{<CompanyIntro \/>\}/);
   const intro = read('src/shared/CompanyIntro.tsx');
-  assert.match(intro, /FILM_SECONDS/);
-  assert.match(intro, /showModal\(\)/);
-  assert.match(intro, /onCancel=/);
-  assert.match(intro, /launcher.current\?\.focus\(\)/);
-  assert.match(intro, /useVisibleMotion<HTMLDialogElement>/);
-  assert.match(intro, /cancelAnimationFrame\(frame\)/);
-  assert.match(intro, /resize.disconnect\(\)/);
-  assert.match(intro, /sound.pause\(\)/);
-  assert.match(intro, /type="range"/);
-  assert.match(intro, /<canvas key=\{variant\} ref=\{canvas\}/);
-  assert.doesNotMatch(intro, /film-chapters|film-copy|secondsPerChapter/);
-  assert.match(read('src/styles/company-intro.css'), /prefers-reduced-motion: reduce/);
+  assert.match(intro, /const FILM = '#\/explore\/product-film'/);
+  assert.match(intro, /<EmblemLauncher label=\{t\('Watch the product film'\)\} onLaunch=\{\(\) => navigate\(FILM\)\} \/>/);
   assert.match(read('src/pages/Research.tsx'), /<Publications people=\{site.about.people\} papers=\{papers\} \/>/);
 });
 
-test('the RF positioning and introduction are bilingual and clearly illustrative', () => {
-  const { introduction, rfPhysics } = JSON.parse(read('src/content/site.json'));
+test('the RF positioning is bilingual and clearly illustrative', () => {
+  const { rfPhysics } = JSON.parse(read('src/content/site.json'));
   const dictionary = JSON.parse(read('src/content/tr.json'));
   const strings = value => typeof value === 'string' ? [value] : Object.values(value).flatMap(strings);
-  for (const text of strings({ introduction, rfPhysics })) {
+  for (const text of strings({ rfPhysics })) {
     assert.ok(text === 'GENESIS' || dictionary[text], text);
     assert.doesNotMatch(text, /—|CLI|JSON|empire|DRC|LVS/);
   }
-  assert.match(introduction.description, /not simulated measurement data/);
   assert.match(read('src/pages/Explore.tsx'), /t\("From schematic"\)/);
   assert.match(read('src/pages/Explore.tsx'), /<RFPhysics \/>/);
   const intro = read('src/shared/CompanyIntro.tsx');
   assert.match(intro, /Illustrated workflow/);
-  assert.match(intro, /import\('\.\/intro\/frontEndFilm'\)/);
-  assert.match(intro, /film.current\?\.dispose\(\)/);
   assert.match(intro, /<RFDesignScene stage=\{3\}/);
+  assert.match(intro, /href=\{FILM\}/);
 });
 
 const transpiled = (path, dependencies = {}) => { const module = {}; new Function('exports', 'require', ts.transpileModule(read(path), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText)(module, id => dependencies[id] ?? {}); return module; };
-
-test('the separate 2D film resizes connected components together without replacing the 3D original', () => {
-  const { illustrationState, illustrationPixels, illustrationCopy } = transpiled('src/shared/intro/illustrationScene.ts', {
-    './timeline': transpiled('src/shared/intro/timeline.ts'), '../pixelLayout': transpiled('src/shared/pixelLayout.ts'),
-  });
-  const states = Array.from({ length: 9 }, (_, i) => illustrationState(10.15 + i * 1.8));
-  for (const readValue of [s => s.mos.fingers, s => s.mos.width, s => s.mos.height, s => s.coil.size, s => s.coil.width, s => s.pixel.width, s => s.cap.width]) {
-    assert.ok(new Set(states.map(readValue)).size >= 5, 'the geometry actually changes, not just its label');
-  }
-  assert.ok(new Set(illustrationPixels.map(p => JSON.stringify(p.metal))).size >= 5);
-  for (let time = 3; time <= 26; time += .25) {
-    const s = illustrationState(time);
-    assert.deepEqual(s, illustrationState(time), 'seeking is deterministic');
-    for (const [wire, from, to] of [['input', 'input', 'pixelIn'], ['gate', 'pixelOut', 'gate'], ['drain', 'drain', 'coilIn'], ['output', 'coilOut', 'output']]) {
-      const points = s.wires.find(w => w.id === wire).points;
-      assert.deepEqual(points[0], s.pins[from]); assert.deepEqual(points.at(-1), s.pins[to]);
-    }
-    for (const p of Object.values(s.pins)) {
-      const screenX = 640 + (p[0] - s.focusX) * s.zoom;
-      assert.ok(screenX > 32 && screenX < 1248, 'the output and input remain in frame');
-    }
-  }
-  const dictionary = JSON.parse(read('src/content/tr.json'));
-  for (const label of illustrationCopy) assert.ok(dictionary[label], label);
-  for (const sentence of Object.values(JSON.parse(read('src/content/site.json')).introduction.illustration)) {
-    assert.match(sentence, /\.$/); assert.doesNotMatch(sentence, /—|\?/);
-  }
-  const renderer = read('src/shared/intro/illustrationFilm.ts');
-  assert.match(renderer, /getContext\('2d'/); assert.doesNotMatch(renderer, /from 'three'/);
-  const player = read('src/shared/CompanyIntro.tsx');
-  assert.match(player, /useState<'3d' \| '2d'>\('3d'\)/);
-  assert.match(player, /import\('\.\/intro\/illustrationFilm'\)/);
-  assert.match(player, /download="GENESIS-3D-30s.mp4"/);
-  const mp4 = readFileSync(resolve(root, 'public/assets/films/genesis-3d-30s.mp4'));
-  assert.equal(mp4.subarray(4, 8).toString(), 'ftyp');
-  assert.equal(mp4.length, 9_657_818, 'the published 3D export remains unchanged');
-});
-
-test('the original score is finite, deterministic and resolves with the film', () => {
-  const timeline = transpiled('src/shared/intro/timeline.ts');
-  const { composeScore, FILM_SECONDS, BPM } = transpiled('src/shared/intro/score.ts', { './timeline': timeline });
-  assert.equal(FILM_SECONDS, 30);
-  assert.equal(16 * 4 * 60 / BPM, FILM_SECONDS);
-  const notes = composeScore();
-  assert.deepEqual(notes, composeScore());
-  assert.ok(notes.length > 200 && notes.length < 600);
-  assert.ok(notes.every(note => note.at >= 0 && note.at < FILM_SECONDS && note.length > 0 && note.level > 0 && Math.abs(note.pan) <= 1));
-  assert.deepEqual([...new Set(notes.map(note => note.voice))].sort(), ['bass', 'bell', 'hat', 'kick', 'pad', 'tick']);
-  assert.ok(notes.some(note => note.at >= 27 && note.voice === 'bell'));
-  assert.ok(!notes.some(note => note.at >= 26.25 && note.voice === 'tick'));
-  const score = read('src/shared/intro/score.ts');
-  assert.doesNotMatch(score, /fetch\(|https?:|setInterval/);
-  assert.match(score, /removeAttribute\('src'\)/);
-  assert.ok(existsSync(resolve(root, 'public/assets/genesis-intro-score.mp3')));
-  const musicBytes = statSync(resolve(root, 'public/assets/genesis-intro-score.mp3')).size;
-  assert.ok(musicBytes > 350_000 && musicBytes < 800_000, 'bounded pre-rendered stereo track');
-});
-
-test('the film tells a complete prompt-to-schematic-to-layout story in thirty seconds', () => {
-  const { filmCues, filmCue, filmTime, FILM_SECONDS } = transpiled('src/shared/intro/timeline.ts');
-  assert.deepEqual(filmCues.map(cue => cue.id), ['prompt', 'schematic', 'joint', 'layout', 'verify', 'closing']);
-  assert.equal(filmCues[0].from, 0);
-  assert.equal(filmCues.at(-1).to, FILM_SECONDS);
-  filmCues.forEach((cue, i) => { assert.ok(cue.to - cue.from >= 3); if (i) assert.equal(cue.from, filmCues[i - 1].to); });
-  for (let time = 0; time <= FILM_SECONDS; time += .1) {
-    const cue = filmCue(time); assert.ok(cue.opacity >= 0 && cue.opacity <= 1);
-  }
-  assert.equal(filmCue(30).id, 'closing');
-  assert.equal(filmTime(60), '1:00'); assert.equal(filmTime(59.9), '0:59');
-  assert.equal(filmCue(5).id, 'schematic', 'the request does not spend ten seconds drifting');
-  assert.equal(filmCue(11).id, 'joint');
-  assert.equal(filmCue(19).id, 'layout');
-});
-
-const frontEndModel = () => transpiled('src/shared/intro/frontEndScene.ts', {
-  './timeline': transpiled('src/shared/intro/timeline.ts'), '../pixelLayout': transpiled('src/shared/pixelLayout.ts'),
-});
-test('assembly fills the film before the closing brand reveal and starts after the illustrated LLM click', () => {
-  const { llmClickAt, parts, partState, requestState } = frontEndModel();
-  assert.equal(requestState(1), 'request'); assert.equal(requestState(2.2), 'pressed');
-  assert.equal(requestState(25), 'thinking'); assert.equal(requestState(26), 'ready');
-  parts.forEach(part => {
-    assert.ok(part.start > llmClickAt);
-    assert.equal(partState(part, llmClickAt).appear, 0);
-    assert.equal(partState(part, part.start).appear, 0);
-    assert.equal(partState(part, part.start + .8).appear, 1);
-  });
-  assert.ok(Math.max(...parts.map(part => part.start)) > 20);
-  const dictionary = JSON.parse(read('src/content/tr.json'));
-  for (const copy of ['Send to GENESIS', 'Request received', 'Thinking', 'Circuit assembled', 'Illustrated LLM interaction']) assert.ok(dictionary[copy], copy);
-});
-
-test('LNA and PA contain complete amplifier structures and retain port connections during resizing', () => {
-  const { hierarchy, parts, connections, connectionState, portPosition } = frontEndModel();
-  assert.equal(hierarchy.id, 'front-end');
-  for (const id of ['lna', 'pa']) {
-    const circuit = hierarchy.children.find(child => child.id === id);
-    const children = circuit.children.map(id => parts.find(part => part.id === id));
-    assert.equal(children.filter(part => part.kind === 'mos').length, 2);
-    assert.equal(children.filter(part => part.kind === 'pixel').length, 3);
-    assert.equal(children.filter(part => part.kind === 'capacitor').length, 2);
-    assert.equal(children.filter(part => part.kind === 'choke').length, 1);
-  }
-  assert.equal(parts.filter(part => part.kind === 'mixer').length, 2);
-  for (let time = 0; time <= 30; time += .5) for (const edge of connections) {
-    const state = connectionState(edge, time);
-    assert.deepEqual(state.points[0], portPosition(edge.from, time));
-    assert.deepEqual(state.points.at(-1), portPosition(edge.to, time));
-    assert.ok(state.points.flat().every(Number.isFinite));
-    assert.ok(state.progress >= 0 && state.progress <= 1);
-  }
-});
-
-test('pixel topology, footprint and transistor sizing change together until the final product shot', () => {
-  const { parts, partState, pixelCandidates, designTimes, designState, sceneCopy } = frontEndModel();
-  assert.ok(designTimes.at(-1) >= 24); assert.equal(designState(26).blend, 1);
-  for (const part of parts.filter(part => part.kind === 'pixel')) {
-    const variants = pixelCandidates.get(part.id);
-    assert.ok(variants.length >= 12);
-    for (let i = 1; i < variants.length; i++) assert.notDeepEqual(variants[i].metal, variants[i - 1].metal);
-    assert.notEqual(partState(part, 22).width, partState(part, 26).width);
-  }
-  for (const part of parts.filter(part => part.kind === 'mos')) {
-    assert.notEqual(partState(part, 22).fingers, partState(part, 26).fingers);
-    assert.notEqual(partState(part, 22).fingerLength, partState(part, 26).fingerLength);
-  }
-  const dictionary = JSON.parse(read('src/content/tr.json'));
-  sceneCopy.forEach(copy => assert.ok(dictionary[copy], `Scene translation: ${copy}`));
-  const renderer = read('src/shared/intro/frontEndFilm.ts');
-  assert.match(renderer, /new WebGLRenderer/); assert.match(renderer, /new PerspectiveCamera/);
-  assert.match(renderer, /new InstancedMesh/); assert.match(renderer, /renderer.forceContextLoss/);
-  assert.doesNotMatch(renderer, /getContext\('2d'|CanvasTexture|Math.random/);
-});
 
 test('the GENESIS symbol stays consistent and opens without a full-screen flash', () => {
   const { emblem, emblemMark, drawEmblem } = transpiled('src/shared/emblem.ts');
@@ -902,13 +757,13 @@ test('product links accept only a valid port and carry the selected theme', asyn
   for (const port of ['', '0', '65536', '-1', '4.3', '1e3', 'abc', 'https://example.test', 'javascript:alert(1)']) assert.equal(productLink(port, 'dark'), null, port);
 });
 
-test('the supplemental product film is on-demand, accessible and independent of the original', async () => {
-  assert.ok(readFileSync(resolve(root, 'public/assets/films/genesis-product-56s.mp4')).length < 10e6);
+test('the product film is on-demand and accessible', async () => {
+  assert.ok(readFileSync(resolve(root, 'public/assets/films/genesis-product-58s.mp4')).length < 10e6);
   const player = read('src/shared/ProductFilm.tsx');
   assert.match(player, /controls playsInline preload="none"/);
-  assert.doesNotMatch(player, /autoPlay|from 'three'|import\('\.\/intro/);
+  assert.doesNotMatch(player, /autoPlay/);
   assert.match(player, /aria-labelledby="product-film-title"/);
-  assert.match(player, /download="GENESIS-product-film-56s.mp4"/);
+  assert.match(player, /download="GENESIS-product-film-58s.mp4"/);
   assert.match(player, /visibilitychange/);
   assert.match(player, /visibility.disconnect\(\); dialogs.disconnect\(\)/);
   assert.match(read('src/pages/Welcome.tsx'), /href="#\/explore\/product-film"/);
@@ -918,10 +773,10 @@ test('the supplemental product film is on-demand, accessible and independent of 
   const transcript = parsed.statements.find(statement => statement.declarationList?.declarations[0]?.name.getText(parsed) === 'transcript').declarationList.declarations[0].initializer.elements;
   for (const line of transcript) assert.ok(dictionary[line.text], `Transcript translation: ${line.text}`);
   for (const language of ['en', 'tr']) {
-    const captions = read(`public/assets/films/genesis-product-56s.${language}.vtt`);
+    const captions = read(`public/assets/films/genesis-product-58s.${language}.vtt`);
     assert.ok(captions.startsWith('WEBVTT\n\n'));
     const cues = [...captions.matchAll(/00:00:(\d{2}\.\d{3}) --> 00:00:(\d{2}\.\d{3})/g)].map(match => match.slice(1).map(Number));
-    assert.equal(cues.length, 10); assert.equal(cues[0][0], 0); assert.equal(cues.at(-1)[1], 55.8);
+    assert.equal(cues.length, 11); assert.equal(cues[0][0], 0); assert.equal(cues.at(-1)[1], 58.5);
     cues.forEach(([from, to], i) => { assert.ok(to > from); if (i) assert.equal(from, cues[i - 1][1]); });
   }
 });

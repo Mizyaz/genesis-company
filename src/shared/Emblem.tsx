@@ -20,7 +20,7 @@ export function EmblemMark() {
   </svg>;
 }
 
-/** The shared GENESIS symbol opens its supplied introduction without a flash or a delayed handoff. */
+/** The shared GENESIS symbol, as a button that runs `onLaunch`. */
 export const EmblemLauncher = forwardRef<HTMLButtonElement, { label: string; onLaunch: () => void }>(function EmblemLauncher({ label, onLaunch }, ref) {
   const { ref: seen, enabled, running } = useVisibleMotion<HTMLSpanElement>();
   const id = `emblem-${useId().replace(/:/g, '')}`;

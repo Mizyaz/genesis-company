@@ -77,7 +77,8 @@ function camera(page, frames, view) {
   };
 }
 
-const browser = await chromium.launch({ executablePath: chrome });
+// Software WebGL, so a scene can film a 3D view on a host without a GPU.
+const browser = await chromium.launch({ executablePath: chrome, args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
 try {
   for (const scene of recordedScenes.filter(s => !wanted || wanted.includes(s.id))) {
     // A scene can ask for a taller window when its view does not fit the default one.

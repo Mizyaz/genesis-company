@@ -122,19 +122,46 @@ export const recordedScenes = [
     async film(page, base, rec) {
       const main = name => page.locator('.flow-rail[aria-label="Main stages"] button', { hasText: name }).click();
       rec.mark('placement');
-      await hold(page, 2.4);
+      await hold(page, 1.8);
       await main('Routing');
-      await hold(page, 2.4);
+      await hold(page, 1.8);
       await main('Tiling');
-      await hold(page, 2.4);
+      await hold(page, 1.8);
       rec.mark('verify');
       await main('Verify');
-      await hold(page, 2);
-      await page.locator('.flow-capture-open').first().click();
       await hold(page, 1.8);
+      await page.locator('.flow-capture-open').first().click();
+      await hold(page, 1.2);
       const zoomIn = page.getByRole('button', { name: 'Zoom in' }).locator('visible=true').last();
-      for (let i = 0; i < 3; i++) { await zoomIn.click(); await hold(page, .45); }
-      await hold(page, 2.5);
+      for (let i = 0; i < 3; i++) { await zoomIn.click(); await hold(page, .35); }
+      await hold(page, 1.5);
+    },
+  },
+  {
+    id: 'C5_3d', shows: 'The offline 3D viewer (circuit_3d.html) the floorplan flow writes for chip C1, opened from the chip showcase; density fill and side panels hidden; orbit and zoom by mouse',
+    async setup(page, base) {
+      await page.goto(`${base}/api/report/chip-showcase/c1/viewer`, { waitUntil: 'load', timeout: 240000 });
+      await page.locator('canvas').first().waitFor();
+      await hold(page, 4);
+      // The fill envelopes take most of the draw time in a browser without a GPU; the chip itself stays whole.
+      await page.locator('label, li, div').filter({ has: page.locator('input[type=checkbox]') }).filter({ hasText: 'Density fill' }).last().locator('input[type=checkbox]').first().uncheck();
+      await page.getByTitle('Show or hide the layer panel').click();
+      await page.getByTitle('Show or hide the settings panel').click();
+      await hold(page, 1);
+      await page.keyboard.press('f');
+      await hold(page, 2);
+    },
+    async film(page, base, rec) {
+      // The drag starts and ends on empty canvas, so no hover card opens over the chip.
+      const box = await page.locator('canvas').first().boundingBox();
+      const x0 = box.x + 80, y0 = box.y + box.height - 120;
+      await page.mouse.move(x0, y0);
+      rec.mark('orbit');
+      await hold(page, .3);
+      await page.mouse.down();
+      for (let i = 1; i <= 16; i++) await page.mouse.move(x0 - i * 4, y0 - i * 2.5);
+      await page.mouse.up();
+      await hold(page, 1.5);
     },
   },
   {

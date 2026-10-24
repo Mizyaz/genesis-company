@@ -14,13 +14,13 @@ export function Welcome() {
     <div className="landing-atmosphere" aria-hidden="true" />
     <section className="welcome-content" aria-labelledby="welcome-heading">
       <p className="eyebrow">{t("RF DESIGN. SIMULATION. AI.")}</p>
-      <BrandIntro headingId="welcome-heading" symbol={<CompanyIntro symbol />} />
+      <BrandIntro headingId="welcome-heading" symbol={<CompanyIntro />} />
       <p className="welcome-intro">{t("Explore what we build. Or start your next design.")}</p>
       <div className="welcome-choices">
         <a className="welcome-choice" href="#/explore"><Icon name="wave" /><span><strong>{t("Discover")}</strong><small>{t("Our approach, our circuits and our platform.")}</small></span><Icon name="arrow" /></a>
         <a className="welcome-choice welcome-choice-design" href="#/design"><Icon name="chip" /><span><strong>{t("Design")}</strong><small>{t("Open your GENESIS design environment.")}</small></span><Icon name="arrow" /></a>
       </div>
-      <a className="welcome-discover" href="#/explore/product-film"><Icon name="play" />{t("Watch the product film")} <span>0:56</span></a>
+      <a className="welcome-discover" href="#/explore/product-film"><Icon name="play" />{t("Watch the product film")} <span>0:58</span></a>
       <StoryScene content={site.story.scene} brand={<Brand />} />
     </section>
   </main>;

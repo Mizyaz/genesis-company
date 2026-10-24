@@ -37,12 +37,12 @@ function camera(focus: Focus | undefined, frame: number, width: number, height: 
   return `translate(${inside(x - fx * scale, width)}px, ${inside(y - fy * scale, height)}px) scale(${scale})`;
 }
 
-/** The real recording from the shot's start, filling the frame, slowed (never sped up) only if the clip ends early. */
-function Footage({ clip, start, frames, focus }: { clip: Clip; start: number; frames: number; focus?: Focus }) {
+/** The real recording from the shot's start, filling the frame, at the shot's speed; slowed only if the clip ends early. */
+function Footage({ clip, start, frames, focus, speed = 1 }: { clip: Clip; start: number; frames: number; focus?: Focus; speed?: number }) {
   const frame = useCurrentFrame(), { width, height } = useVideoConfig();
   const available = (clip.duration_s - start) * FPS;
   return <div style={{ position: 'absolute', inset: 0, transform: camera(focus, frame, width, height), transformOrigin: '0 0' }}>
-    <Video src={staticFile(clip.file)} muted trimBefore={Math.round(start * FPS)} playbackRate={Math.min(1, available / frames)}
+    <Video src={staticFile(clip.file)} muted trimBefore={Math.round(start * FPS)} playbackRate={Math.min(speed, available / frames)}
       style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
   </div>;
 }
@@ -75,7 +75,7 @@ export function ChapterScene({ chapter, clips, index, count }: { chapter: Chapte
       const hold = !last && chapter.shots[i + 1].clip !== shot.clip ? SHOT_FADE : 0;
       const opacity = fades ? interpolate(frame - start, [0, SHOT_FADE], [0, 1], clamp) : 1;
       return <Sequence key={i} from={start} durationInFrames={frames + hold} layout="none">
-        <div style={{ position: 'absolute', inset: 0, opacity }}><Footage clip={clip} start={shotStart(shot, clip)} frames={frames + hold} focus={shot.focus} /></div>
+        <div style={{ position: 'absolute', inset: 0, opacity }}><Footage clip={clip} start={shotStart(shot, clip)} frames={frames + hold} focus={shot.focus} speed={shot.speed} /></div>
       </Sequence>;
     })}
     {chapter.title && <>

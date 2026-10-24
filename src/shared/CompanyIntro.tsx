@@ -1,234 +1,18 @@
-import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react';
-import { createPortal } from 'react-dom';
+import { useEffect, useState } from 'react';
 import siteContent from '../content/site.json';
 import { useLanguage, useTranslatedContent } from './Language';
 import { useVisibleMotion } from './MotionSettings';
-import { EmblemLauncher, EmblemMark } from './Emblem';
+import { EmblemLauncher } from './Emblem';
 import { RFDesignScene } from './RFDesignScene';
-import { DiePanel } from './SiliconGate';
-import { Icon, assetUrl } from './ui';
-import type { CircuitFilm } from './intro/frontEndFilm';
-import { readFilmPalette } from './intro/filmPalette';
-import { RequestSequence } from './intro/RequestSequence';
-import { ease, filmCue, filmTime } from './intro/timeline';
-import { IntroSound, FILM_SECONDS, type AudioStatus } from './intro/score';
-import '../styles/company-intro.css';
+import { Icon } from './ui';
+import { navigate } from './gate';
 
-/** The same short overview can be opened from the brand or from the company presentation. */
-export function CompanyIntro({ symbol = false }: { symbol?: boolean }) {
-  const { t } = useLanguage();
-  const [open, setOpen] = useState(false);
-  const launcher = useRef<HTMLButtonElement>(null);
-  const origin = useRef<DOMRect>();
-  const sound = useRef<IntroSound>();
-  const launch = () => { origin.current = launcher.current?.getBoundingClientRect(); sound.current = new IntroSound(assetUrl('/assets/genesis-intro-score.mp3')); setOpen(true); };
-  const close = () => { sound.current?.dispose(); sound.current = undefined; setOpen(false); window.requestAnimationFrame(() => launcher.current?.focus()); };
-  useEffect(() => () => sound.current?.dispose(), []);
-  return <>
-    {symbol ? <EmblemLauncher ref={launcher} label={t('Watch the GENESIS introduction')} onLaunch={launch} />
-      : <button ref={launcher} type="button" className="button button-secondary" onClick={launch}><Icon name="play" />{t('Watch the introduction')}<span className="intro-duration">{filmTime(FILM_SECONDS)}</span></button>}
-    {open && sound.current && createPortal(<IntroFilm onClose={close} sound={sound.current} origin={origin.current} />, document.body)}
-  </>;
-}
+const FILM = '#/explore/product-film';
 
-function IntroFilm({ onClose, sound, origin }: { onClose: () => void; sound: IntroSound; origin?: DOMRect }) {
+/** The GENESIS symbol opens the product film, the one film of the real workbench. */
+export function CompanyIntro() {
   const { t } = useLanguage();
-  const { introduction } = useTranslatedContent(siteContent);
-  const { ref, enabled, running } = useVisibleMotion<HTMLDialogElement>();
-  const [entering, setEntering] = useState(enabled);
-  const entered = useRef(false);
-  const [time, setTime] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const [muted, setMuted] = useState(false);
-  const [audioStatus, setAudioStatus] = useState<AudioStatus>(sound.status);
-  const [revision, setRevision] = useState(0);
-  const closeButton = useRef<HTMLButtonElement>(null);
-  const canvas = useRef<HTMLCanvasElement>(null);
-  const labels = useRef<HTMLDivElement>(null);
-  const film = useRef<CircuitFilm>();
-  const [sceneStatus, setSceneStatus] = useState<'loading' | 'ready' | 'unavailable'>('loading');
-  const [variant, setVariant] = useState<'3d' | '2d'>('3d');
-  const viewport = useRef<HTMLDivElement>(null);
-  const clock = useRef(0);
-  const sampling = useRef(1);
-  const fitScene = useRef(() => {});
-  const duration = FILM_SECONDS;
-  const playing = running && !entering && !paused && sceneStatus === 'ready' && time < duration;
-  useLayoutEffect(() => {
-    const node = viewport.current;
-    if (!node) return;
-    const fit = () => node.style.setProperty('--film-scale', String(node.clientWidth / 1280));
-    fit(); const observer = new ResizeObserver(fit); observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
-  useEffect(() => {
-    let active = true;
-    const surface = canvas.current;
-    const lost = (event: Event) => { event.preventDefault(); if (active) setSceneStatus('unavailable'); };
-    surface?.addEventListener('webglcontextlost', lost);
-    const renderer = variant === '3d'
-      ? import('./intro/frontEndFilm').then(module => module.createCircuitFilm)
-      : import('./intro/illustrationFilm').then(module => module.createIllustrationFilm);
-    void renderer.then(createCircuitFilm => {
-      if (!active || !canvas.current || !labels.current) return;
-      try { film.current = createCircuitFilm(canvas.current, labels.current); setSceneStatus('ready'); }
-      catch { setSceneStatus('unavailable'); }
-    }).catch(() => { if (active) setSceneStatus('unavailable'); });
-    return () => { active = false; surface?.removeEventListener('webglcontextlost', lost); film.current?.dispose(); film.current = undefined; };
-  }, [variant]);
-  useEffect(() => {
-    let active = true;
-    void sound.ready.then(() => { if (active) setAudioStatus(sound.status); });
-    return () => { active = false; sound.pause(); };
-  }, [sound]);
-  useLayoutEffect(() => {
-    const dialog = ref.current;
-    dialog?.showModal();
-    closeButton.current?.focus();
-    const overflow = document.documentElement.style.overflow;
-    document.documentElement.style.overflow = 'hidden';
-    return () => { dialog?.close(); document.documentElement.style.overflow = overflow; };
-  }, [ref]);
-  useLayoutEffect(() => {
-    const dialog = ref.current;
-    if (!dialog || entered.current) return;
-    if (!enabled) { entered.current = true; setEntering(false); return; }
-    const bounds = dialog.getBoundingClientRect();
-    const x = Math.max(0, Math.min(bounds.width - 2, (origin?.left ?? bounds.left + bounds.width / 2) - bounds.left));
-    const y = Math.max(0, Math.min(bounds.height - 2, (origin?.top ?? bounds.top + bounds.height / 2) - bounds.top));
-    const w = Math.min(origin?.width ?? 40, bounds.width - x), h = Math.min(origin?.height ?? 40, bounds.height - y);
-    const expansion = dialog.animate([
-      { clipPath: `inset(${y}px ${bounds.width - x - w}px ${bounds.height - y - h}px ${x}px round 20px)` },
-      { clipPath: 'inset(0px 0px 0px 0px round 0px)' },
-    ], { duration: 620, easing: 'cubic-bezier(.2,.75,.2,1)', fill: 'both' });
-    expansion.id = 'film-expand';
-    const animations = [expansion, ...Array.from(dialog.querySelectorAll<HTMLElement>('.film-opening .silicon-gate-panel')).map((panel, i) => {
-      const animation = panel.animate([{ transform: 'translateX(0)' }, { transform: `translateX(${i ? 102 : -102}%)` }],
-        { duration: 520, delay: 270, easing: 'cubic-bezier(.2,.75,.2,1)', fill: 'both' });
-      animation.id = `film-shutter-${i}`; return animation;
-    })];
-    let active = true;
-    const finish = () => { if (active) { entered.current = true; setEntering(false); animations.forEach(animation => animation.cancel()); } };
-    void Promise.all(animations.map(animation => animation.finished)).then(finish, () => {});
-    const fallback = window.setTimeout(finish, 950);
-    return () => { active = false; window.clearTimeout(fallback); animations.forEach(animation => animation.cancel()); };
-  }, [enabled, origin, ref]);
-  useEffect(() => {
-    const surface = canvas.current, scene = film.current;
-    if (!surface || !scene || sceneStatus !== 'ready') return;
-    let palette = readFilmPalette(surface);
-    scene.theme(palette);
-    const draw = () => {
-      scene.render(clock.current, t);
-    };
-    const fit = () => {
-      const displayWidth = viewport.current?.clientWidth ?? 1280;
-      // One landscape composition. Only sampling density changes on small screens.
-      const ratio = Math.min((devicePixelRatio || 1) * displayWidth / 1280, 1.5, Math.sqrt(1_800_000 / (1280 * 720)));
-      scene.resize(1280, 720, ratio * sampling.current);
-    };
-    fitScene.current = fit;
-    fit();
-    const resize = new ResizeObserver(() => { fit(); draw(); });
-    if (viewport.current) resize.observe(viewport.current);
-    // The shared theme can change while paused. Repaint without changing the film's clock.
-    const theme = new MutationObserver(() => { palette = readFilmPalette(surface); scene.theme(palette); draw(); });
-    theme.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'style', 'class'] });
-    return () => { resize.disconnect(); theme.disconnect(); fitScene.current = () => {}; };
-  }, [sceneStatus, t, variant]);
-  useEffect(() => {
-    const scene = film.current;
-    if (!scene || sceneStatus !== 'ready') return;
-    const draw = () => scene.render(clock.current, t);
-    if (!playing && sampling.current !== 1) { sampling.current = 1; fitScene.current(); }
-    let frame = 0, lastPaint = 0, lastLabel = 0;
-    const offset = clock.current, started = performance.now();
-    if (playing) sound.play(offset); else sound.pause();
-    const tick = (now: number) => {
-      clock.current = Math.min(duration, sound.position ?? offset + (now - started) / 1000);
-      // 30 fps is intentional: this film stays light on mobile and on shared machines.
-      if (now - lastPaint >= 1000 / 30 || clock.current === duration) {
-        const stalled = lastPaint > 0 && now - lastPaint > 120;
-        const before = performance.now(); draw(); lastPaint = now;
-        // Preserve the film's timing on weak GPUs. Paused/frame-exact exports stay full quality.
-        if (variant === '3d' && (stalled || performance.now() - before > 80) && sampling.current > .35) {
-          sampling.current = Math.max(.35, sampling.current * .6); fitScene.current();
-        }
-      }
-      clock.current = Math.min(duration, sound.position ?? clock.current);
-      if (now - lastLabel >= 100 || clock.current === duration) { setTime(clock.current); lastLabel = now; }
-      if (clock.current < duration) frame = requestAnimationFrame(tick);
-    };
-    draw();
-    if (playing) frame = requestAnimationFrame(tick);
-    return () => { cancelAnimationFrame(frame); sound.pause(); };
-  }, [playing, revision, sound, duration, audioStatus, sceneStatus, t, variant]);
-  const chooseVariant = (next: '3d' | '2d') => {
-    if (next === variant) return;
-    sound.pause(); setSceneStatus('loading'); sampling.current = 1; setVariant(next);
-  };
-  const seek = (value: number) => { clock.current = value; setTime(value); setRevision(value => value + 1); };
-  const togglePlay = () => {
-    void sound.unlock().then(() => setAudioStatus(sound.status));
-    if (time >= duration) { seek(0); setPaused(false); } else setPaused(value => !value);
-  };
-  const toggleSound = async () => {
-    if (audioStatus === 'blocked') { await sound.unlock(); setAudioStatus(sound.status); setRevision(value => value + 1); return; }
-    sound.setMuted(!muted); setMuted(value => !value);
-  };
-  const keyboard = (event: KeyboardEvent<HTMLDialogElement>) => {
-    if (event.key === 'Tab') {
-      const controls = ref.current?.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled), a[href]');
-      const first = controls?.[0], last = controls?.[controls.length - 1];
-      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
-      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
-    }
-    if (event.target instanceof HTMLInputElement || event.target instanceof HTMLButtonElement) return;
-    if (event.code === 'Space') { event.preventDefault(); togglePlay(); }
-  };
-  const cue = filmCue(time), caption = introduction.scenes[cue.id];
-  const titles = introduction.illustration;
-  const title = variant === '2d' && cue.id !== 'closing' && cue.id !== 'prompt' ? titles[cue.id] : caption.title;
-  const ending = ease(26, 27.2, time);
-  return <dialog ref={ref} className="company-film" aria-labelledby="company-film-title" aria-describedby="company-film-description" onCancel={event => { event.preventDefault(); onClose(); }} onKeyDown={keyboard} data-running={playing} data-entering={entering} data-scene={sceneStatus} data-motion={enabled ? 'on' : 'off'} data-audio={audioStatus} data-muted={muted} data-cue={cue.id} data-variant={variant}>
-    <h2 id="company-film-title" className="film-sr-only">{introduction.title}</h2>
-    <p id="company-film-description" className="film-sr-only">{introduction.description}</p>
-    <div ref={viewport} className="film-viewport"><div className="film-stage">
-    <canvas key={variant} ref={canvas} className="film-canvas" aria-hidden="true" style={{ opacity: ease(2.65, 3.2, time) * (1 - ease(25.8, 27.2, time)) }} />
-    <div ref={labels} className="film-scene-labels" aria-hidden="true" />
-    {sceneStatus !== 'ready' && <p className="film-scene-status" role="status">{t(sceneStatus === 'loading' ? 'Preparing the film' : variant === '3d' ? 'This device could not open the 3D scene. Please try a WebGL-enabled browser.' : 'This browser could not open the 2D illustration.')}</p>}
-    {entering && <div className="film-opening" aria-hidden="true"><DiePanel side="left" /><DiePanel side="right" /></div>}
-    <div className="film-story">
-    {cue.id !== 'closing' && cue.id !== 'prompt' && <div className="film-caption" key={cue.id} style={{ opacity: enabled ? cue.opacity : 1 }}>
-      <h3 aria-label={title}>{title.split(' ').map((word, i) => {
-        const progress = enabled ? ease(cue.from + i * .055, cue.from + .7 + i * .055, time) : 1;
-        return <span key={i} aria-hidden="true" style={{ opacity: progress, transform: `translateY(${(1 - progress) * 13}px)` }}>{word}{' '}</span>;
-      })}</h3>
-      <p className="film-sr-only">{caption.detail}</p>
-    </div>}
-    {time < 3.2 && <RequestSequence time={time} prompt={variant === '2d' ? titles.prompt : introduction.prompt} />}
-    {cue.id === 'closing' && <div className="film-ending" aria-hidden={ending < .5} style={{ opacity: ending, transform: `translateY(${(1 - ending) * 14}px)` }}>
-      <span className="film-end-symbol" style={{ transform: `scale(${.82 + .18 * ease(26, 27.3, time)})` }}><EmblemMark /></span>
-      <strong style={{ opacity: ease(26.6, 27.6, time), letterSpacing: `${.24 - .12 * ease(26.6, 28, time)}em` }}>GENESIS</strong>
-      <p className="film-signature" lang="en" style={{ opacity: ease(27.25, 28.3, time) }}>Generative Evolution of Silicon Intelligent Systems</p>
-    </div>}
-    </div></div></div>
-    <header className="film-header"><button ref={closeButton} type="button" className="icon-button" onClick={onClose} aria-label={t('Close introduction')}><Icon name="close" /></button></header>
-    <div className="film-controls"><div className="film-transport">
-      <button type="button" className="icon-button" disabled={!enabled || entering || sceneStatus !== 'ready'} aria-label={t(time >= duration ? 'Replay introduction' : playing ? 'Pause introduction' : 'Play introduction')} onClick={togglePlay}><Icon name={playing ? 'pause' : 'play'} /></button>
-      <input type="range" min="0" max={duration} step=".1" value={time} aria-label={t('Introduction progress')} aria-valuetext={`${Math.floor(time)} / ${duration} ${t('seconds')}`} onChange={event => seek(Number(event.target.value))} />
-      <span className="film-time">{filmTime(time)} / {filmTime(duration)}</span>
-      <button type="button" className="icon-button" disabled={audioStatus === 'unavailable' || audioStatus === 'loading'} aria-label={t(audioStatus === 'unavailable' ? 'Sound unavailable' : audioStatus === 'blocked' ? 'Enable sound' : muted ? 'Unmute music' : 'Mute music')} onClick={() => void toggleSound()}><Icon name={muted || audioStatus !== 'ready' ? 'muted' : 'volume'} /></button>
-    </div><footer className="film-footer">
-      <div className="film-variants" role="group" aria-label={t('Film version')}>
-        <button type="button" aria-pressed={variant === '3d'} onClick={() => chooseVariant('3d')}>3D</button>
-        <button type="button" aria-pressed={variant === '2d'} onClick={() => chooseVariant('2d')}>2D</button>
-      </div>
-      <span>{audioStatus === 'loading' ? t('Preparing the soundtrack') : !enabled ? t('Animations are off. Scrub to explore the circuit.') : t('Original score')}</span>
-      <a className="film-done" href={assetUrl('/assets/films/genesis-3d-30s.mp4')} download="GENESIS-3D-30s.mp4">{t('Download 3D film')}</a>
-      <button className="film-done" type="button" onClick={onClose}>{t('Continue exploring')}<Icon name="arrow" /></button>
-    </footer></div>
-  </dialog>;
+  return <EmblemLauncher label={t('Watch the product film')} onLaunch={() => navigate(FILM)} />;
 }
 
 /** Explain why physical checks and RF performance must be considered together. Viewport-scoped, like all site motion. */
@@ -244,7 +28,7 @@ export function RFPhysics() {
   }, [running]);
   const verified = !enabled || beat >= 2;
   return <section ref={ref} className="content-section rf-physics" aria-labelledby="rf-physics-title" data-running={running} data-motion={enabled ? 'on' : 'off'}>
-    <div className="rf-physics-copy"><p className="eyebrow">{rfPhysics.label}</p><h2 id="rf-physics-title">{rfPhysics.title}</h2><p>{rfPhysics.detail}</p><CompanyIntro /></div>
+    <div className="rf-physics-copy"><p className="eyebrow">{rfPhysics.label}</p><h2 id="rf-physics-title">{rfPhysics.title}</h2><p>{rfPhysics.detail}</p><a className="button button-secondary" href={FILM}><Icon name="play" />{t('Watch the product film')}</a></div>
     <figure className="rf-physics-visual"><RFDesignScene stage={3} verified={verified} /><div className="rf-verification"><span><Icon name="check" />{rfPhysics.physical}</span><span data-verified={verified}><Icon name={verified ? 'check' : 'wave'} />{rfPhysics.performance}</span></div><figcaption>{t('Illustrated workflow')}</figcaption></figure>
   </section>;
 }
