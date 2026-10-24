@@ -1,49 +1,95 @@
-import { Easing, interpolate, staticFile, useCurrentFrame, useVideoConfig } from 'remotion';
+import { Easing, interpolate, Sequence, staticFile, useCurrentFrame, useVideoConfig } from 'remotion';
 import { Video } from '@remotion/media';
-import { Backdrop, C, GRADIENT } from './Brand';
-import { TRANSITION_FRAMES, type Scene } from './storyboard';
+import { C, GRADIENT } from './Brand';
+import { FOCUS_MOVE_SECONDS, FPS, TRANSITION_FRAMES, type Chapter, type Focus, type Shot } from './storyboard';
 
-/** One clip from the footage manifest. `content_box` is the app's area inside the frame ([x, y, w, h], px). */
-export type Clip = { scene_id: string; file: string; fps: number; width: number; height: number; duration_s: number; in_s?: number; content_box?: number[] };
+/** One clip from the footage manifest. `marks` name clip times where shots start. */
+export type Clip = { scene_id: string; file: string; fps: number; width: number; height: number; duration_s: number; in_s?: number; marks?: Record<string, number> };
 const clamp = { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' } as const;
-const WINDOW = { right: 70, top: 100, height: 880 };
+const SHOT_FADE = 8;
 
-/** The real recording, cropped to the app and slowed (never sped up) just enough to fill the scene. */
-function Footage({ clip, frames }: { clip: Clip; frames: number }) {
-  const { fps } = useVideoConfig();
-  const available = (clip.duration_s - (clip.in_s ?? 0)) * fps;
-  return <Video src={staticFile(clip.file)} muted trimBefore={Math.round((clip.in_s ?? 0) * fps)}
-    playbackRate={Math.min(1, available / frames)} style={{ width: '100%', height: '100%' }} />;
+/** Where a shot starts in its clip, in seconds; a missing mark fails the render. */
+export function shotStart(shot: Shot, clip: Clip) {
+  if (!shot.from) return clip.in_s ?? 0;
+  const mark = clip.marks?.[shot.from];
+  if (mark === undefined) throw new Error(`Clip ${clip.scene_id} has no mark "${shot.from}"`);
+  return (clip.in_s ?? 0) + mark;
 }
 
-export function AppScene({ scene, clip, index, count }: { scene: Scene; clip: Clip; index: number; count: number }) {
-  const frame = useCurrentFrame(), { fps, durationInFrames, width: W, height: H } = useVideoConfig();
-  const visible = durationInFrames - TRANSITION_FRAMES;
-  const f = scene.focus ?? { x: 50, y: 50, scale: 1 };
-  const zoom = interpolate(frame, [visible * (f.from ?? 0), visible], [1, f.scale], { ...clamp, easing: Easing.inOut(Easing.cubic) });
-  const camera = { transform: `scale(${zoom})`, transformOrigin: `${f.x}% ${f.y}%` };
+/** Frame where each shot starts inside its chapter. */
+const shotStarts = (chapter: Chapter) => chapter.shots.reduce<number[]>((acc, _s, i) => [...acc, i ? acc[i - 1] + Math.round(chapter.shots[i - 1].seconds * FPS) : 0], []);
 
-  if (!scene.title) return <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
-    <div style={{ position: 'absolute', inset: 0, ...camera }}><Footage clip={clip} frames={durationInFrames} /></div>
+/** Where the camera brings a focus point while it is pushed in: above the caption band, so the caption never covers it. */
+const ANCHOR = { x: 50, y: 40 };
+
+/** Camera at `frame` frames into a shot: a short push-in that scales the focus point up and carries it to the anchor,
+ * a hold and a pull back out. */
+function camera(focus: Focus | undefined, frame: number, width: number, height: number) {
+  if (!focus) return 'none';
+  const move = FOCUS_MOVE_SECONDS * FPS, at = focus.at * FPS, out = at + move + focus.hold * FPS;
+  const ease = { ...clamp, easing: Easing.inOut(Easing.cubic) };
+  const k = interpolate(frame, [at, at + move], [0, 1], ease) * interpolate(frame, [out, out + move], [1, 0], ease);
+  const scale = 1 + (focus.scale - 1) * k;
+  const fx = focus.x / 100 * width, fy = focus.y / 100 * height;
+  const x = fx + (ANCHOR.x / 100 * width - fx) * k, y = fy + (ANCHOR.y / 100 * height - fy) * k;
+  // The footage always covers the frame: a point near an edge moves toward the anchor only as far as the edge allows.
+  const inside = (t: number, size: number) => Math.min(0, Math.max(size - size * scale, t));
+  return `translate(${inside(x - fx * scale, width)}px, ${inside(y - fy * scale, height)}px) scale(${scale})`;
+}
+
+/** The real recording from the shot's start, filling the frame, slowed (never sped up) only if the clip ends early. */
+function Footage({ clip, start, frames, focus }: { clip: Clip; start: number; frames: number; focus?: Focus }) {
+  const frame = useCurrentFrame(), { width, height } = useVideoConfig();
+  const available = (clip.duration_s - start) * FPS;
+  return <div style={{ position: 'absolute', inset: 0, transform: camera(focus, frame, width, height), transformOrigin: '0 0' }}>
+    <Video src={staticFile(clip.file)} muted trimBefore={Math.round(start * FPS)} playbackRate={Math.min(1, available / frames)}
+      style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
   </div>;
+}
 
-  const [bx, by, bw, bh] = clip.content_box ?? [0, 0, clip.width, clip.height];
-  const k = WINDOW.height / bh, winW = bw * k, winX = W - WINDOW.right - winW;
-  const enter = interpolate(frame, [.3 * fps, .3 * fps + 14], [0, 1], { ...clamp, easing: Easing.out(Easing.cubic) });
-  const leave = interpolate(frame, [visible - .3 * fps, visible], [1, 0], clamp);
-  const text = enter * leave;
-  return <div style={{ position: 'absolute', inset: 0 }}>
-    <Backdrop />
-    <div style={{ position: 'absolute', left: 80, width: winX - 150, top: 0, height: H, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 22, opacity: text, transform: `translateY(${(1 - enter) * 16}px)` }}>
-      <div style={{ fontFamily: 'Inter', fontSize: 22, letterSpacing: '.16em', color: C.cyan, fontVariantNumeric: 'tabular-nums' }}>{String(index + 1).padStart(2, '0')} / {String(count).padStart(2, '0')}</div>
-      <div style={{ width: 72, height: 4, borderRadius: 2, background: GRADIENT }} />
-      <div style={{ fontFamily: 'Inter', fontWeight: 650, fontSize: 54, lineHeight: 1.12, color: C.text, letterSpacing: '-.01em' }}>{scene.title}</div>
-      {scene.detail && <div style={{ fontFamily: 'Inter', fontSize: 29, lineHeight: 1.4, color: C.muted }}>{scene.detail}</div>}
-    </div>
-    <div style={{ position: 'absolute', left: winX, top: WINDOW.top, width: winW, height: WINDOW.height, borderRadius: 14, overflow: 'hidden', border: `1px solid ${C.border}`, boxShadow: `0 30px 90px #0008, 0 0 60px ${C.cyan}22` }}>
-      <div style={{ position: 'absolute', inset: 0, ...camera }}>
-        <div style={{ position: 'absolute', left: -bx * k, top: -by * k, width: clip.width * k, height: clip.height * k }}><Footage clip={clip} frames={durationInFrames} /></div>
+/** A caption whose words rise in one after another; GENESIS is drawn in the brand gradient. */
+function Caption({ text }: { text: string }) {
+  const frame = useCurrentFrame();
+  return <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 62, lineHeight: 1.1, letterSpacing: '-.015em', color: C.text, textShadow: '0 4px 30px #000a' }}>
+    {text.split(' ').map((word, i) => {
+      const t = interpolate(frame - 4 - i * 2.5, [0, 9], [0, 1], { ...clamp, easing: Easing.out(Easing.cubic) });
+      const brand = word.startsWith('GENESIS');
+      return <span key={i} style={{ display: 'inline-block', marginRight: '.25em', opacity: t, transform: `translateY(${(1 - t) * 26}px)` }}>
+        {brand ? <><span style={{ background: GRADIENT, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>GENESIS</span>{word.slice(7)}</> : word}
+      </span>;
+    })}
+  </div>;
+}
+
+export function ChapterScene({ chapter, clips, index, count }: { chapter: Chapter; clips: Map<string, Clip>; index: number; count: number }) {
+  const frame = useCurrentFrame(), { durationInFrames } = useVideoConfig();
+  const starts = shotStarts(chapter), visible = durationInFrames - TRANSITION_FRAMES;
+  const band = interpolate(frame, [4, 16], [0, 1], { ...clamp, easing: Easing.out(Easing.cubic) }) * interpolate(frame, [visible - 8, visible], [1, 0], clamp);
+
+  return <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', background: C.page }}>
+    {chapter.shots.map((shot, i) => {
+      const clip = clips.get(shot.clip)!, start = starts[i], last = i === chapter.shots.length - 1;
+      const frames = last ? durationInFrames - start : starts[i + 1] - start;
+      const fades = i > 0 && chapter.shots[i - 1].clip !== shot.clip;
+      // A shot that fades in needs the previous shot still playing underneath it.
+      const hold = !last && chapter.shots[i + 1].clip !== shot.clip ? SHOT_FADE : 0;
+      const opacity = fades ? interpolate(frame - start, [0, SHOT_FADE], [0, 1], clamp) : 1;
+      return <Sequence key={i} from={start} durationInFrames={frames + hold} layout="none">
+        <div style={{ position: 'absolute', inset: 0, opacity }}><Footage clip={clip} start={shotStart(shot, clip)} frames={frames + hold} focus={shot.focus} /></div>
+      </Sequence>;
+    })}
+    {chapter.title && <>
+      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 330, opacity: band, background: 'linear-gradient(180deg, #04132500 0%, #041325cc 45%, #041325f2 100%)' }} />
+      <div style={{ position: 'absolute', left: 96, right: 96, bottom: 74, opacity: band }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 18, marginBottom: 18, fontFamily: 'Inter', fontWeight: 600, fontSize: 24, letterSpacing: '.18em', textTransform: 'uppercase', color: C.cyan }}>
+          <div style={{ display: 'flex', gap: 6 }}>{Array.from({ length: count }, (_, i) =>
+            <div key={i} style={{ width: 34, height: 5, borderRadius: 3, background: i < index ? C.cyan : i === index ? GRADIENT : '#ffffff26' }} />)}</div>
+          <span>{String(index + 1).padStart(2, '0')} · {chapter.title}</span>
+        </div>
+        {chapter.shots.map((shot, i) => <Sequence key={i} from={starts[i]} durationInFrames={i < chapter.shots.length - 1 ? starts[i + 1] - starts[i] : undefined} layout="none">
+          <Caption text={shot.caption} />
+        </Sequence>)}
       </div>
-    </div>
+    </>}
   </div>;
 }

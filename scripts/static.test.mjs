@@ -903,12 +903,12 @@ test('product links accept only a valid port and carry the selected theme', asyn
 });
 
 test('the supplemental product film is on-demand, accessible and independent of the original', async () => {
-  assert.ok(readFileSync(resolve(root, 'public/assets/films/genesis-product-60s.mp4')).length < 10e6);
+  assert.ok(readFileSync(resolve(root, 'public/assets/films/genesis-product-56s.mp4')).length < 10e6);
   const player = read('src/shared/ProductFilm.tsx');
   assert.match(player, /controls playsInline preload="none"/);
   assert.doesNotMatch(player, /autoPlay|from 'three'|import\('\.\/intro/);
   assert.match(player, /aria-labelledby="product-film-title"/);
-  assert.match(player, /download="GENESIS-product-film-60s.mp4"/);
+  assert.match(player, /download="GENESIS-product-film-56s.mp4"/);
   assert.match(player, /visibilitychange/);
   assert.match(player, /visibility.disconnect\(\); dialogs.disconnect\(\)/);
   assert.match(read('src/pages/Welcome.tsx'), /href="#\/explore\/product-film"/);
@@ -918,10 +918,10 @@ test('the supplemental product film is on-demand, accessible and independent of 
   const transcript = parsed.statements.find(statement => statement.declarationList?.declarations[0]?.name.getText(parsed) === 'transcript').declarationList.declarations[0].initializer.elements;
   for (const line of transcript) assert.ok(dictionary[line.text], `Transcript translation: ${line.text}`);
   for (const language of ['en', 'tr']) {
-    const captions = read(`public/assets/films/genesis-product-60s.${language}.vtt`);
+    const captions = read(`public/assets/films/genesis-product-56s.${language}.vtt`);
     assert.ok(captions.startsWith('WEBVTT\n\n'));
-    const cues = [...captions.matchAll(/00:00:(\d{2})\.000 --> 00:00:(\d{2})\.000/g)].map(match => match.slice(1).map(Number));
-    assert.equal(cues.length, 9); assert.equal(cues[0][0], 0); assert.equal(cues.at(-1)[1], 60);
+    const cues = [...captions.matchAll(/00:00:(\d{2}\.\d{3}) --> 00:00:(\d{2}\.\d{3})/g)].map(match => match.slice(1).map(Number));
+    assert.equal(cues.length, 10); assert.equal(cues[0][0], 0); assert.equal(cues.at(-1)[1], 55.8);
     cues.forEach(([from, to], i) => { assert.ok(to > from); if (i) assert.equal(from, cues[i - 1][1]); });
   }
 });

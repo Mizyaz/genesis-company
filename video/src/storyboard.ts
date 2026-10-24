@@ -1,30 +1,52 @@
-/** The promo's editorial plan: scene order, on-screen titles, timing and camera focus. Footage comes from the clip
- * manifest (real app recordings); this file only says how long each scene holds and where the camera leans. */
+/** The promo's editorial plan: chapters, their shots, captions and timing. Footage comes from the clip manifest
+ * (real app recordings); this file only says which part of which clip each shot plays and what its caption says. */
 export const FPS = 30;
 export const TRANSITION_FRAMES = 12;
 
 export type Transition = 'fade' | 'slide' | 'wipe';
-/** Where the camera ends up inside the app window: transform origin in % of the window and the final scale. */
-export type Focus = { x: number; y: number; scale: number; from?: number };
-/** `title` names the app stage on screen; `detail` names the design, block or number the frame shows. A scene holds
- * still unless `focus` is set, which is kept for a detail too small to read at full window size. */
-export type Scene = { id: string; seconds: number; title?: string; detail?: string; focus?: Focus; enter: Transition };
+/** One short push-in during a shot: from `at` seconds the camera scales up around the point (x, y), in % of the frame,
+ * and carries it above the caption; it holds for `hold` seconds and pulls back out. */
+export type Focus = { x: number; y: number; scale: number; at: number; hold: number };
+/** One shot plays `seconds` of `clip`, from its mark `from` (the clip start without one). `caption` says what GENESIS
+ * does in it; GENESIS is drawn in the brand gradient. */
+export type Shot = { clip: string; from?: string; seconds: number; caption: string; focus?: Focus };
+/** A chapter groups its shots under one tag; a chapter without a title plays its shot with no caption. */
+export type Chapter = { id: string; title?: string; enter: Transition; shots: Shot[] };
 
-export const scenes: Scene[] = [
-  { id: 'S1_prompt', seconds: 6, title: 'Your prompt', detail: '“I want a broadband RF switch with low loss and high isolation.”', enter: 'fade' },
-  { id: 'S2_reply', seconds: 8, title: 'Circuit Assistant', detail: 'Reads the Maestro plan: one testbench “full” with two S-parameter tests, port2_on and port3_on.', enter: 'slide' },
-  { id: 'S3_schematic', seconds: 6, title: 'Schematic', detail: 'spdt_series_shunt_noC1 on GF22FDX: FETs M1–M4, coils L1–L3 · 24 parts, 27 wires.', enter: 'fade' },
-  { id: 'S4_blocks', seconds: 6, title: 'Blocks', detail: 'The DUT opens into Input and Upper branch, 5 blocks each: coils, RF pads, interconnects.', enter: 'fade' },
-  { id: 'S5_agent_tools', seconds: 8, title: 'Analyses & Variables', detail: '2 S-parameter tests on testbench “full”, one per bias state: port2_on and port3_on.', enter: 'fade' },
-  { id: 'S6_results', seconds: 7, title: 'Optimize', detail: 'S21 target ≥ −2 dB · CMA-ES, 337 evaluations · 8 of 18 targets met.', enter: 'wipe' },
-  // The one zoom: the density layout is small inside its viewer.
-  { id: 'S7_layout', seconds: 7, title: 'Floorplan', detail: 'The chip layout Cadence captured after the density stage.', enter: 'fade', focus: { x: 50, y: 54, scale: 1.45, from: .3 } },
-  { id: 'S8_finishing', seconds: 4.5, enter: 'fade' },
+export const chapters: Chapter[] = [
+  {
+    id: 'start', title: 'Start', enter: 'fade', shots: [
+      { clip: 'S1_prompt', seconds: 4, caption: 'Tell GENESIS what you want to design.', focus: { x: 50, y: 72, scale: 1.5, at: 1.9, hold: 1.3 } },
+      { clip: 'S2_assistant', seconds: 6.5, caption: 'GENESIS understands your flow.', focus: { x: 84, y: 56, scale: 1.55, at: 2.4, hold: 2.4 } },
+    ],
+  },
+  {
+    id: 'design', title: 'Design', enter: 'slide', shots: [
+      { clip: 'C2_design', from: 'schematic', seconds: 4, caption: 'GENESIS draws the schematic on your PDK.', focus: { x: 52, y: 62, scale: 1.6, at: .9, hold: 2 } },
+      { clip: 'C2_design', from: 'blocks', seconds: 6, caption: 'GENESIS turns it into blocks and a testbench.' },
+    ],
+  },
+  {
+    id: 'analysis', title: 'Analysis', enter: 'slide', shots: [
+      { clip: 'C3_analysis', from: 'analyses', seconds: 4, caption: 'GENESIS sets up every analysis and bias state.', focus: { x: 50, y: 74, scale: 1.4, at: 1.1, hold: 1.6 } },
+      { clip: 'C3_analysis', from: 'optimize', seconds: 5.5, caption: 'GENESIS optimizes toward your targets.', focus: { x: 38, y: 66, scale: 1.7, at: 2.2, hold: 1.8 } },
+    ],
+  },
+  {
+    id: 'floorplan', title: 'Floorplan', enter: 'slide', shots: [
+      { clip: 'C4_floorplan', from: 'placement', seconds: 7.2, caption: 'GENESIS places, routes and tiles the layout.' },
+      { clip: 'C4_floorplan', from: 'verify', seconds: 7.6, caption: 'GENESIS checks it with Calibre DRC and LVS.', focus: { x: 78, y: 68, scale: 1.8, at: .15, hold: 1 } },
+    ],
+  },
+  { id: 'finishing', enter: 'fade', shots: [{ clip: 'S8_finishing', seconds: 4, caption: '' }] },
 ];
-export const OPENING_SECONDS = 4;
+export const OPENING_SECONDS = 3.5;
 export const END_CARD_SECONDS = 3.5;
+/** Seconds the camera takes to push in or pull out. */
+export const FOCUS_MOVE_SECONDS = .4;
 
-/** A sequence runs one transition longer than its scene, so each scene's `seconds` is what the viewer sees and the
+export const chapterSeconds = (chapter: Chapter) => chapter.shots.reduce((sum, s) => sum + s.seconds, 0);
+/** A sequence runs one transition longer than its chapter, so each chapter's seconds are what the viewer sees and the
  * film is exactly the sum of them. The last sequence has nothing to hand over to. */
 export const sequenceFrames = (seconds: number, last = false) => Math.round(seconds * FPS) + (last ? 0 : TRANSITION_FRAMES);
-export const totalFrames = () => Math.round((OPENING_SECONDS + scenes.reduce((sum, s) => sum + s.seconds, 0) + END_CARD_SECONDS) * FPS);
+export const totalFrames = () => Math.round((OPENING_SECONDS + chapters.reduce((sum, c) => sum + chapterSeconds(c), 0) + END_CARD_SECONDS) * FPS);

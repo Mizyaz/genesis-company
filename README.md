@@ -178,8 +178,9 @@ Leaving the player off-screen, hiding the page or opening a dialog pauses it.
 There is no autoplay. The existing introduction, 3D/2D choices, score and
 `genesis-3d-30s.mp4` remain unchanged.
 
-`public/assets/films/genesis-product-60s.mp4` is a 60-second, 1280×720, 30 fps film of the real GENESIS
-workbench, rendered from screen recordings by the Remotion project in `video/` (`node video/render.mjs --inputs
-<footage folder> --audio <score.wav>`, then scaled to 720p). Scene order, titles and timing are in
-`video/src/storyboard.ts`; footage comes only through the folder's `clips/manifest.json`. Results and layouts in the
-film are saved records from earlier runs. The poster is a frame from the same film.
+`public/assets/films/genesis-product-56s.mp4` is a 56-second, 1280×720, 30 fps film of the real GENESIS
+workbench in four chapters (Start, Design, Analysis, Floorplan), two shots each, rendered from screen recordings by
+the Remotion project in `video/`. `node video/record.mjs` records the clips from a running workbench; `node
+video/render.mjs --inputs <footage folder> --audio <score.wav>` renders the film, which is then scaled to 720p.
+Chapters, captions, zooms and timing are in `video/src/storyboard.ts`; footage comes only through the folder's
+`clips/manifest.json`. Results and layouts in the film are saved records from earlier runs. The poster is a frame from the same film.

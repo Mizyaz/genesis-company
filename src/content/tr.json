@@ -602,11 +602,12 @@
   "Recorded in the GENESIS workbench: the first request, the schematic and its blocks, the analysis, saved results and the chip layout.": "GENESIS çalışma alanında kaydedildi: ilk istek, şematik ve blokları, analiz, kaydedilmiş sonuçlar ve çip yerleşimi.",
   "Screen recordings of the GENESIS workbench with original music. Results and layouts shown are saved records from earlier runs.": "Özgün müzik eşliğinde GENESIS çalışma alanının ekran kayıtları. Gösterilen sonuçlar ve yerleşimler önceki çalışmalardan kaydedilmiş kayıtlardır.",
   "The opening shows the GENESIS emblem.": "Açılışta GENESIS amblemi görünür.",
-  "Your prompt: “I want a broadband RF switch with low loss and high isolation.”": "İsteminiz: “I want a broadband RF switch with low loss and high isolation.” (düşük kayıplı, yüksek yalıtımlı geniş bantlı bir RF anahtar)",
-  "Circuit Assistant: it reads the Maestro plan, one testbench “full” with two S-parameter tests, port2_on and port3_on.": "Circuit Assistant: Maestro planını okur; “full” test düzeneğinde iki S-parametre testi var, port2_on ve port3_on.",
-  "Schematic: spdt_series_shunt_noC1 on GF22FDX, FETs M1–M4 and coils L1–L3, 24 parts and 27 wires.": "Şematik: GF22FDX üzerinde spdt_series_shunt_noC1; M1–M4 FET’leri ve L1–L3 bobinleri, 24 parça ve 27 bağlantı.",
-  "Blocks: the DUT opens into Input and Upper branch, 5 blocks each: coils, RF pads, interconnects.": "Bloklar: DUT, her biri 5 bloklu Input ve Upper branch olarak açılır: bobinler, RF pedleri, ara bağlantılar.",
-  "Analyses & Variables: 2 S-parameter tests on testbench “full”, one per bias state, port2_on and port3_on.": "Analizler ve Değişkenler: “full” test düzeneğinde her kutuplama durumu için bir S-parametre testi, toplam 2: port2_on ve port3_on.",
-  "Optimize: S21 target ≥ −2 dB; CMA-ES ran 337 evaluations and 8 of 18 targets are met.": "Optimizasyon: S21 hedefi ≥ −2 dB; CMA-ES 337 değerlendirme yaptı ve 18 hedeften 8’i karşılandı.",
-  "Floorplan: the chip layout Cadence captured after the density stage.": "Yerleşim: Cadence’in yoğunluk aşamasından sonra aldığı çip yerleşimi."
+  "Tell GENESIS what you want to design: “I want a broadband RF switch with low loss and high isolation.”": "GENESIS’e ne tasarlamak istediğinizi söyleyin: “I want a broadband RF switch with low loss and high isolation.”",
+  "GENESIS understands your flow: the Circuit Assistant reads the Maestro plan, one testbench with two bias states, port2_on and port3_on.": "GENESIS akışınızı anlar: Circuit Assistant Maestro planını okur; bir testbench, iki bias durumu, port2_on ve port3_on.",
+  "GENESIS draws the schematic on your PDK: spdt_series_shunt_noC1 on GF22FDX, 24 parts and 27 wires.": "GENESIS şematiği PDK’nizde çizer: GF22FDX üzerinde spdt_series_shunt_noC1, 24 parça ve 27 tel.",
+  "GENESIS turns it into blocks and a testbench: Input, Bias, Upper and Lower branch, joined by the nets they share.": "GENESIS onu bloklara ve bir testbench’e dönüştürür: Input, Bias, Upper ve Lower branch, paylaştıkları netlerle bağlı.",
+  "GENESIS sets up every analysis and bias state: S-parameters with Port 2 ON and with Port 3 ON.": "GENESIS her analizi ve bias durumunu kurar: Port 2 ON ve Port 3 ON durumlarında S-parametreleri.",
+  "GENESIS optimizes toward your targets: a recorded CMA-ES run of 337 evaluations meets 16 of 18 targets.": "GENESIS hedeflerinize doğru optimize eder: 337 değerlendirmelik kayıtlı bir CMA-ES koşusu 18 hedefin 16’sını karşılar.",
+  "GENESIS places, routes and tiles the layout: Placement, Routing and Tiling, each with its saved layout capture.": "GENESIS layout’u yerleştirir, yönlendirir ve döşer: Placement, Routing ve Tiling, her biri kayıtlı layout görüntüsüyle.",
+  "GENESIS checks it with Calibre DRC and LVS: LVS correct and 124 DRC markers, then the final layout at full size.": "GENESIS onu Calibre DRC ve LVS ile kontrol eder: LVS doğru ve 124 DRC işareti, ardından son layout tam boyutta."
 }

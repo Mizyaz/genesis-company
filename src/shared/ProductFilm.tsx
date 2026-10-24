@@ -4,13 +4,14 @@ import { assetUrl, Icon } from './ui';
 import '../styles/product-film.css';
 
 const transcript = [
-  'Your prompt: “I want a broadband RF switch with low loss and high isolation.”',
-  'Circuit Assistant: it reads the Maestro plan, one testbench “full” with two S-parameter tests, port2_on and port3_on.',
-  'Schematic: spdt_series_shunt_noC1 on GF22FDX, FETs M1–M4 and coils L1–L3, 24 parts and 27 wires.',
-  'Blocks: the DUT opens into Input and Upper branch, 5 blocks each: coils, RF pads, interconnects.',
-  'Analyses & Variables: 2 S-parameter tests on testbench “full”, one per bias state, port2_on and port3_on.',
-  'Optimize: S21 target ≥ −2 dB; CMA-ES ran 337 evaluations and 8 of 18 targets are met.',
-  'Floorplan: the chip layout Cadence captured after the density stage.',
+  'Tell GENESIS what you want to design: “I want a broadband RF switch with low loss and high isolation.”',
+  'GENESIS understands your flow: the Circuit Assistant reads the Maestro plan, one testbench with two bias states, port2_on and port3_on.',
+  'GENESIS draws the schematic on your PDK: spdt_series_shunt_noC1 on GF22FDX, 24 parts and 27 wires.',
+  'GENESIS turns it into blocks and a testbench: Input, Bias, Upper and Lower branch, joined by the nets they share.',
+  'GENESIS sets up every analysis and bias state: S-parameters with Port 2 ON and with Port 3 ON.',
+  'GENESIS optimizes toward your targets: a recorded CMA-ES run of 337 evaluations meets 16 of 18 targets.',
+  'GENESIS places, routes and tiles the layout: Placement, Routing and Tiling, each with its saved layout capture.',
+  'GENESIS checks it with Calibre DRC and LVS: LVS correct and 124 DRC markers, then the final layout at full size.',
   'GENESIS. Whatever you want to design.',
 ];
 
@@ -31,22 +32,22 @@ export function ProductFilm() {
     document.addEventListener('visibilitychange', pauseWhenHidden);
     return () => { player.pause(); visibility.disconnect(); dialogs.disconnect(); document.removeEventListener('visibilitychange', pauseWhenHidden); };
   }, []);
-  const movie = assetUrl('/assets/films/genesis-product-60s.mp4');
+  const movie = assetUrl('/assets/films/genesis-product-56s.mp4');
   return <section id="product-film" className="content-section product-film-section" aria-labelledby="product-film-title">
     <div className="product-film-heading">
-      <div><p className="eyebrow">{t('PRODUCT FILM')} <span>1:00</span></p><h2 id="product-film-title">{t('RFIC design, on demand.')}</h2></div>
+      <div><p className="eyebrow">{t('PRODUCT FILM')} <span>0:56</span></p><h2 id="product-film-title">{t('RFIC design, on demand.')}</h2></div>
       <p id="product-film-description">{t('Recorded in the GENESIS workbench: the first request, the schematic and its blocks, the analysis, saved results and the chip layout.')}</p>
     </div>
     <figure className="product-film-player">
-      <video ref={video} controls playsInline preload="none" width="1280" height="720" poster={assetUrl('/assets/films/genesis-product-60s-poster.jpg')} aria-labelledby="product-film-title" aria-describedby="product-film-description product-film-note">
+      <video ref={video} controls playsInline preload="none" width="1280" height="720" poster={assetUrl('/assets/films/genesis-product-56s-poster.jpg')} aria-labelledby="product-film-title" aria-describedby="product-film-description product-film-note">
         <source src={movie} type="video/mp4" />
-        <track kind="captions" src={assetUrl('/assets/films/genesis-product-60s.en.vtt')} srcLang="en" label="English" />
-        <track kind="captions" src={assetUrl('/assets/films/genesis-product-60s.tr.vtt')} srcLang="tr" label="Türkçe" />
+        <track kind="captions" src={assetUrl('/assets/films/genesis-product-56s.en.vtt')} srcLang="en" label="English" />
+        <track kind="captions" src={assetUrl('/assets/films/genesis-product-56s.tr.vtt')} srcLang="tr" label="Türkçe" />
         <a href={movie}>{t('Download the product film')}</a>
       </video>
       <figcaption id="product-film-note">{t('Screen recordings of the GENESIS workbench with original music. Results and layouts shown are saved records from earlier runs.')}</figcaption>
     </figure>
-    <div className="product-film-actions"><a className="button button-secondary" href={movie} download="GENESIS-product-film-60s.mp4"><Icon name="down" />{t('Download the product film')}<span>MP4 · 4 MB</span></a></div>
+    <div className="product-film-actions"><a className="button button-secondary" href={movie} download="GENESIS-product-film-56s.mp4"><Icon name="down" />{t('Download the product film')}<span>MP4 · 6 MB</span></a></div>
     <details className="product-film-transcript"><summary>{t('Read the film transcript')}</summary>
       <p>{t('Original instrumental music accompanies the film. There is no spoken narration.')}</p>
       <p>{t('The opening shows the GENESIS emblem.')}</p>
