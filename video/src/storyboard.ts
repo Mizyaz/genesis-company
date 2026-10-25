@@ -43,6 +43,8 @@ export const chapters: Chapter[] = [
     id: 'floorplan', title: 'Floorplan', enter: 'slide', shots: [
       { clip: 'C4_floorplan', from: 'placement', seconds: 5.4, caption: 'GENESIS places, routes and tiles the layout.' },
       { clip: 'C4_floorplan', from: 'verify', seconds: 5.6, caption: 'GENESIS checks it with Calibre DRC and LVS.', focus: { x: 78, y: 68, scale: 1.8, at: .15, hold: 1 } },
+      // Stepped take (one screenshot per path step): 0.8 s still, 4 s along the path, the lit path held.
+      { clip: 'C6_signal', from: 'signal', seconds: 5.8, caption: 'GENESIS traces the signal path through your layout.', focus: { x: 66, y: 52, scale: 1.45, at: .7, hold: 4.3 } },
       { clip: 'C5_3d', from: 'orbit', seconds: 6.5, speed: 4.5, caption: 'GENESIS builds your chip in 3D.', focus: { x: 50, y: 48, scale: 1.45, at: 2.6, hold: 2.4 } },
     ],
   },

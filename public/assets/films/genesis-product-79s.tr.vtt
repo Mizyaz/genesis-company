@@ -30,11 +30,14 @@ GENESIS yerleşimi yerleştirir, yönlendirir ve döşer: Yerleştirme, Yönlend
 00:00:48.100 --> 00:00:53.700
 GENESIS onu Calibre DRC ve LVS ile kontrol eder: LVS doğru ve kurala göre listelenen 124 DRC işareti.
 
-00:00:53.700 --> 00:01:00.200
+00:00:53.700 --> 00:00:59.500
+GENESIS sinyal yolunu yerleşim boyunca izler: C1 çipinin RF pad 1’inden kaydedilmiş MarkNet şekilleri boyunca, L1 ve anahtar transistörlerinden iki çıkışa kadar.
+
+00:00:59.500 --> 00:01:06.000
 GENESIS çipinizi 3B olarak oluşturur: yerleşim akışı C1 çipinin 3B modelini yazar; burada hızlandırılmış olarak gösterilir.
 
-00:01:00.200 --> 00:01:07.200
+00:01:06.000 --> 00:01:13.000
 GENESIS istediğiniz her devreyi tasarlar: bir RF anahtar, bir düşük gürültülü yükselteç, bir karıştırıcı ve bir güç yükselteci, her biri kendi kaydedilmiş konuşmasından.
 
-00:01:07.200 --> 00:01:13.200
+00:01:13.000 --> 00:01:19.000
 GENESIS. Ne tasarlamak isterseniz.

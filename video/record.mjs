@@ -47,14 +47,17 @@ if (!existsSync(`${out}/brand/InterVariable.woff2`)) copyFileSync(brand, `${out}
 /** Films the page between start() and stop(); stop() returns the encoded clip's duration and its marks. pause()/resume() leave a
  * wait (a model reply, a stage generating) out of the clip: the clip cuts from the last frame before the pause to the
  * first frame after it. */
-function camera(page, frames, view) {
-  let cdp, shots = [], t0 = 0, paused = false, pausedAt = 0, skipped = 0, marks = {};
-  const now = () => Date.now() / 1000 - skipped;
+/** A `stepped` camera films no screencast: the scene takes each frame itself with frame(seconds), a screenshot held that long
+ * on the clip, for views that draw too slowly for a screencast (software WebGL on a large chip). */
+function camera(page, frames, view, stepped = false) {
+  let cdp, shots = [], t0 = 0, paused = false, pausedAt = 0, skipped = 0, marks = {}, clock = 0;
+  const now = () => stepped ? clock : Date.now() / 1000 - skipped;
   // A static page sends no frames; nudge a repaint so each filmed stretch starts with a frame.
   const repaint = () => page.evaluate(() => document.body.style.setProperty('outline', `0 solid rgba(0,0,0,${Math.random() / 1000})`));
   return {
     async start() {
       rmSync(frames, { recursive: true, force: true }); mkdirSync(frames, { recursive: true });
+      if (stepped) { clock = 0; t0 = 0; return; }
       cdp = await page.context().newCDPSession(page);
       cdp.on('Page.screencastFrame', ({ data, metadata, sessionId }) => {
         if (!paused) {
@@ -69,13 +72,18 @@ function camera(page, frames, view) {
       await repaint();
     },
     /** Names the clip time where a shot starts (storyboard `from`). */
+    async frame(seconds = 1 / FPS) {
+      const file = `${frames}/${String(shots.length).padStart(5, '0')}.jpg`;
+      await page.screenshot({ path: file, type: 'jpeg', quality: 92, timeout: 120000 });
+      shots.push({ file, t: clock }); clock += seconds;
+    },
     mark(name) { marks[name] = Number((now() - t0).toFixed(3)); },
     pause() { paused = true; pausedAt = Date.now() / 1000; },
     // A restarted screencast and a nudged repaint send the current frame, so the clip resumes on what happened during the pause.
     async resume() { await cdp.send('Page.stopScreencast'); skipped += Date.now() / 1000 - pausedAt; paused = false; await cdp.send('Page.startScreencast', screencast(view)); await repaint(); },
     async stop(file) {
       const t1 = now();
-      await cdp.send('Page.stopScreencast'); await cdp.detach();
+      if (!stepped) { await cdp.send('Page.stopScreencast'); await cdp.detach(); }
       if (!shots.length) throw new Error('The screencast sent no frames');
       shots[0].t = Math.min(shots[0].t, t0);
       const list = shots.map((s, i) => `file '${s.file}'\nduration ${Math.max(.001, (shots[i + 1]?.t ?? t1) - s.t).toFixed(4)}`).join('\n') + `\nfile '${shots.at(-1).file}'\n`;
@@ -100,7 +108,7 @@ try {
     const view = scene.viewport ?? VIEWPORT;
     const context = await browser.newContext({ viewport: view, deviceScaleFactor: SCALE, colorScheme: 'dark', reducedMotion: 'no-preference' });
     const page = await context.newPage();
-    const rec = camera(page, `${out}/clips/${scene.id}_frames`, view);
+    const rec = camera(page, `${out}/clips/${scene.id}_frames`, view, scene.stepped);
     const file = `clips/${scene.id}.mp4`;
     if (existsSync(`${out}/${file}`) && !argv.includes('--replace')) throw new Error(`${out}/${file} exists; keep the take or pass --replace`);
     const evidence = { scene_id: scene.id, recorder_sha256: recorder, writes: [], replies: [], errors: [] };

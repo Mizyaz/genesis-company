@@ -119,14 +119,14 @@ test('the logo opens the product film, which loads on demand, plays its audio an
   const film = page.locator('#product-film'), video = film.locator('video');
   await expect(video).toBeInViewport();
   await expect(video).toHaveAttribute('preload', 'none');
-  expect(requests.some(url => url.includes('genesis-product-73s.mp4'))).toBe(false);
+  expect(requests.some(url => url.includes('genesis-product-79s.mp4'))).toBe(false);
   expect(await video.evaluate(v => v.paused && !v.autoplay && !v.loop && v.controls && v.playsInline)).toBe(true);
   await video.focus();
   await expect(video).toBeFocused();
   await video.press('Space');
   await expect.poll(() => video.evaluate(v => v.currentTime)).toBeGreaterThan(.1);
   const media = await video.evaluate(v => ({ duration: v.duration, width: v.videoWidth, height: v.videoHeight, muted: v.muted, volume: v.volume, audioBytes: v.webkitAudioDecodedByteCount }));
-  expect(media.duration).toBeCloseTo(73.2, 1); expect(media.width).toBe(1280); expect(media.height).toBe(720);
+  expect(media.duration).toBeCloseTo(79, 1); expect(media.width).toBe(1280); expect(media.height).toBe(720);
   expect(media.muted).toBe(false); expect(media.volume).toBeGreaterThan(0);
   if (typeof media.audioBytes === 'number') expect(media.audioBytes).toBeGreaterThan(0);
   await video.evaluate(v => { v.pause(); v.currentTime = 50; v.textTracks[0].mode = 'showing'; });
@@ -134,7 +134,7 @@ test('the logo opens the product film, which loads on demand, plays its audio an
   await expect.poll(() => video.evaluate(v => v.textTracks[0].activeCues?.[0]?.text)).toContain('GENESIS checks it with Calibre DRC and LVS');
   await video.evaluate(v => { v.textTracks[0].mode = 'disabled'; v.textTracks[1].mode = 'showing'; });
   await expect.poll(() => video.evaluate(v => v.textTracks[1].activeCues?.[0]?.text)).toContain('Calibre DRC ve LVS ile kontrol eder');
-  await video.evaluate(v => { v.muted = true; v.currentTime = 72.8; return v.play(); });
+  await video.evaluate(v => { v.muted = true; v.currentTime = 78.6; return v.play(); });
   await expect.poll(() => video.evaluate(v => v.ended)).toBe(true);
   await video.evaluate(v => { v.currentTime = 2; return v.play(); });
   await expect.poll(() => video.evaluate(v => v.currentTime)).toBeGreaterThan(2.1);

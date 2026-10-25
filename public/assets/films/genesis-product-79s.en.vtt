@@ -30,11 +30,14 @@ GENESIS places, routes and tiles the layout: Placement, Routing, Tiling and Veri
 00:00:48.100 --> 00:00:53.700
 GENESIS checks it with Calibre DRC and LVS: LVS correct and 124 DRC markers listed by rule.
 
-00:00:53.700 --> 00:01:00.200
+00:00:53.700 --> 00:00:59.500
+GENESIS traces the signal path through your layout: from RF pad 1 of chip C1 along its saved MarkNet shapes, through L1 and the switch transistors to both outputs.
+
+00:00:59.500 --> 00:01:06.000
 GENESIS builds your chip in 3D: the floorplan flow writes a 3D model of chip C1, shown here as a time-lapse.
 
-00:01:00.200 --> 00:01:07.200
+00:01:06.000 --> 00:01:13.000
 GENESIS designs any circuit you want: an RF switch, a low-noise amplifier, a mixer and a power amplifier, each from its own recorded conversation.
 
-00:01:07.200 --> 00:01:13.200
+00:01:13.000 --> 00:01:19.000
 GENESIS. Whatever you want to design.

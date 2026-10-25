@@ -290,6 +290,33 @@ export const recordedScenes = [
     },
   },
   {
+    id: 'C6_signal', shows: 'The offline 3D viewer of chip C1 with Connect → MarkNet open: the signal path from rf_pad_1_1 (PORT1) lit along its saved MarkNet shapes, pad to both outputs',
+    // Software WebGL draws this chip too slowly for a screencast, so the camera is stepped: one screenshot per frame.
+    stepped: true,
+    async setup(page, base) {
+      await page.goto(process.env.GENESIS_VIEWER_URL ?? `${base}/circuit_3d.html`, { waitUntil: 'load', timeout: 240000 });
+      await page.waitForFunction(() => window.viewerReady === true || window.viewerError, null, { timeout: 240000 });
+      if (await page.evaluate(() => window.viewerError || null)) throw new Error('The viewer failed to load');
+      await page.evaluate(() => { const fill = document.querySelector('#fill-toggle'); if (fill?.getAttribute('aria-pressed') === 'true') fill.click(); });
+      await page.evaluate(() => layoutViewer.workspace.open('connections', 'marknet'));
+      await page.evaluate(() => layoutViewer.nativeConnectivity.signal.start('rf_pad_1_1'));
+      await page.evaluate(() => layoutViewer.nativeConnectivity.signal.at(0));
+      await hold(page, 3);
+    },
+    async film(page, base, rec) {
+      // Each step is drawn, then filmed for one frame: the path advances at an even pace on screen whatever the draw time.
+      const span = await page.evaluate(() => layoutViewer.nativeConnectivity.signal.state().span_um), steps = 120;
+      rec.mark('signal');
+      await rec.frame(.8);
+      for (let i = 1; i <= steps; i++) {
+        await page.evaluate(d => layoutViewer.nativeConnectivity.signal.at(d), span * i / steps);
+        await page.evaluate(() => new Promise(done => requestAnimationFrame(() => requestAnimationFrame(done))));
+        await rec.frame();
+      }
+      await rec.frame(2);
+    },
+  },
+  {
     id: 'S8_finishing', shows: 'Circuit Finishing Screen: emblem, GENESIS, "Whatever you want to design."',
     async setup(page) { await page.goto('about:blank'); },
     async film(page, base) { await page.goto(`${base}/?presentation=finish`, { waitUntil: 'domcontentloaded' }); await hold(page, 6); },

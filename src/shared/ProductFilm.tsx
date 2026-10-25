@@ -9,9 +9,9 @@ type Film = { id: string; asset: string; length: string; size: string; eyebrow: 
 
 const films: Film[] = [
   {
-    id: 'product-film', asset: 'genesis-product-73s', length: '1:13', size: '6 MB', eyebrow: 'PRODUCT FILM', title: 'RFIC design, on demand.',
-    description: 'Recorded on the GENESIS site and workbench: a conversation that becomes a schematic, its blocks and analyses, the chip layout, its checks and its 3D model, then four more circuits.',
-    note: 'Screen recordings of GENESIS with original music. The conversations are live; the layout, checks and 3D model are saved records from earlier runs.',
+    id: 'product-film', asset: 'genesis-product-79s', length: '1:19', size: '6 MB', eyebrow: 'PRODUCT FILM', title: 'RFIC design, on demand.',
+    description: 'Recorded on the GENESIS site and workbench: a conversation that becomes a schematic, its blocks and analyses, the chip layout, its checks, its signal path and its 3D model, then four more circuits.',
+    note: 'Screen recordings of GENESIS with original music. The conversations are live; the layout, checks, signal path and 3D model are saved records from earlier runs.',
     download: 'Download the product film',
     opening: 'The film opens on the GENESIS landing page: light from the top and the chat box.',
     transcript: [
@@ -24,6 +24,7 @@ const films: Film[] = [
       'GENESIS optimizes toward your targets: the test matrix of circuit variants and operating states.',
       'GENESIS places, routes and tiles the layout: Placement, Routing, Tiling and Verify, each with its record.',
       'GENESIS checks it with Calibre DRC and LVS: LVS correct and 124 DRC markers listed by rule.',
+      'GENESIS traces the signal path through your layout: from RF pad 1 of chip C1 along its saved MarkNet shapes, through L1 and the switch transistors to both outputs.',
       'GENESIS builds your chip in 3D: the floorplan flow writes a 3D model of chip C1, shown here as a time-lapse.',
       'GENESIS designs any circuit you want: an RF switch, a low-noise amplifier, a mixer and a power amplifier, each from its own recorded conversation.',
       'GENESIS. Whatever you want to design.',
