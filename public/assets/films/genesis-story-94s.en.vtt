@@ -6,53 +6,53 @@ WEBVTT
 00:00:01.933 --> 00:00:04.800
 Tell GENESIS what you want to design: “Design a broadband SPDT RF switch, DC to 110 GHz.”
 
-00:00:04.800 --> 00:00:09.104
+00:00:04.800 --> 00:00:09.100
 GENESIS asks what your circuit needs: series–shunt, series or distributed and tuned; series–shunt is chosen.
 
-00:00:09.104 --> 00:00:13.100
-GENESIS proposes the schematic: the GF22FDX series–shunt starting topology.
+00:00:09.100 --> 00:00:13.600
+GENESIS proposes the schematic: the GF22FDX series–shunt starting topology, drawn beside its proposal.
 
-00:00:13.100 --> 00:00:19.200
-GENESIS draws the schematic on your PDK: 25 parts and 29 wires, from left to right.
+00:00:13.600 --> 00:00:19.700
+GENESIS draws the schematic on your PDK: 3 ports, 3 inductors, 1 capacitor, 4 transistors, 4 resistors and 2 DC sources, each kind lit in turn.
 
-00:00:19.200 --> 00:00:21.200
+00:00:19.700 --> 00:00:21.700
 GENESIS splits it into layout blocks: inductors, switch pairs, bias resistors and the input capacitor.
 
-00:00:21.200 --> 00:00:27.800
+00:00:21.700 --> 00:00:27.300
 Chip C1 in blocks: its RF pads, inductors, switch transistors, bias resistors and DC pads, joined by its RF lines and bias nets.
 
-00:00:27.800 --> 00:00:33.900
-GENESIS builds every testbench and measurement: DC and S-parameters, harmonic balance and transient, with their bias states and 26 measurements.
+00:00:27.300 --> 00:00:32.300
+GENESIS builds every testbench and measurement: a port on each RF pad and a DC source on each DC pad of chip C1, for DC and S-parameters, harmonic balance and transient, with their bias states.
 
-00:00:33.900 --> 00:00:40.000
+00:00:32.300 --> 00:00:39.900
 GENESIS runs the analyses and plots every S-parameter: ON S21, ISO S31 and S11 of chip C1 with RF2 on, from PEX and from the EM window.
 
-00:00:40.000 --> 00:00:45.000
+00:00:39.900 --> 00:00:45.100
 GENESIS tunes coil pixels, coil shapes and transistor sizes: random pixels on a 12 × 12 grid for each of L1, L2 and L3, half-turn coils and 1.5-turn coils by diameter and width, and the width and fingers of M1 to M4.
 
-00:00:45.000 --> 00:00:49.600
+00:00:45.100 --> 00:00:54.500
 Each step is one recorded evaluation: 290 in the pixel run, 342 in the half-turn run and 488 in the 1.5-turn run, each with its goal error.
 
-00:00:49.600 --> 00:00:53.933
-GENESIS turns the blocks into a layout: the blocks of chip C1 move from the schematic to their places.
+00:00:54.500 --> 00:00:58.800
+GENESIS turns the blocks into a layout: the blocks of chip C1 move from the block view to their places.
 
-00:00:53.933 --> 00:01:00.933
+00:00:58.800 --> 00:01:05.800
 GENESIS routes RF lines, drops and DC lines.
 
-00:01:00.933 --> 00:01:04.200
+00:01:05.800 --> 00:01:09.100
 GENESIS tiles the ground and fills density.
 
-00:01:04.200 --> 00:01:08.300
+00:01:09.100 --> 00:01:13.200
 GENESIS checks it with Calibre DRC and LVS: both clean for this layout.
 
-00:01:08.300 --> 00:01:14.900
+00:01:13.200 --> 00:01:19.800
 GENESIS builds your chip in 3D: the metal layers of chip C1, lifted apart.
 
-00:01:14.900 --> 00:01:19.900
+00:01:19.800 --> 00:01:24.800
 GENESIS designs any circuit you want: the schematics of an RF switch, a low-noise amplifier, a mixer and a power amplifier, each from its own recorded conversation.
 
-00:01:19.900 --> 00:01:23.500
+00:01:24.800 --> 00:01:28.400
 GENESIS lays out the mixer and checks it with Calibre: its switch quad from the GDS, DRC with 0 violations in 17,095 rule checks, LVS correct and no density markers.
 
-00:01:23.500 --> 00:01:29.000
+00:01:28.400 --> 00:01:33.900
 GENESIS. Whatever you want to design.

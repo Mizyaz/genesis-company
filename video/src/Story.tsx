@@ -5,7 +5,7 @@ import { loadFont } from '@remotion/fonts';
 import { Caption } from './AppScene';
 import { C, GRADIENT } from './Brand';
 import { OptimizeView, SParamPlots, type Optimize, type SParams } from './story/Analysis';
-import { BlockView, type BlockLinks } from './story/BlockView';
+import { blockCentres, BlockView, type BlockLinks } from './story/BlockView';
 import { LitEmblem, Sunrise } from './story/Landing';
 import { fit, mix, Schematic, type Drawing } from './story/Schematic';
 import { FPS } from './storyboard';
@@ -42,12 +42,17 @@ const BLOCK_COLOURS = ['#41dce8', '#b08af4', '#f5a623', '#6fe0a5', '#ff7aa8', '#
 const MODES: Record<string, string> = { dc: 'DC operating point', sp: 'S-parameters', hb: 'Harmonic balance', tran: 'Transient', ac: 'AC', noise: 'Noise', pss: 'Periodic steady state' };
 const STAGES: Record<string, string> = { essentials: 'Essentials', interconnect: 'RF lines', drops: 'Drops', dc_lines: 'DC lines', gnd_tiling: 'GND tiling', density: 'Density fill' };
 const TRANSITION = 12;
-// Content stays above the caption band.
-const AREA = { left: 110, top: 44, width: 1700, height: 690 };
+// Content stays above the caption band. From the proposal on, the circuit always sits on the right (CIRCUIT) and the
+// words and plots about it on the left (PANEL); the circuit's view only moves forward: schematic, blocks, testbench,
+// layout, 3D.
+const CIRCUIT = { left: 790, top: 30, width: 1040, height: 700 };
+const PANEL = { left: 96, top: 40, width: 640 };
+// The blocks and the testbench sit lower, with room above for the DC sources and below for a port.
+const BENCH = { x: CIRCUIT.left + 40, y: 95, w: CIRCUIT.width - 80, h: 660 };
 
 /** Scenes in order, in seconds. */
 const SCENES = [
-  ['ask', 13.5], ['schematic', 6.5], ['blocks', 9], ['testbench', 6.5], ['analysis', 6.5], ['optimize', 10], ['layout', 15], ['signoff', 4.5], ['chip3d', 7], ['any', 9], ['end', 5.5],
+  ['ask', 14], ['schematic', 6.5], ['blocks', 8], ['testbench', 13], ['optimize', 15], ['layout', 15], ['signoff', 4.5], ['chip3d', 7], ['any', 9], ['end', 5.5],
 ] as const;
 export const storyFrames = () => SCENES.reduce((n, [, s]) => n + Math.round(s * FPS), 0) - TRANSITION * (SCENES.length - 1);
 
@@ -86,7 +91,8 @@ function Bubble({ who, children, k }: { who: 'user' | 'genesis'; children: React
 }
 
 /** The landing page and the conversation: the prompt is typed and sent, GENESIS answers with its question and choice
- * cards, the recorder's choice is taken and GENESIS proposes the schematic. */
+ * cards, the recorder's choice is taken and GENESIS proposes the schematic: its proposal stays on the left and the
+ * chosen topology draws itself on the right. */
 function Ask({ story }: { story: StoryData }) {
   const frame = useCurrentFrame(), sent = 118;
   const typed = story.prompt.slice(0, Math.floor(interpolate(frame, [62, 108], [0, story.prompt.length], clamp)));
@@ -109,6 +115,8 @@ function Ask({ story }: { story: StoryData }) {
     }
     if (turn.answer?.text) { const t = turn.answer.text; items.push({ at, node: k => <Bubble who="user" k={k}>{t}</Bubble> }); at += 26; }
   }
+  const proposal = story.conversation[story.conversation.length - 1].message, chosen = story.conversation.find(t => t.answer?.card)?.answer?.card;
+  const turnAt = at + 10, turn = ease(frame, turnAt, turnAt + 18);
   // The column scrolls so the newest item stays above the caption band.
   const shown = items.filter(i => i.at <= frame).length;
   const scroll = interpolate(frame, [sent + 120, sent + 150], [0, 160], clamp) * (shown > 3 ? 1 : 0);
@@ -119,7 +127,7 @@ function Ask({ story }: { story: StoryData }) {
       <div style={{ marginTop: 18, opacity: out(frame, 14, 40), filter: `blur(${(1 - out(frame, 14, 40)) * 7}px)`, transform: `translateY(${(1 - out(frame, 14, 40)) * 3}px)` }}><Wordmark size={120} /></div>
       <div style={{ marginTop: 12, fontFamily: 'Inter', fontSize: 34, color: C.muted, opacity: out(frame, 14, 40) }}>Whatever you want to design.</div>
     </div>
-    <div style={{ position: 'absolute', left: 260, width: 1400, top: 56 - scroll, display: 'flex', flexDirection: 'column', gap: 20 }}>
+    <div style={{ position: 'absolute', left: 260, width: 1400, top: 56 - scroll, display: 'flex', flexDirection: 'column', gap: 20, opacity: 1 - turn }}>
       {items.map((item, i) => frame >= item.at && <div key={i} style={{ display: 'flex', flexDirection: 'column' }}>{item.node(out(frame, item.at, item.at + 12))}</div>)}
     </div>
     <div style={{ position: 'absolute', left: 360, width: 1200, top: interpolate(box, [0, 1], [640, 560]) + ease(frame, sent, sent + 24) * 320, opacity: box * (1 - ease(frame, sent, sent + 20)),
@@ -127,6 +135,17 @@ function Ask({ story }: { story: StoryData }) {
       fontFamily: 'Inter', fontSize: 32, color: typed ? C.text : C.muted }}>
       {typed || 'Describe your circuit…'}<span style={{ opacity: Math.floor(frame / 15) % 2 && frame < sent ? 1 : 0, color: C.cyan }}>|</span>
     </div>
+    {frame >= turnAt && <>
+      <div style={{ position: 'absolute', left: PANEL.left, top: PANEL.top + 40, width: PANEL.width, display: 'flex', opacity: out(frame, turnAt + 6, turnAt + 22) }}>
+        <Bubble who="genesis" k={1}><span style={{ fontSize: 30 }}>{proposal}</span></Bubble>
+      </div>
+      <div style={{ position: 'absolute', ...CIRCUIT, borderRadius: 22, background: C.surface, border: `1px solid ${C.border}`, opacity: out(frame, turnAt + 4, turnAt + 20) }}>
+        <div style={{ position: 'absolute', left: 30, top: 70, right: 30, bottom: 30 }}>
+          <Schematic drawing={story.schematics[0]} width={CIRCUIT.width - 60} height={CIRCUIT.height - 100} t={interpolate(frame, [turnAt + 10, turnAt + 80], [0, 1], clamp)} />
+        </div>
+        {chosen && <div style={{ position: 'absolute', left: 22, top: 18, padding: '8px 18px', borderRadius: 999, background: '#12405a', border: '2px solid #41dce8', fontFamily: 'Inter', fontWeight: 650, fontSize: 30, color: C.text }}>{chosen}</div>}
+      </div>
+    </>}
     <Band chapter="Ask" captions={[[0, ''], [58, 'Tell GENESIS what you want to design.'], [sent + 26, 'GENESIS asks what your circuit needs.'], [at - 20, 'GENESIS proposes the schematic.']]} />
   </AbsoluteFill>;
 }
@@ -149,10 +168,32 @@ function groupBoxes(drawing: Drawing, w: number, h: number) {
   }).filter(g => g !== null);
 }
 
+const KINDS: Record<string, [string, string]> = { port: ['port', 'ports'], nmos: ['transistor', 'transistors'], pmos: ['transistor', 'transistors'], inductor: ['inductor', 'inductors'],
+  capacitor: ['capacitor', 'capacitors'], resistor: ['resistor', 'resistors'], vdc: ['DC source', 'DC sources'] };
+
+/** The proposed schematic on the right, now on the PDK, and its parts by kind on the left: each kind lights its parts. */
 function SchematicScene({ story }: { story: StoryData }) {
   const frame = useCurrentFrame(), drawing = story.schematics[0];
+  const kinds = [...new Set(drawing.parts.map(p => p.kind))].filter(k => KINDS[k]);
+  const step = 26, active = Math.floor((frame - 16) / step), lit = kinds[active];
+  const colours = new Map(drawing.parts.filter(p => p.kind === lit).map(p => [p.label, '#41dce8']));
   return <AbsoluteFill style={{ background: C.page }}>
-    <div style={{ position: 'absolute', ...AREA }}><Schematic drawing={drawing} width={AREA.width} height={AREA.height} t={interpolate(frame, [6, 150], [0, 1], clamp)} /></div>
+    <div style={{ position: 'absolute', ...CIRCUIT, borderRadius: 22, background: C.surface, border: `1px solid ${C.border}` }}>
+      <div style={{ position: 'absolute', left: 30, top: 70, right: 30, bottom: 30 }}>
+        <Schematic drawing={drawing} width={CIRCUIT.width - 60} height={CIRCUIT.height - 100} t={1} tint={lit ? 1 : 0} colours={colours} />
+      </div>
+    </div>
+    <div style={{ position: 'absolute', left: PANEL.left, top: PANEL.top + 30, width: PANEL.width, fontFamily: 'Inter' }}>
+      <div style={{ fontSize: 26, fontWeight: 600, letterSpacing: '.16em', textTransform: 'uppercase', color: C.muted, marginBottom: 20 }}>{drawing.title} parts</div>
+      {kinds.map((kind, i) => {
+        const n = drawing.parts.filter(p => p.kind === kind).length, on = kind === lit, k = out(frame, 10 + i * step, 22 + i * step);
+        return <div key={kind} style={{ opacity: k, display: 'flex', alignItems: 'baseline', gap: 18, padding: '10px 20px', marginBottom: 8, borderRadius: 14,
+          background: on ? '#0f2c46' : 'transparent', border: `1px solid ${on ? '#41dce866' : 'transparent'}` }}>
+          <span style={{ width: 60, textAlign: 'right', fontSize: 40, fontWeight: 700, color: on ? C.cyan : C.text }}>{n}</span>
+          <span style={{ fontSize: 34, color: on ? C.text : C.muted }}>{KINDS[kind][n === 1 ? 0 : 1]}</span>
+        </div>;
+      })}
+    </div>
     <Band chapter="Schematic" captions={[[0, 'GENESIS draws the schematic on your PDK.']]} />
   </AbsoluteFill>;
 }
@@ -162,76 +203,72 @@ function SchematicScene({ story }: { story: StoryData }) {
 function BlocksScene({ story, layout, links }: { story: StoryData; layout: LayoutData; links: BlockLinks }) {
   const frame = useCurrentFrame(), drawing = story.schematics[0], colours = blockColours(drawing), tint = ease(frame, 4, 34);
   const away = ease(frame, 40, 62), chip = new Map(layout.blocks.map((b, i) => [b.name, BLOCK_COLOURS[i % BLOCK_COLOURS.length]]));
+  const sw = CIRCUIT.width - 60, sh = CIRCUIT.height - 100;
   return <AbsoluteFill style={{ background: C.page }}>
-    <div style={{ position: 'absolute', ...AREA, opacity: 1 - away, transform: `scale(${1 - .2 * away})`, transformOrigin: '30% 50%' }}>
-      <svg width={AREA.width} height={AREA.height} style={{ position: 'absolute', overflow: 'visible' }}>
-        {groupBoxes(drawing, AREA.width, AREA.height).map((g, i) => {
-          const k = out(frame, 10 + i * 2, 24 + i * 2);
-          return <g key={g.name} opacity={k}>
-            <rect x={g.x0} y={g.y0} width={g.x1 - g.x0} height={g.y1 - g.y0} rx={14} fill={g.colour} fillOpacity={.08} stroke={g.colour} strokeOpacity={.7} strokeWidth={2} strokeDasharray="8 6" />
-            <text x={g.x0 + 10} y={g.y0 - 10} fontFamily="Inter" fontWeight={650} fontSize={20} fill={g.colour}>{g.name.replace(/_/g, ' ')}</text>
-          </g>;
-        })}
-      </svg>
-      <div style={{ position: 'absolute', inset: 0 }}><Schematic drawing={drawing} width={AREA.width} height={AREA.height} t={1} tint={tint} colours={colours} /></div>
+    <div style={{ position: 'absolute', ...CIRCUIT, borderRadius: 22, background: C.surface, border: `1px solid ${C.border}`, opacity: 1 - away }}>
+      <div style={{ position: 'absolute', left: 30, top: 70, width: sw, height: sh }}>
+        <svg width={sw} height={sh} style={{ position: 'absolute', overflow: 'visible' }}>
+          {groupBoxes(drawing, sw, sh).map((g, i) => {
+            const k = out(frame, 10 + i * 2, 24 + i * 2);
+            return <g key={g.name} opacity={k}>
+              <rect x={g.x0} y={g.y0} width={g.x1 - g.x0} height={g.y1 - g.y0} rx={14} fill={g.colour} fillOpacity={.08} stroke={g.colour} strokeOpacity={.7} strokeWidth={2} strokeDasharray="8 6" />
+              <text x={g.x0 + 10} y={g.y0 - 10} fontFamily="Inter" fontWeight={650} fontSize={24} fill={g.colour}>{g.name.replace(/_/g, ' ')}</text>
+            </g>;
+          })}
+        </svg>
+        <div style={{ position: 'absolute', inset: 0 }}><Schematic drawing={drawing} width={sw} height={sh} t={1} tint={tint} colours={colours} labels={false} /></div>
+      </div>
     </div>
-    <div style={{ position: 'absolute', left: 96, top: 60, width: 470, fontFamily: 'Inter', opacity: out(frame, 54, 70) }}>
-      <div style={{ fontWeight: 700, fontSize: 26, color: C.text, marginBottom: 12 }}>Chip C1</div>
+    <div style={{ position: 'absolute', left: PANEL.left, top: PANEL.top, width: PANEL.width, fontFamily: 'Inter', opacity: out(frame, 50, 66) }}>
+      <div style={{ fontWeight: 700, fontSize: 34, color: C.text, marginBottom: 14 }}>Chip C1 blocks</div>
       {layout.blocks.map((b, i) => {
-        const k = out(frame, 58 + i * 3, 70 + i * 3), members = layout.members.filter(m => m.block === b.name);
-        return <div key={b.name} style={{ opacity: k, transform: `translateX(${(1 - k) * -20}px)`, display: 'flex', alignItems: 'center', gap: 10, padding: '5px 0 5px 14px', borderLeft: `2px solid ${C.border}` }}>
-          <span style={{ width: 12, height: 12, borderRadius: 3, background: chip.get(b.name), flex: 'none' }} />
-          <span style={{ fontWeight: 600, fontSize: 21, color: C.text, width: 190 }}>{b.name.replace(/_/g, ' ')}</span>
-          <span style={{ fontSize: 17, color: C.muted, fontFamily: 'ui-monospace, monospace' }}>{members.map(m => m.member).join(' ')}</span>
+        const k = out(frame, 56 + i * 3, 68 + i * 3), members = layout.members.filter(m => m.block === b.name);
+        return <div key={b.name} style={{ opacity: k, transform: `translateX(${(1 - k) * -20}px)`, display: 'flex', alignItems: 'center', gap: 14, padding: '7px 0 7px 16px', borderLeft: `2px solid ${C.border}` }}>
+          <span style={{ width: 16, height: 16, borderRadius: 4, background: chip.get(b.name), flex: 'none' }} />
+          <span style={{ fontWeight: 600, fontSize: 28, color: C.text, width: 290 }}>{b.name.replace(/_/g, ' ')}</span>
+          <span style={{ fontSize: 24, color: C.muted, fontFamily: 'ui-monospace, monospace' }}>{members.length > 4 ? `${members.length} members` : members.map(m => m.member.replace(/^PAD_/, '')).join(' ')}</span>
         </div>;
       })}
     </div>
-    <BlockView layout={layout} links={links} colours={chip} frame={frame} x={620} y={18} w={1200} h={836} start={62} />
+    <BlockView layout={layout} links={links} colours={chip} frame={frame} x={BENCH.x} y={BENCH.y} w={BENCH.w} h={BENCH.h} start={54} />
     <Band chapter="Blocks" captions={[[0, 'GENESIS splits it into layout blocks.'], [60, 'Chip C1 in blocks: pads, RF lines and bias nets.']]} />
   </AbsoluteFill>;
 }
-function TestbenchScene({ story }: { story: StoryData }) {
-  const frame = useCurrentFrame(), drawing = story.schematics[0], move = ease(frame, 0, 26);
-  const w = AREA.width * (1 - .5 * move), h = AREA.height * (1 - .2 * move);
+
+/** The testbench is built on the blocks: the view pulls back, ports land on the RF pads and sources on the DC pads, the
+ * testbenches are listed on the left, then the S-parameter plots replace them. */
+function TestbenchScene({ story, layout, links, sparams }: { story: StoryData; layout: LayoutData; links: BlockLinks; sparams: SParams }) {
+  const frame = useCurrentFrame(), plots = 150, gone = ease(frame, plots - 16, plots);
+  const chip = new Map(layout.blocks.map((b, i) => [b.name, BLOCK_COLOURS[i % BLOCK_COLOURS.length]]));
   return <AbsoluteFill style={{ background: C.page }}>
-    <div style={{ position: 'absolute', left: AREA.left, top: AREA.top + AREA.height * .1 * move, width: w, height: h }}>
-      <Schematic drawing={drawing} width={w} height={h} t={1} tint={1 - move} colours={blockColours(drawing)} labels={false} />
-    </div>
-    <div style={{ position: 'absolute', left: 1010, top: AREA.top, width: 800, display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <BlockView layout={layout} links={links} colours={chip} frame={frame} start={-200} bench={out(frame, 16, 60)} {...BENCH} />
+    <div style={{ position: 'absolute', left: PANEL.left, top: PANEL.top, width: PANEL.width, display: 'flex', flexDirection: 'column', gap: 20, opacity: 1 - gone }}>
       {story.testbenches.map((tb, i) => {
-        const k = out(frame, 22 + i * 12, 38 + i * 12);
-        return <div key={tb.name} style={{ opacity: k, transform: `translateX(${(1 - k) * 40}px)`, padding: '18px 24px', borderRadius: 18, background: C.surface, border: `1px solid ${C.border}`, fontFamily: 'Inter' }}>
+        const k = out(frame, 30 + i * 14, 46 + i * 14);
+        return <div key={tb.name} style={{ opacity: k, transform: `translateX(${(1 - k) * -40}px)`, padding: '22px 26px', borderRadius: 18, background: C.surface, border: `1px solid ${C.border}`, fontFamily: 'Inter' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-            <span style={{ fontWeight: 700, fontSize: 30, color: C.text }}>{tb.modes.map(m => MODES[m] ?? m).join(' + ')}</span>
-            <span style={{ fontSize: 20, color: C.muted }}>{tb.ports} ports</span>
+            <span style={{ fontWeight: 700, fontSize: 34, color: C.text }}>{tb.modes.map(m => MODES[m] ?? m).join(' + ')}</span>
+            <span style={{ fontSize: 26, color: C.muted }}>{tb.ports} ports</span>
           </div>
-          <div style={{ marginTop: 10, display: 'flex', gap: 10, flexWrap: 'wrap' }}>{tb.states.map(s =>
-            <span key={s} style={{ padding: '4px 12px', borderRadius: 999, fontSize: 19, color: C.cyan, border: `1px solid #41dce855` }}>{s.replace(/_/g, ' ')}</span>)}</div>
+          <div style={{ marginTop: 12, display: 'flex', gap: 10, flexWrap: 'wrap' }}>{tb.states.map(s =>
+            <span key={s} style={{ padding: '5px 14px', borderRadius: 999, fontSize: 26, color: C.cyan, border: '1px solid #41dce855' }}>{s.replace(/_/g, ' ')}</span>)}</div>
         </div>;
       })}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 6 }}>{story.outputs.map((o, i) => {
-        const k = out(frame, 64 + i * 2.2, 74 + i * 2.2);
-        return <span key={o} style={{ opacity: k, padding: '5px 12px', borderRadius: 8, fontFamily: 'ui-monospace, monospace', fontSize: 22, color: C.text, background: '#0e2a44' }}>{o}</span>;
-      })}</div>
     </div>
-    <Band chapter="Testbench" captions={[[0, 'GENESIS builds every testbench and measurement.']]} />
+    {frame >= plots - 10 && <SParamPlots sparams={sparams} frame={frame} x={PANEL.left} y={PANEL.top - 10} w={PANEL.width} h={CIRCUIT.height} start={plots} />}
+    <Band chapter="Testbench" captions={[[0, 'GENESIS builds every testbench and measurement.'], [plots, 'GENESIS runs the analyses and plots every S-parameter.']]} />
   </AbsoluteFill>;
 }
 
-function AnalysisScene({ sparams }: { sparams: SParams }) {
-  const frame = useCurrentFrame();
+/** The optimizer runs on the left, one after another; on the right the testbench gives way to the blocks, with the
+ * coils and transistors the runs tune lit. */
+function OptimizeScene({ layout, links, optimize }: { layout: LayoutData; links: BlockLinks; optimize: Optimize }) {
+  const frame = useCurrentFrame(), back = 1 - ease(frame, 0, 30);
+  const chip = new Map(layout.blocks.map((b, i) => [b.name, BLOCK_COLOURS[i % BLOCK_COLOURS.length]]));
   return <AbsoluteFill style={{ background: C.page }}>
-    <div style={{ position: 'absolute', left: AREA.left, top: 60, fontFamily: 'Inter', fontSize: 24, color: C.muted, opacity: out(frame, 0, 14) }}>
-      Chip C1, RF2 on: PEX and the EM window</div>
-    <SParamPlots sparams={sparams} frame={frame} x={AREA.left} y={110} w={AREA.width} h={560} start={8} />
-    <Band chapter="Analysis" captions={[[0, 'GENESIS runs the analyses and plots every S-parameter.']]} />
-  </AbsoluteFill>;
-}
-function OptimizeScene({ optimize }: { optimize: Optimize }) {
-  const frame = useCurrentFrame();
-  return <AbsoluteFill style={{ background: C.page }}>
-    <OptimizeView optimize={optimize} frame={frame} start={24} end={270} />
-    <Band chapter="Optimization" captions={[[0, 'GENESIS tunes coil pixels, coil shapes and transistor sizes.'], [150, 'Each step is one recorded evaluation.']]} />
+    <BlockView layout={layout} links={links} colours={chip} frame={frame} start={-200} bench={back} focus={{ kinds: ['inductor', 'transistor'], k: out(frame, 24, 44) }} {...BENCH} />
+    <OptimizeView optimize={optimize} frame={frame} x={PANEL.left} y={PANEL.top - 10} w={PANEL.width} phases={[[16, 156], [156, 296], [296, 446]]} />
+    <Band chapter="Optimization" captions={[[0, 'GENESIS tunes coil pixels, coil shapes and transistor sizes.'], [156, 'Each step is one recorded evaluation.']]} />
   </AbsoluteFill>;
 }
 
@@ -261,29 +298,31 @@ function Chip({ layout, frame, staged, blocks }: { layout: Pick<LayoutData, 'fil
   </>;
 }
 
-function LayoutScene({ story, layout }: { story: StoryData; layout: LayoutData }) {
-  const frame = useCurrentFrame(), drawing = story.schematics[0];
-  const f = layoutFrame(layout, 740, AREA.top, AREA.height);
-  // A layout block flies in from the schematic parts it holds (matched by instance name); a pad block from outside the die.
+/** The chip's layout box on the right. */
+const chipFrame = (layout: LayoutData) => {
+  const [x0, y0, x1, y1] = layout.die, w = Math.min(CIRCUIT.width, CIRCUIT.height * (x1 - x0) / (y1 - y0)), h = w * (y1 - y0) / (x1 - x0);
+  return layoutFrame(layout, CIRCUIT.left + (CIRCUIT.width - w) / 2, CIRCUIT.top + (CIRCUIT.height - h) / 2, h);
+};
+
+function LayoutScene({ layout, links }: { layout: LayoutData; links: BlockLinks }) {
+  const frame = useCurrentFrame(), f = chipFrame(layout);
+  const chip = new Map(layout.blocks.map((b, i) => [b.name, BLOCK_COLOURS[i % BLOCK_COLOURS.length]]));
+  // Each layout block flies in from its card in the block view, which stands where the chip will be.
+  const cards = blockCentres(layout, BENCH.x, BENCH.y, BENCH.w, BENCH.h);
   const flights = layout.blocks.map((b, i) => {
-    const members = layout.members.filter(m => m.block === b.name).map(m => m.member.toUpperCase());
-    const parts = drawing.parts.filter(p => members.includes(p.label.toUpperCase()));
-    const { k, dx, dy } = fit(drawing, AREA.width, AREA.height);
-    const cx = f.px((b.box[0] + b.box[2]) / 2), cy = f.py((b.box[1] + b.box[3]) / 2);
-    const from = parts.length
-      ? [AREA.left - f.left + parts.reduce((s, p) => s + p.x * k + dx, 0) / parts.length, AREA.top - f.top + parts.reduce((s, p) => s + p.y * k + dy, 0) / parts.length]
-      : [cx + (cx - f.width / 2) * .6, cy + (cy - f.height / 2) * .6];
-    return { block: b.name, cx, cy, from, matched: parts.length > 0, k: ease(frame, 22 + i * 6, 70 + i * 6) };
+    const cx = f.px((b.box[0] + b.box[2]) / 2), cy = f.py((b.box[1] + b.box[3]) / 2), card = cards.get(b.name);
+    const from = card ? [card[0] - f.left, card[1] - f.top] : [cx, cy];
+    return { block: b.name, cx, cy, from, matched: true, k: ease(frame, 22 + i * 6, 70 + i * 6) };
   });
-  const schematic = 1 - ease(frame, 30, 80);
+  const blocks = 1 - ease(frame, 26, 70);
   // The camera pushes in on the switch core while the drops are drawn.
   const core = layout.blocks.find(b => b.name === 'switch_fets')?.box;
   const zoom = ease(frame, 176, 204) * (1 - ease(frame, 250, 282));
   const zx = core ? f.px((core[0] + core[2]) / 2) : f.width / 2, zy = core ? f.py((core[1] + core[3]) / 2) : f.height / 2, scale = 1 + 3.2 * zoom;
   const active = Object.entries(STAGE_AT).filter(([, [a]]) => frame >= a).pop()?.[0];
   return <AbsoluteFill style={{ background: C.page }}>
-    <div style={{ position: 'absolute', ...AREA, opacity: schematic }}>
-      <Schematic drawing={drawing} width={AREA.width} height={AREA.height} t={1} tint={1} colours={blockColours(drawing)} labels={false} />
+    <div style={{ position: 'absolute', inset: 0, opacity: blocks }}>
+      <BlockView layout={layout} links={links} colours={chip} frame={frame} start={-200} {...BENCH} />
     </div>
     <div style={{ position: 'absolute', left: f.left, top: f.top, width: f.width, height: f.height, overflow: 'hidden', borderRadius: 10,
       boxShadow: `0 0 0 1px ${C.border}`, opacity: out(frame, 20, 40) }}>
@@ -293,7 +332,7 @@ function LayoutScene({ story, layout }: { story: StoryData; layout: LayoutData }
           transform: `translate(${(fl.from[0] - fl.cx) * (1 - fl.k)}px, ${(fl.from[1] - fl.cy) * (1 - fl.k)}px) scale(${.45 + .55 * fl.k})` }} />)} />
       </div>
     </div>
-    <div style={{ position: 'absolute', left: AREA.left, top: AREA.top + 40, width: 520, fontFamily: 'Inter', opacity: out(frame, 70, 96) }}>
+    <div style={{ position: 'absolute', left: PANEL.left, top: PANEL.top + 40, width: PANEL.width, fontFamily: 'Inter', opacity: out(frame, 70, 96) }}>
       <div style={{ fontSize: 22, fontWeight: 600, letterSpacing: '.16em', textTransform: 'uppercase', color: C.muted, marginBottom: 18 }}>Floorplanner stages</div>
       {layout.stages.map(stage => {
         const on = stage === active, done = frame >= STAGE_AT[stage][1];
@@ -308,7 +347,7 @@ function LayoutScene({ story, layout }: { story: StoryData; layout: LayoutData }
 }
 
 function SignoffScene({ story, layout }: { story: StoryData; layout: LayoutData }) {
-  const frame = useCurrentFrame(), f = layoutFrame(layout, 740, AREA.top, AREA.height), scan = interpolate(frame, [8, 62], [0, 1], { ...clamp, easing: Easing.inOut(Easing.quad) });
+  const frame = useCurrentFrame(), f = chipFrame(layout), scan = interpolate(frame, [8, 62], [0, 1], { ...clamp, easing: Easing.inOut(Easing.quad) });
   const checks = [['Calibre DRC', story.signoff.drc], ['Calibre LVS', story.signoff.lvs]] as const;
   return <AbsoluteFill style={{ background: C.page }}>
     <div style={{ position: 'absolute', left: f.left, top: f.top, width: f.width, height: f.height, overflow: 'hidden', borderRadius: 10, boxShadow: `0 0 0 1px ${C.border}` }}>
@@ -316,7 +355,7 @@ function SignoffScene({ story, layout }: { story: StoryData; layout: LayoutData 
       <div style={{ position: 'absolute', top: 0, bottom: 0, left: `${scan * 100}%`, width: 6, marginLeft: -3, opacity: scan < 1 ? 1 : 0, background: C.cyan, boxShadow: '0 0 40px 14px #41dce888' }} />
       <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, width: `${scan * 100}%`, background: '#41dce80d' }} />
     </div>
-    <div style={{ position: 'absolute', left: AREA.left, top: AREA.top + 80, width: 540, display: 'flex', flexDirection: 'column', gap: 18, fontFamily: 'Inter' }}>
+    <div style={{ position: 'absolute', left: PANEL.left, top: PANEL.top + 80, width: PANEL.width, display: 'flex', flexDirection: 'column', gap: 18, fontFamily: 'Inter' }}>
       {checks.map(([name, ok], i) => {
         const k = out(frame, 50 + i * 10, 64 + i * 10);
         return <div key={name} style={{ opacity: k, transform: `scale(${.9 + .1 * k})`, transformOrigin: 'left', display: 'flex', alignItems: 'center', gap: 18, padding: '20px 26px', borderRadius: 18, background: C.surface, border: `1px solid ${ok ? '#6fe0a566' : '#ff7aa866'}` }}>
@@ -325,19 +364,27 @@ function SignoffScene({ story, layout }: { story: StoryData; layout: LayoutData 
           <span style={{ marginLeft: 'auto', fontSize: 26, color: ok ? '#6fe0a5' : '#ff7aa8' }}>{ok ? 'clean' : 'open'}</span>
         </div>;
       })}
-      <div style={{ opacity: out(frame, 76, 90), fontFamily: 'ui-monospace, monospace', fontSize: 19, color: C.muted }}>GDS sha256 {story.signoff.gds_sha256.slice(0, 16)}…</div>
+      <div style={{ opacity: out(frame, 76, 90), fontFamily: 'ui-monospace, monospace', fontSize: 24, color: C.muted }}>GDS sha256 {story.signoff.gds_sha256.slice(0, 16)}…</div>
     </div>
     <Band chapter="Signoff" captions={[[0, 'GENESIS checks it with Calibre DRC and LVS.']]} />
   </AbsoluteFill>;
 }
 
-/** The chip's metal layers, lifted apart in z order: the same top-down layers, tilted into 3D. */
+/** The chip's metal layers, lifted apart in z order: the same top-down layers, tilted into 3D on the right, while the
+ * layer names on the left light up as their layer lifts. */
 function Chip3DScene({ layout }: { layout: LayoutData }) {
   const frame = useCurrentFrame(), tilt = ease(frame, 4, 64), lift = ease(frame, 40, 130), spin = interpolate(frame, [0, 210], [0, -14]);
-  const layers = layout.layers.filter(l => layout.files[`layer_${l.name}`]);
-  const height = 640, width = height * (layout.die[2] - layout.die[0]) / (layout.die[3] - layout.die[1]);
+  const layers = layout.layers.filter(l => layout.files[`layer_${l.name}`]), c = chipFrame(layout);
+  // The tilted stack spreads wider than the flat chip, so it starts smaller.
+  const f = { left: c.left + c.width * .14, top: c.top + c.height * .18, width: c.width * .72, height: c.height * .72 };
   return <AbsoluteFill style={{ background: C.page, perspective: 3200 }}>
-    <div style={{ position: 'absolute', left: (1920 - width) / 2, top: 70, width, height, transformStyle: 'preserve-3d',
+    <div style={{ position: 'absolute', left: PANEL.left, top: PANEL.top, width: PANEL.width, fontFamily: 'Inter', display: 'flex', flexDirection: 'column-reverse', gap: 6 }}>
+      {layers.map((l, i) => { const k = out(frame, 40 + i * 6, 52 + i * 6);
+        return <div key={l.name} style={{ display: 'flex', alignItems: 'center', gap: 16, opacity: .35 + .65 * k, fontSize: 30, fontWeight: 600, color: C.text }}>
+          <span style={{ width: 22, height: 22, borderRadius: 5, background: l.color }} />{l.name}
+        </div>; })}
+    </div>
+    <div style={{ position: 'absolute', left: f.left, top: f.top, width: f.width, height: f.height, transformStyle: 'preserve-3d',
       transform: `rotateX(${56 * tilt}deg) rotateZ(${(-28 + spin) * tilt}deg) scale(${1 - .12 * tilt})` }}>
       {layers.map((l, i) => <Img key={l.name} src={image(layout, `layer_${l.name}`)!} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%',
         transform: `translateZ(${i * 30 * lift}px)`, opacity: .93 }} />)}
@@ -398,9 +445,9 @@ function EndScene() {
 export function Story({ story, layout, links, sparams, optimize, circuits }: StoryProps) {
   if (!story || !layout || !links || !sparams || !optimize || !circuits) throw new Error('story.json, layout.json, blocks.json, sparams.json, optimize.json or circuit_layouts.json is missing from the public folder');
   const scene: Record<string, React.ReactNode> = {
-    ask: <Ask story={story} />, schematic: <SchematicScene story={story} />, blocks: <BlocksScene story={story} layout={layout} links={links} />, testbench: <TestbenchScene story={story} />,
-    analysis: <AnalysisScene sparams={sparams} />, optimize: <OptimizeScene optimize={optimize} />,
-    layout: <LayoutScene story={story} layout={layout} />, signoff: <SignoffScene story={story} layout={layout} />, chip3d: <Chip3DScene layout={layout} />,
+    ask: <Ask story={story} />, schematic: <SchematicScene story={story} />, blocks: <BlocksScene story={story} layout={layout} links={links} />, testbench: <TestbenchScene story={story} layout={layout} links={links} sparams={sparams} />,
+    optimize: <OptimizeScene layout={layout} links={links} optimize={optimize} />,
+    layout: <LayoutScene layout={layout} links={links} />, signoff: <SignoffScene story={story} layout={layout} />, chip3d: <Chip3DScene layout={layout} />,
     any: <AnyScene story={story} circuits={circuits.circuits} />, end: <EndScene />,
   };
   return <TransitionSeries>
