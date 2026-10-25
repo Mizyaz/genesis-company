@@ -772,7 +772,7 @@ test('the two films are on-demand and accessible', async () => {
   const films = parsed.statements.find(statement => statement.declarationList?.declarations[0]?.name.getText(parsed) === 'films').declarationList.declarations[0].initializer.elements;
   const field = (film, name) => film.properties.find(p => p.name.getText(parsed) === name).initializer;
   // Each film: its asset under 10 MB, every line translated, and contiguous captions from 0 to its end, one cue per line.
-  const ends = { 'product-film': 73.2, 'how-it-works-film': 66.8 };
+  const ends = { 'product-film': 73.2, 'how-it-works-film': 87 };
   assert.deepEqual(films.map(film => field(film, 'id').text).sort(), Object.keys(ends).sort());
   for (const film of films) {
     const id = field(film, 'id').text, asset = field(film, 'asset').text, transcript = field(film, 'transcript').elements;

@@ -4,6 +4,8 @@ import { fade } from '@remotion/transitions/fade';
 import { loadFont } from '@remotion/fonts';
 import { Caption } from './AppScene';
 import { C, GRADIENT } from './Brand';
+import { OptimizeView, SParamPlots, type Optimize, type SParams } from './story/Analysis';
+import { BlockView, type BlockLinks } from './story/BlockView';
 import { LitEmblem, Sunrise } from './story/Landing';
 import { fit, mix, Schematic, type Drawing } from './story/Schematic';
 import { FPS } from './storyboard';
@@ -23,9 +25,9 @@ export type LayoutData = {
   die: [number, number, number, number]; width: number; height: number; files: Record<string, { file: string; boxes: number }>;
   stages: string[]; layers: { name: string; color: string; z_um: number }[];
   blocks: { name: string; box: [number, number, number, number] }[];
-  members: { block: string; member: string; box: [number, number, number, number] }[];
+  members: { block: string; member: string; cell: string; box: [number, number, number, number] }[];
 };
-export type StoryProps = { story: StoryData | null; layout: LayoutData | null };
+export type StoryProps = { story: StoryData | null; layout: LayoutData | null; links: BlockLinks | null; sparams: SParams | null; optimize: Optimize | null };
 
 void loadFont({ family: 'Inter', url: staticFile('brand/InterVariable.woff2'), weight: '100 900' });
 
@@ -41,13 +43,13 @@ const AREA = { left: 110, top: 44, width: 1700, height: 690 };
 
 /** Scenes in order, in seconds. */
 const SCENES = [
-  ['ask', 13.5], ['schematic', 6.5], ['blocks', 4.5], ['testbench', 6.5], ['layout', 15], ['signoff', 4.5], ['chip3d', 7], ['any', 7], ['end', 5.5],
+  ['ask', 13.5], ['schematic', 6.5], ['blocks', 9], ['testbench', 6.5], ['analysis', 6.5], ['optimize', 10], ['layout', 15], ['signoff', 4.5], ['chip3d', 7], ['any', 7], ['end', 5.5],
 ] as const;
 export const storyFrames = () => SCENES.reduce((n, [, s]) => n + Math.round(s * FPS), 0) - TRANSITION * (SCENES.length - 1);
 
 export const storyMetadata: CalculateMetadataFunction<StoryProps> = async () => {
-  const [story, layout] = await Promise.all(['story.json', 'layout.json'].map(async f => (await fetch(staticFile(f))).json()));
-  return { durationInFrames: storyFrames(), props: { story, layout } };
+  const [story, layout, links, sparams, optimize] = await Promise.all(['story.json', 'layout.json', 'blocks.json', 'sparams.json', 'optimize.json'].map(async f => (await fetch(staticFile(f))).json()));
+  return { durationInFrames: storyFrames(), props: { story, layout, links, sparams, optimize } };
 };
 
 function Wordmark({ size }: { size: number }) {
@@ -151,13 +153,16 @@ function SchematicScene({ story }: { story: StoryData }) {
   </AbsoluteFill>;
 }
 
-function BlocksScene({ story }: { story: StoryData }) {
+/** The schematic's block groups, then the chip's blocks as one symbolic floorplan: a hierarchy of blocks and members on
+ * the left, glyph cards with the pads at their places on the die, joined by the RF lines and the DC nets. */
+function BlocksScene({ story, layout, links }: { story: StoryData; layout: LayoutData; links: BlockLinks }) {
   const frame = useCurrentFrame(), drawing = story.schematics[0], colours = blockColours(drawing), tint = ease(frame, 4, 34);
+  const away = ease(frame, 40, 62), chip = new Map(layout.blocks.map((b, i) => [b.name, BLOCK_COLOURS[i % BLOCK_COLOURS.length]]));
   return <AbsoluteFill style={{ background: C.page }}>
-    <div style={{ position: 'absolute', ...AREA }}>
+    <div style={{ position: 'absolute', ...AREA, opacity: 1 - away, transform: `scale(${1 - .2 * away})`, transformOrigin: '30% 50%' }}>
       <svg width={AREA.width} height={AREA.height} style={{ position: 'absolute', overflow: 'visible' }}>
         {groupBoxes(drawing, AREA.width, AREA.height).map((g, i) => {
-          const k = out(frame, 20 + i * 4, 36 + i * 4);
+          const k = out(frame, 10 + i * 2, 24 + i * 2);
           return <g key={g.name} opacity={k}>
             <rect x={g.x0} y={g.y0} width={g.x1 - g.x0} height={g.y1 - g.y0} rx={14} fill={g.colour} fillOpacity={.08} stroke={g.colour} strokeOpacity={.7} strokeWidth={2} strokeDasharray="8 6" />
             <text x={g.x0 + 10} y={g.y0 - 10} fontFamily="Inter" fontWeight={650} fontSize={20} fill={g.colour}>{g.name.replace(/_/g, ' ')}</text>
@@ -166,10 +171,21 @@ function BlocksScene({ story }: { story: StoryData }) {
       </svg>
       <div style={{ position: 'absolute', inset: 0 }}><Schematic drawing={drawing} width={AREA.width} height={AREA.height} t={1} tint={tint} colours={colours} /></div>
     </div>
-    <Band chapter="Blocks" captions={[[0, 'GENESIS splits it into layout blocks.']]} />
+    <div style={{ position: 'absolute', left: 96, top: 60, width: 470, fontFamily: 'Inter', opacity: out(frame, 54, 70) }}>
+      <div style={{ fontWeight: 700, fontSize: 26, color: C.text, marginBottom: 12 }}>Chip C1</div>
+      {layout.blocks.map((b, i) => {
+        const k = out(frame, 58 + i * 3, 70 + i * 3), members = layout.members.filter(m => m.block === b.name);
+        return <div key={b.name} style={{ opacity: k, transform: `translateX(${(1 - k) * -20}px)`, display: 'flex', alignItems: 'center', gap: 10, padding: '5px 0 5px 14px', borderLeft: `2px solid ${C.border}` }}>
+          <span style={{ width: 12, height: 12, borderRadius: 3, background: chip.get(b.name), flex: 'none' }} />
+          <span style={{ fontWeight: 600, fontSize: 21, color: C.text, width: 190 }}>{b.name.replace(/_/g, ' ')}</span>
+          <span style={{ fontSize: 17, color: C.muted, fontFamily: 'ui-monospace, monospace' }}>{members.map(m => m.member).join(' ')}</span>
+        </div>;
+      })}
+    </div>
+    <BlockView layout={layout} links={links} colours={chip} frame={frame} x={620} y={18} w={1200} h={836} start={62} />
+    <Band chapter="Blocks" captions={[[0, 'GENESIS splits it into layout blocks.'], [60, 'Chip C1 in blocks: pads, RF lines and bias nets.']]} />
   </AbsoluteFill>;
 }
-
 function TestbenchScene({ story }: { story: StoryData }) {
   const frame = useCurrentFrame(), drawing = story.schematics[0], move = ease(frame, 0, 26);
   const w = AREA.width * (1 - .5 * move), h = AREA.height * (1 - .2 * move);
@@ -195,6 +211,23 @@ function TestbenchScene({ story }: { story: StoryData }) {
       })}</div>
     </div>
     <Band chapter="Testbench" captions={[[0, 'GENESIS builds every testbench and measurement.']]} />
+  </AbsoluteFill>;
+}
+
+function AnalysisScene({ sparams }: { sparams: SParams }) {
+  const frame = useCurrentFrame();
+  return <AbsoluteFill style={{ background: C.page }}>
+    <div style={{ position: 'absolute', left: AREA.left, top: 60, fontFamily: 'Inter', fontSize: 24, color: C.muted, opacity: out(frame, 0, 14) }}>
+      Chip C1, RF2 on: PEX and the EM window</div>
+    <SParamPlots sparams={sparams} frame={frame} x={AREA.left} y={110} w={AREA.width} h={560} start={8} />
+    <Band chapter="Analysis" captions={[[0, 'GENESIS runs the analyses and plots every S-parameter.']]} />
+  </AbsoluteFill>;
+}
+function OptimizeScene({ optimize }: { optimize: Optimize }) {
+  const frame = useCurrentFrame();
+  return <AbsoluteFill style={{ background: C.page }}>
+    <OptimizeView optimize={optimize} frame={frame} start={24} end={270} />
+    <Band chapter="Optimization" captions={[[0, 'GENESIS tunes coil pixels, coil shapes and transistor sizes.'], [150, 'Each step is one recorded evaluation.']]} />
   </AbsoluteFill>;
 }
 
@@ -338,10 +371,11 @@ function EndScene() {
   </AbsoluteFill>;
 }
 
-export function Story({ story, layout }: StoryProps) {
-  if (!story || !layout) throw new Error('story.json and layout.json are missing from the public folder');
+export function Story({ story, layout, links, sparams, optimize }: StoryProps) {
+  if (!story || !layout || !links || !sparams || !optimize) throw new Error('story.json, layout.json, blocks.json, sparams.json or optimize.json is missing from the public folder');
   const scene: Record<string, React.ReactNode> = {
-    ask: <Ask story={story} />, schematic: <SchematicScene story={story} />, blocks: <BlocksScene story={story} />, testbench: <TestbenchScene story={story} />,
+    ask: <Ask story={story} />, schematic: <SchematicScene story={story} />, blocks: <BlocksScene story={story} layout={layout} links={links} />, testbench: <TestbenchScene story={story} />,
+    analysis: <AnalysisScene sparams={sparams} />, optimize: <OptimizeScene optimize={optimize} />,
     layout: <LayoutScene story={story} layout={layout} />, signoff: <SignoffScene story={story} layout={layout} />, chip3d: <Chip3DScene layout={layout} />,
     any: <AnyScene story={story} />, end: <EndScene />,
   };
