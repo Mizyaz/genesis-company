@@ -48,8 +48,11 @@ GENESIS checks it with Calibre DRC and LVS: both clean for this layout.
 00:01:08.300 --> 00:01:14.900
 GENESIS builds your chip in 3D: the metal layers of chip C1, lifted apart.
 
-00:01:14.900 --> 00:01:21.500
+00:01:14.900 --> 00:01:19.900
 GENESIS designs any circuit you want: the schematics of an RF switch, a low-noise amplifier, a mixer and a power amplifier, each from its own recorded conversation.
 
-00:01:21.500 --> 00:01:27.000
+00:01:19.900 --> 00:01:23.500
+GENESIS lays out the mixer and checks it with Calibre: its switch quad from the GDS, DRC with 0 violations in 17,095 rule checks, LVS correct and no density markers.
+
+00:01:23.500 --> 00:01:29.000
 GENESIS. Whatever you want to design.

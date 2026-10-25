@@ -27,7 +27,11 @@ export type LayoutData = {
   blocks: { name: string; box: [number, number, number, number] }[];
   members: { block: string; member: string; cell: string; box: [number, number, number, number] }[];
 };
-export type StoryProps = { story: StoryData | null; layout: LayoutData | null; links: BlockLinks | null; sparams: SParams | null; optimize: Optimize | null };
+/** A further circuit's clean layout (story/circuit_layouts.mjs): its drawn layers and its signoff records. */
+export type CircuitLayout = Pick<LayoutData, 'die' | 'width' | 'height' | 'files' | 'blocks'> & {
+  id: string; signoff: { status: string; drc_violations: number; drc_rule_checks: number; lvs: string; density_markers: number; gds_sha256: string };
+};
+export type StoryProps = { story: StoryData | null; layout: LayoutData | null; links: BlockLinks | null; sparams: SParams | null; optimize: Optimize | null; circuits: { circuits: CircuitLayout[] } | null };
 
 void loadFont({ family: 'Inter', url: staticFile('brand/InterVariable.woff2'), weight: '100 900' });
 
@@ -43,13 +47,13 @@ const AREA = { left: 110, top: 44, width: 1700, height: 690 };
 
 /** Scenes in order, in seconds. */
 const SCENES = [
-  ['ask', 13.5], ['schematic', 6.5], ['blocks', 9], ['testbench', 6.5], ['analysis', 6.5], ['optimize', 10], ['layout', 15], ['signoff', 4.5], ['chip3d', 7], ['any', 7], ['end', 5.5],
+  ['ask', 13.5], ['schematic', 6.5], ['blocks', 9], ['testbench', 6.5], ['analysis', 6.5], ['optimize', 10], ['layout', 15], ['signoff', 4.5], ['chip3d', 7], ['any', 9], ['end', 5.5],
 ] as const;
 export const storyFrames = () => SCENES.reduce((n, [, s]) => n + Math.round(s * FPS), 0) - TRANSITION * (SCENES.length - 1);
 
 export const storyMetadata: CalculateMetadataFunction<StoryProps> = async () => {
-  const [story, layout, links, sparams, optimize] = await Promise.all(['story.json', 'layout.json', 'blocks.json', 'sparams.json', 'optimize.json'].map(async f => (await fetch(staticFile(f))).json()));
-  return { durationInFrames: storyFrames(), props: { story, layout, links, sparams, optimize } };
+  const [story, layout, links, sparams, optimize, circuits] = await Promise.all(['story.json', 'layout.json', 'blocks.json', 'sparams.json', 'optimize.json', 'circuit_layouts.json'].map(async f => (await fetch(staticFile(f))).json()));
+  return { durationInFrames: storyFrames(), props: { story, layout, links, sparams, optimize, circuits } };
 };
 
 function Wordmark({ size }: { size: number }) {
@@ -236,7 +240,7 @@ function layoutFrame(layout: LayoutData, left: number, top: number, height: numb
   const [x0, y0, x1, y1] = layout.die, width = height * (x1 - x0) / (y1 - y0);
   return { left, top, width, height, px: (x: number) => (x - x0) / (x1 - x0) * width, py: (y: number) => (y1 - y) / (y1 - y0) * height };
 }
-const image = (layout: LayoutData, key: string) => layout.files[key] ? staticFile(layout.files[key].file) : null;
+const image = (layout: Pick<LayoutData, 'files'>, key: string) => layout.files[key] ? staticFile(layout.files[key].file) : null;
 const wipe = (k: number) => `inset(0 ${100 - k * 100}% 0 0)`;
 
 /** Stage times in the layout scene (frames): the floorplanner's stages run in their order. */
@@ -244,7 +248,7 @@ const STAGE_AT: Record<string, [number, number]> = { essentials: [24, 120], inte
 
 /** All stage layers of the chip, bottom to top: ground tiles and fill (dimmed, so the blocks stay readable), then the blocks (`blocks`, or the essentials layer),
  * then the routes, as the viewer draws them. */
-function Chip({ layout, frame, staged, blocks }: { layout: LayoutData; frame: number; staged: boolean; blocks?: React.ReactNode }) {
+function Chip({ layout, frame, staged, blocks }: { layout: Pick<LayoutData, 'files'>; frame: number; staged: boolean; blocks?: React.ReactNode }) {
   const at = (stage: string) => staged ? ease(frame, ...STAGE_AT[stage]) : 1;
   const img = (key: string, k: number, opacity = 1) => image(layout, key) && <Img key={key} src={image(layout, key)!} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity, clipPath: wipe(k) }} />;
   return <>
@@ -342,8 +346,10 @@ function Chip3DScene({ layout }: { layout: LayoutData }) {
   </AbsoluteFill>;
 }
 
-function AnyScene({ story }: { story: StoryData }) {
+/** The four recorded circuits, each drawn from its schematic; a circuit with a clean layout then turns into it, with its signoff. */
+function AnyScene({ story, circuits }: { story: StoryData; circuits: CircuitLayout[] }) {
   const frame = useCurrentFrame(), gap = 24, top = 30, w = (1920 - 3 * gap) / 2, h = (1080 - 300 - top - gap) / 2;
+  const turn = out(frame, 140, 162);
   return <AbsoluteFill style={{ background: C.page }}>
     {story.schematics.map((d, i) => {
       const k = out(frame, i * 6, i * 6 + 16);
@@ -352,10 +358,28 @@ function AnyScene({ story }: { story: StoryData }) {
         <div style={{ position: 'absolute', left: 40, top: 56, width: w - 80, height: h - 80 }}>
           <Schematic drawing={d} width={w - 80} height={h - 80} t={interpolate(frame, [10 + i * 8, 130 + i * 8], [0, 1], clamp)} labels={false} />
         </div>
+        {(() => {
+          const c = circuits.find(c => c.id === d.id);
+          if (!c) return null;
+          // The view crops the die to its blocks with a 15 µm margin of ground tiles around them.
+          const [x0, , x1, y1] = c.die, m = 15, bx0 = Math.min(...c.blocks.map(b => b.box[0])) - m, by0 = Math.min(...c.blocks.map(b => b.box[1])) - m;
+          const bx1 = Math.max(...c.blocks.map(b => b.box[2])) + m, by1 = Math.max(...c.blocks.map(b => b.box[3])) + m;
+          const lh = h - 150, lw = Math.min(w - 80, lh * (bx1 - bx0) / (by1 - by0)), px = lw / (bx1 - bx0), s = c.signoff;
+          const facts = [`DRC ${s.drc_violations}`, s.lvs === 'LVS_CORRECT' ? 'LVS correct' : s.lvs, `density ${s.density_markers}`];
+          return <div style={{ position: 'absolute', inset: 0, background: C.surface, opacity: turn }}>
+            <div style={{ position: 'absolute', left: (w - lw) / 2, top: 84 + (lh - (by1 - by0) * px) / 2, width: lw, height: (by1 - by0) * px, overflow: 'hidden', borderRadius: 8, boxShadow: `0 0 0 1px ${C.border}` }}>
+              <div style={{ position: 'absolute', left: (x0 - bx0) * px, top: (by1 - y1) * px, width: (x1 - x0) * px, height: c.height / c.width * (x1 - x0) * px }}><Chip layout={c} frame={frame} staged={false} /></div>
+            </div>
+            <div style={{ position: 'absolute', left: 0, right: 0, bottom: 18, textAlign: 'center', fontFamily: 'Inter', fontSize: 22, color: C.muted }}>{c.blocks.map(b => b.name.replace(/_/g, ' ')).join(', ')} · layout from the GDS</div>
+            <div style={{ position: 'absolute', right: 16, top: 14, display: 'flex', gap: 10 }}>
+              {facts.map((t, j) => <div key={t} style={{ opacity: out(frame, 158 + j * 6, 170 + j * 6), padding: '8px 14px', borderRadius: 999, border: '1px solid #6fe0a566', background: '#041325d9', fontFamily: 'Inter', fontWeight: 650, fontSize: 22, color: '#6fe0a5' }}>✓ {t}</div>)}
+            </div>
+          </div>;
+        })()}
         <div style={{ position: 'absolute', left: 16, top: 14, padding: '8px 16px', borderRadius: 999, background: '#041325d9', border: `1px solid ${C.border}`, fontFamily: 'Inter', fontWeight: 650, fontSize: 30, color: C.text }}>{d.title}</div>
       </div>;
     })}
-    <Band chapter="Any circuit" captions={[[0, 'GENESIS designs any circuit you want.']]} />
+    <Band chapter="Any circuit" captions={[[0, 'GENESIS designs any circuit you want.'], [150, 'GENESIS lays out the mixer and checks it with Calibre.']]} />
   </AbsoluteFill>;
 }
 
@@ -371,13 +395,13 @@ function EndScene() {
   </AbsoluteFill>;
 }
 
-export function Story({ story, layout, links, sparams, optimize }: StoryProps) {
-  if (!story || !layout || !links || !sparams || !optimize) throw new Error('story.json, layout.json, blocks.json, sparams.json or optimize.json is missing from the public folder');
+export function Story({ story, layout, links, sparams, optimize, circuits }: StoryProps) {
+  if (!story || !layout || !links || !sparams || !optimize || !circuits) throw new Error('story.json, layout.json, blocks.json, sparams.json, optimize.json or circuit_layouts.json is missing from the public folder');
   const scene: Record<string, React.ReactNode> = {
     ask: <Ask story={story} />, schematic: <SchematicScene story={story} />, blocks: <BlocksScene story={story} layout={layout} links={links} />, testbench: <TestbenchScene story={story} />,
     analysis: <AnalysisScene sparams={sparams} />, optimize: <OptimizeScene optimize={optimize} />,
     layout: <LayoutScene story={story} layout={layout} />, signoff: <SignoffScene story={story} layout={layout} />, chip3d: <Chip3DScene layout={layout} />,
-    any: <AnyScene story={story} />, end: <EndScene />,
+    any: <AnyScene story={story} circuits={circuits.circuits} />, end: <EndScene />,
   };
   return <TransitionSeries>
     {SCENES.flatMap(([id, seconds], i) => [

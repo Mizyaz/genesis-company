@@ -31,8 +31,8 @@ const films: Film[] = [
     ],
   },
   {
-    id: 'how-it-works-film', asset: 'genesis-story-87s', length: '1:27', size: '5 MB', eyebrow: 'HOW IT WORKS', title: 'From one sentence to a checked chip.',
-    description: 'A 2D film of the GENESIS flow, drawn from saved records: a recorded conversation, the SPDT schematic and its blocks, the testbenches, S-parameter plots, the optimizer’s pixel, shape and transistor steps, the C1 chip layout stage by stage, its Calibre checks and its layers.',
+    id: 'how-it-works-film', asset: 'genesis-story-89s', length: '1:29', size: '5 MB', eyebrow: 'HOW IT WORKS', title: 'From one sentence to a checked chip.',
+    description: 'A 2D film of the GENESIS flow, drawn from saved records: a recorded conversation, the SPDT schematic and its blocks, the testbenches, S-parameter plots, the optimizer’s pixel, shape and transistor steps, the C1 chip layout stage by stage, its Calibre checks and its layers, then the mixer’s clean layout.',
     note: 'An illustration with original music. Every schematic, plot, layout layer and check result it shows is read from a GENESIS record.',
     download: 'Download the 2D film',
     opening: 'The film opens as the GENESIS symbol lights up under the landing page sunrise, then its name and the chat box.',
@@ -53,6 +53,7 @@ const films: Film[] = [
       'GENESIS checks it with Calibre DRC and LVS: both clean for this layout.',
       'GENESIS builds your chip in 3D: the metal layers of chip C1, lifted apart.',
       'GENESIS designs any circuit you want: the schematics of an RF switch, a low-noise amplifier, a mixer and a power amplifier, each from its own recorded conversation.',
+      'GENESIS lays out the mixer and checks it with Calibre: its switch quad from the GDS, DRC with 0 violations in 17,095 rule checks, LVS correct and no density markers.',
       'GENESIS. Whatever you want to design.',
     ],
   },

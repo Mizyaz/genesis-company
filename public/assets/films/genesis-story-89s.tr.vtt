@@ -48,8 +48,11 @@ GENESIS onu Calibre DRC ve LVS ile kontrol eder: bu yerleşim için ikisi de tem
 00:01:08.300 --> 00:01:14.900
 GENESIS çipinizi 3B olarak oluşturur: C1 çipinin metal katmanları birbirinden ayrılarak.
 
-00:01:14.900 --> 00:01:21.500
+00:01:14.900 --> 00:01:19.900
 GENESIS istediğiniz her devreyi tasarlar: bir RF anahtarın, bir düşük gürültülü yükseltecin, bir karıştırıcının ve bir güç yükseltecinin şematikleri, her biri kendi kaydedilmiş konuşmasından.
 
-00:01:21.500 --> 00:01:27.000
+00:01:19.900 --> 00:01:23.500
+GENESIS karıştırıcıyı yerleştirir ve Calibre ile kontrol eder: GDS’ten anahtar dörtlüsü, 17.095 kural kontrolünde 0 DRC ihlali, LVS doğru ve hiç yoğunluk işareti yok.
+
+00:01:23.500 --> 00:01:29.000
 GENESIS. Ne tasarlamak isterseniz.
