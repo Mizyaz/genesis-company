@@ -1,0 +1,120 @@
+{
+  "note": "The four circuits of the 'any circuit you want' montage. Each one is a real conversation with the connected model on the live landing page: the prompt is sent, GENESIS's questions are answered (a named or recommended choice card, else the first answer whose topic matches the question, else 'Use your recommendation.'), and the take ends on its schematic proposal. Nothing is applied.",
+  "circuits": [
+    {
+      "id": "A_spdt",
+      "title": "RF switch",
+      "prompt": "Design a broadband SPDT RF switch, DC to 110 GHz.",
+      "choose": [
+        "SPDT",
+        "Series–shunt"
+      ],
+      "answers": [
+        [
+          "process|pdk|technology",
+          "The installed PDK."
+        ],
+        [
+          "band|frequen",
+          "Broadband, DC to 110 GHz."
+        ]
+      ]
+    },
+    {
+      "id": "A_lna",
+      "title": "Low-noise amplifier",
+      "prompt": "Design a low-noise amplifier for 28 GHz.",
+      "choose": [],
+      "answers": [
+        [
+          "back-gate|body|b/x|common-mode",
+          "Tie b/x to 0 V; use a 0.4 V LO common-mode and your recommended bias."
+        ],
+        [
+          "process|pdk|technology",
+          "The installed PDK."
+        ],
+        [
+          "impedance|supply|bias|voltage",
+          "50 Ω source and load, 1.2 V supply; choose the bias."
+        ],
+        [
+          "band|frequen",
+          "27 to 29 GHz."
+        ],
+        [
+          "gain|noise",
+          "Gain above 15 dB, noise figure below 3 dB."
+        ]
+      ]
+    },
+    {
+      "id": "A_mixer",
+      "title": "Mixer",
+      "prompt": "Design a downconversion mixer for 28 GHz.",
+      "choose": [],
+      "answers": [
+        [
+          "back-gate|body|b/x|common-mode",
+          "Tie b/x to 0 V; use a 0.4 V LO common-mode and your recommended bias."
+        ],
+        [
+          "commutat|four-switch|switch",
+          "Yes, the standard four-switch differential commutating mixer."
+        ],
+        [
+          "low-side|high-side|\\blo\\b",
+          "A 26 GHz low-side LO."
+        ],
+        [
+          "process|pdk|technology",
+          "The installed PDK."
+        ],
+        [
+          "topolog|passive|gilbert",
+          "A passive switching mixer."
+        ],
+        [
+          "\\bif\\b|intermediate",
+          "IF at 2 GHz."
+        ],
+        [
+          "band|frequen",
+          "RF 27 to 29 GHz, LO 26 GHz."
+        ]
+      ]
+    },
+    {
+      "id": "A_pa",
+      "title": "Power amplifier",
+      "prompt": "Design a 60 GHz power amplifier with 15 dBm output power.",
+      "choose": [],
+      "answers": [
+        [
+          "back-gate|body|b/x|common-mode",
+          "Tie b/x to 0 V; use a 0.4 V LO common-mode and your recommended bias."
+        ],
+        [
+          "process|pdk|technology",
+          "The installed PDK."
+        ],
+        [
+          "waveform|linearity|narrowband|modulated|efficiency",
+          "A narrowband carrier; prioritize efficiency."
+        ],
+        [
+          "class",
+          "Class AB."
+        ],
+        [
+          "band|frequen",
+          "57 to 64 GHz."
+        ],
+        [
+          "power|output|psat|p1db",
+          "15 dBm saturated output power."
+        ]
+      ]
+    }
+  ]
+}

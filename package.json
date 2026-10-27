@@ -1,0 +1,33 @@
+{
+  "name": "genesis-company",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "node --test scripts/static.test.mjs scripts/local-name.test.mjs",
+    "test:browser": "playwright test",
+    "connection:setup": "node scripts/local-name.mjs",
+    "site:open": "node scripts/site-access.mjs open",
+    "site:close": "node scripts/site-access.mjs close",
+    "site:status": "node scripts/site-access.mjs status",
+    "film-tokens:sync": "node scripts/sync-film-tokens.mjs"
+  },
+  "dependencies": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/react": "18.3.31",
+    "@types/react-dom": "18.3.7",
+    "@vitejs/plugin-react": "4.7.0",
+    "typescript": "5.9.3",
+    "vite": "7.3.6"
+  }
+}

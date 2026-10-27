@@ -1,0 +1,40 @@
+.image-viewer { position: fixed; z-index: 100; display: flex; flex-direction: column; overflow: hidden; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 8px; box-shadow: var(--shadow); font: 1rem/1.4 var(--font-sans); }
+.image-viewer:focus { outline: none; }
+.image-viewer button { padding: 5px 10px; cursor: pointer; }
+.image-viewer button:disabled { opacity: .5; cursor: not-allowed; }
+.image-viewer-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 10px 8px 14px; background: var(--surface-raised); border-bottom: 1px solid var(--border); cursor: move; user-select: none; touch-action: none; }
+.image-viewer-title strong { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.image-viewer-title button { font-size: 1.538rem; line-height: 20px; }
+.image-viewer-tools { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+.image-viewer-tools output { min-width: 44px; text-align: center; font-variant-numeric: tabular-nums; }
+.image-viewer-tools span { color: var(--muted); margin-left: auto; font-size: 0.846rem; }
+.image-viewer-stage { position: relative; min-height: 0; flex: 1; overflow: hidden; touch-action: none; overscroll-behavior: contain; user-select: none; cursor: grab; background: var(--surface-raised); }
+.image-viewer-stage.is-dragging { cursor: grabbing; }
+.image-viewer-stage img { position: absolute; left: 0; top: 0; max-width: none; max-height: none; transform-origin: 0 0; pointer-events: none; user-select: none; }
+.image-viewer-stage:focus-visible, .image-viewer-title:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.image-viewer-message { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; padding: 20px; text-align: center; cursor: default; }
+.image-viewer-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 5px 6px 5px 12px; border-top: 1px solid var(--border); }
+.image-viewer-footer small { color: var(--muted); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.image-viewer-footer .image-viewer-resize { flex-shrink: 0; cursor: nwse-resize; touch-action: none; padding: 4px 6px; border: 0; background: transparent; }
+
+/* Shared site tokens, without workbench style dependencies. */
+.image-viewer button, .image-viewer-tools a { border: 1px solid var(--border); border-radius: 6px; background: var(--surface); color: var(--text); font: inherit; font-size: .8rem; line-height: 1.4; }
+.image-viewer button:hover, .image-viewer button[aria-pressed="true"] { border-color: var(--cyan); color: var(--cyan); }
+.image-viewer :is(button, a):focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+.image-viewer-media { position: absolute; left: 0; top: 0; overflow: hidden; transform-origin: 0 0; pointer-events: none; }
+.image-viewer-media img { width: auto; height: auto; }
+.image-viewer-media.layout-preview { filter: var(--layout-filter); mix-blend-mode: var(--layout-blend); }
+.image-viewer-tools .viewer-views { display: flex; flex-wrap: wrap; gap: 6px; padding-right: 8px; margin-right: 2px; border-right: 1px solid var(--border); }
+.image-viewer-tools a { display: inline-flex; align-items: center; gap: 5px; padding: 5px 8px; }
+.image-viewer-tools a .icon { width: 14px; height: 14px; }
+.image-viewer-tools > span { font-size: .65rem; }
+.image-viewer-footer small { font-size: .7rem; }
+.layout-open { display: block; width: 100%; height: 100%; padding: 0; border: 0; background: transparent; cursor: zoom-in; }
+.layout-open:focus-visible { outline: 2px solid var(--cyan); outline-offset: 5px; border-radius: 4px; }
+.layout-inspect { position: absolute; left: 12px; bottom: 8px; display: inline-flex; align-items: center; gap: 5px; padding: 5px 8px; border-radius: 5px; background: color-mix(in srgb, var(--surface) 90%, transparent); color: var(--cyan); font-size: .6875rem; pointer-events: none; }
+.layout-inspect .icon { width: 13px; height: 13px; }
+@media (max-width: 600px) {
+  .image-viewer-tools { padding: 7px 9px; gap: 5px; }
+  .image-viewer-tools > span { flex-basis: 100%; margin-left: 0; }
+  .image-viewer-title { font-size: .85rem; }
+}

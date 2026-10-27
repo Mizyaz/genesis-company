@@ -1,0 +1,148 @@
+{
+  "source": {
+    "file": "content/design_library/tokens.json",
+    "commit": "30fa2adbda981f3efe4a61ffa6dcf20fb021c505"
+  },
+  "tokens": {
+    "text": {
+      "dark": "#f1f6fc",
+      "light": "#0b233c"
+    },
+    "muted": {
+      "dark": "#9aacbf",
+      "light": "#0b233c"
+    },
+    "page": {
+      "dark": "#041325",
+      "light": "#ffffff"
+    },
+    "surface": {
+      "dark": "#091d32",
+      "light": "#ffffff"
+    },
+    "raised": {
+      "dark": "#0b2238",
+      "light": "#e9f0f8"
+    },
+    "die": {
+      "dark": "#06182b",
+      "light": "#e9f0f8"
+    },
+    "border": {
+      "dark": "#20364b",
+      "light": "#c4d4e5"
+    },
+    "grid": {
+      "dark": "#2a4660",
+      "light": "#dbe5ef"
+    },
+    "plot-grid": {
+      "dark": "#1d3a55",
+      "light": "#dbe5ef"
+    },
+    "dim": {
+      "dark": "#5d7891",
+      "light": "#c4d4e5"
+    },
+    "active": {
+      "dark": "#41dce8",
+      "light": "#007d97"
+    },
+    "active-fill": {
+      "dark": "#0f2c46",
+      "light": "#e3f4f7"
+    },
+    "passive": {
+      "dark": "#b08af4",
+      "light": "#7846bf"
+    },
+    "passive-fill": {
+      "dark": "#0b2238",
+      "light": "#f1ebfa"
+    },
+    "limit": {
+      "dark": "#ff7aa8",
+      "light": "#aa2851"
+    },
+    "limit-fill": {
+      "dark": "#0b2238",
+      "light": "#f7e4ea"
+    },
+    "pass": {
+      "dark": "#6fe0a5",
+      "light": "#007d97"
+    },
+    "ring": {
+      "dark": "#e6fdff",
+      "light": "#ffffff"
+    },
+    "brand2": {
+      "dark": "#6fb9ed",
+      "light": "#3f7fd0"
+    },
+    "brand4": {
+      "dark": "#e6fdff",
+      "light": "#00b3d6"
+    },
+    "dc": {
+      "dark": "#f5a623",
+      "light": "#b36200"
+    },
+    "ink": {
+      "dark": "#dce8f4",
+      "light": "#0b233c"
+    },
+    "soft": {
+      "dark": "#b8c8d8",
+      "light": "#3d5670"
+    },
+    "faint": {
+      "dark": "#8aa0b6",
+      "light": "#506780"
+    },
+    "glow": {
+      "dark": "#ffffff",
+      "light": "#0b233c"
+    },
+    "gold": {
+      "dark": "#ffc76b",
+      "light": "#a86a00"
+    },
+    "rose": {
+      "dark": "#ff9ad5",
+      "light": "#b8337f"
+    },
+    "sky": {
+      "dark": "#7fd3ff",
+      "light": "#1d78b5"
+    },
+    "lilac": {
+      "dark": "#c9a7ff",
+      "light": "#7846bf"
+    },
+    "yellow": {
+      "dark": "#ffd166",
+      "light": "#9a7400"
+    },
+    "lime": {
+      "dark": "#9be15d",
+      "light": "#4d8a1f"
+    },
+    "orange": {
+      "dark": "#ff9f6e",
+      "light": "#c2552a"
+    },
+    "lift": {
+      "dark": "brightness(1.5) drop-shadow(0 0 1px #ffffff99)",
+      "light": "invert(1) hue-rotate(180deg)"
+    },
+    "well": {
+      "dark": "#06182b",
+      "light": "#0b233c"
+    },
+    "well-border": {
+      "dark": "#20364b",
+      "light": "#c4d4e5"
+    }
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "about": "The story film's design, shared by the film (video/) and the site: the surfaces its panels sit on, its type and its motion. The brand colours live in brand.json. Change a value here and the film and the site follow; the site reads it as CSS variables (vite.config.ts), the film and the site's story animations through src/shared/story/.",
+  "story": { "page": "#041325", "surface": "#091d32", "card": "#0b2238", "die": "#06182b", "border": "#20364b", "grid": "#2a4660", "text": "#f1f6fc", "muted": "#9aacbf", "dc": "#f5a623" },
+  "type": { "family": "Inter", "chapterTracking": ".18em", "panelRadius": 22 },
+  "motion": {
+    "fps": 30,
+    "transition": 12,
+    "stagger": 4,
+    "enter": 12,
+    "out": [0.33, 1, 0.68, 1],
+    "inOut": [0.65, 0, 0.35, 1]
+  }
+}

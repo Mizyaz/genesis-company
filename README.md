@@ -1,0 +1,135 @@
+# GENESIS company website
+
+Standalone React/Vite company presentation. No design assistant, product landing
+page, workspace, API server, PDK files or connection to the engineering server.
+The home page offers Discover (company presentation) and Design (an explicit
+link to the visitor's own installation). All runtime assets are included here.
+Animations, theme and motion preferences run in the browser.
+
+The home-page symbol opens the product film (see below). No video service, CDN, PDK or runtime server connection
+is required.
+
+Design first asks whether GENESIS is installed. No leads to the team's contact
+email; Yes asks which port to use. Only a port number (1 to 65535) is entered,
+never a URL. The port is remembered in the visitor's browser after opening the
+product. Only an explicit Open GENESIS click opens the configured local name in a new
+tab, with the selected theme. No availability probe, port scan, public LLM
+endpoint, prompt transfer, or backend request is made by this site. The actual
+assistant, model selection and CLI execution remain in the separate product.
+
+### One-time local name setup
+
+`connection.json` defines the friendly name, currently `genesis.test`. On the
+computer running your browser, from this checkout:
+
+```sh
+npm run connection:setup            # preview only
+npm run connection:setup -- --apply # local sudo, one /etc/hosts entry
+```
+
+This helper needs Node but no npm dependencies. It appends `127.0.0.1 genesis.test`
+only when missing and refuses conflicting mappings. On an SSH setup with a Mac
+browser, run it on the Mac, not the remote server. Keep your port forwarding.
+Open GENESIS then navigates to `http://genesis.test:<your port>`. No setup runs in
+the browser or during deployment, and the public site never tries to resolve or
+probe the name. The product must explicitly allow this hostname and origin while
+remaining bound to loopback. The companion local company app already does so.
+Remove only the `# GENESIS local connection` hosts entry to undo local setup.
+
+## Run and build
+
+Use Node 22 and npm:
+
+```sh
+npm ci
+npm run dev
+npm run build
+npm test
+npx playwright install chromium # once, for the browser regression tests
+npm run test:browser            # tests the built site; runs before deployment too
+npm run preview
+```
+
+The deployable output is `dist/`. No runtime environment variables, credentials,
+backend, private repository access or Python installation are needed. Relative
+asset paths work at both a domain root and a repository subpath. Hash navigation
+does not require server rewrites. The production HTML blocks API/WebSocket
+connections through `connect-src 'none'`.
+
+## Hosting
+
+### Quick access switch
+
+With GitHub CLI installed and logged into the repository owner's account:
+
+```sh
+npm run site:open
+npm run site:close
+npm run site:status
+```
+
+`open` makes this repository and its Pages site public. `close` disables the Pages
+workflow, cancels any active publication, unpublishes the website and makes the
+repository private without deleting source or history. Closing is not a private
+website login screen. GitHub may take a minute to propagate the change, and
+previously downloaded copies cannot be revoked. These commands affect only
+`Mizyaz/genesis-company`; they run from any authenticated computer and are never
+part of the browser bundle. No connection to an engineering server is involved.
+
+GitHub Pages: select **GitHub Actions** as the Pages publishing source.
+The included workflow builds and deploys pushes to `main` on GitHub-hosted
+runners. It never contacts an engineering machine or a self-hosted runner.
+
+Cloudflare Pages: connect this repository, production branch `main`, build
+command `npm run build`, output directory `dist`, Node 22. No function, Worker,
+API token in the site, or engineering-server access is required.
+
+Link previews (Open Graph) use absolute `https://mizyaz.github.io/genesis-company/`
+URLs in `index.html`. If the site moves, update them in the source project.
+
+## Source and updates
+
+The editable source remains in the main project's `company-web` directory.
+This repository is a clean public export, not a copy of the main Git history.
+To update an existing clean checkout of this repository, run from the main project:
+
+```sh
+npm --prefix company-web run publish:public -- /path/to/genesis-company
+```
+
+To prepare files without publishing, use `export:public` instead. The exporter
+uses a fixed file allowlist and a public-only content JSON. It refuses conflicting
+local edits and never copies `.env`, authentication files, simulation results,
+CAD sources or unrelated files. Edit the source project, then publish again.
+
+Contact uses an email link. Theme and motion preferences are stored only in the
+visitor's browser. No analytics or online model is connected.
+
+Presentation images and role profiles were supplied by the GENESIS team.
+Original layout images remain unchanged; the lighter card previews, preview
+cropping and theme treatment are display-only. Public repository visibility does not grant a license to
+redistribute the layout images or other company materials.
+
+## Films
+
+The company page has two films. The product film, at `#/explore/product-film`, opens from the home-page symbol, the
+welcome page link and the RF physics section; the 2D film follows it at `#/explore/how-it-works-film`. Both use native
+inline video controls, load on demand, and include English/Turkish captions, a text transcript and an MP4 download,
+with the original instrumental score embedded. Leaving a player off-screen, hiding the page or opening a dialog pauses
+it. There is no autoplay. Both are rendered by the Remotion project in `video/` at 1080p and scaled to 1280×720.
+
+`public/assets/films/genesis-product-73s.mp4` (73 s) is the product film: screen recordings of the GENESIS site and
+workbench. It opens on the landing page, where a recorded conversation answers GENESIS's questions and approves its
+proposed schematic, then follows the chapters Start, Design, Analysis and Floorplan, ending in the 3D viewer the flow
+writes for the SPDT layout (a time-lapse, since it renders slowly without a GPU) and four more circuits, each from its own
+recorded conversation. `node video/record.mjs` records the clips from a running site and workbench; every clip keeps an
+`evidence.json` with the replies, the answers sent and the build hashes. `node video/render.mjs --inputs <footage
+folder> --audio <score.wav>` renders the film. Chapters, captions and timing are in `video/src/storyboard.ts`.
+
+`public/assets/films/genesis-story-67s.mp4` (67 s) is the 2D film. It draws the same flow from saved records: the
+recorded SPDT conversation and its schematic, the blocks and the testbenches of the SPDT, its layout stage by stage
+from its GDS, the DRC and LVS result of that GDS and its metal layers. `node video/story/layout_layers.mjs --scene
+<viewer scene.json> --out <folder>` draws the layout stages and layers; `node video/story/collect.mjs --footage <footage
+folder> --circuit <circuit.json> --verify <verify/record.json> --out <folder>` writes `story.json` (it refuses a verify
+record for another GDS); `node video/render.mjs --composition GenesisStory --inputs <folder> --audio <score.wav>`
+renders it. Scenes and timing are in `video/src/Story.tsx`. Each poster is a frame from its film.
