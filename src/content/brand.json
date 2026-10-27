@@ -1,0 +1,5 @@
+{
+  "about": "The four brand colours, per theme. The site tokens, the GENESIS mark, the favicon and the film all read them from here: change a colour here and every one of them follows. brand1 to brand3 run the mark's gradient from left to right; brand4 lights the pixels as they arrive and the current that runs along the traces.",
+  "dark": { "brand1": "#41dce8", "brand2": "#6fb9ed", "brand3": "#b08af4", "brand4": "#e6fdff" },
+  "light": { "brand1": "#007d97", "brand2": "#3f7fd0", "brand3": "#7846bf", "brand4": "#00b3d6" }
+}

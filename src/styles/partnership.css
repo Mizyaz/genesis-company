@@ -1,0 +1,19 @@
+.partnership-section { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: clamp(32px, 5vw, 72px); align-items: start; }
+.partnership-copy > p { color: var(--muted); line-height: 1.8; max-width: 520px; margin: 18px 0 28px; }
+.partnership-tracks { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+.partnership-tracks button { display: flex; gap: 16px; align-items: flex-start; width: 100%; padding: 18px 20px; font: inherit; color: var(--text); text-align: left; cursor: pointer; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); transition: border-color .2s, box-shadow .2s, transform .2s; }
+.partnership-tracks button .icon { flex: none; width: 24px; height: 24px; margin-top: 2px; color: var(--cyan); }
+.partnership-tracks button span { display: grid; gap: 4px; }
+.partnership-tracks button small { color: var(--muted); font-size: .9rem; line-height: 1.55; }
+.partnership-tracks button[aria-pressed="true"] { border-color: transparent; background: linear-gradient(var(--surface), var(--surface)) padding-box, var(--gradient) border-box; box-shadow: 0 14px 36px var(--glow); }
+.partnership-tracks button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+@media (hover: hover) { .partnership-tracks button:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--cyan) 50%, var(--border)); } }
+.partnership-form { display: grid; gap: 14px; padding: clamp(22px, 3vw, 32px); border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); }
+.partnership-form label { display: grid; gap: 6px; color: var(--muted); font-size: .85rem; font-weight: 600; }
+.partnership-form :is(input, select, textarea) { font: inherit; font-size: .95rem; font-weight: 400; color: var(--text); padding: 11px 13px; border: 1px solid var(--border); border-radius: 8px; background: var(--page); }
+.partnership-form textarea { resize: vertical; }
+.partnership-form :is(input, select, textarea):focus { outline: 2px solid var(--cyan); outline-offset: 1px; border-color: transparent; }
+.partnership-form .button { justify-content: center; margin-top: 6px; }
+.partnership-note { margin: 0; color: var(--subtle); font-size: .8rem; text-align: center; }
+@media (max-width: 900px) { .partnership-section { grid-template-columns: minmax(0, 1fr); } }
+@media (prefers-reduced-motion: reduce) { .partnership-tracks button { transition: none; } .partnership-tracks button:hover { transform: none; } }

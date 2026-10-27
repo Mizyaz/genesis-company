@@ -1,0 +1,44 @@
+/* The flow as the reader scrolls it: one screen of scroll per stage, the stage list and the scene held in place. */
+.journey { position: relative; height: calc(var(--stages) * 70vh + 100vh); margin-top: 36px; }
+.journey-sticky { position: sticky; top: 82px; height: calc(100vh - 82px); display: grid; grid-template-columns: minmax(220px, 290px) minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto auto; column-gap: 36px; row-gap: 14px; align-items: center; padding: 14px 0 18px; }
+.journey-bar { grid-column: 1 / -1; height: 3px; border-radius: 3px; background: var(--border-soft); overflow: hidden; }
+.journey-bar span { display: block; height: 100%; background: linear-gradient(90deg, var(--brand-1), var(--brand-2), var(--brand-3)); transform-origin: left; }
+.journey-stages { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; align-self: center; }
+.journey-stages li { display: flex; gap: 12px; padding: 8px 12px; border: 1px solid transparent; border-radius: 12px; color: var(--muted); transition: background .35s, border-color .35s, color .35s, box-shadow .35s; }
+.journey-stages strong { display: block; font-size: .95rem; font-weight: 600; }
+.journey-stages p { max-height: 0; margin: 0; overflow: hidden; font-size: .82rem; line-height: 1.4; opacity: 0; transition: max-height .4s, opacity .4s, margin .4s; }
+.journey-dot { flex-shrink: 0; width: 10px; height: 10px; margin-top: 6px; border-radius: 50%; background: var(--border); transition: background .35s, box-shadow .35s; }
+.journey-stages li.is-done { color: var(--text); }
+.journey-stages li.is-done .journey-dot { background: var(--cyan); }
+.journey-stages li.is-on { color: var(--text); background: color-mix(in srgb, var(--cyan) 9%, transparent); border-color: color-mix(in srgb, var(--cyan) 40%, transparent); box-shadow: 0 0 28px -8px color-mix(in srgb, var(--cyan) 55%, transparent); }
+.journey-stages li.is-on .journey-dot { background: linear-gradient(135deg, var(--brand-1), var(--brand-3)); box-shadow: 0 0 12px var(--cyan); }
+.journey-stages li.is-on p { max-height: 4.5em; margin-top: 4px; opacity: 1; }
+/* The film keeps its lowest fifth for captions, which the page leaves out: the frame shows the scene above it. */
+.journey-stage.story-frame { aspect-ratio: 1920 / 870; width: min(100%, calc((100vh - 82px - 190px) * 1920 / 870)); justify-self: center; }
+.journey-scale { grid-column: 1 / -1; display: flex; justify-content: center; gap: 48px; margin: 0; padding: 0; list-style: none; opacity: 0; transform: translateY(10px); transition: opacity .5s, transform .5s; }
+.journey-scale.is-on { opacity: 1; transform: none; }
+.journey-scale li { display: grid; justify-items: center; text-align: center; }
+.journey-scale strong { font-size: 1.6rem; font-weight: 700; background: linear-gradient(90deg, var(--brand-1), var(--brand-3)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.journey-scale span { color: var(--muted); font-size: .82rem; }
+.journey-next { grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0; color: var(--muted); font-size: .85rem; }
+.journey-next strong { color: var(--text); font-weight: 600; }
+.journey-next .icon { width: 16px; height: 16px; color: var(--cyan); transform: rotate(90deg); animation: journey-nudge 1.6s ease-in-out infinite; }
+@keyframes journey-nudge { 50% { transform: rotate(90deg) translateX(4px); } }
+/* Less motion: no held screen, the list beside the last scene at rest. */
+.journey.is-still { height: auto; }
+.journey.is-still .journey-sticky { position: static; height: auto; }
+.journey.is-still .journey-stages p { max-height: none; opacity: 1; margin-top: 4px; }
+.journey.is-still .journey-scale { opacity: 1; transform: none; }
+.journey.is-still .journey-next .icon { animation: none; }
+@media (max-width: 760px) {
+  .journey { height: calc(var(--stages) * 60vh + 100vh); }
+  .journey-sticky { top: 70px; height: calc(100vh - 70px); grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto auto minmax(0, 1fr); align-content: stretch; row-gap: 16px; padding-top: 20px; }
+  .journey-next { align-self: end; }
+  .journey-stages li { display: none; }
+  .journey-stages li.is-on { display: flex; }
+  .journey-stage.story-frame { width: 100%; }
+  .journey-scale { gap: 18px; }
+  .journey-scale strong { font-size: 1.2rem; }
+  .journey-scale span { font-size: .72rem; }
+  .journey.is-still .journey-stages li { display: flex; }
+}

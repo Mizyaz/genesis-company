@@ -1,0 +1,30 @@
+/* Brand contract: page modules use these tokens; no workbench CSS is imported. */
+/* Inter, the film's typeface (SIL Open Font License 1.1, licence text embedded in the font), cut to Latin and Turkish. */
+@font-face { font-family: Inter; src: url("../assets/fonts/InterVariable-latin.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+:root {
+  color-scheme: dark;
+  --font-sans: Inter, "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: "SFMono-Regular", Consolas, monospace;
+  --page: var(--story-page); --surface: var(--story-surface); --surface-raised: #0d253c;
+  --text: var(--story-text); --muted: var(--story-muted); --subtle: #6e87a0;
+  --border: var(--story-border); --border-soft: #142c42;
+  --cyan: var(--brand-1); --violet: var(--brand-3); --accent: #55ddec;
+  --glow: #1bbedc18; --error: #ffa7b9; --shadow: 0 20px 70px #0005;
+  --button-fill: #5cdce7; --button-hover: #87eaf2; --button-text: #031f2b;
+  --layout-filter: none; --layout-blend: screen;
+  --flow-cyan: #20dcef; --flow-violet: #a064ff; --flow-blue: #4285ff; --flow-highlight: #d6fcff;
+  --gradient: linear-gradient(105deg, var(--brand-1) 10%, var(--brand-2) 47%, var(--brand-3) 92%);
+  --radius: 12px; --content-width: 1240px;
+  font-family: var(--font-sans); font-size: 16px; line-height: 1.55;
+  font-synthesis: none; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
+  --page: #f3f7fc; --surface: #fff; --surface-raised: #e9f0f8;
+  --text: #0b233c; --muted: #506780; --subtle: #5d7490;
+  --border: #c4d4e5; --border-soft: #dbe5ef;
+  --accent: #006b8a;
+  --glow: #149fcc0d; --error: #aa2851; --shadow: 0 20px 70px #183e6115;
+  --layout-filter: invert(1) hue-rotate(180deg); --layout-blend: multiply;
+  --flow-cyan: #08a9cf; --flow-violet: #9450e5; --flow-blue: #4272db; --flow-highlight: #eaffff;
+}
