@@ -41,16 +41,24 @@ test('the process cards are visible by default; only a page that can watch them 
   assert.ok(hiding.includes('.pc-cards[data-reveal="on"] .pc-card:not(.is-in)'));
   for (const rule of hiding) assert.match(rule, /^(?:\.film-take|@keyframes |\.pc-cards\[data-reveal="on"\] )/, rule);
   // Every number on the cards comes from its record.
-  assert.match(cards, /codesign\.designs/); assert.match(cards, /drc\.rule_checks/); assert.match(cards, /verification_seconds/);
+  assert.match(cards, /codesign\.designs/); assert.match(cards, /Supports up to 20,000 types of design rule checks/);
+  // The DRC and LVS run is not our tool: no rule check count and no check time on the cards.
+  assert.doesNotMatch(cards, /rule_checks|verification_seconds|checkMinutes/);
   assert.match(cards, /public\/assets\/records\/layout-timing\.json/);
-  // The layout picture is the GDS render: every mask it lists is published, all of them in the die's proportions.
-  assert.match(read('src/shared/ProcessVisuals.tsx'), /content\/story\/layout\.json/);
-  const layout = JSON.parse(read('src/content/story/layout.json'));
-  assert.deepEqual(Object.keys(layout.files).sort(), ['blocks', 'blocks_below', 'dc', 'devices', 'fill', 'ground', 'rf', 'rf_below']);
-  for (const file of Object.values(layout.files)) assert.ok(existsSync(resolve(root, `public${file}`)), file);
-  assert.ok(Math.abs(layout.pixels[1] / layout.pixels[0] - layout.die_um[1] / layout.die_um[0]) < .002);
-  // Each mask covers the pixels the export counted, so a mask left from another export fails.
-  for (const [kind, file] of Object.entries(layout.files)) assert.equal(coveredPixels(readFileSync(resolve(root, `public${file}`))), layout.covered_pixels[kind], kind);
+  // The layout pictures are GDS renders, one per design, each DRC and LVS clean: every mask is published, in the die's
+  // proportions, and covers the pixels the export counted, so a mask left from another export fails.
+  assert.match(read('src/shared/ProcessVisuals.tsx'), /content\/story\/layouts\.json/);
+  const { designs } = JSON.parse(read('src/content/story/layouts.json'));
+  assert.deepEqual(designs.map(d => d.id), ['a', 'b']);
+  for (const layout of designs) {
+    assert.deepEqual([layout.drc_results, layout.lvs], [0, 'correct'], layout.id);
+    assert.deepEqual(Object.keys(layout.files).sort(), ['blocks', 'blocks_below', 'dc', 'devices', 'fill', 'ground', 'rf', 'rf_below']);
+    assert.ok(Math.abs(layout.pixels[1] / layout.pixels[0] - layout.die_um[1] / layout.die_um[0]) < .002);
+    for (const [kind, file] of Object.entries(layout.files)) {
+      assert.ok(file.startsWith(`/assets/layout/${layout.id}/`), file);
+      assert.equal(coveredPixels(readFileSync(resolve(root, `public${file}`))), layout.covered_pixels[kind], `${layout.id} ${kind}`);
+    }
+  }
 });
 
 /** The pixels with nonzero alpha of an 8-bit gray-and-alpha PNG (the masks export-layout.py writes). */
@@ -236,13 +244,19 @@ test('the film and the site draw from one design and one set of scenes', () => {
   assert.doesNotMatch(schematic, /#[0-9a-f]{3,8}\b/i, 'no fixed color in the schematic');
   for (const role of ['active', 'passive', 'dc', 'text']) assert.match(schematic, new RegExp(`var\\(--sx-${role}\\)`), role);
   // The simulation card reads the same S-parameters as the public record its numbers link to.
-  assert.equal(read('src/content/story/simulation.json'), read('public/assets/records/spdt-s-parameters.json'));
+  assert.equal(read('src/content/story/simulation.json'), read('public/assets/records/design-a-s-parameters.json'));
   // The layout drawing, the timing and the DRC and LVS reports come from one chain: their results agree.
   const motion = JSON.parse(read('src/content/story/motion.json')), timing = JSON.parse(read('public/assets/records/layout-timing.json'));
   const verification = JSON.parse(read('src/content/story/verification.json'));
   assert.equal(timing.verdict, 'PASS');
-  assert.deepEqual([motion.verify.drc_rule_checks, motion.verify.drc_violations, motion.verify.lvs], [timing.drc.rule_checks, timing.drc.violations, timing.lvs]);
-  assert.deepEqual([verification.drc.rule_checks, verification.drc.results, verification.lvs.result], [timing.drc.rule_checks, timing.drc.violations, 'CORRECT']);
+  assert.deepEqual([motion.verify.drc_violations, motion.verify.lvs], [timing.drc.violations, timing.lvs]);
+  assert.deepEqual([verification.drc.results, verification.lvs.result], [timing.drc.violations, 'CORRECT']);
+  // The published records hold no rule check count and no check time, and name no circuit type.
+  assert.ok(timing.stages.every(s => Object.keys(s).join() === 'stage,seconds'));
+  for (const path of ['public/assets/records/layout-timing.json', 'public/assets/records/design-a-s-parameters.json', 'src/content/story/verification.json',
+    'src/content/story/layouts.json', 'src/content/story/schematic.svg', 'src/content/story/symbol.svg', 'src/content/site.json']) {
+    assert.doesNotMatch(read(path), /rule_checks|verification_seconds|switch|spdt|single-pole|double-throw|amplifier/i, path);
+  }
   assert.deepEqual(Object.keys(motion.seconds), timing.stages.map(s => s.stage));
 });
 

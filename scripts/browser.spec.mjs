@@ -34,6 +34,8 @@ test('the page writes no shortenings and spells out DRC and LVS where they first
     return { text: text.join(' '), all: [...text, ...labels, ...meta, document.title] };
   });
   for (const string of seen.all) expect(string, string).not.toMatch(SHORTENINGS);
+  // No circuit type is named (Islam, 10-28): the designs are design A, design B, ...; only the theme button switches.
+  for (const string of seen.all) expect(string, string).not.toMatch(/\b(?:single-pole|double-throw|amplifier)\b|\bswitch(?:es|ed)?\b(?! to (?:light|dark) mode)/i);
   for (const spelled of ['DRC (design rule check)', 'LVS (layout versus schematic)']) {
     const at = seen.text.indexOf(spelled.slice(0, 3));
     expect(seen.text.slice(at, at + spelled.length)).toBe(spelled);

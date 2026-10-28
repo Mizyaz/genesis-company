@@ -8,10 +8,10 @@
     "headline": "Automated layout",
     "accent": "for RF and mmWave front-ends.",
     "intro": "Zero DRC (design rule check) violations, LVS (layout versus schematic) correct. Send a specification: you never open a simulator or a commercial tool, and you get the finished library for your own design kit.",
-    "film": "GENESIS designing a single-pole double-throw switch, from the specification to the verified layout.",
+    "film": "GENESIS designing a circuit, from the specification to the verified layout.",
     "process": {
       "headline": "From specification to verified layout",
-      "intro": "On a single-pole double-throw switch."
+      "intro": "Every step shown on real designs, from their own records."
     },
     "membership": {
       "headline": "Membership",

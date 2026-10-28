@@ -3,17 +3,19 @@ import optimization from '../content/story/optimization.json';
 import codesign from '../content/story/codesign.json';
 import simulation from '../content/story/simulation.json';
 import verification from '../content/story/verification.json';
-// The layout rendered from its GDS (scripts/export-layout.py): one alpha mask per kind of shape.
-import layout from '../content/story/layout.json';
+// The layouts rendered from their GDS (scripts/export-layout.py): per design, one alpha mask per kind of shape and its
+// DRC and LVS result. A design goes in only through that export, which refuses one that is not DRC and LVS clean; the
+// next design takes the next letter with one more export run, and the gallery shows it with no change here.
+import layouts from '../content/story/layouts.json';
 // Drawn by the GENESIS design library (glyphs.py, the one symbol language), its colors as the theme's CSS variables.
 import schematic from '../content/story/schematic.svg?raw';
 import symbol from '../content/story/symbol.svg?raw';
 import { assetUrl } from './ui';
 
 /** The process cards' pictures, each drawn from its record (loaded after the page, in their own chunk): the
- * specification (codesign.json), the schematic and symbol of the switch in the design library's symbols, the simulated
- * S-parameters of its traditional version (simulation.json), the optimizer's designs (optimization.json), the layout of
- * one physical-flow chain rendered from its GDS (layout.json) and the DRC and LVS reports of that layout (verification.json). */
+ * specification of design A (codesign.json), its schematic and symbol in the design library's symbols, its simulated
+ * S-parameters (simulation.json), the optimizer's designs (optimization.json), the layouts rendered from their GDS
+ * (layouts.json) and the DRC and LVS reports of design A's layout (verification.json). No circuit type is named. */
 const W = 400, H = 160;
 const BAND = '1–110 GHz', TOP = '110 GHz';
 const minus = (s: string) => s.split('-').join('−');
@@ -33,7 +35,7 @@ function Specification() {
   const p1 = codesign.goals.find(g => g.goal === 'P1dB');
   return <figure className="pv-spec">
     <div className="pv-sheet">
-      <p className="pv-sheet-head"><b>Specification</b><span>Single-pole double-throw switch</span></p>
+      <p className="pv-sheet-head"><b>Specification</b><span>Design A</span></p>
       <table>
         <thead><tr><th scope="col">Goal</th><th scope="col">{BAND}</th><th scope="col">At {TOP}</th></tr></thead>
         <tbody>
@@ -41,7 +43,7 @@ function Specification() {
           {p1 && <tr><th scope="row">1 dB compression point</th><td colSpan={2}>{minus(p1.target)}</td></tr>}
         </tbody>
       </table>
-      <p className="pv-sheet-tests">Testbenches: {codesign.testbenches.map(t => `${t.modes.map(m => TESTS[m] ?? m).join(' and ')} in ${t.states} switch ${t.states === 1 ? 'state' : 'states'}`).join(' · ')}</p>
+      <p className="pv-sheet-tests">Testbenches: {codesign.testbenches.map(t => `${t.modes.map(m => TESTS[m] ?? m).join(' and ')} in ${t.states} ${t.states === 1 ? 'state' : 'states'}`).join(' · ')}</p>
     </div>
     <div className="pv-intake" aria-hidden="true">
       <svg viewBox="0 0 60 24"><path className="pv-intake-arrow" d="M2 12H52M44 4l8 8-8 8" /></svg>
@@ -62,7 +64,7 @@ function Schematic2D() {
  * mean and the value at the top of the band written on the plot, and a readout under the pointer. Every number links
  * to the record it comes from. */
 type Curve = 'S21' | 'S31' | 'S11' | 'S22';
-const RECORD = assetUrl('/assets/records/spdt-s-parameters.json');
+const RECORD = assetUrl('/assets/records/design-a-s-parameters.json');
 const NAME: Record<Curve, string> = { S21: 'Transmission', S31: 'Isolation', S11: 'Input match', S22: 'Output match' };
 const dB = (v: number) => `${minus(v.toFixed(2))} dB`;
 const mean = (y: number[]) => y.reduce((a, b) => a + b, 0) / y.length;
@@ -184,7 +186,7 @@ function SParameterChart({ chart }: { chart: Chart }) {
 function Simulated() {
   return <div className="pv-sim">
     {CHARTS.map(chart => <SParameterChart key={chart.title} chart={chart} />)}
-    <p className="pv-sim-source">Extracted layout with electromagnetic simulation, output 2 switched on, {simulation.ghz.length} frequency points. <a href={RECORD}>The S-parameter record</a></p>
+    <p className="pv-sim-source">Extracted layout with electromagnetic simulation, output 2 on, {simulation.ghz.length} frequency points. <a href={RECORD}>The S-parameter record</a></p>
   </div>;
 }
 
@@ -209,7 +211,10 @@ function Designs() {
  * with a theme color. */
 const KINDS = ['fill', 'ground', 'blocks_below', 'rf_below', 'blocks', 'devices', 'dc', 'rf'] as const;
 const LAYOUT_KEY = [['rf', 'RF lines'], ['blocks', 'Blocks'], ['dc', 'Bias lines and transistors'], ['ground', 'Ground tiles']] as const;
-function Layout({ label = "The switch's verified layout, from its GDS", legend = true }: { label?: string; legend?: boolean }) {
+type Design = (typeof layouts.designs)[number];
+const DESIGN_A = layouts.designs[0];
+const designName = (d: Design) => `Design ${d.id.toUpperCase()}`;
+function Layout({ layout = DESIGN_A, label, legend = true }: { layout?: Design; label: string; legend?: boolean }) {
   const [w, h] = layout.pixels;
   return <figure className="pv-layout">
     <div className="pv-gds" role="img" aria-label={label} style={{ aspectRatio: `${w} / ${h}` }}>
@@ -219,17 +224,29 @@ function Layout({ label = "The switch's verified layout, from its GDS", legend =
   </figure>;
 }
 
+/** The layouts, one at a time: a button per design, its die size and its own DRC and LVS result under it. */
+function Gallery() {
+  const [id, setId] = useState(DESIGN_A.id), shown = layouts.designs.find(d => d.id === id) ?? DESIGN_A;
+  return <div className="pv-gallery">
+    <div className="pv-gallery-pick" role="group" aria-label="Layouts">
+      {layouts.designs.map(d => <button key={d.id} type="button" aria-pressed={d.id === shown.id} onClick={() => setId(d.id)}>{designName(d)}</button>)}
+    </div>
+    <Layout key={shown.id} layout={shown} label={`${designName(shown)}: its verified layout, from its GDS`} />
+    <p className="pv-gallery-result">{designName(shown)} · DRC {shown.drc_results} violations · LVS {shown.lvs}</p>
+  </div>;
+}
+
 /** The verified layout with the summary of its DRC and LVS reports: a check sweeps the layout, the report beside it. */
 const { drc, lvs } = verification;
 const correct = (result: string) => result === 'CORRECT';
 function Verified() {
   const rows = [['Ports', lvs.matched.ports], ['Nets', lvs.matched.nets], ['Instances', lvs.matched.instances]] as const;
   return <div className="pv-verify">
-    <div className="pv-verify-layout"><Layout label="The layout the reports check, from its GDS" legend={false} /><span className="pv-scan" aria-hidden="true" /></div>
+    <div className="pv-verify-layout"><Layout label="Design A: the layout the reports check, from its GDS" legend={false} /><span className="pv-scan" aria-hidden="true" /></div>
     <div className="pv-report">
       <section>
         <p className="pv-report-head">Design rule check<b className={drc.results ? 'is-bad' : 'is-good'}>{drc.results} results</b></p>
-        <dl><dt>Rule checks run</dt><dd>{drc.rule_checks.toLocaleString('en-US')}</dd><dt>Results generated</dt><dd>{drc.results}</dd></dl>
+        <dl><dt>Results generated</dt><dd>{drc.results}</dd></dl>
       </section>
       <section>
         <p className="pv-report-head">Layout versus schematic<b className={correct(lvs.result) ? 'is-good' : 'is-bad'}>{correct(lvs.result) ? 'correct' : 'not correct'}</b></p>
@@ -246,7 +263,7 @@ function Verified() {
 /** The delivered design library as a library browser: its cells, the views of the top cell (each one shown on
  * request) and the reports that go with it. */
 const VIEWS = [
-  { id: 'layout', name: 'layout', show: () => <Layout label="Layout view of the switch, from its GDS" legend={false} /> },
+  { id: 'layout', name: 'layout', show: () => <Layout label="Layout view of design A, from its GDS" legend={false} /> },
   { id: 'schematic', name: 'schematic', show: () => <div className="pv-svg" dangerouslySetInnerHTML={{ __html: schematic }} /> },
   { id: 'symbol', name: 'symbol', show: () => <div className="pv-svg pv-symbol" dangerouslySetInnerHTML={{ __html: symbol }} /> },
 ] as const;
@@ -257,7 +274,7 @@ function Delivery() {
     <nav className="pv-lib-tree" aria-label="Design library">
       <p className="pv-lib-label">Design library</p>
       <ul>
-        <li className="pv-lib-cell is-open"><span>switch</span>
+        <li className="pv-lib-cell is-open"><span>design A</span>
           <ul className="pv-lib-views">{VIEWS.map(v => <li key={v.id}><button type="button" aria-pressed={v.id === view} onClick={() => setView(v.id)}>{v.name}</button></li>)}</ul>
         </li>
         {blocks.map(b => <li key={b.cell} className="pv-lib-cell"><span>{b.cell}</span></li>)}
@@ -270,9 +287,9 @@ function Delivery() {
         <li><a href={RECORD}>S-parameters</a><span>{simulation.ghz.length} points</span></li>
       </ul>
     </nav>
-    <figure className="pv-lib-view">{shown.show()}<figcaption>switch · {shown.name}</figcaption></figure>
+    <figure className="pv-lib-view">{shown.show()}<figcaption>design A · {shown.name}</figcaption></figure>
   </div>;
 }
 
-export const VISUALS: Record<string, () => ReactNode> = { spec: Specification, schematic: Schematic2D, simulation: Simulated, optimization: Designs, layout: () => <Layout />, verification: Verified, delivery: Delivery };
+export const VISUALS: Record<string, () => ReactNode> = { spec: Specification, schematic: Schematic2D, simulation: Simulated, optimization: Designs, layout: Gallery, verification: Verified, delivery: Delivery };
 export default function ProcessVisual({ id }: { id: string }) { const Visual = VISUALS[id]; return <Visual />; }

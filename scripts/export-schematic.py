@@ -1,8 +1,8 @@
-"""The schematic and the symbol of the single-pole double-throw switch, drawn with the GENESIS design library's one
+"""The schematic and the symbol of design A, drawn with the GENESIS design library's one
 symbol language (glyphs.py, SYMBOLS.md). Colors are CSS variables, so the inline SVG follows the site's theme; each role
 is one <g class="sx-..."> so the page can bring them in in order.
 
-The wiring follows the switch's netlist (the LVS source of the physical-flow chain the cards show):
+The wiring follows the design's netlist (the LVS source of the physical-flow chain the cards show):
   port 1 - feed line - inductor - line - common node; two series transistors from the node, a shunt transistor to
   ground after each; every gate and body through its bias resistor; each branch line - inductor - feed line - port.
 The symbol carries the top cell's seven pins: three RF ports, three bias pins and ground.
@@ -82,7 +82,7 @@ def schematic():
     # the shared back gate node of the two series transistors, to its bias pin
     add("dc", g.wire((bu[0], bu[1] + 29), (bu[0], ym), (bl[0], bl[1] - 29), color="dc"), g.dot(bu[0], ym, color="dc"),
         g.wire((bu[0], ym), (bu[0] + 14, ym), color="dc"), g.net(bu[0] + 14, ym, "", "right"))
-    write("schematic.svg", 516, 232, "Schematic of the switch: one input, two series transistors and two shunt transistors, "
+    write("schematic.svg", 516, 232, "Schematic of design A: one input, two series transistors and two shunt transistors, "
           "inductors and interconnect lines to two outputs, bias resistors on every gate and body", groups)
 
 
@@ -95,14 +95,14 @@ def symbol():
     add("wire", g.wire((x0 - 30, y0 + h / 2), (x0, y0 + h / 2)), g.wire((x0 + w, y0 + 35), (x0 + w + 30, y0 + 35)),
         g.wire((x0 + w, y0 + h - 35), (x0 + w + 30, y0 + h - 35)))
     add("port", g.port(x0 - 40, y0 + h / 2, "1"), g.port(x0 + w + 40, y0 + 35, "2"), g.port(x0 + w + 40, y0 + h - 35, "3"))
-    # the switch inside: one transistor glyph per throw
+    # inside: one transistor glyph per output
     add("active", g.block_glyph("transistor", x0 + w / 2, y0 + 35, 30, "active"), g.block_glyph("transistor", x0 + w / 2, y0 + h - 35, 30, "active"))
     # three bias pins on top, ground at the bottom
     for i in range(3):
         x = x0 + 35 + i * 35
         add("dc", g.wire((x, y0), (x, y0 - 22), color="dc"), g.net(x, y0 - 22, "", "above"))
     add("wire", g.wire((x0 + w / 2, y0 + h), (x0 + w / 2, y0 + h + 14)), g.ground(x0 + w / 2, y0 + h + 14))
-    write("symbol.svg", 280, 200, "Symbol of the switch: three RF ports, three bias pins and ground", groups)
+    write("symbol.svg", 280, 200, "Symbol of design A: three RF ports, three bias pins and ground", groups)
 
 
 schematic()
