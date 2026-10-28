@@ -15,9 +15,10 @@ function brandColors(): Plugin {
   const shared = Object.entries(story).map(([name, value]) => `--story-${name}: ${value};`).join(' ')
     + ` --ease-out: cubic-bezier(${motion.out.join(', ')}); --ease-in-out: cubic-bezier(${motion.inOut.join(', ')});`
     + ` --dur-transition: ${seconds(motion.transition)}; --dur-enter: ${seconds(motion.enter)}; --dur-stagger: ${seconds(motion.stagger)};`;
-  // The film's scenes on the light page take the light film tokens (src/content/film.json, shared with the app).
+  // The film's scenes and the layout pictures (painted from layout_paint.json) on the light page take the light film
+  // tokens (src/content/film.json, shared with the app).
   const lightStage = Object.entries(film.tokens).map(([name, value]) => `--film-${name}: ${value.light};`).join(' ');
-  const css = `:root { ${shared} ${vars(brand.dark)} } :root[data-theme="light"] { ${vars(brand.light)} } :root[data-theme="light"] .story-stage-box { ${lightStage} }`
+  const css = `:root { ${shared} ${vars(brand.dark)} } :root[data-theme="light"] { ${vars(brand.light)} } :root[data-theme="light"] :is(.story-stage-box, .pv-layout) { ${lightStage} }`
     // The first paint, before the script sets data-theme, follows the system.
     + ` @media (prefers-color-scheme: light) { :root:not([data-theme]) { ${vars(brand.light)} } }`;
   const icon = `data:image/svg+xml,${encodeURIComponent(markSvg(brand.dark))}`;

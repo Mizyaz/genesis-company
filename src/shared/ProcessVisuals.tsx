@@ -11,6 +11,8 @@ import layouts from '../content/story/layouts.json';
 import schematic from '../content/story/schematic.svg?raw';
 import symbol from '../content/story/symbol.svg?raw';
 import { assetUrl } from './ui';
+import { alpha } from './story/palette';
+import { LAYOUT_KINDS, paintOf } from './story/layoutPaint';
 
 /** The process cards' pictures, each drawn from its record (loaded after the page, in their own chunk): the
  * specification of design A (codesign.json), its schematic and symbol in the design library's symbols, its simulated
@@ -208,8 +210,9 @@ function Designs() {
 
 /** The finished layout from its GDS: the density fill and the ground tiles faint, then the blocks and the RF lines on
  * their thick top metals (the metals under them faint), the transistors and the DC lines. Each kind is one mask painted
- * with a theme color. */
-const KINDS = ['fill', 'ground', 'blocks_below', 'rf_below', 'blocks', 'devices', 'dc', 'rf'] as const;
+ * with its film color and opacity from the one paint file the app reads too (layoutPaint.ts). */
+/** A legend swatch: the kind's color, a faint kind at a readable strength. */
+const swatch = (kind: string) => { const { colour, opacity } = paintOf(kind); return opacity < .5 ? alpha(colour, .45) : colour; };
 const LAYOUT_KEY = [['rf', 'RF lines'], ['blocks', 'Blocks'], ['dc', 'Bias lines and transistors'], ['ground', 'Ground tiles']] as const;
 type Design = (typeof layouts.designs)[number];
 const DESIGN_A = layouts.designs[0];
@@ -218,9 +221,10 @@ function Layout({ layout = DESIGN_A, label, legend = true }: { layout?: Design; 
   const [w, h] = layout.pixels;
   return <figure className="pv-layout">
     <div className="pv-gds" role="img" aria-label={label} style={{ aspectRatio: `${w} / ${h}` }}>
-      {KINDS.map(kind => <i key={kind} className={`pv-gds-${kind}`} style={{ maskImage: `url(${assetUrl(layout.files[kind])})`, WebkitMaskImage: `url(${assetUrl(layout.files[kind])})` }} />)}
+      {LAYOUT_KINDS.map(kind => { const mask = `url(${assetUrl(layout.files[kind as keyof Design["files"]])})`, { colour, opacity } = paintOf(kind);
+        return <i key={kind} style={{ background: colour, opacity, maskImage: mask, WebkitMaskImage: mask }} />; })}
     </div>
-    {legend && <figcaption>{LAYOUT_KEY.map(([kind, name]) => <span key={kind}><i className={`pv-swatch pv-gds-key-${kind}`} />{name}</span>)}<span>{layout.die_um[0]} × {layout.die_um[1]} µm</span></figcaption>}
+    {legend && <figcaption>{LAYOUT_KEY.map(([kind, name]) => <span key={kind}><i className="pv-swatch" style={{ background: swatch(kind) }} />{name}</span>)}<span>{layout.die_um[0]} × {layout.die_um[1]} µm</span></figcaption>}
   </figure>;
 }
 

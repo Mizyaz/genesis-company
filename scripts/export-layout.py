@@ -55,8 +55,10 @@ if len(tops) != 1:
     raise SystemExit("expected one top cell, found %d" % len(tops))
 top = tops[0]
 
-# The cell of each kind of shape, by the name the physical flow gives it.
-KIND = [("fill", r"^(density|BEOL|FEOL|FET)"), ("ground", r"^gnd|_GND_(JOIN|FRAME)"), ("blocks", r"^blk"), ("dc", r"^routes"), ("rf", r"^conductor")]
+# The kinds of shape in draw order and the cell of each, by the name the physical flow gives it: the one paint file the
+# site and the app read (src/content/layout_paint.json).
+PAINT = json.load(open(os.path.join(ROOT, "src", "content", "layout_paint.json")))["kinds"]
+KIND = [(k["kind"], k["cells"]) for k in PAINT if "cells" in k]
 DRAWN = {"drawing", "vdd", "e1", "e2", "fill", "cfill"}
 
 
@@ -69,7 +71,9 @@ METAL, DEVICE = streams({"metal"}), {k for k in streams({"diff", "poly"})}
 DEVICE = {(l, d) for l, d in DEVICE if any(s["purpose"] == "drawing" and (s["gds_layer"], s["gds_datatype"]) == (l, d)
                                           for L in facts.values() for s in L["stream"])}
 ORDER = {(s["gds_layer"], s["gds_datatype"]): L["order"] for L in facts.values() if L.get("function") == "metal" for s in L["stream"]}
-groups = {name: [] for name in ("fill", "ground", "blocks_below", "rf_below", "blocks", "devices", "dc", "rf")}
+groups = {k["kind"]: [] for k in PAINT}
+if set(groups) != {"fill", "ground", "blocks_below", "rf_below", "blocks", "devices", "dc", "rf"}:
+    raise SystemExit("layout_paint.json names other kinds than the ones this export draws")
 unknown = []
 
 

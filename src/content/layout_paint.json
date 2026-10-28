@@ -1,0 +1,13 @@
+{
+  "what": "How a layout rendered from its GDS is painted, in draw order: each kind of shape, the cells that hold it (a pattern on the cell name, for the kinds read from cells), its film color token (src/shared/story/palette.ts) and its opacity. Read by scripts/export-layout.py and src/shared/story/layoutPaint.ts.",
+  "kinds": [
+    { "kind": "fill", "cells": "^(density|BEOL|FEOL|FET)", "colour": "muted", "opacity": 0.12 },
+    { "kind": "ground", "cells": "^gnd|_GND_(JOIN|FRAME)", "colour": "muted", "opacity": 0.28 },
+    { "kind": "blocks_below", "colour": "brand-3", "opacity": 0.18 },
+    { "kind": "rf_below", "colour": "brand-1", "opacity": 0.18 },
+    { "kind": "blocks", "cells": "^blk", "colour": "brand-3", "opacity": 0.9 },
+    { "kind": "devices", "colour": "dc", "opacity": 1 },
+    { "kind": "dc", "cells": "^routes", "colour": "dc", "opacity": 0.95 },
+    { "kind": "rf", "cells": "^conductor", "colour": "brand-1", "opacity": 1 }
+  ]
+}

@@ -49,10 +49,16 @@ test('the process cards are visible by default; only a page that can watch them 
   // proportions, and covers the pixels the export counted, so a mask left from another export fails.
   assert.match(read('src/shared/ProcessVisuals.tsx'), /content\/story\/layouts\.json/);
   const { designs } = JSON.parse(read('src/content/story/layouts.json'));
+  // One paint for the site and the app: the export and the page read layout_paint.json; no second palette in the CSS.
+  const paint = JSON.parse(read('src/content/layout_paint.json')).kinds;
+  assert.match(read('scripts/export-layout.py'), /layout_paint\.json/);
+  assert.match(read('src/shared/ProcessVisuals.tsx'), /paintOf\(kind\)/);
+  assert.doesNotMatch(read('src/shared/story/layoutPaint.ts'), /^import (?!paint from '\.\.\/\.\.\/content\/layout_paint\.json'|\{ B, C \} from '\.\/palette')/m);
+  assert.doesNotMatch(css, /\.pv-gds-/);
   assert.deepEqual(designs.map(d => d.id), ['a', 'b']);
   for (const layout of designs) {
     assert.deepEqual([layout.drc_results, layout.lvs], [0, 'correct'], layout.id);
-    assert.deepEqual(Object.keys(layout.files).sort(), ['blocks', 'blocks_below', 'dc', 'devices', 'fill', 'ground', 'rf', 'rf_below']);
+    assert.deepEqual(Object.keys(layout.files), paint.map(k => k.kind), 'masks in the paint order');
     assert.ok(Math.abs(layout.pixels[1] / layout.pixels[0] - layout.die_um[1] / layout.die_um[0]) < .002);
     for (const [kind, file] of Object.entries(layout.files)) {
       assert.ok(file.startsWith(`/assets/layout/${layout.id}/`), file);

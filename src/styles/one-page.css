@@ -43,7 +43,7 @@
 .pv-axis { fill: none; stroke: var(--border); stroke-width: 1; }
 .pv-line { fill: none; stroke: var(--flow-cyan); stroke-width: 2; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
 .pv-dots circle { fill: var(--flow-violet); opacity: .5; }
-/* The layout from its GDS: one alpha mask per kind of shape, each painted with a theme color. */
+/* The layout from its GDS: one alpha mask per kind of shape, each painted inline from layout_paint.json. */
 .pv-layout { width: 100%; margin: 0; display: grid; gap: 10px; }
 /* The layout gallery: one design at a time, a button per design, its own DRC and LVS result under it. */
 .pv-gallery { width: 100%; display: grid; gap: 10px; }
@@ -54,18 +54,8 @@
 .pv-gallery-result { margin: 0; text-align: center; font-size: .8125rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 .pv-gds { position: relative; width: 100%; border: 1px solid var(--border-soft); border-radius: 6px; background: var(--page); overflow: hidden; }
 .pv-gds i { position: absolute; inset: 0; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
-.pv-gds-fill { background: var(--muted); opacity: .12; }
-.pv-gds-ground { background: var(--muted); opacity: .28; }
-.pv-gds-blocks_below { background: var(--brand-3); opacity: .18; }
-.pv-gds-rf_below { background: var(--brand-1); opacity: .18; }
-.pv-gds-blocks { background: var(--brand-3); opacity: .9; }
-.pv-gds-devices { background: var(--dc); }
-.pv-gds-dc { background: var(--dc); opacity: .95; }
-.pv-gds-rf { background: var(--brand-1); }
 .pv-layout figcaption { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px; font-size: .8125rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 .pv-layout figcaption span { display: inline-flex; align-items: center; gap: 6px; }
-.pv-swatch.pv-gds-key-rf { background: var(--brand-1); } .pv-swatch.pv-gds-key-blocks { background: var(--brand-3); } .pv-swatch.pv-gds-key-dc { background: var(--dc); }
-.pv-swatch.pv-gds-key-ground { background: color-mix(in srgb, var(--muted) 45%, transparent); }
 
 /* The schematic, in the design library's symbols: one color per role, the roles coming in one after another. */
 .pv-schematic { --sx-active: var(--brand-1); --sx-passive: var(--brand-3); --sx-dc: var(--dc); --sx-text: var(--text); width: 100%; display: grid; gap: 14px; }
