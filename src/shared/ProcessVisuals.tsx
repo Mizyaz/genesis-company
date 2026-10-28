@@ -115,7 +115,7 @@ function SParameterChart({ chart }: { chart: Chart }) {
     const gap = (at: number) => Math.min(...series.map(o => Math.abs(o.values[Math.round(at * (GHZ.length - 1))] - text)));
     return gap(.3) > gap(.6) ? .3 : .6;
   };
-  // A missed goal is labelled beside its bar in two lines (the goal, then its error), on the side away from the value; a met one mid-plot, on the side of its line
+  // A missed goal is labelled beside its bar in two lines (the goal, then its goal error), on the side away from the value; a met one mid-plot, on the side of its line
   // away from the curves there, so the label crosses no curve and no value at the top of the band.
   const topLabel = (limit: number, missed: boolean, top: number) => {
     if (missed) return { x: x(F1) - 28, y: y(limit) + (y(top) < y(limit) ? 13 : -18), textAnchor: 'end' as const };
@@ -162,7 +162,7 @@ function SParameterChart({ chart }: { chart: Chart }) {
           {s.topError > 0 && <line className="pv-top-error" x1={x(F1)} x2={x(F1)} y1={y(s.topGoal.limit)} y2={y(s.top)} />}
           {(s.topError > 0 || s.topGoal.limit !== s.goal.limit) && <text {...topLabel(s.topGoal.limit, s.topError > 0, s.top)}>
             {chart.curves.length > 1 ? `${s.k} ` : ''}goal at {TOP} {s.topGoal.text}
-            {s.topError > 0 && <tspan x={x(F1) - 28} dy={13}>error {dB(s.topError)}</tspan>}
+            {s.topError > 0 && <tspan x={x(F1) - 28} dy={13}>goal error {dB(s.topError)}</tspan>}
           </text>}
         </g>)}
         {series.map(s => <g key={`m${s.k}`} className={`pv-marker pv-curve-${s.i}`}>

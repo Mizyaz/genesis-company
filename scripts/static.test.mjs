@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { inflateSync } from 'node:zlib';
 import test from 'node:test';
 import ts from 'typescript';
 import { createRequire } from 'node:module';
@@ -48,7 +49,34 @@ test('the process cards are visible by default; only a page that can watch them 
   assert.deepEqual(Object.keys(layout.files).sort(), ['blocks', 'blocks_below', 'dc', 'devices', 'fill', 'ground', 'rf', 'rf_below']);
   for (const file of Object.values(layout.files)) assert.ok(existsSync(resolve(root, `public${file}`)), file);
   assert.ok(Math.abs(layout.pixels[1] / layout.pixels[0] - layout.die_um[1] / layout.die_um[0]) < .002);
+  // Each mask covers the pixels the export counted, so a mask left from another export fails.
+  for (const [kind, file] of Object.entries(layout.files)) assert.equal(coveredPixels(readFileSync(resolve(root, `public${file}`))), layout.covered_pixels[kind], kind);
 });
+
+/** The pixels with nonzero alpha of an 8-bit gray-and-alpha PNG (the masks export-layout.py writes). */
+function coveredPixels(png) {
+  const width = png.readUInt32BE(16), height = png.readUInt32BE(20);
+  assert.deepEqual([png[24], png[25], png[28]], [8, 4, 0], 'an 8-bit gray-and-alpha PNG, not interlaced');
+  const chunks = [];
+  for (let at = 8; at < png.length;) {
+    const size = png.readUInt32BE(at), type = png.toString('latin1', at + 4, at + 8);
+    if (type === 'IDAT') chunks.push(png.subarray(at + 8, at + 8 + size));
+    at += size + 12;
+  }
+  const data = inflateSync(Buffer.concat(chunks)), bpp = 2, stride = width * bpp;
+  let previous = Buffer.alloc(stride), covered = 0;
+  for (let row = 0; row < height; row++) {
+    const filter = data[row * (stride + 1)], line = Buffer.from(data.subarray(row * (stride + 1) + 1, (row + 1) * (stride + 1)));
+    for (let i = 0; i < stride; i++) {
+      const a = i >= bpp ? line[i - bpp] : 0, b = previous[i], c = i >= bpp ? previous[i - bpp] : 0;
+      const p = a + b - c, pa = Math.abs(p - a), pb = Math.abs(p - b), pc = Math.abs(p - c);
+      line[i] = (line[i] + [0, a, b, (a + b) >> 1, pa <= pb && pa <= pc ? a : pb <= pc ? b : c][filter]) & 255;
+    }
+    for (let i = 1; i < stride; i += bpp) if (line[i]) covered++;
+    previous = line;
+  }
+  return covered;
+}
 
 test('the film goes in only as an export whose on-screen scan cleared every kind of leak', () => {
   assert.deepEqual(LEAK_KINDS, ['host', 'user', 'email', 'paths', 'names', 'vendors', 'models']);

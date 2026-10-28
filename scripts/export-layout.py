@@ -13,7 +13,7 @@ that holds them:
 Every metal of the technology (technology_facts.json of the chain) is drawn; the thick top metals are the three with the
 highest order that carry shapes. The devices group keeps the diffusion and gate drawing shapes. Each group is one alpha mask (PNG, white with the coverage in alpha), all the same size; the page
 paints each with a theme color, so the picture follows light and dark. Cell, layer and tool names are only read here:
-layout.json carries the group names above, the die size in um and the mask files.
+layout.json carries the group names above, the die size in um, the mask files and the pixels each mask covers.
 
 usage: python -I scripts/export-layout.py <chain folder>
   writes public/assets/layout/<group>.png and src/content/story/layout.json
@@ -82,7 +82,7 @@ size = (WIDTH * OVERSAMPLE, int(round((y1 - y0) * scale)))
 height = int(round(size[1] / OVERSAMPLE))
 out_dir = os.path.join(ROOT, "public", "assets", "layout")
 os.makedirs(out_dir, exist_ok=True)
-files = {}
+files, covered = {}, {}
 for name, polys in groups.items():
     image = Image.new("L", size, 0)
     draw = ImageDraw.Draw(image)
@@ -97,9 +97,12 @@ for name, polys in groups.items():
     path = os.path.join(out_dir, name + ".png")
     Image.merge("LA", (Image.new("L", alpha.size, 255), alpha)).save(path, optimize=True)
     files[name] = "/assets/layout/%s.png" % name
+    # The pixels each mask covers, as the PNG holds them: the static test recounts them, so a stale mask fails.
+    covered[name] = int(np.count_nonzero(np.asarray(Image.open(path).getchannel("A"))))
     print("%-8s %8d shapes  %7d bytes" % (name, len(polys), os.path.getsize(path)))
 
 record = {"what": "The switch's layout rendered from its GDS, one alpha mask per kind of shape",
-          "die_um": [round(x1 - x0, 1), round(y1 - y0, 1)], "pixels": [WIDTH, height], "files": files}
+          "die_um": [round(x1 - x0, 1), round(y1 - y0, 1)], "pixels": [WIDTH, height], "files": files,
+          "covered_pixels": covered}
 open(os.path.join(ROOT, "src", "content", "story", "layout.json"), "w").write(json.dumps(record) + "\n")
 print(json.dumps(record))
