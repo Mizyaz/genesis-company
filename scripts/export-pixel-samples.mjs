@@ -4,6 +4,7 @@
 //   node scripts/export-pixel-samples.mjs <dataset folder> [count] [min fill] [max fill]
 import { createReadStream, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { guard } from './leak-guard.mjs';
 import { createInterface } from 'node:readline';
 
 const root = resolve(import.meta.dirname, '..'), [folder, count = '24', lo = '.3', hi = '.6'] = process.argv.slice(2);
@@ -33,7 +34,7 @@ for await (const line of lines) {
 }
 const steps = Math.round((config.freq_stop - config.freq_start) / config.freq_step) + 1;
 const out = { structure: config.structure, ports: config.n_ports, pixel_um: config.pixel_size_um, ghz: Array.from({ length: steps }, (_, i) => (config.freq_start + i * config.freq_step) / 1e9), designs: picked };
-const text = JSON.stringify(out), leak = /\/DATA|\/home|\/linux|isguven|sha256|[0-9a-f]{32}/i.exec(text);
-if (leak) throw new Error(`exported pixels hold "${leak[0]}"`);
+const text = JSON.stringify(out);
+guard(text, 'exported pixels', ['[0-9a-f]{32}']);
 writeFileSync(resolve(root, 'src/content/story/pixels.json'), text + '\n');
 console.log(`pixels.json ${text.length} bytes, ${picked.length} designs`);

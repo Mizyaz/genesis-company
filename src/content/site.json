@@ -5,407 +5,62 @@
     "email": "islam.guven@uclouvain.be"
   },
   "home": {
-    "eyebrow": "GENESIS DESIGN LAB",
-    "headline": "Automated and non-intuitive RFIC design for",
-    "accent": "millimeter-wave and beyond.",
-    "links": {
-      "Automated": {
-        "href": "#/explore/methods",
-        "tone": "brand1",
-        "title": "See the AI methods"
-      },
-      "non-intuitive": {
-        "href": "#/explore/non-intuitive",
-        "tone": "brand3",
-        "title": "See passive synthesis"
-      }
+    "headline": "Automated layout",
+    "accent": "for RF and mmWave front-ends.",
+    "intro": "Zero DRC, LVS correct. Send a spec: you never open a simulator or a commercial tool, and you get the finished library for your own design kit.",
+    "film": "GENESIS designing an SPDT switch, from the spec to the verified layout.",
+    "process": {
+      "headline": "From spec to verified layout",
+      "intro": "On the SPDT switch."
     },
-    "intro": "From specification to validated layout, for any circuit topology and any transistor technology.",
-    "watch": "What we offer",
-    "join": "Join us for research",
-    "film": {
-      "watch": "Watch the film",
-      "line": "Whatever you want to design.",
-      "close": "Close the film",
-      "label": "The GENESIS film",
-      "src": "/assets/film/genesis-story.mp4",
-      "poster": "/assets/film/genesis-story-poster.jpg"
-    },
-    "lab": {
-      "eyebrow": "RESEARCH",
-      "headline": "The research",
-      "accent": "behind GENESIS.",
-      "intro": "Our publications cover RF and millimeter-wave integrated circuits, design optimization and autonomous systems, in venues including the IEEE Transactions on Microwave Theory and Techniques and the IEEE Custom Integrated Circuits Conference.",
-      "count": "publications"
-    },
-    "claims": {
-      "eyebrow": "RESULTS",
-      "headline": "From specification",
-      "accent": "to silicon.",
-      "items": [
+    "membership": {
+      "headline": "Membership",
+      "intro": "Start with the demo. Move to Premium when you have a circuit to build.",
+      "tiers": [
         {
-          "icon": "chip",
-          "value": "Silicon",
-          "title": "Silicon demonstration",
-          "detail": "Fabricated in a commercial foundry."
+          "id": "demo",
+          "name": "Demo",
+          "price": "Free",
+          "for": "See how GENESIS works.",
+          "items": [
+            "Watch the full flow, from spec to layout",
+            "Inspect one example circuit library",
+            "Read its DRC and LVS reports"
+          ],
+          "action": "Request the demo",
+          "subject": "GENESIS demo"
         },
         {
-          "icon": "switch",
-          "value": "Any PDK",
-          "title": "Technology independent",
-          "detail": "Your process comes from your PDK."
-        },
-        {
-          "icon": "layers",
-          "value": "< 1 hour",
-          "title": "Layout generation",
-          "detail": "Schematic to DRC- and LVS-clean layout."
-        },
-        {
-          "icon": "check",
-          "value": "DRC + LVS",
-          "title": "Validated layout",
-          "detail": "Every layout checked with DRC and LVS."
-        }
-      ],
-      "story": {
-        "scenes": [
-          "chip3d"
-        ],
-        "label": "GENESIS shows your validated layout layer by layer in 3D."
-      }
-    },
-    "flow": {
-      "eyebrow": "SCHEMATIC TO LAYOUT",
-      "headline": "From schematic",
-      "accent": "to validated layout.",
-      "intro": "GENESIS takes your schematic to a validated layout on your PDK, with parasitics simulated on the way.",
-      "journey": {
-        "label": "GENESIS from schematic to validated layout, stage by stage as you scroll: schematic, layout blocks, testbenches, specification, co-design, layout, validation and any RF circuit.",
-        "next": "Next:",
-        "done": "Next: how the co-design works",
-        "focus": "switch_fets",
-        "stages": [
-          {
-            "scene": "schematic",
-            "title": "Schematic",
-            "detail": "Your circuit, drawn on your PDK."
-          },
-          {
-            "scene": "blocks",
-            "title": "Layout blocks",
-            "detail": "Split into blocks, joined by RF and bias lines."
-          },
-          {
-            "scene": "testbench",
-            "title": "Testbenches",
-            "detail": "Built for your circuit and simulated with parasitics."
-          },
-          {
-            "scene": "spec",
-            "title": "Specification",
-            "detail": "Every goal scored against your targets.",
-            "window": [
-              0,
-              0.5
-            ]
-          },
-          {
-            "scene": "optimize",
-            "title": "Co-design",
-            "detail": "Transistors and passives optimized together.",
-            "window": [
-              0.08,
-              0.9
-            ]
-          },
-          {
-            "scene": "layout",
-            "title": "Layout",
-            "detail": "Placed, routed and tiled."
-          },
-          {
-            "scene": "validation",
-            "title": "Validation",
-            "detail": "DRC 0 errors and LVS correct."
-          },
-          {
-            "scene": "any",
-            "title": "Any RF circuit",
-            "detail": "Switches, LNAs, mixers and PAs on one flow."
-          }
-        ],
-        "scale": [
-          {
-            "value": "1,380,864",
-            "label": "EM-simulated passive designs in our datasets"
-          },
-          {
-            "value": "290",
-            "label": "designs in one co-design run"
-          }
-        ]
-      }
-    },
-    "methods": {
-      "eyebrow": "AI-DRIVEN CO-DESIGN",
-      "headline": "Transistors and passives,",
-      "accent": "optimized as one circuit.",
-      "intro": "GENESIS sizes the transistors and synthesizes the passives of your circuit in one optimization, then lays out the best design and checks it with DRC and LVS.",
-      "board": {
-        "label": "A recorded optimization run of 290 designs, shown in six steps.",
-        "design": "Design",
-        "repeat": "Steps 2 to 5 repeat for every design",
-        "scrub": "Step through the run",
-        "first": "first design",
-        "steps": [
-          {
-            "id": "spec",
-            "title": "Specification",
-            "detail": "Your goals, each against its target."
-          },
-          {
-            "id": "sizing",
-            "title": "Transistor sizing",
-            "detail": "A width for every transistor."
-          },
-          {
-            "id": "passives",
-            "title": "Passive synthesis",
-            "detail": "Each passive, drawn and simulated with EM."
-          },
-          {
-            "id": "simulate",
-            "title": "Circuit and EM simulation",
-            "detail": "The circuit's S-parameters, parasitics included."
-          },
-          {
-            "id": "objective",
-            "title": "One objective",
-            "detail": "All goals as one error, driven down over the run."
-          },
-          {
-            "id": "layout",
-            "title": "Validated layout",
-            "detail": "The best design, laid out and checked."
-          }
-        ],
-        "passives": {
-          "pixelated": "Pixelated",
-          "parametric": "Parametric",
-          "another": "Another design",
-          "previous": "Previous design",
-          "note": "Random 12 × 12 grids of 16 µm pixels, simulated with EM from 120 to 160 GHz.",
-          "candidate": "Spiral"
-        },
-        "play": "Play the run",
-        "pause": "Pause",
-        "circuit": {
-          "label": "Recorded run",
-          "name": "SPDT switch",
-          "note": "The same six steps run for amplifiers, mixers and any other RF circuit."
-        },
-        "spec": {
-          "miss": "misses",
-          "target": "target",
-          "met": "meets"
-        }
-      }
-    },
-    "contact": {
-      "eyebrow": "JOIN US",
-      "headline": "Design with us.",
-      "accent": "Also for research opportunities."
-    },
-    "portfolio": {
-      "story": {
-        "scenes": [
-          "any"
-        ],
-        "label": "GENESIS designs any circuit you want."
-      }
-    }
-  },
-  "portfolio": [
-    {
-      "id": "spdt",
-      "title": "Wideband SPDT switch",
-      "kind": "One circuit, two versions",
-      "band": "1–110 GHz",
-      "images": [
-        {
-          "src": "/assets/spdt-pixelated.png",
-          "preview": "/assets/spdt-pixelated-preview.webp",
-          "alt": "Full layout of the SPDT switch with pixelated passive devices",
-          "label": "Pixelated",
-          "fit": "contain",
-          "width": 1580,
-          "height": 1060
-        },
-        {
-          "src": "/assets/spdt-traditional.png",
-          "preview": "/assets/spdt-traditional-preview.webp",
-          "alt": "Full layout of the SPDT switch with traditional inductors",
-          "label": "Traditional",
-          "fit": "contain",
-          "width": 1580,
-          "height": 1060
-        }
-      ],
-      "description": "One switch in two versions, pixelated and traditional, both validated with DRC and LVS."
-    },
-    {
-      "id": "mixer",
-      "title": "D-band passive mixer",
-      "kind": "Quadcore topology",
-      "band": "120–160 GHz",
-      "images": [
-        {
-          "src": "/assets/mixer.png",
-          "preview": "/assets/mixer-preview.webp",
-          "alt": "Layout of the quadcore passive mixer",
-          "label": "Full layout",
-          "fit": "contain",
-          "width": 739,
-          "height": 399
-        }
-      ],
-      "description": "Frequency conversion with transformer-based matching, optimized at circuit level.",
-      "fabricated": true
-    },
-    {
-      "id": "divider",
-      "title": "Broadband power divider",
-      "kind": "Three-port · equal split",
-      "band": "20–120 GHz",
-      "images": [
-        {
-          "src": "/assets/divider.png",
-          "preview": "/assets/divider-preview.webp",
-          "alt": "Layout of the compact three-port power divider",
-          "label": "Full layout",
-          "fit": "contain",
-          "width": 151,
-          "height": 179
-        }
-      ],
-      "description": "A broadband passive circuit shaped with EM simulation.",
-      "fabricated": true
-    }
-  ],
-  "membership": {
-    "eyebrow": "GENESIS MEMBERSHIP",
-    "headline": "One RFIC design system,",
-    "headlineAccent": "from front-ends to specialised circuits.",
-    "intro": "GENESIS is a general RFIC design system. Start with a free demo, then pick the tier that fits your team.",
-    "tiers": [
-      {
-        "id": "demo",
-        "icon": "calendar",
-        "title": "Demo",
-        "label": "Free",
-        "pitch": "See GENESIS on a design like yours.",
-        "features": [
-          "Free live demo sessions with our team",
-          "A guided run on an RF block",
-          "Answers on your tools and setup"
-        ],
-        "action": "Book a free demo"
-      },
-      {
-        "id": "pro",
-        "icon": "chip",
-        "title": "Pro",
-        "label": "Per user",
-        "pitch": "The GENESIS design environment for your engineers.",
-        "features": [
-          "Passive synthesis with EM simulation",
-          "Active circuits optimized with your simulator",
-          "Design assistant and Python scripting",
-          "Updates and product support"
-        ],
-        "action": "Request an offer"
-      },
-      {
-        "id": "enterprise",
-        "icon": "layers",
-        "title": "Enterprise",
-        "label": "For teams and labs",
-        "pitch": "GENESIS across your team, connected to your flow.",
-        "features": [
-          "Everything in Pro, for your whole team",
-          "Multi-block designs exported to your design environment",
-          "Onboarding, training and tool integration",
-          "Silicon prototype support"
-        ],
-        "action": "Talk to us"
-      }
-    ],
-    "note": "Prices come with your offer. Tool licenses, PDK access and compute stay on your side.",
-    "faq": {
-      "title": "Frequently asked questions",
-      "intro": "If your question is not here, write to us.",
-      "action": "Ask a question",
-      "items": [
-        {
-          "question": "What does the membership include?",
-          "answer": "Your tier's GENESIS modules for your team, with updates and support: software access, not a chip design done for you."
-        },
-        {
-          "question": "How is GENESIS priced?",
-          "answer": "Per user. Your tier, the number of users and the term are set in your offer."
-        },
-        {
-          "question": "Where does GENESIS run?",
-          "answer": "On your own Linux server, next to your tools. CAD and solver licenses, PDK access and compute stay on your side."
-        },
-        {
-          "question": "How do we get started?",
-          "answer": "With a free demo session. Then we agree your tier, your users and your tools."
+          "id": "premium",
+          "name": "Premium",
+          "price": "Price on request",
+          "for": "Your circuit, designed, with automated layout.",
+          "items": [
+            "Your spec in, scored on your goals",
+            "A design library in your PDK",
+            "DRC and LVS reports",
+            "Extracted netlist and S-parameters",
+            "The testbenches, ready to rerun"
+          ],
+          "action": "Send us a spec",
+          "subject": "GENESIS spec"
         }
       ]
+    },
+    "research": {
+      "headline": "Research"
+    },
+    "team": {
+      "headline": "Team"
+    },
+    "contact": {
+      "headline": "Have a front-end to build?",
+      "accent": "Send us the spec.",
+      "action": "Send us a spec"
     }
   },
-  "partnership": {
-    "eyebrow": "PARTNERSHIP",
-    "headline": "Sign up for partnership.",
-    "accent": "Build your next demonstrator with us.",
-    "intro": "Bring a circuit and a technology. We take it from specification to validated layout, and on to silicon.",
-    "tracks": [
-      {
-        "id": "demonstrator",
-        "icon": "chip",
-        "title": "Silicon demonstrator partner",
-        "detail": "Your circuit, your technology: a validated layout ready for tape-out."
-      },
-      {
-        "id": "research",
-        "icon": "users",
-        "title": "Research partner",
-        "detail": "Joint papers, student projects and shared tape-outs."
-      },
-      {
-        "id": "technology",
-        "icon": "layers",
-        "title": "Technology partner",
-        "detail": "Connect your PDK, models or tools to the GENESIS flow."
-      }
-    ],
-    "action": "Sign up",
-    "note": "Your mail app opens with these details filled in."
-  },
-  "story": {
-    "eyebrow": "OUR STORY",
-    "headline": "How GENESIS started.",
-    "intro": "GENESIS grew out of our own work: RFIC research on one side, building AI products on the other.",
-    "paragraphs": [
-      "RF ideas take shape quickly. The time goes into the loop around them: simulate, compare, check the layout, repeat. GENESIS runs that loop between your tools, while the engineer sets the goals and makes the decisions."
-    ]
-  },
   "about": {
-    "eyebrow": "ABOUT US",
     "headline": "The team behind GENESIS.",
-    "intro": "RFIC research and AI product development in one team.",
     "people": [
       {
         "id": "islam-guven",

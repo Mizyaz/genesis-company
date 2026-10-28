@@ -1,7 +1,7 @@
 import { useEffect, useId, useState, type MouseEvent, type ReactNode } from 'react';
 import { Brand, Icon } from './ui';
 import { useMotion } from './MotionSettings';
-import { ScrollCurrent } from './ScrollCurrent';
+import { mailto } from '../pages/OnePage';
 
 type Theme = 'light' | 'dark';
 export function useCompanyAppearance() {
@@ -24,7 +24,7 @@ export function useCompanyAppearance() {
   return { theme, setTheme };
 }
 
-export function SiteShell({ children, explore, workbenchUrl, homeUrl = '#/', caption, designUrl, theme, onThemeChange }: { children: ReactNode; explore: boolean; workbenchUrl?: string; homeUrl?: string; caption?: string; designUrl?: string; theme: Theme; onThemeChange: (theme: Theme) => void }) {
+export function SiteShell({ children, theme, onThemeChange }: { children: ReactNode; theme: Theme; onThemeChange: (theme: Theme) => void }) {
   const motion = useMotion();
   const navId = `site-nav-${useId().replace(/:/g, '')}`;
   const [menuOpen, setMenuOpen] = useState(false);
@@ -44,25 +44,22 @@ export function SiteShell({ children, explore, workbenchUrl, homeUrl = '#/', cap
     main.focus({ preventScroll: true });
     main.scrollIntoView({ block: 'start', behavior: 'instant' });
   };
-  return <div className={`site-shell ${explore ? 'is-explore' : 'is-landing'}`}>
+  return <div className="site-shell">
     <a className="skip-link" href="#main" onClick={skipToContent}>Skip to content</a>
-    <ScrollCurrent />
     <header className="site-header" data-menu={menuOpen ? 'open' : 'closed'}>
-      <a className="brand-link" href={homeUrl} aria-label="GENESIS home"><Brand /></a>
+      <a className="brand-link" href="#/" aria-label="GENESIS home"><Brand /></a>
       <span className="header-divider" />
-      <span className="header-caption">{caption || (explore ? 'FROM SPECS TO SILICON' : 'RFIC DESIGN ASSISTANT')}</span>
+      <span className="header-caption">AUTOMATED RFIC LAYOUT</span>
       <button className="icon-button menu-toggle" type="button" aria-expanded={menuOpen} aria-controls={navId} aria-label={menuOpen ? 'Close menu' : 'Open menu'} onClick={() => setMenuOpen(open => !open)}><Icon name={menuOpen ? 'close' : 'menu'} /></button>
       <nav id={navId} aria-label="Main navigation" onClick={followLink}>
-        {explore && <><a href="#/explore/research">Research</a><a href="#/explore/portfolio">Designs</a><a href="#/explore/membership">Membership</a><a href="#/explore/partnership">Partnership</a></>}
-        <a className="about-link" href="#/explore/about">About us</a>
-        {designUrl && <a className="workbench-link" href={designUrl}><span>Design</span><Icon name="diagonal" /></a>}
-        {workbenchUrl && <a className="workbench-link" href={workbenchUrl} data-genesis-handoff aria-label="Open workbench"><span>Open workbench</span><Icon name="diagonal" /></a>}
+        <a href="#/explore/how">How it works</a><a href="#/explore/membership">Membership</a><a href="#/explore/research">Research</a><a href="#/explore/team">Team</a>
+        <a className="button button-primary header-cta" href={mailto('GENESIS spec')}>Send us a spec</a>
         <div className="nav-settings">
         <button className="icon-button theme-toggle" type="button" onClick={() => onThemeChange(theme === 'dark' ? 'light' : 'dark')} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}><Icon name={theme === 'dark' ? 'sun' : 'moon'} /></button>
         <button className="icon-button motion-toggle" type="button" onClick={motion.toggle} aria-label={motion.enabled ? 'Stop animations' : 'Play animations'} title={motion.enabled ? 'Stop animations' : 'Play animations'}><Icon name={motion.enabled ? 'stop' : 'play'} /></button></div>
       </nav>
     </header>
     {children}
-    <footer className="site-footer"><span>GENESIS <span className="footer-separator">/</span> Autonomous RFIC design</span><span>From specs to silicon.</span></footer>
+    <footer className="site-footer"><span>GENESIS <span className="footer-separator">/</span> Automated RFIC layout</span><span>Zero DRC, LVS correct.</span></footer>
   </div>;
 }

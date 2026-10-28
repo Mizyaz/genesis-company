@@ -4,6 +4,7 @@
 //   node scripts/export-spdt-sparams.mjs <pixelated sp file> <traditional sp file>
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { guard } from './leak-guard.mjs';
 
 const root = resolve(import.meta.dirname, '..'), [pixelated, traditional] = process.argv.slice(2);
 if (!pixelated || !traditional) throw new Error('usage: node scripts/export-spdt-sparams.mjs <pixelated sp file> <traditional sp file>');
@@ -30,8 +31,8 @@ if (a.ghz.length !== b.ghz.length || a.ghz.some((f, i) => f !== b.ghz[i])) throw
 if (a.ghz.length > 125) throw new Error(`${a.ghz.length} points`);
 const strip = ({ ghz, ...curves }) => curves;
 const out = { ghz: a.ghz, versions: { pixelated: strip(a), traditional: strip(b) } };
-const text = JSON.stringify(out), leak = /\/DATA|\/home|\/linux|isguven|sha256|[0-9a-f]{32}/i.exec(text);
-if (leak) throw new Error(`exported S-parameters hold "${leak[0]}"`);
+const text = JSON.stringify(out);
+guard(text, 'exported S-parameters', ['[0-9a-f]{32}']);
 writeFileSync(resolve(root, 'src/content/story/spdt.json'), text + '\n');
 const stat = (y) => `${(y.reduce((p, v) => p + v, 0) / y.length).toFixed(2)} / ${y[y.length - 1].toFixed(2)}`;
 for (const [name, v] of Object.entries(out.versions)) console.log(name, 'S21', stat(v.S21), 'S31', stat(v.S31), 'S11', stat(v.S11));

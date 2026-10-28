@@ -17,7 +17,9 @@ function brandColors(): Plugin {
     + ` --dur-transition: ${seconds(motion.transition)}; --dur-enter: ${seconds(motion.enter)}; --dur-stagger: ${seconds(motion.stagger)};`;
   // The film's scenes on the light page take the light film tokens (src/content/film.json, shared with the app).
   const lightStage = Object.entries(film.tokens).map(([name, value]) => `--film-${name}: ${value.light};`).join(' ');
-  const css = `:root { ${shared} ${vars(brand.dark)} } :root[data-theme="light"] { ${vars(brand.light)} } :root[data-theme="light"] .story-stage-box { ${lightStage} }`;
+  const css = `:root { ${shared} ${vars(brand.dark)} } :root[data-theme="light"] { ${vars(brand.light)} } :root[data-theme="light"] .story-stage-box { ${lightStage} }`
+    // The first paint, before the script sets data-theme, follows the system.
+    + ` @media (prefers-color-scheme: light) { :root:not([data-theme]) { ${vars(brand.light)} } }`;
   const icon = `data:image/svg+xml,${encodeURIComponent(markSvg(brand.dark))}`;
   return { name: 'genesis-brand-colors', transformIndexHtml: () => [
     { tag: 'style', attrs: { id: 'brand-colors' }, children: css, injectTo: 'head-prepend' },

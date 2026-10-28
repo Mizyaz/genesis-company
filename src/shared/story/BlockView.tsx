@@ -51,6 +51,8 @@ function bands(values: number[], size: number) {
 
 const NOUN: Record<Kind, [string, string]> = { pad: ['DC pad', 'DC pads'], rfpad: ['RF pad', 'RF pads'], resistor: ['resistor', 'resistors'], inductor: ['inductor', 'inductors'], pixelated: ['pixelated passive device', 'pixelated passive devices'], transistor: ['transistor', 'transistors'] };
 const WORD: Record<string, string> = { rf: 'RF', dc: 'DC', fets: 'FETs', fet: 'FET', gnd: 'GND' };
+/** Block words the kind's noun already says ("dc", "pad" before "DC pad"), dropped so the title does not repeat them. */
+const unsaid = (words: string[], kind: Kind) => { const said = new Set(NOUN[kind].join(' ').toLowerCase().split(' ')); return words.filter(x => !said.has(x)); };
 /** "M1–M4" for members named by one prefix and consecutive numbers, else nothing. */
 function span(names: string[]) {
   const m = names.map(n => /^([A-Za-z]+)(\d+)$/.exec(n));
@@ -67,11 +69,11 @@ export function cardTitle(blocks: string[], members: { member: string; cell: str
   let title: string;
   if (blocks.length === 1) {
     const w = words[0];
-    if (members.length === 1 && kinds.length === 1 && names[0].toLowerCase() === w[w.length - 1]) title = [...w.slice(0, -1).map(x => WORD[x] ?? x), NOUN[kinds[0]][0], names[0]].join(' ');
+    if (members.length === 1 && kinds.length === 1 && names[0].toLowerCase() === w[w.length - 1]) title = [...unsaid(w.slice(0, -1), kinds[0]).map(x => WORD[x] ?? x), NOUN[kinds[0]][0], names[0]].join(' ');
     else title = [...w.map(x => WORD[x] ?? x), span(names)].filter(Boolean).join(' ');
   } else {
     const common = words[0].filter(x => x !== 'and' && words.every(w => w.includes(x)));
-    title = [...common.map(x => WORD[x] ?? x), kinds.length === 1 ? NOUN[kinds[0]][1] : 'blocks'].join(' ');
+    title = [...(kinds.length === 1 ? unsaid(common, kinds[0]) : common).map(x => WORD[x] ?? x), kinds.length === 1 ? NOUN[kinds[0]][1] : 'blocks'].join(' ');
   }
   return title[0].toUpperCase() + title.slice(1);
 }

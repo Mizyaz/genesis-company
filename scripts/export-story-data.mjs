@@ -12,6 +12,7 @@ import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import ts from 'typescript';
 import { resolveRecord, schematicOf } from './circuit-schematic.mjs';
+import { guard } from './leak-guard.mjs';
 
 const root = resolve(import.meta.dirname, '..'), args = process.argv.slice(2), flag = name => { const at = args.indexOf(`--${name}`); return at >= 0 ? args.splice(at, 2)[1] : undefined; };
 const genesis = flag('genesis'), ref = flag('ref') ?? 'HEAD', circuit = flag('circuit'), lvsSource = flag('lvs'), [inputs] = args;
@@ -40,8 +41,7 @@ const out = {
   links: { rf: links.rf.map(({ line, blocks, nets }) => ({ line, blocks, nets })), dc: links.dc.map(({ net, blocks }) => ({ net, blocks })), pins: links.pins },
 };
 const text = JSON.stringify(out);
-const leak = /\/DATA|\/home|\/linux|isguven|sha256|spdt|final/i.exec(text);
-if (leak) throw new Error(`exported data holds "${leak[0]}"`);
+guard(text, 'exported data', ['spdt', 'final']);
 mkdirSync(resolve(root, 'src/content/story'), { recursive: true });
 writeFileSync(resolve(root, 'src/content/story/flow.json'), text + '\n');
 mkdirSync(resolve(root, 'public/assets/story'), { recursive: true });
@@ -55,8 +55,8 @@ const validation = { record: { drc, lvs, drc_violations, lvs_status },
   layers: drawnLayers.map(({ name, color }) => ({ name: generic(name), color })),
   files: Object.fromEntries(layerKeys.map(key => [key, `assets/story/${key}.png`])),
   drawings: story.schematics.map(({ title, parts, wires, colouring }, i) => ({ id: `circuit_${i}`, title, parts, wires, colouring })) };
-const vtext = JSON.stringify(validation), vleak = /\/DATA|\/home|\/linux|isguven|sha256|spdt|final/i.exec(vtext);
-if (vleak) throw new Error(`exported validation data holds "${vleak[0]}"`);
+const vtext = JSON.stringify(validation);
+guard(vtext, 'exported validation data', ['spdt', 'final']);
 writeFileSync(resolve(root, 'src/content/story/validation.json'), vtext + '\n');
 drawnLayers.forEach((l, i) => copyFileSync(resolve(inputs, layout.files[`layer_${l.name}`].file), resolve(root, `public/assets/story/${layerKeys[i]}.png`)));
 console.log(`validation.json ${vtext.length} bytes, ${layerKeys.length} layer pictures`);
@@ -72,8 +72,8 @@ const drawn = new Set(parts.map(p => p.kind));
 const PART = /\b(capacitor|inductor|resistor|transistor)s?\b/i;
 const recorded = text => text.replace(/, including [^.]*(?=\.)/g, clause => { const kind = PART.exec(clause)?.[1].toLowerCase(); return kind && !drawn.has(kind === 'transistor' ? 'nmos' : kind) ? '' : clause; });
 const ask = { prompt: unnamed(story.prompt), conversation: story.conversation.map(({ message, choices, answer }) => ({ message: recorded(unnamed(message)), ...(recorded(unnamed(message)) !== unnamed(message) ? { excerpt: true } : {}), choices: choices.map(unnamed), answer: answer ? { ...(answer.card ? { card: answer.card } : {}), ...(answer.text ? { text: answer.text } : {}) } : null })) };
-const askText = JSON.stringify(ask), askLeak = /\/DATA|\/home|\/linux|isguven|sha256|final/i.exec(askText) ?? new RegExp(FOUNDRY.source, 'i').exec(askText);
-if (askLeak) throw new Error(`exported conversation holds "${askLeak[0]}"`);
+const askText = JSON.stringify(ask);
+guard(askText, 'exported conversation', ['final', FOUNDRY.source]);
 writeFileSync(resolve(root, 'src/content/story/ask.json'), askText + '\n');
 console.log(`ask.json ${askText.length} bytes`);
 // The testbench and specification scenes: the testbench list, the PEX curves of each S-parameter panel and, of the
@@ -89,8 +89,7 @@ const analysis = {
     evaluations: [{ iteration: first.iteration, error: first.error, values: [], terms: [], curves: Object.fromEntries(PLOT_CURVES.map(c => [c, first.curves[c].map(round)])) }] },
 };
 const analysisText = JSON.stringify(analysis);
-const analysisLeak = /\/DATA|\/home|\/linux|isguven|sha256|spdt|final/i.exec(analysisText);
-if (analysisLeak) throw new Error(`exported analysis data holds "${analysisLeak[0]}"`);
+guard(analysisText, 'exported analysis data', ['spdt', 'final']);
 writeFileSync(resolve(root, 'src/content/story/analysis.json'), analysisText + '\n');
 console.log(`analysis.json ${analysisText.length} bytes`);
 // The optimization scene: the run's error and switch-FET widths per design, every design's goal values (the Pareto
@@ -99,21 +98,20 @@ console.log(`analysis.json ${analysisText.length} bytes`);
 const optimize = json('optimize.json'), coilFrames = json('coil_frames.json'), coilCandidates = json('coil_candidates.json');
 const precise = (v, digits = 4) => Number(v.toPrecision(digits));
 const optimization = {
-  run: optimize.pixels.evaluations.map(({ error, fet }) => ({ error: precise(error), fet: Object.fromEntries([1, 2, 3, 4].map(m => [`w_M${m}`, precise(fet[`w_M${m}`] * 1e6)])) })),
+  run: optimize.pixels.evaluations.map(({ error, fet }) => ({ error: precise(error, 6), fet: Object.fromEntries([1, 2, 3, 4].map(m => [`w_M${m}`, precise(fet[`w_M${m}`] * 1e6)])) })),
   objective: { goals: objective.goals.map(({ name, state, output, unit, sense, target, band }) => ({ name, state, output, unit, sense, target, band })), axis: [],
-    evaluations: objective.evaluations.map(({ iteration, error, values }) => ({ iteration, error: precise(error), values: values.map(v => precise(v)), terms: [], curves: {} })) },
+    evaluations: objective.evaluations.map(({ iteration, error, values }) => ({ iteration, error: precise(error, 6), values: values.map(v => precise(v)), terms: [], curves: {} })) },
   frames: coilFrames.frames.map(({ family, px, file }, i) => ({ family, px, file: `assets/story/passive_device_${i}.png` })),
   candidates: coilCandidates.candidates.map(({ bbox, layers }, i) => ({ run: `candidate_${i}`, bbox, layers: genericLayers(layers) })),
 };
-const optimizationText = JSON.stringify(optimization), optimizationLeak = /\/DATA|\/home|\/linux|isguven|sha256|spdt|final/i.exec(optimizationText);
-if (optimizationLeak) throw new Error(`exported optimization data holds "${optimizationLeak[0]}"`);
+const optimizationText = JSON.stringify(optimization);
+guard(optimizationText, 'exported optimization data', ['spdt', 'final']);
 writeFileSync(resolve(root, 'src/content/story/optimization.json'), optimizationText + '\n');
 coilFrames.frames.forEach(({ file }, i) => copyFileSync(resolve(inputs, file), resolve(root, `public/assets/story/passive_device_${i}.png`)));
 console.log(`optimization.json ${optimizationText.length} bytes, ${coilFrames.frames.length} passive device pictures`);
 // Every design's three simulated curves (0.1 dB), fetched by the site when a reader steps through the run.
 const curvesText = JSON.stringify({ axis: objective.axis, names: PLOT_CURVES, designs: objective.evaluations.map(e => PLOT_CURVES.map(c => e.curves[c].map(v => Math.round(v * 10) / 10))) });
-const curvesLeak = /\/DATA|\/home|\/linux|isguven|sha256|spdt|final/i.exec(curvesText);
-if (curvesLeak) throw new Error(`exported run curves hold "${curvesLeak[0]}"`);
+guard(curvesText, 'exported run curves', ['spdt', 'final']);
 writeFileSync(resolve(root, 'src/content/story/run-curves.json'), curvesText + '\n');
 console.log(`run-curves.json ${curvesText.length} bytes`);
 console.log(`flow.json ${text.length} bytes, ${pictures.length} pictures`);

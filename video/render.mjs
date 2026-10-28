@@ -1,7 +1,7 @@
 // One command per film:  node render.mjs [--composition GenesisPromo|GenesisPromoFramed|GenesisStory] [--inputs <folder>] [--audio <music.wav>] [--out <file.mp4>] [--concurrency 4] [--theme light]
 // GenesisPromo reads a footage folder (clips/manifest.json, clips/*.mp4); GenesisStory a story folder (story.json, layout.json,
 // layout/*.png from story/collect.mjs and story/layout_layers.mjs). Both need brand/InterVariable.woff2; renders stay outside git.
-// Remotion's own encoder (compositor) needs glibc >= 2.31; nyluma has 2.28. So Chrome renders a JPEG sequence and an
+// Remotion's own encoder (compositor) needs glibc >= 2.31; the build host has 2.28. So Chrome renders a JPEG sequence and an
 // existing FFmpeg (FFMPEG, or imageio-ffmpeg's binary) encodes it. The frame folder is removed after a good encode.
 // --audio is muxed as read (never copied): cut to the film's length with a 2 s fade-out, AAC 192 kb/s.
 import { spawnSync } from 'node:child_process';
