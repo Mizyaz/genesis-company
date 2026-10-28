@@ -16,9 +16,10 @@
 .film-toggle { position: absolute; right: 12px; bottom: 12px; background: color-mix(in srgb, var(--page) 70%, transparent); color: var(--text); backdrop-filter: blur(8px); }
 
 /* The results under the film: one value and one line each, in one row. */
-.claims { list-style: none; margin: clamp(22px, 3vh, 32px) auto 0; padding: 18px 0; max-width: 1100px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; border-block: 1px solid var(--border-soft); text-align: center; }
+.claims { list-style: none; margin: clamp(22px, 3vh, 32px) auto 0; padding: 18px 0; max-width: 1100px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; border-block: 1px solid var(--border-soft); text-align: center; }
 .claims li { display: grid; gap: 4px; align-content: start; }
 .claims strong { font-size: clamp(1.25rem, 2.2vw, 1.75rem); font-weight: 680; letter-spacing: -.03em; font-variant-numeric: tabular-nums; background: var(--gradient); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.claims strong a { color: inherit; text-decoration: none; }
 .claims span { color: var(--muted); font-size: .875rem; line-height: 1.45; }
 
 /* Process cards: text beside its picture; a card rises into place as it comes on screen (only when that can be watched). */
@@ -33,18 +34,6 @@
 .pc-visual > svg, .pc-visual > figure { width: 100%; height: 100%; }
 .pc-visual-layout { aspect-ratio: 790 / 530; }
 .pc-visual-spec, .pc-visual-schematic, .pc-visual-simulation, .pc-visual-verification, .pc-visual-delivery { aspect-ratio: auto; }
-.pc-goals { display: flex; flex-wrap: wrap; gap: 10px; align-content: center; justify-content: center; }
-.pc-goals span { padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: .875rem; color: var(--muted); background: var(--page); }
-.pc-goals b { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; margin-left: 4px; }
-.pc-goals em { flex-basis: 100%; text-align: center; font-style: normal; font-size: .8125rem; color: var(--subtle); }
-.pc-verdict { display: flex; gap: 18px; }
-.pc-verdict p { display: grid; justify-items: center; gap: 2px; min-width: 130px; padding: 18px 22px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--page); }
-.pc-verdict small { font-size: .75rem; letter-spacing: .14em; color: var(--muted); }
-.pc-verdict b { font-size: 2.6rem; line-height: 1.1; font-weight: 700; color: var(--accent); }
-.pc-verdict span { font-size: .875rem; color: var(--muted); }
-.pc-library { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; width: min(100%, 360px); }
-.pc-library li { padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--page); font-size: .9rem; }
-.pc-library li::before { content: ''; display: inline-block; width: 7px; height: 7px; margin-right: 10px; border-radius: 2px; background: var(--gradient); vertical-align: middle; }
 
 /* The pictures, drawn from the records. */
 .pv-plot { display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: 6px; }
@@ -65,8 +54,8 @@
 .pv-schematic { --sx-active: var(--brand-1); --sx-passive: var(--brand-3); --sx-dc: var(--dc); --sx-text: var(--text); width: 100%; display: grid; gap: 14px; }
 .pv-schematic svg { display: block; width: 100%; height: auto; overflow: visible; }
 .pv-schematic text { font-size: 11px; font-family: var(--font-sans); }
-.pv-schematic figcaption, .pv-curves figcaption { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px; font-size: .8125rem; color: var(--muted); }
-.pv-schematic figcaption span, .pv-curves figcaption span { display: inline-flex; align-items: center; gap: 6px; }
+.pv-schematic figcaption { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px; font-size: .8125rem; color: var(--muted); }
+.pv-schematic figcaption span { display: inline-flex; align-items: center; gap: 6px; }
 .pv-swatch { display: inline-block; width: 14px; height: 3px; border-radius: 2px; background: var(--brand-1); }
 .pv-swatch-passive { background: var(--brand-3); } .pv-swatch-dc { background: var(--dc); } .pv-swatch-text { background: var(--text); }
 .pv-swatch-port { width: 10px; height: 10px; border-radius: 50%; background: none; border: 2px solid var(--brand-1); }
@@ -79,34 +68,119 @@
 .pc-cards[data-reveal="on"] .is-in .pv-schematic .sx-port { animation-delay: .75s; }
 @keyframes role-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
-/* The simulation screen: each figure of merit against its goal, then the curves over the band. */
-.pv-sim { width: 100%; display: grid; gap: 22px; font-variant-numeric: tabular-nums; }
-.pv-foms { display: grid; gap: 12px; }
-.pv-fom { display: grid; grid-template-columns: 9.5rem minmax(0, 1fr) 5.5rem; align-items: center; column-gap: 14px; row-gap: 2px; }
-.pv-fom-name { font-size: .875rem; font-weight: 600; }
-.pv-fom-name small, .pv-curves figcaption span { font-weight: 400; color: var(--muted); }
-.pv-fom svg { width: 100%; height: 10px; overflow: visible; }
-.pv-fom-track { fill: var(--surface-raised); }
-.pv-fom-bar { fill: var(--brand-1); transform-box: fill-box; transform-origin: 0 50%; }
-.pv-fom-goal { stroke: var(--limit); stroke-width: 2; vector-effect: non-scaling-stroke; }
-.pv-fom-value { justify-self: end; font-weight: 650; color: var(--text); text-decoration: none; }
-.pv-fom-note { grid-column: 2 / 4; font-size: .75rem; color: var(--muted); }
-.pv-fom a { color: inherit; text-decoration: underline dotted color-mix(in srgb, currentColor 45%, transparent); text-underline-offset: 3px; }
-.pv-fom a:hover { color: var(--accent); }
-.pv-curves { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
-.pv-curves figure { margin: 0; display: grid; gap: 6px; }
-.pv-curves figcaption { justify-content: flex-start; color: var(--text); font-weight: 600; font-size: .8125rem; }
-.pv-curves svg { width: 100%; height: 84px; overflow: visible; }
-.pv-curves p { display: flex; justify-content: space-between; gap: 6px; font-size: .6875rem; color: var(--muted); }
-.pv-goal { stroke: var(--limit); stroke-width: 1.5; stroke-dasharray: 4 3; vector-effect: non-scaling-stroke; }
-.pv-curve { fill: none; stroke: var(--brand-1); stroke-width: 2; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
-.pv-curve-1 { stroke: var(--brand-3); } .pv-swatch.pv-curve-1 { background: var(--brand-3); }
-.pc-cards[data-reveal="on"] .pv-fom-bar { transform: scaleX(0); }
-.pc-cards[data-reveal="on"] .is-in .pv-fom-bar { animation: bar-in .9s cubic-bezier(.2, .7, .2, 1) .2s both; }
+/* The specification: the sheet the co-design run takes in, then the designs it scores. */
+.pv-spec { width: 100%; margin: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 18px; }
+.pv-sheet { padding: 16px 18px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--page); box-shadow: 0 10px 30px var(--glow); font-variant-numeric: tabular-nums; }
+.pv-sheet-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; padding-bottom: 10px; margin-bottom: 6px; border-bottom: 1px solid var(--border-soft); }
+.pv-sheet-head b { font-family: var(--font-mono); font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); }
+.pv-sheet-head span { font-size: .875rem; font-weight: 600; }
+.pv-sheet table, .pv-report table { width: 100%; border-collapse: collapse; font-size: .8125rem; }
+.pv-sheet th, .pv-sheet td, .pv-report th, .pv-report td { padding: 5px 4px; text-align: right; border-bottom: 1px solid var(--border-soft); white-space: nowrap; }
+.pv-sheet th[scope="row"], .pv-report th[scope="row"], .pv-sheet thead th:first-child, .pv-report thead th:first-child { text-align: left; font-weight: 500; white-space: normal; }
+.pv-sheet thead th, .pv-report thead th { font-size: .6875rem; font-weight: 500; color: var(--subtle); letter-spacing: .04em; }
+.pv-sheet td { font-weight: 600; }
+.pv-sheet-tests { margin-top: 10px; font-size: .75rem; line-height: 1.5; color: var(--muted); }
+.pv-intake { display: grid; justify-items: center; gap: 8px; text-align: center; max-width: 9rem; }
+.pv-intake svg { width: 60px; height: 24px; overflow: visible; }
+.pv-intake-arrow { fill: none; stroke: var(--brand-1); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 6 5; }
+.pv-intake b { display: block; font-size: 2rem; line-height: 1; font-weight: 700; letter-spacing: -.03em; background: var(--gradient); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.pv-intake span { font-size: .8125rem; color: var(--muted); }
+.pc-cards[data-reveal="on"] .pv-sheet tr, .pc-cards[data-reveal="on"] .pv-intake { opacity: 0; }
+.pc-cards[data-reveal="on"] .is-in .pv-sheet tr { animation: role-in .4s ease both; }
+.pc-cards[data-reveal="on"] .is-in .pv-sheet tbody tr:nth-child(1) { animation-delay: .1s; }
+.pc-cards[data-reveal="on"] .is-in .pv-sheet tbody tr:nth-child(2) { animation-delay: .2s; }
+.pc-cards[data-reveal="on"] .is-in .pv-sheet tbody tr:nth-child(3) { animation-delay: .3s; }
+.pc-cards[data-reveal="on"] .is-in .pv-sheet tbody tr:nth-child(4) { animation-delay: .4s; }
+.pc-cards[data-reveal="on"] .is-in .pv-sheet tbody tr:nth-child(5) { animation-delay: .5s; }
+.pc-cards[data-reveal="on"] .is-in .pv-intake { animation: role-in .5s ease .7s both; }
+.pc-cards[data-reveal="on"] .is-in .pv-intake-arrow { animation: intake-flow 1s linear 1.2s infinite; }
+@keyframes intake-flow { to { stroke-dashoffset: -11; } }
+
+/* The simulation screen: one plot per figure of merit, its goal region shaded, the band mean and the value at the top
+   of the band on the plot, a readout under the pointer. */
+.pv-sim { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; font-variant-numeric: tabular-nums; }
+.pv-chart { margin: 0; min-width: 0; display: grid; gap: 6px; }
+.pv-chart > figcaption { font-size: .8125rem; font-weight: 650; }
+.pv-chart-box { position: relative; min-width: 0; border: 1px solid var(--border-soft); border-radius: 8px; background: var(--page); overflow: hidden; }
+.pv-chart-box svg { display: block; touch-action: pan-y; }
+.pv-grid line { stroke: var(--border-soft); stroke-width: 1; }
+.pv-ticks text { font-size: 10.5px; fill: var(--subtle); }
+.pv-ticks .pv-axis-title { fill: var(--muted); font-size: 10.5px; }
+.pv-axis { fill: none; stroke: var(--border); stroke-width: 1; }
+.pv-pass { fill: var(--brand-1); opacity: .08; }
+.pv-pass-1 { fill: var(--brand-3); }
+.pv-goal { stroke: var(--limit); stroke-width: 1.5; stroke-dasharray: 5 4; }
+.pv-goal-1 { stroke-dasharray: 2 3; }
+.pv-goal-text { font-size: 10.5px; fill: var(--limit); font-weight: 600; paint-order: stroke; stroke: var(--page); stroke-width: 3px; }
+.pv-mean { stroke: var(--brand-1); stroke-width: 1; stroke-dasharray: 1 3; opacity: .9; }
+.pv-mean.pv-curve-1 { stroke: var(--brand-3); }
+.pv-curve { fill: none; stroke: var(--brand-1); stroke-width: 2.2; stroke-linejoin: round; }
+.pv-curve.pv-curve-1 { stroke: var(--brand-3); }
+.pv-marker circle { fill: var(--page); stroke: var(--brand-1); stroke-width: 2; }
+.pv-marker.pv-curve-1 circle { stroke: var(--brand-3); }
+.pv-marker text { font-size: 11px; font-weight: 650; fill: var(--text); paint-order: stroke; stroke: var(--page); stroke-width: 3px; }
+.pv-cursor line { stroke: var(--muted); stroke-width: 1; }
+.pv-cursor circle { fill: var(--brand-1); stroke: var(--page); stroke-width: 1.5; }
+.pv-cursor circle.pv-curve-1 { fill: var(--brand-3); }
+.pv-swatch.pv-curve-1 { background: var(--brand-3); }
+.pv-legend { position: absolute; margin: 0; display: grid; gap: 3px; padding: 6px 9px; border: 1px solid var(--border-soft); border-radius: 6px; background: color-mix(in srgb, var(--surface) 88%, transparent); font-size: .6875rem; line-height: 1.35; pointer-events: auto; }
+.pv-legend-top { top: 8px; }
+.pv-legend-bottom { bottom: 46px; }
+.pv-legend > div { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 10px; }
+.pv-legend dt { display: inline-flex; align-items: center; gap: 6px; font-weight: 650; color: var(--text); }
+.pv-legend dd { margin: 0; color: var(--muted); }
+.pv-legend a, .pv-sim-source a { color: var(--text); text-decoration: underline dotted color-mix(in srgb, currentColor 45%, transparent); text-underline-offset: 2px; }
+.pv-legend a:hover, .pv-sim-source a:hover { color: var(--accent); }
+.pv-readout { position: absolute; top: 8px; display: grid; gap: 1px; padding: 5px 8px; border-radius: 6px; background: var(--text); color: var(--page); font-size: .6875rem; pointer-events: none; white-space: nowrap; }
+.pv-sim-source a { white-space: nowrap; }
+.pv-sim-source { font-size: .75rem; color: var(--muted); }
 .pc-cards[data-reveal="on"] .pv-curve { stroke-dasharray: 1; stroke-dashoffset: 1; }
-.pc-cards[data-reveal="on"] .is-in .pv-curve { animation: curve-in 1.2s ease .4s both; }
-@keyframes bar-in { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.pc-cards[data-reveal="on"] .is-in .pv-curve { animation: curve-in 1.2s ease .3s both; }
+.pc-cards[data-reveal="on"] .pv-marker, .pc-cards[data-reveal="on"] .pv-legend { opacity: 0; }
+.pc-cards[data-reveal="on"] .is-in .pv-marker, .pc-cards[data-reveal="on"] .is-in .pv-legend { animation: role-in .4s ease 1.3s both; }
 @keyframes curve-in { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+
+/* Verification: a check sweeps the layout, the report summary beside it. */
+.pv-verify { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: center; }
+.pv-verify-layout { position: relative; overflow: hidden; border-radius: 6px; aspect-ratio: 790 / 530; }
+.pv-verify-layout svg { display: block; width: 100%; height: 100%; }
+.pv-scan { position: absolute; inset: 0 auto 0 0; width: 18%; background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--brand-1) 30%, transparent), transparent); transform: translateX(-110%); pointer-events: none; }
+.pc-cards[data-reveal="on"] .is-in .pv-scan { animation: scan 1.6s ease-in-out .3s 2 both; }
+@keyframes scan { from { transform: translateX(-110%); } to { transform: translateX(570%); } }
+.pv-report { display: grid; gap: 14px; padding: 14px 16px; border: 1px solid var(--border); border-radius: 10px; background: var(--page); font-variant-numeric: tabular-nums; }
+.pv-report-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 6px; font-size: .8125rem; font-weight: 650; }
+.pv-report-head b { font-size: .75rem; padding: 2px 8px; border-radius: 999px; }
+.is-good { color: var(--accent); } .is-bad { color: var(--limit); }
+.pv-report-head b.is-good { background: color-mix(in srgb, var(--brand-1) 14%, transparent); }
+.pv-report dl { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 3px 10px; margin: 0; font-size: .8125rem; }
+.pv-report dt { color: var(--muted); } .pv-report dd { margin: 0; font-weight: 600; text-align: right; }
+.pv-report ul { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 3px; font-size: .75rem; }
+.pv-report li { display: flex; justify-content: space-between; gap: 8px; color: var(--text); }
+.pv-report li span::before { content: '✓ '; }
+.pv-report li.is-bad span::before { content: '✗ '; }
+.pv-report li span { color: var(--accent); }
+
+/* Delivery: the design library as a library browser, a view of the top cell shown on request. */
+.pv-library { width: 100%; display: grid; grid-template-columns: minmax(0, 12rem) minmax(0, 1fr); border: 1px solid var(--border); border-radius: 10px; background: var(--page); overflow: hidden; }
+.pv-lib-tree { padding: 12px 10px; border-right: 1px solid var(--border-soft); background: var(--surface-raised); font-size: .8125rem; }
+.pv-lib-tree ul { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 2px; }
+.pv-lib-label { margin: 0 0 6px; font-family: var(--font-mono); font-size: .6875rem; letter-spacing: .08em; text-transform: uppercase; color: var(--subtle); }
+.pv-lib-cell > span { display: block; padding: 3px 6px; font-weight: 550; }
+.pv-lib-cell > span::before { content: '▸ '; color: var(--subtle); }
+.pv-lib-cell.is-open > span::before { content: '▾ '; }
+.pv-lib-views { margin: 2px 0 4px 14px !important; }
+.pv-lib-views button { width: 100%; min-height: 30px; padding: 3px 8px; border: 0; border-radius: 6px; background: none; color: var(--muted); font: inherit; text-align: left; cursor: pointer; }
+.pv-lib-views button:hover { color: var(--text); }
+.pv-lib-views button[aria-pressed="true"] { background: color-mix(in srgb, var(--brand-1) 18%, transparent); color: var(--text); font-weight: 600; }
+.pv-lib-reports li { display: flex; justify-content: space-between; gap: 6px; padding: 2px 6px; color: var(--muted); }
+.pv-lib-reports span { color: var(--subtle); }
+.pv-lib-reports a { color: var(--text); text-decoration: underline dotted; text-underline-offset: 2px; }
+.pv-lib-view { margin: 0; padding: 14px; display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: 8px; min-width: 0; min-height: 250px; }
+.pv-lib-view > svg, .pv-svg { width: 100%; height: 100%; max-height: 300px; display: grid; place-items: center; }
+.pv-svg { --sx-active: var(--brand-1); --sx-passive: var(--brand-3); --sx-dc: var(--dc); --sx-text: var(--text); }
+.pv-svg svg { width: 100%; height: auto; max-height: 280px; }
+.pv-symbol svg { max-width: 300px; }
+.pv-lib-view figcaption { font-family: var(--font-mono); font-size: .75rem; color: var(--subtle); }
 
 /* Membership: the demo, then Premium. */
 .tiers { margin-top: 36px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
@@ -150,15 +224,15 @@
 }
 @media (max-width: 700px) {
   .claims { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 18px; }
-  .pv-fom { grid-template-columns: minmax(0, 1fr) auto; }
-  .pv-fom svg { grid-column: 1 / -1; grid-row: 2; }
-  .pv-fom-note { grid-column: 1 / -1; }
-  .pv-curves { grid-template-columns: minmax(0, 1fr); }
-  .pv-curves svg { height: 72px; }
+  .claims li:last-child { grid-column: 1 / -1; }
+  .pv-sim, .pv-verify, .pv-spec, .pv-library { grid-template-columns: minmax(0, 1fr); }
+  .pv-legend { position: static; margin: 8px 8px 0; border: 0; background: none; padding: 0; }
+  .pv-intake { max-width: none; grid-auto-flow: column; align-items: center; }
+  .pv-intake svg { transform: rotate(90deg); }
+  .pv-lib-tree { border-right: 0; border-bottom: 1px solid var(--border-soft); }
   .home { padding: 0 16px 32px; }
   .film-take { min-width: 0; width: 100%; }
   .pc-card { padding: 20px; }
-  .pc-verdict p { min-width: 0; flex: 1; padding: 14px; }
   .tier { padding: 22px; }
   .tier .button { align-self: stretch; }
   .team a { min-height: 44px; }

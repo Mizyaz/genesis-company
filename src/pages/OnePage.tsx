@@ -20,7 +20,7 @@ export function Home({ theme }: { theme: 'dark' | 'light' }) {
       <p>{home.intro}</p>
     </section>
     <FilmTake theme={theme} label={home.film} />
-    <ul className="claims" aria-label="Results">{CLAIMS.map(claim => <li key={claim.line}><strong>{claim.value}</strong><span>{claim.line}</span></li>)}</ul>
+    <ul className="claims" aria-label="Results">{CLAIMS.map(claim => <li key={claim.line}><strong>{claim.href ? <a href={claim.href}>{claim.value}</a> : claim.value}</strong><span>{claim.line}</span></li>)}</ul>
     <section id="how" className="home-section" aria-labelledby="how-title">
       <h2 id="how-title">{home.process.headline}</h2><p className="home-sub">{home.process.intro}</p>
       <ProcessCards />

@@ -40,7 +40,8 @@ test('the process cards are visible by default; only a page that can watch them 
   assert.ok(hiding.includes('.pc-cards[data-reveal="on"] .pc-card:not(.is-in)'));
   for (const rule of hiding) assert.match(rule, /^(?:\.film-take|@keyframes |\.pc-cards\[data-reveal="on"\] )/, rule);
   // Every number on the cards comes from its record.
-  assert.match(cards, /codesign\.designs/); assert.match(cards, /verify\.drc_rule_checks/); assert.match(cards, /seconds/);
+  assert.match(cards, /codesign\.designs/); assert.match(cards, /drc\.rule_checks/); assert.match(cards, /verification_seconds/);
+  assert.match(cards, /public\/assets\/records\/layout-timing\.json/);
   assert.match(read('src/shared/ProcessVisuals.tsx'), /motion\.json\?geometry/);
 });
 
@@ -203,6 +204,13 @@ test('the film and the site draw from one design and one set of scenes', () => {
   for (const role of ['active', 'passive', 'dc', 'text']) assert.match(schematic, new RegExp(`var\\(--sx-${role}\\)`), role);
   // The simulation card reads the same S-parameters as the public record its numbers link to.
   assert.equal(read('src/content/story/simulation.json'), read('public/assets/records/spdt-s-parameters.json'));
+  // The layout drawing, the timing and the DRC and LVS reports come from one chain: their results agree.
+  const motion = JSON.parse(read('src/content/story/motion.json')), timing = JSON.parse(read('public/assets/records/layout-timing.json'));
+  const verification = JSON.parse(read('src/content/story/verification.json'));
+  assert.equal(timing.verdict, 'PASS');
+  assert.deepEqual([motion.verify.drc_rule_checks, motion.verify.drc_violations, motion.verify.lvs], [timing.drc.rule_checks, timing.drc.violations, timing.lvs]);
+  assert.deepEqual([verification.drc.rule_checks, verification.drc.results, verification.lvs.result], [timing.drc.rule_checks, timing.drc.violations, 'CORRECT']);
+  assert.deepEqual(Object.keys(motion.seconds), timing.stages.map(s => s.stage));
 });
 
 
