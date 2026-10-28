@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, type ReactNode } from 'react';
+import { lazy, Suspense, useLayoutEffect, useRef, type ReactNode } from 'react';
 import codesign from '../content/story/codesign.json';
 // Named imports: the build keeps these two fields of the chain's record, not its geometry (ProcessVisuals loads that).
 import { seconds, verify } from '../content/story/motion.json';
@@ -27,10 +27,10 @@ export const CARDS: Card[] = [
 
 /** The cards rise into place one by one as they come on screen. They are visible by default: only a page that can watch
  * them (IntersectionObserver) and plays motion hides them first, so nothing stays hidden without it. A card the reader
- * has scrolled past (a jump to a later section) counts as seen. */
+ * has scrolled past (a jump to a later section) counts as seen. Set before the first paint, so no card shows and then hides. */
 export function ProcessCards() {
   const list = useRef<HTMLOListElement>(null), { enabled } = useMotion();
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = list.current;
     if (!el || !enabled || !('IntersectionObserver' in window)) return;
     const view = new IntersectionObserver(entries => entries.forEach(entry => {
