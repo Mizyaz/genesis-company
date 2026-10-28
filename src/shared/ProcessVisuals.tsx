@@ -1,19 +1,82 @@
 import type { ReactNode } from 'react';
-import analysis from '../content/story/analysis.json';
 import optimization from '../content/story/optimization.json';
+import codesign from '../content/story/codesign.json';
+import simulation from '../content/story/simulation.json';
 // Its own module id, so the geometry stays in this chunk while the cards read the two small fields of the same file.
 import motion from '../content/story/motion.json?geometry';
-import { Schematic, type Drawing } from './story/Schematic';
+// Drawn by the GENESIS design library (glyphs.py, the one symbol language), its colors as the theme's CSS variables.
+import schematic from '../content/story/schematic.svg?raw';
+import { assetUrl } from './ui';
 
-/** The process cards' pictures, each drawn from its record (loaded after the page, in their own chunk):
- * the schematic and layout of one physical-flow chain (motion.json), the extracted S21 (analysis.json) and the
- * optimizer's designs (optimization.json). */
-const INK = { wire: 'var(--flow-cyan)', text: 'var(--text)', muted: 'var(--muted)', page: 'var(--surface)' };
+/** The process cards' pictures, each drawn from its record (loaded after the page, in their own chunk): the schematic
+ * of the switch in the design library's symbols, the simulated S-parameters of its traditional version (simulation.json),
+ * the optimizer's designs (optimization.json) and the layout of one physical-flow chain (motion.json). */
 const W = 400, H = 160;
 
+const ROLES = [['active', 'Transistor'], ['passive', 'Inductor'], ['text', 'Interconnect line'], ['dc', 'Bias resistor'], ['active', 'Port']] as const;
 function Schematic2D() {
-  return <svg viewBox="0 0 420 220" role="img" aria-label="The switch's schematic">
-    <Schematic drawing={motion.schematic as Drawing} width={420} height={220} t={1} labels={false} ink={INK} /></svg>;
+  return <figure className="pv-schematic">
+    <div className="pv-schematic-drawing" dangerouslySetInnerHTML={{ __html: schematic }} />
+    <figcaption>{ROLES.map(([role, name]) => <span key={name}><i className={`pv-swatch pv-swatch-${role}${name === 'Port' ? ' pv-swatch-port' : ''}`} />{name}</span>)}</figcaption>
+  </figure>;
+}
+
+/** The simulation screen: each figure of merit's band mean against its goal, then the curves over the band with the
+ * goal line. Every number links to the record it comes from. */
+type Curve = 'S21' | 'S31' | 'S11' | 'S22';
+const RECORD = assetUrl('/assets/records/spdt-s-parameters.json');
+const BAND = '1–110 GHz', TOP = '110 GHz';
+/** A goal of the co-design run's record: its limit in dB and its target as written there (for example "≥ −2 dB"). */
+const goal = (name: string, band: string) => {
+  const row = codesign.goals.find(g => g.goal === name && g.band === band);
+  if (!row) throw new Error(`no goal ${name} over ${band}`);
+  return { limit: Number(row.target.replace(/[^\d.-]/g, '')), text: row.target.replace('-', '−') };
+};
+const FOMS: { name: string; curve: Curve }[] = [{ name: 'Transmission', curve: 'S21' }, { name: 'Isolation', curve: 'S31' }, { name: 'Input match', curve: 'S11' }, { name: 'Output match', curve: 'S22' }];
+const curve = (k: Curve) => simulation[k];
+const mean = (y: number[]) => y.reduce((a, b) => a + b, 0) / y.length;
+const dB = (v: number) => `${v.toFixed(2).replace('-', '−')} dB`;
+
+function Figures() {
+  return <div className="pv-foms">{FOMS.map(({ name, curve: k }) => {
+    const y = curve(k), m = mean(y), at = y[y.length - 1], { limit: target, text } = goal(name, BAND);
+    const range = Math.ceil(Math.max(Math.abs(target), Math.abs(m)) * 1.3);
+    return <div key={name} className="pv-fom">
+      <span className="pv-fom-name">{name} <small>{k}</small></span>
+      <svg viewBox="0 0 100 10" preserveAspectRatio="none" aria-hidden="true">
+        <rect className="pv-fom-track" width={100} height={10} rx={2} />
+        <rect className="pv-fom-bar" width={Math.abs(m) / range * 100} height={10} rx={2} />
+        <line className="pv-fom-goal" x1={Math.abs(target) / range * 100} x2={Math.abs(target) / range * 100} y1={-2} y2={12} />
+      </svg>
+      <a className="pv-fom-value" href={RECORD}>{dB(m)}</a>
+      <small className="pv-fom-note">band mean; <a href={RECORD}>{dB(at)}</a> at {TOP}; goal {text}</small>
+    </div>;
+  })}</div>;
+}
+
+const PLOTS: { title: string; curves: Curve[]; floor: number; goal: string }[] = [
+  { title: 'Transmission', curves: ['S21'], floor: -4, goal: 'Transmission' },
+  { title: 'Match', curves: ['S11', 'S22'], floor: -40, goal: 'Output match' },
+  { title: 'Isolation', curves: ['S31'], floor: -70, goal: 'Isolation' },
+];
+function Curves() {
+  const f = simulation.ghz, x = (i: number) => (i / (f.length - 1) * 200).toFixed(1), y = (v: number, floor: number) => (Math.min(1, v / floor) * 100).toFixed(1);
+  return <div className="pv-curves">{PLOTS.map(plot => {
+    const target = goal(plot.goal, BAND).limit;
+    return <figure key={plot.title}>
+      <figcaption>{plot.title}{plot.curves.map((k, i) => <span key={k}><i className={`pv-swatch pv-curve-${i}`} />{k}</span>)}</figcaption>
+      <svg viewBox="0 0 200 100" preserveAspectRatio="none" role="img" aria-label={`${plot.curves.join(' and ')} from ${f[0]} to ${f[f.length - 1]} GHz, 0 to ${plot.floor} dB`}>
+        <path className="pv-axis" d="M0.5 0V99.5H200" />
+        <line className="pv-goal" x1={0} x2={200} y1={y(target, plot.floor)} y2={y(target, plot.floor)} />
+        {plot.curves.map((k, i) => <path key={k} className={`pv-curve pv-curve-${i}`} pathLength={1} d={curve(k).map((v, j) => `${j ? 'L' : 'M'}${x(j)} ${y(v, plot.floor)}`).join('')} />)}
+      </svg>
+      <p><span>{f[0]} GHz</span><span>0 to {plot.floor.toString().replace('-', '−')} dB</span><span>{f[f.length - 1]} GHz</span></p>
+    </figure>;
+  })}</div>;
+}
+
+function Simulated() {
+  return <div className="pv-sim"><Figures /><Curves /></div>;
 }
 
 /** One series on a fixed frame: the left and bottom axes, the curve inside. */
@@ -23,13 +86,6 @@ function Plot({ label, children, ends }: { label: string; children: ReactNode; e
     <figcaption><span>{ends[0]}</span><span>{ends[2]}</span><span>{ends[1]}</span></figcaption></figure>;
 }
 
-function Extracted() {
-  const pex = analysis.sparams.panels[0].series.find(s => s.label === 'PEX')!, x0 = pex.x[0], x1 = pex.x[pex.x.length - 1];
-  const lo = Math.min(...pex.y), hi = Math.max(...pex.y), pad = (hi - lo) * .15;
-  const d = pex.x.map((x, i) => `${i ? 'L' : 'M'}${((x - x0) / (x1 - x0) * (W - 8) + 4).toFixed(1)} ${(8 + (hi + pad - pex.y[i]) / (hi - lo + 2 * pad) * (H - 16)).toFixed(1)}`).join('');
-  const label = `S21 with parasitics, ${hi.toFixed(2)} to ${lo.toFixed(2)} dB`;
-  return <Plot label={`${label}, ${x0} to ${x1} GHz`} ends={[`${x0} GHz`, `${x1} GHz`, label]}><path className="pv-line" d={d} /></Plot>;
-}
 
 function Designs() {
   const errors = optimization.run.map(r => r.error), lg = Math.log10, lo = lg(Math.min(...errors)), hi = lg(Math.max(...errors));
@@ -60,5 +116,5 @@ function Layout() {
   </svg>;
 }
 
-export const VISUALS: Record<string, () => ReactNode> = { schematic: Schematic2D, simulation: Extracted, optimization: Designs, layout: Layout };
+export const VISUALS: Record<string, () => ReactNode> = { schematic: Schematic2D, simulation: Simulated, optimization: Designs, layout: Layout };
 export default function ProcessVisual({ id }: { id: string }) { const Visual = VISUALS[id]; return <Visual />; }

@@ -35,8 +35,10 @@ test('the process cards are visible by default; only a page that can watch them 
   const cards = read('src/shared/ProcessCards.tsx'), css = read('src/styles/one-page.css');
   assert.match(cards, /if \(!el \|\| !enabled \|\| !\('IntersectionObserver' in window\)\) return;/);
   assert.match(cards, /el\.dataset\.reveal = 'on'/);
-  // The one rule that hides a card waits for data-reveal; nothing else lowers a card's opacity.
-  assert.deepEqual(css.match(/[^\n{}]*\{[^}]*opacity: 0[^}]*\}/g).map(rule => rule.split('{')[0].trim()), ['.film-take', '.pc-cards[data-reveal="on"] .pc-card:not(.is-in)']);
+  // Every rule that hides a card or part of one waits for data-reveal (the film fades in on its own; keyframes start hidden).
+  const hiding = css.match(/[^\n{}]*\{[^}]*opacity: 0[^}]*\}/g).map(rule => rule.split('{')[0].trim());
+  assert.ok(hiding.includes('.pc-cards[data-reveal="on"] .pc-card:not(.is-in)'));
+  for (const rule of hiding) assert.match(rule, /^(?:\.film-take|@keyframes |\.pc-cards\[data-reveal="on"\] )/, rule);
   // Every number on the cards comes from its record.
   assert.match(cards, /codesign\.designs/); assert.match(cards, /verify\.drc_rule_checks/); assert.match(cards, /seconds/);
   assert.match(read('src/shared/ProcessVisuals.tsx'), /motion\.json\?geometry/);
@@ -65,7 +67,7 @@ test('the copy keeps the wording of record and names no vendor, foundry, tool or
   for (const path of copy) assert.doesNotMatch(read(path), BANNED, path);
   const site = JSON.parse(read('src/content/site.json'));
   assert.equal(`${site.home.headline} ${site.home.accent}`, 'Automated layout for RF and mmWave front-ends.');
-  assert.match(site.home.intro, /^Zero DRC, LVS correct\./);
+  assert.match(site.home.intro, /^Zero DRC \(design rule check\) violations, LVS \(layout versus schematic\) correct\./);
   // No cell or run name (lower_case_words_joined) in the copy.
   assert.doesNotMatch(JSON.stringify(site), /\b[a-z0-9]+(?:_[a-z0-9]+){2,}\b/);
 });
@@ -194,8 +196,13 @@ test('the film and the site draw from one design and one set of scenes', () => {
   assert.equal(design.motion.transition, 12);
   // Scene code lives once, in src/shared/story; the film keeps no copy.
   for (const moved of ['Schematic.tsx', 'BlockView.tsx']) assert.ok(!existsSync(resolve(root, 'video/src/story', moved)), moved);
-  // The page draws the film's schematic with the film's own component.
-  assert.match(read('src/shared/ProcessVisuals.tsx'), /from '\.\/story\/Schematic'/);
+  // The schematic card is the design library's drawing (glyphs.py, the one symbol language), colored by the theme.
+  assert.match(read('src/shared/ProcessVisuals.tsx'), /from '\.\.\/content\/story\/schematic\.svg\?raw'/);
+  const schematic = read('src/content/story/schematic.svg');
+  assert.doesNotMatch(schematic, /#[0-9a-f]{3,8}\b/i, 'no fixed color in the schematic');
+  for (const role of ['active', 'passive', 'dc', 'text']) assert.match(schematic, new RegExp(`var\\(--sx-${role}\\)`), role);
+  // The simulation card reads the same S-parameters as the public record its numbers link to.
+  assert.equal(read('src/content/story/simulation.json'), read('public/assets/records/spdt-s-parameters.json'));
 });
 
 

@@ -4,14 +4,14 @@ import papers from '../content/publications.json';
 import { publicationUrl, type Publication } from '../shared/citations';
 import { assetUrl, Icon } from '../shared/ui';
 import { FilmTake } from '../shared/FilmTake';
-import { ProcessCards } from '../shared/ProcessCards';
+import { CLAIMS, ProcessCards } from '../shared/ProcessCards';
 
 const { home, about, brand } = site;
 export const mailto = (subject: string) => `mailto:${brand.email}?subject=${encodeURIComponent(subject)}`;
 const newest = (papers as Publication[]).slice().sort((a, b) => b.year - a.year || a.title.localeCompare(b.title));
 const FEW = 3;
 
-/** The one page: the film first, then the process it shows as cards, what membership brings, our research, team and contact. */
+/** The one page: the film first, the results it shows in one strip, then the process it shows as cards, what membership brings, our research, team and contact. */
 export function Home({ theme }: { theme: 'dark' | 'light' }) {
   const [everything, setEverything] = useState(false);
   return <main id="main" className="home">
@@ -20,6 +20,7 @@ export function Home({ theme }: { theme: 'dark' | 'light' }) {
       <p>{home.intro}</p>
     </section>
     <FilmTake theme={theme} label={home.film} />
+    <ul className="claims" aria-label="Results">{CLAIMS.map(claim => <li key={claim.line}><strong>{claim.value}</strong><span>{claim.line}</span></li>)}</ul>
     <section id="how" className="home-section" aria-labelledby="how-title">
       <h2 id="how-title">{home.process.headline}</h2><p className="home-sub">{home.process.intro}</p>
       <ProcessCards />
@@ -49,7 +50,7 @@ export function Home({ theme }: { theme: 'dark' | 'light' }) {
     <section id="contact" className="home-section contact" aria-labelledby="contact-title">
       <h2 id="contact-title">{home.contact.headline} <span className="accent">{home.contact.accent}</span></h2>
       <a className="contact-mail" href={mailto('GENESIS')}>{brand.email}</a>
-      <a className="button button-primary" href={mailto('GENESIS spec')}>{home.contact.action}</a>
+      <a className="button button-primary" href={mailto('GENESIS specification')}>{home.contact.action}</a>
     </section>
   </main>;
 }

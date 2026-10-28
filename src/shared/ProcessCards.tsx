@@ -10,15 +10,23 @@ const goals = codesign.goals.filter(g => !g.band || g.band === band);
 const minutes = Math.round(Object.values(seconds as Record<string, number>).reduce((a, b) => a + b, 0) / 60);
 const lvs = verify.lvs === 'LVS_CORRECT';
 
+/** The strip under the film: one value and one line each, every value computed from the records the cards show. */
+export const CLAIMS = [
+  { value: `${minutes} minutes`, line: 'From schematic to layout' },
+  { value: `${verify.drc_violations} DRC violations`, line: `LVS ${lvs ? 'correct' : 'not correct'}, ${verify.drc_rule_checks.toLocaleString('en-US')} rule checks` },
+  { value: `${codesign.designs} designs`, line: 'In one co-design run' },
+  { value: band.replace(' GHz', '\u202fGHz'), line: 'Every goal scored over the band' },
+];
+
 type Card = { id: string; step: string; title: string; line: string; visual: ReactNode };
 /** The process, one card per step, each with a number or a picture from its record. */
 export const CARDS: Card[] = [
-  { id: 'spec', step: 'Spec', title: 'Describe the front-end you need.', line: 'Bands, targets and priorities become the goals every design is scored on.',
-    visual: <div className="pc-goals">{goals.map(g => <span key={g.goal}>{g.goal} <b>{g.target.replace('-', '−')}</b></span>)}<em>{band}</em></div> },
+  { id: 'spec', step: 'Specification', title: 'Describe the front-end you need.', line: 'Bands, targets and priorities become the goals every design is scored on.',
+    visual: <div className="pc-goals">{goals.map(g => <span key={g.goal}>{g.goal === 'P1dB' ? '1 dB compression point' : g.goal} <b>{g.target.replace('-', '−')}</b></span>)}<em>{band}</em></div> },
   { id: 'schematic', step: 'Schematic', title: 'A topology on your PDK.', line: 'The circuit is drawn from your process devices, every block named.', visual: null },
   { id: 'simulation', step: 'Simulation', title: 'Simulated with parasitics.', line: 'The layout is extracted and its S-parameters simulated.', visual: null },
   { id: 'optimization', step: 'Co-optimization', title: 'Transistors and passives, sized together.', line: `${codesign.designs} designs evaluated. The best scores an error of ${codesign.error.toFixed(4)} against the goals.`, visual: null },
-  { id: 'layout', step: 'Layout', title: 'Automated layout.', line: `Placement, RF and DC lines, ground tiles and density fill, in ${minutes} minutes.`, visual: null },
+  { id: 'layout', step: 'Layout', title: 'Automated layout.', line: `Placement, RF lines and bias lines, ground tiles and density fill, in ${minutes} minutes.`, visual: null },
   { id: 'verification', step: 'Verification', title: `DRC ${verify.drc_violations} violations. LVS ${lvs ? 'correct' : 'not correct'}.`, line: `${verify.drc_rule_checks.toLocaleString('en-US')} rule checks run on the final layout.`,
     visual: <div className="pc-verdict"><p><small>DRC</small><b>{verify.drc_violations}</b><span>violations</span></p><p><small>LVS</small><b aria-hidden="true">{lvs ? '✓' : '✗'}</b><span>{lvs ? 'correct' : 'not correct'}</span></p></div> },
   { id: 'delivery', step: 'Delivery', title: 'Open it in your own design kit.', line: 'A design library in your PDK, with the reports that prove it.',

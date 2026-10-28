@@ -1,17 +1,17 @@
 {
   "brand": {
     "name": "GENESIS",
-    "descriptor": "Autonomous RFIC design engine",
+    "descriptor": "Autonomous RF circuit design engine",
     "email": "islam.guven@uclouvain.be"
   },
   "home": {
     "headline": "Automated layout",
     "accent": "for RF and mmWave front-ends.",
-    "intro": "Zero DRC, LVS correct. Send a spec: you never open a simulator or a commercial tool, and you get the finished library for your own design kit.",
-    "film": "GENESIS designing an SPDT switch, from the spec to the verified layout.",
+    "intro": "Zero DRC (design rule check) violations, LVS (layout versus schematic) correct. Send a specification: you never open a simulator or a commercial tool, and you get the finished library for your own design kit.",
+    "film": "GENESIS designing a single-pole double-throw switch, from the specification to the verified layout.",
     "process": {
-      "headline": "From spec to verified layout",
-      "intro": "On the SPDT switch."
+      "headline": "From specification to verified layout",
+      "intro": "On a single-pole double-throw switch."
     },
     "membership": {
       "headline": "Membership",
@@ -23,7 +23,7 @@
           "price": "Free",
           "for": "See how GENESIS works.",
           "items": [
-            "Watch the full flow, from spec to layout",
+            "Watch the full flow, from specification to layout",
             "Inspect one example circuit library",
             "Read its DRC and LVS reports"
           ],
@@ -36,14 +36,14 @@
           "price": "Price on request",
           "for": "Your circuit, designed, with automated layout.",
           "items": [
-            "Your spec in, scored on your goals",
+            "Your specification in, scored on your goals",
             "A design library in your PDK",
             "DRC and LVS reports",
             "Extracted netlist and S-parameters",
             "The testbenches, ready to rerun"
           ],
-          "action": "Send us a spec",
-          "subject": "GENESIS spec"
+          "action": "Send us a specification",
+          "subject": "GENESIS specification"
         }
       ]
     },
@@ -55,8 +55,8 @@
     },
     "contact": {
       "headline": "Have a front-end to build?",
-      "accent": "Send us the spec.",
-      "action": "Send us a spec"
+      "accent": "Send us the specification.",
+      "action": "Send us a specification"
     }
   },
   "about": {
@@ -67,13 +67,13 @@
         "name": "İslam Güven",
         "scholar": "https://scholar.google.com/citations?user=p_KOMQwAAAAJ",
         "role": "PhD Researcher",
-        "specialty": "RFIC design automation · Multi-agent systems",
-        "description": "Research in RFIC design, machine learning and optimization, with a focus on autonomous design systems and advanced silicon technologies.",
+        "specialty": "RF integrated circuit design automation · Multi-agent systems",
+        "description": "Research in RF integrated circuit design, machine learning and optimization, with a focus on autonomous design systems and advanced silicon technologies.",
         "image": "/assets/team-research.webp",
         "alt": "Portrait of İslam Güven",
         "focus": [
-          "RFIC & mmWave",
-          "AI agents & ML",
+          "RF integrated circuits & mmWave",
+          "Artificial intelligence agents & machine learning",
           "System integration"
         ]
       },
@@ -81,9 +81,9 @@
         "id": "mehmet-parlak",
         "name": "Mehmet Parlak",
         "scholar": "https://scholar.google.com/citations?user=F6vMw38AAAAJ",
-        "role": "AI & Deep-Tech Venture Architect",
+        "role": "Artificial Intelligence & Deep-Tech Venture Architect",
         "specialty": "Technology strategy · Venture building",
-        "description": "20+ years in technology strategy, venture building and AI-driven innovation, with experience in Silicon Valley and international networks.",
+        "description": "More than 20 years in technology strategy, venture building and innovation driven by artificial intelligence, with experience in Silicon Valley and international networks.",
         "image": "/assets/team-venture.webp",
         "alt": "Portrait of Mehmet Parlak",
         "focus": [

@@ -13,6 +13,8 @@
   --button-fill: #5cdce7; --button-hover: #87eaf2; --button-text: #031f2b;
   --layout-filter: none; --layout-blend: screen;
   --flow-cyan: #20dcef; --flow-violet: #a064ff; --flow-blue: #4285ff; --flow-highlight: #d6fcff;
+  /* Two roles of the design library's symbol language: bias (DC) wires and goal limits. */
+  --dc: #f5a623; --limit: #ff7aa8;
   --gradient: linear-gradient(105deg, var(--brand-1) 10%, var(--brand-2) 47%, var(--brand-3) 92%);
   --radius: 12px; --content-width: 1240px;
   font-family: var(--font-sans); font-size: 16px; line-height: 1.55;
@@ -27,6 +29,7 @@
   --glow: #149fcc0d; --error: #aa2851; --shadow: 0 20px 70px #183e6115;
   --layout-filter: invert(1) hue-rotate(180deg); --layout-blend: multiply;
   --flow-cyan: #08a9cf; --flow-violet: #9450e5; --flow-blue: #4272db; --flow-highlight: #eaffff;
+  --dc: #b36200; --limit: #aa2851;
 }
 /* The first paint, before the script sets data-theme, follows the system: the same light values (keep the two in step). */
 @media (prefers-color-scheme: light) {
@@ -39,5 +42,6 @@
     --glow: #149fcc0d; --error: #aa2851; --shadow: 0 20px 70px #183e6115;
     --layout-filter: invert(1) hue-rotate(180deg); --layout-blend: multiply;
     --flow-cyan: #08a9cf; --flow-violet: #9450e5; --flow-blue: #4272db; --flow-highlight: #eaffff;
+    --dc: #b36200; --limit: #aa2851;
   }
 }

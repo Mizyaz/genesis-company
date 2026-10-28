@@ -49,17 +49,17 @@ export function SiteShell({ children, theme, onThemeChange }: { children: ReactN
     <header className="site-header" data-menu={menuOpen ? 'open' : 'closed'}>
       <a className="brand-link" href="#/" aria-label="GENESIS home"><Brand /></a>
       <span className="header-divider" />
-      <span className="header-caption">AUTOMATED RFIC LAYOUT</span>
+      <span className="header-caption">AUTOMATED RF CIRCUIT LAYOUT</span>
       <button className="icon-button menu-toggle" type="button" aria-expanded={menuOpen} aria-controls={navId} aria-label={menuOpen ? 'Close menu' : 'Open menu'} onClick={() => setMenuOpen(open => !open)}><Icon name={menuOpen ? 'close' : 'menu'} /></button>
       <nav id={navId} aria-label="Main navigation" onClick={followLink}>
         <a href="#/explore/how">How it works</a><a href="#/explore/membership">Membership</a><a href="#/explore/research">Research</a><a href="#/explore/team">Team</a>
-        <a className="button button-primary header-cta" href={mailto('GENESIS spec')}>Send us a spec</a>
+        <a className="button button-primary header-cta" href={mailto('GENESIS specification')}>Send us a specification</a>
         <div className="nav-settings">
         <button className="icon-button theme-toggle" type="button" onClick={() => onThemeChange(theme === 'dark' ? 'light' : 'dark')} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}><Icon name={theme === 'dark' ? 'sun' : 'moon'} /></button>
         <button className="icon-button motion-toggle" type="button" onClick={motion.toggle} aria-label={motion.enabled ? 'Stop animations' : 'Play animations'} title={motion.enabled ? 'Stop animations' : 'Play animations'}><Icon name={motion.enabled ? 'stop' : 'play'} /></button></div>
       </nav>
     </header>
     {children}
-    <footer className="site-footer"><span>GENESIS <span className="footer-separator">/</span> Automated RFIC layout</span><span>Zero DRC, LVS correct.</span></footer>
+    <footer className="site-footer"><span>GENESIS <span className="footer-separator">/</span> Automated RF circuit layout</span><span>Zero DRC, LVS correct.</span></footer>
   </div>;
 }

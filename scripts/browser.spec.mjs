@@ -18,6 +18,28 @@ test('the lead names the claim, both themes work and a phone never scrolls sidew
   }
 });
 
+// Islam, 2026-10-28: no shortenings in what a reader sees ("Normal haliyle"). DRC, LVS, RF, mmWave, PDK and GHz are
+// terms; DRC and LVS are spelled out where they first appear. Publication titles and venues are cited as published.
+const SHORTENINGS = /\b(?:specs?|PEX|vs|info|config|e\.g|i\.e|etc|approx|SPDT|RFIC|AI|ML|UI|FAQ|DC|EM|P1dB|LNA|SOI|CMOS)\b|\b(?:min|max|sec|hrs?)\.?(?=\s|$)/;
+test('the page writes no shortenings and spells out DRC and LVS where they first appear', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  await page.locator('#how .pv-sim').waitFor();
+  const seen = await page.evaluate(() => {
+    const cited = [...document.querySelectorAll('#research .papers li')];
+    const text = [...document.querySelectorAll('body *')].filter(el => !cited.some(li => li.contains(el)) && el.childNodes.length)
+      .flatMap(el => [...el.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent));
+    const labels = [...document.querySelectorAll('[aria-label], [alt], [title]')].flatMap(el => ['aria-label', 'alt', 'title'].map(a => el.getAttribute(a) ?? ''));
+    const meta = [...document.querySelectorAll('meta[content]')].map(el => el.getAttribute('content'));
+    return { text: text.join(' '), all: [...text, ...labels, ...meta, document.title] };
+  });
+  for (const string of seen.all) expect(string, string).not.toMatch(SHORTENINGS);
+  for (const spelled of ['DRC (design rule check)', 'LVS (layout versus schematic)']) {
+    const at = seen.text.indexOf(spelled.slice(0, 3));
+    expect(seen.text.slice(at, at + spelled.length)).toBe(spelled);
+  }
+});
+
 test('skip link focuses the page without navigating away', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/#/');

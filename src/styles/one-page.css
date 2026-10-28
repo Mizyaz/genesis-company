@@ -15,6 +15,12 @@
 .film-take video { display: block; width: 100%; height: 100%; object-fit: cover; }
 .film-toggle { position: absolute; right: 12px; bottom: 12px; background: color-mix(in srgb, var(--page) 70%, transparent); color: var(--text); backdrop-filter: blur(8px); }
 
+/* The results under the film: one value and one line each, in one row. */
+.claims { list-style: none; margin: clamp(22px, 3vh, 32px) auto 0; padding: 18px 0; max-width: 1100px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; border-block: 1px solid var(--border-soft); text-align: center; }
+.claims li { display: grid; gap: 4px; align-content: start; }
+.claims strong { font-size: clamp(1.25rem, 2.2vw, 1.75rem); font-weight: 680; letter-spacing: -.03em; font-variant-numeric: tabular-nums; background: var(--gradient); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.claims span { color: var(--muted); font-size: .875rem; line-height: 1.45; }
+
 /* Process cards: text beside its picture; a card rises into place as it comes on screen (only when that can be watched). */
 .pc-cards { list-style: none; margin: 40px 0 0; padding: 0; display: grid; gap: 20px; counter-reset: step; }
 .pc-card { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: clamp(24px, 4vw, 56px); align-items: center; padding: clamp(22px, 3vw, 36px); border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface);
@@ -26,7 +32,7 @@
 .pc-visual { aspect-ratio: 5 / 2.6; display: grid; place-items: center; min-width: 0; }
 .pc-visual > svg, .pc-visual > figure { width: 100%; height: 100%; }
 .pc-visual-layout { aspect-ratio: 790 / 530; }
-.pc-visual-spec, .pc-visual-verification, .pc-visual-delivery { aspect-ratio: auto; }
+.pc-visual-spec, .pc-visual-schematic, .pc-visual-simulation, .pc-visual-verification, .pc-visual-delivery { aspect-ratio: auto; }
 .pc-goals { display: flex; flex-wrap: wrap; gap: 10px; align-content: center; justify-content: center; }
 .pc-goals span { padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: .875rem; color: var(--muted); background: var(--page); }
 .pc-goals b { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; margin-left: 4px; }
@@ -54,6 +60,53 @@
 .pv-rf { fill: none; stroke: var(--flow-cyan); stroke-linecap: square; }
 .pv-dc { fill: var(--flow-violet); opacity: .85; }
 .pv-block { fill: var(--surface-raised); stroke: var(--muted); stroke-width: 1.5; }
+
+/* The schematic, in the design library's symbols: one color per role, the roles coming in one after another. */
+.pv-schematic { --sx-active: var(--brand-1); --sx-passive: var(--brand-3); --sx-dc: var(--dc); --sx-text: var(--text); width: 100%; display: grid; gap: 14px; }
+.pv-schematic svg { display: block; width: 100%; height: auto; overflow: visible; }
+.pv-schematic text { font-size: 11px; font-family: var(--font-sans); }
+.pv-schematic figcaption, .pv-curves figcaption { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px; font-size: .8125rem; color: var(--muted); }
+.pv-schematic figcaption span, .pv-curves figcaption span { display: inline-flex; align-items: center; gap: 6px; }
+.pv-swatch { display: inline-block; width: 14px; height: 3px; border-radius: 2px; background: var(--brand-1); }
+.pv-swatch-passive { background: var(--brand-3); } .pv-swatch-dc { background: var(--dc); } .pv-swatch-text { background: var(--text); }
+.pv-swatch-port { width: 10px; height: 10px; border-radius: 50%; background: none; border: 2px solid var(--brand-1); }
+.pc-cards[data-reveal="on"] .pv-schematic svg > g { opacity: 0; }
+.pc-cards[data-reveal="on"] .is-in .pv-schematic svg > g { animation: role-in .5s ease both; }
+.pc-cards[data-reveal="on"] .is-in .pv-schematic .sx-line { animation-delay: .15s; }
+.pc-cards[data-reveal="on"] .is-in .pv-schematic .sx-active { animation-delay: .3s; }
+.pc-cards[data-reveal="on"] .is-in .pv-schematic .sx-passive { animation-delay: .45s; }
+.pc-cards[data-reveal="on"] .is-in .pv-schematic .sx-dc { animation-delay: .6s; }
+.pc-cards[data-reveal="on"] .is-in .pv-schematic .sx-port { animation-delay: .75s; }
+@keyframes role-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* The simulation screen: each figure of merit against its goal, then the curves over the band. */
+.pv-sim { width: 100%; display: grid; gap: 22px; font-variant-numeric: tabular-nums; }
+.pv-foms { display: grid; gap: 12px; }
+.pv-fom { display: grid; grid-template-columns: 9.5rem minmax(0, 1fr) 5.5rem; align-items: center; column-gap: 14px; row-gap: 2px; }
+.pv-fom-name { font-size: .875rem; font-weight: 600; }
+.pv-fom-name small, .pv-curves figcaption span { font-weight: 400; color: var(--muted); }
+.pv-fom svg { width: 100%; height: 10px; overflow: visible; }
+.pv-fom-track { fill: var(--surface-raised); }
+.pv-fom-bar { fill: var(--brand-1); transform-box: fill-box; transform-origin: 0 50%; }
+.pv-fom-goal { stroke: var(--limit); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.pv-fom-value { justify-self: end; font-weight: 650; color: var(--text); text-decoration: none; }
+.pv-fom-note { grid-column: 2 / 4; font-size: .75rem; color: var(--muted); }
+.pv-fom a { color: inherit; text-decoration: underline dotted color-mix(in srgb, currentColor 45%, transparent); text-underline-offset: 3px; }
+.pv-fom a:hover { color: var(--accent); }
+.pv-curves { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.pv-curves figure { margin: 0; display: grid; gap: 6px; }
+.pv-curves figcaption { justify-content: flex-start; color: var(--text); font-weight: 600; font-size: .8125rem; }
+.pv-curves svg { width: 100%; height: 84px; overflow: visible; }
+.pv-curves p { display: flex; justify-content: space-between; gap: 6px; font-size: .6875rem; color: var(--muted); }
+.pv-goal { stroke: var(--limit); stroke-width: 1.5; stroke-dasharray: 4 3; vector-effect: non-scaling-stroke; }
+.pv-curve { fill: none; stroke: var(--brand-1); stroke-width: 2; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.pv-curve-1 { stroke: var(--brand-3); } .pv-swatch.pv-curve-1 { background: var(--brand-3); }
+.pc-cards[data-reveal="on"] .pv-fom-bar { transform: scaleX(0); }
+.pc-cards[data-reveal="on"] .is-in .pv-fom-bar { animation: bar-in .9s cubic-bezier(.2, .7, .2, 1) .2s both; }
+.pc-cards[data-reveal="on"] .pv-curve { stroke-dasharray: 1; stroke-dashoffset: 1; }
+.pc-cards[data-reveal="on"] .is-in .pv-curve { animation: curve-in 1.2s ease .4s both; }
+@keyframes bar-in { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes curve-in { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
 
 /* Membership: the demo, then Premium. */
 .tiers { margin-top: 36px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
@@ -96,6 +149,12 @@
   .tiers, .home-pair { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 700px) {
+  .claims { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 18px; }
+  .pv-fom { grid-template-columns: minmax(0, 1fr) auto; }
+  .pv-fom svg { grid-column: 1 / -1; grid-row: 2; }
+  .pv-fom-note { grid-column: 1 / -1; }
+  .pv-curves { grid-template-columns: minmax(0, 1fr); }
+  .pv-curves svg { height: 72px; }
   .home { padding: 0 16px 32px; }
   .film-take { min-width: 0; width: 100%; }
   .pc-card { padding: 20px; }
