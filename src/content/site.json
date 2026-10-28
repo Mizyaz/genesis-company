@@ -16,11 +16,11 @@
     "membership": {
       "headline": "Membership",
       "intro": "Start with the demo. Move to Premium when you have a circuit to build.",
-      "draft": true,
       "tiers": [
         {
           "id": "demo",
           "name": "Demo",
+          "price": "Free",
           "for": "See how GENESIS works.",
           "items": [
             "Watch the full flow, from spec to layout",
@@ -33,6 +33,7 @@
         {
           "id": "premium",
           "name": "Premium",
+          "price": "Price on request",
           "for": "Your circuit, designed, with automated layout.",
           "items": [
             "Your spec in, scored on your goals",

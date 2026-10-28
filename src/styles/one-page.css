@@ -60,6 +60,7 @@
 .tier { display: flex; flex-direction: column; gap: 14px; padding: 30px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
 .tier-main { border-color: color-mix(in srgb, var(--cyan) 55%, var(--border)); box-shadow: 0 0 0 1px color-mix(in srgb, var(--cyan) 25%, transparent), 0 20px 60px var(--glow); }
 .tier h3 { font-size: 1.5rem; font-weight: 680; letter-spacing: -.02em; }
+.tier-price { margin-top: -8px; font-size: 1.15rem; font-weight: 620; color: var(--accent); }
 .tier-for { color: var(--muted); }
 .tier ul { list-style: none; margin: 4px 0 8px; padding: 0; display: grid; gap: 10px; align-content: start; flex: 1; }
 .tier li { display: flex; gap: 10px; align-items: start; line-height: 1.5; }

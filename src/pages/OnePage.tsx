@@ -27,7 +27,7 @@ export function Home({ theme }: { theme: 'dark' | 'light' }) {
     <section id="membership" className="home-section" aria-labelledby="membership-title">
       <h2 id="membership-title">{home.membership.headline}</h2><p className="home-sub">{home.membership.intro}</p>
       <div className="tiers">{home.membership.tiers.map((tier, i) => <article key={tier.id} className={`tier${i ? ' tier-main' : ''}`}>
-        <h3>{tier.name}</h3><p className="tier-for">{tier.for}</p>
+        <h3>{tier.name}</h3><p className="tier-price">{tier.price}</p><p className="tier-for">{tier.for}</p>
         <ul>{tier.items.map(item => <li key={item}><Icon name="check" />{item}</li>)}</ul>
         <a className={`button button-${i ? 'primary' : 'secondary'}`} href={mailto(tier.subject)}>{tier.action}</a>
       </article>)}</div>
