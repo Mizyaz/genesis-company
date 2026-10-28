@@ -98,9 +98,9 @@ console.log(`analysis.json ${analysisText.length} bytes`);
 const optimize = json('optimize.json'), coilFrames = json('coil_frames.json'), coilCandidates = json('coil_candidates.json');
 const precise = (v, digits = 4) => Number(v.toPrecision(digits));
 const optimization = {
-  run: optimize.pixels.evaluations.map(({ error, fet }) => ({ error: precise(error), fet: Object.fromEntries([1, 2, 3, 4].map(m => [`w_M${m}`, precise(fet[`w_M${m}`] * 1e6)])) })),
+  run: optimize.pixels.evaluations.map(({ error, fet }) => ({ error: precise(error, 6), fet: Object.fromEntries([1, 2, 3, 4].map(m => [`w_M${m}`, precise(fet[`w_M${m}`] * 1e6)])) })),
   objective: { goals: objective.goals.map(({ name, state, output, unit, sense, target, band }) => ({ name, state, output, unit, sense, target, band })), axis: [],
-    evaluations: objective.evaluations.map(({ iteration, error, values }) => ({ iteration, error: precise(error), values: values.map(v => precise(v)), terms: [], curves: {} })) },
+    evaluations: objective.evaluations.map(({ iteration, error, values }) => ({ iteration, error: precise(error, 6), values: values.map(v => precise(v)), terms: [], curves: {} })) },
   frames: coilFrames.frames.map(({ family, px, file }, i) => ({ family, px, file: `assets/story/passive_device_${i}.png` })),
   candidates: coilCandidates.candidates.map(({ bbox, layers }, i) => ({ run: `candidate_${i}`, bbox, layers: genericLayers(layers) })),
 };

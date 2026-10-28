@@ -21,9 +21,9 @@
 :root[data-theme="light"] {
   color-scheme: light;
   --page: #f3f7fc; --surface: #fff; --surface-raised: #e9f0f8;
-  --text: #0b233c; --muted: #506780; --subtle: #5d7490;
+  --text: #0b233c; --muted: #506780; --subtle: #546b84;
   --border: #c4d4e5; --border-soft: #dbe5ef;
-  --accent: #006b8a;
+  --accent: #006b8a; --cyan: #00728a;
   --glow: #149fcc0d; --error: #aa2851; --shadow: 0 20px 70px #183e6115;
   --layout-filter: invert(1) hue-rotate(180deg); --layout-blend: multiply;
   --flow-cyan: #08a9cf; --flow-violet: #9450e5; --flow-blue: #4272db; --flow-highlight: #eaffff;

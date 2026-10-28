@@ -21,7 +21,7 @@
 .research-people { display: flex; flex-wrap: wrap; gap: 9px; }
 .research-people button { display: flex; align-items: center; gap: 12px; padding: 9px 14px; background: transparent; color: var(--muted); border: 1px solid var(--border); border-radius: 30px; font: inherit; font-size: .8rem; cursor: pointer; }
 .research-people button[aria-pressed="true"] { color: var(--cyan); border-color: var(--cyan); background: var(--glow); }
-.research-people button span { font-family: var(--font-mono); font-size: .65rem; opacity: .8; }
+.research-people button span { font-family: var(--font-mono); font-size: .65rem; }
 .research-search { display: grid; grid-template-columns: minmax(0, 1fr) minmax(170px, .38fr) minmax(115px, .22fr); gap: 18px; margin-top: 22px; }
 .research-search label { display: grid; gap: 7px; font-size: .75rem; color: var(--muted); }
 .research-search input, .research-search select { width: 100%; min-width: 0; padding: 11px 12px; border: 1px solid var(--border); border-radius: 7px; background: var(--page); color: var(--text); font: inherit; font-size: .875rem; }
@@ -106,4 +106,10 @@
   .research-entry { gap: 16px; padding: 22px 0; }
   .research-entry-mark { display: none; }
   .research-entry-action { margin-left: auto; flex-shrink: 0; }
+}
+/* Phone: every control a 44 px tap target; standalone links grow an invisible hit area. */
+@media (max-width: 700px) {
+  .research-people button, .research-search select, .publication-actions :is(button, a) { min-height: 44px; }
+  .team-scholar, .research-sources a { position: relative; }
+  .team-scholar::after, .research-sources a::after { content: ""; position: absolute; inset: -13px 0; }
 }

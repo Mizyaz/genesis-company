@@ -30,16 +30,16 @@ export function PublicApp() {
     window.addEventListener('hashchange', change);
     return () => window.removeEventListener('hashchange', change);
   }, []);
-  useEffect(() => { document.title = 'GENESIS | From specs to silicon'; }, []);
+  useEffect(() => { document.title = 'GENESIS | From specs to validated layout'; }, []);
   useEffect(() => {
     const section = route.split('/')[2];
     const timer = window.setTimeout(() => {
-      const target = section && ['flow', 'claims', 'methods', 'non-intuitive', 'research', 'about', 'membership', 'partnership', 'portfolio', 'faq', 'story', 'contact'].includes(section) ? document.getElementById(section) : null;
+      const target = section && ['flow', 'claims', 'methods', 'chip3d', 'non-intuitive', 'research', 'about', 'membership', 'partnership', 'portfolio', 'faq', 'story', 'contact'].includes(section) ? document.getElementById(section) : null;
       if (target instanceof HTMLDetailsElement) target.open = true; // A link to the questions opens them.
       if (target) target.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
       else window.scrollTo({ top: 0 });
     }, 30);
     return () => clearTimeout(timer);
   }, [route]);
-  return <MotionProvider><SiteShell explore caption="FROM SPECS TO SILICON" theme={theme} onThemeChange={setTheme}><Explore /></SiteShell></MotionProvider>;
+  return <MotionProvider><SiteShell explore caption="FROM SPECS TO VALIDATED LAYOUT" theme={theme} onThemeChange={setTheme}><Explore /></SiteShell></MotionProvider>;
 }

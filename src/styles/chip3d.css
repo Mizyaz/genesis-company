@@ -1,0 +1,18 @@
+/* The 3D layer view (Chip3D.tsx, Layers3D.tsx): a still poster until the reader taps it, then the layout's metal layers
+   as a CSS 3D stack that turns slowly while on screen and follows a drag. */
+.chip3d { margin: 0; position: relative; aspect-ratio: 900 / 620; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); overflow: hidden; }
+.chip3d-poster { all: unset; position: absolute; inset: 0; cursor: pointer; display: grid; place-items: center; }
+.chip3d-poster img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.chip3d-poster span, .chip3d-hint { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); padding: 7px 14px; border-radius: 999px;
+  background: var(--button-fill); color: var(--button-text); font-size: .85rem; font-weight: 600; white-space: nowrap; }
+.chip3d-poster:focus-visible span { outline: 2px solid var(--text); outline-offset: 2px; }
+.chip3d-hint { background: var(--surface-raised); color: var(--muted); font-weight: 500; pointer-events: none; }
+.layers3d { position: absolute; inset: 0; container-type: size; perspective: 1800px; touch-action: pan-y; cursor: grab; }
+.layers3d-stack { position: absolute; left: 19%; top: 17%; width: 62%; aspect-ratio: 900 / 604; transform-style: preserve-3d;
+  transform: rotateX(var(--rx, 56deg)) rotateZ(var(--rz, -28deg)); }
+.layers3d-stack img { position: absolute; inset: 0; width: 100%; height: 100%; transform: translateZ(calc((var(--i) - 6) * 2.2cqw)); opacity: .9; }
+@media (prefers-reduced-motion: no-preference) {
+  .layers3d.is-on.is-turning .layers3d-turn { animation: layers3d-turn 24s linear infinite; }
+}
+.layers3d-turn { position: absolute; inset: 0; transform-style: preserve-3d; }
+@keyframes layers3d-turn { from { transform: rotateZ(0); } to { transform: rotateZ(360deg); } }

@@ -21,14 +21,13 @@ test('the supplied Scholar profile is used', () => {
 test('one page: Explore leads with the product and the membership, our story is told in its About section', () => {
   const explore = read('src/pages/Explore.tsx');
   assert.match(explore, /<Membership content=\{site.membership\} email=\{site.brand.email\}( brief)? \/>/);
-  // Our story is told in the About section, after the designs; the old About page's links land there.
+  // The team is the About section, after the designs; the old About page's links land there.
   assert.match(explore, /<section id="about" className="content-section about-section"/);
-  assert.match(explore, /<div id="story" className="about-story">/);
   assert.match(read('src/PublicApp.tsx'), /'#\/about': '#\/explore\/about'/);
   assert.match(read('src/styles/site.css'), /\.company-hero-inner \{ display: grid; grid-template-columns: minmax\(0, 1fr\) minmax\(0, 1fr\)/); // Wide text never widens the page.
   assert.match(read('src/pages/Explore.tsx'), /\bhome\.headline/); assert.match(read('src/content/site.json'), /Automated and non-intuitive RFIC design/);
   // No page copy calls itself an illustration.
-  for (const path of ['src/content/site.json', 'src/shared/CoDesign.tsx']) assert.doesNotMatch(read(path), /illustrat/i, path);
+  for (const path of ['src/content/site.json', 'src/shared/CoDesignDiagram.tsx']) assert.doesNotMatch(read(path), /illustrat/i, path);
   // Contact actions share one component and never a text link.
   for (const path of ['src/pages/Explore.tsx']) {
     assert.match(read(path), /<ActionLink [^>]*icon="mail"/);
@@ -69,27 +68,30 @@ test('on phones rows of cards scroll sideways, sections are named not numbered, 
   assert.match(wireCss, /prefers-reduced-motion: reduce/);
 });
 
-test('Explore opens with the membership, then the portfolio', () => {
+test('Explore follows the film: the claims, the designs, the flow, the co-design and the 3D view, then what we offer', () => {
   const content = JSON.parse(read('src/content/site.json'));
   const page = read('src/pages/Explore.tsx');
-  const order = ['<section className="company-hero"', '<Membership ', '<Partnership ', '<section id="flow"', '<section id="methods"', '<section id="claims"', '<section id="portfolio"', '<section id="about"', '<section id="research"', '<section id="contact"'].map(marker => page.indexOf(marker));
+  const order = ['<section className="company-hero"', '<section id="claims"', '<section id="portfolio"', '<section id="flow"', '<section id="methods"', '<section id="chip3d"', '<Membership ', '<Partnership ', '<section id="about"', '<section id="research"', '<section id="contact"'].map(marker => page.indexOf(marker));
   assert.ok(order.every((position, i) => position >= 0 && (i === 0 || position > order[i - 1])), `section order ${order}`);
-  assert.match(page, /href="#\/explore\/membership"/); // The hero leads to what we offer and to research.
+  assert.match(page, /href="#\/explore\/membership"/); // The hero leads to what we offer.
   assert.match(page, /\{home\.join\}/);
   assert.match(page, /<TeamProfiles people=\{site.about.people\} \/>/); // About us is a section of the one page.
-  assert.match(read('src/PublicApp.tsx'), /'flow', 'claims', 'methods', 'non-intuitive', 'research', 'about', 'membership', 'partnership', 'portfolio'/);
+  assert.match(read('src/PublicApp.tsx'), /'flow', 'claims', 'methods', 'chip3d', 'non-intuitive', 'research', 'about', 'membership', 'partnership', 'portfolio'/);
   assert.match(read('src/styles/site.css'), /font-size: clamp\(2.35rem, 9.5vw, 4rem\)/);
-  assert.ok(content.story.paragraphs.length >= 1);
-  assert.match(page, /site.story.paragraphs.map/);
-  // The hero's key words lead to the AI methods and to passive synthesis, which play the film's optimization live.
+  // Few words: no eyebrows, no section intros, no story paragraphs.
+  assert.doesNotMatch(page, /eyebrow=|site\.story|home\.\w+\.intro/);
+  // The hero's key words lead to the co-design diagram and to the designs.
   assert.match(page, /linked\(home\.headline, home\.links\)/);
   assert.equal(content.home.links.Automated.href, '#/explore/methods');
-  assert.equal(content.home.links['non-intuitive'].href, '#/explore/non-intuitive');
-  // Transistor sizing and passive synthesis are one board of six steps, the passive step the target of non-intuitive.
-  assert.deepEqual(content.home.methods.board.steps.map(step => step.id), ['spec', 'sizing', 'passives', 'simulate', 'objective', 'layout']);
-  assert.ok(!('nonIntuitive' in content.home));
-  assert.match(page, /<CoDesign content=\{home\.methods\.board/);
-  assert.match(read('src/shared/CoDesign.tsx'), /id=\{step\.id === 'passives' \? 'non-intuitive' : undefined\}/);
+  assert.equal(content.home.links['non-intuitive'].href, '#/explore/portfolio');
+  // The co-design is one block diagram of six steps, drawn live with the run's numbers: no film scene, no video.
+  assert.deepEqual(content.home.methods.steps.map(step => step.id), ['spec', 'sizing', 'passives', 'simulate', 'objective', 'layout']);
+  assert.match(page, /<CoDesignDiagram steps=\{home\.methods\.steps/);
+  const diagram = read('src/shared/CoDesignDiagram.tsx');
+  assert.doesNotMatch(diagram, /StoryPlayer|<video|\.mp4|optimization\.json/);
+  assert.match(diagram, /onPointerEnter=.*onFocus=.*onClick=/s);
+  assert.ok(!existsSync('src/shared/CoDesign.tsx') && !existsSync('src/shared/ScrollJourney.tsx') && !existsSync('src/shared/StoryStage.tsx'), 'the film-scene sections are gone');
+  assert.doesNotMatch(page, /StoryStage|ScrollJourney|StoryPlayer/);
   // The film is served from the site and opens full width from the hero; nothing external.
   assert.ok(!existsSync('src/shared/FilmClip.tsx') && !existsSync('src/shared/ProductFilm.tsx') && !existsSync('public/assets/films'), 'one film player only');
   assert.match(page, /<FilmPlayer content=\{home\.film\} \/>/);
@@ -97,19 +99,15 @@ test('Explore opens with the membership, then the portfolio', () => {
   assert.doesNotMatch(read('src/shared/FilmPlayer.tsx'), /youtube|vimeo|https?:/i);
   for (const name of ['analysis', 'optimization', 'validation', 'ask']) for (const pattern of [ABSOLUTE_PATH, PRIVATE, /sha256|final/i]) assert.doesNotMatch(read(`src/content/story/${name}.json`), pattern, name);
   for (const { file } of JSON.parse(read('src/content/story/optimization.json')).frames) assert.ok(existsSync(`public/${file}`), file);
-  // The schematic-to-layout section plays the film's own scenes from the film's data as the reader scrolls, one stage per
-  // screen, with no record paths or names; the page never scrolls by itself.
-  assert.match(page, /<ScrollJourney content=\{home\.flow\.journey/);
-  const journey = read('src/shared/ScrollJourney.tsx');
-  assert.match(journey, /scrub=\{at \+ part\}/);
-  assert.doesNotMatch(journey, /scrollTo|scrollIntoView|scrollBy/);
-  assert.ok(content.home.flow.journey.stages.length >= 6);
+  for (const name of ['motion', 'codesign']) for (const pattern of [ABSOLUTE_PATH, PRIVATE, /sha256|spdt|final/i]) assert.doesNotMatch(read(`src/content/story/${name}.json`), pattern, name);
   const flow = read('src/content/story/flow.json');
   for (const pattern of [ABSOLUTE_PATH, PRIVATE, /sha256|spdt|final/i]) assert.doesNotMatch(flow, pattern);
   for (const file of Object.values(JSON.parse(flow).layout.files)) assert.ok(existsSync(`public/${file}`), file);
   assert.doesNotMatch(page, /hero-index|Reason\. Simulate\. Learn\. Refine\./);
-  // Foundries and partner companies are under NDA: no company name is published, the cards only say fabricated.
-  assert.deepEqual(content.portfolio.map(item => [item.id, Boolean(item.fabricated)]), [['spdt', false], ['mixer', true], ['divider', true]]);
+  // The mixer leads the designs. No card claims silicon: no tape-out or measurement record backs it. Foundries and partner
+  // companies are under NDA: no company name is published.
+  assert.deepEqual(content.portfolio.map(item => item.id), ['mixer', 'spdt', 'divider']);
+  assert.ok(content.portfolio.every(item => !('fabricated' in item)));
   assert.doesNotMatch(read('src/content/site.json'), /GlobalFoundries|STMicro|foundry"/i);
   // Nor do the film's recorder scripts and the exported story data name a foundry or its technology.
   const recorded = ['video/record', 'src/content/story'].flatMap(dir => readdirSync(dir).filter(f => /\.(json|mjs)$/.test(f)).map(f => `${dir}/${f}`));
@@ -121,11 +119,11 @@ test('Explore opens with the membership, then the portfolio', () => {
   const scripts = ['README.md', 'video/render.mjs', 'video/record.mjs', 'video/record/scenes.mjs', ...readdirSync('video/story').map(f => `video/story/${f}`)];
   for (const file of scripts) for (const pattern of [PRIVATE, /spdt_\w|run_r\d|Calibre|Virtuoso|Spectre/i]) assert.doesNotMatch(read(file), pattern, file);
   // The SPDT shows its two current versions, pixelated and traditional; no passive is called a coil.
-  assert.deepEqual(content.portfolio[0].images.map(image => image.label), ['Pixelated', 'Traditional']);
+  assert.deepEqual(content.portfolio.find(item => item.id === 'spdt').images.map(image => image.label), ['Pixelated', 'Traditional']);
   assert.doesNotMatch(read('src/content/site.json'), /\bcoils?\b|EM-searched|pixel-searched/i);
   // No tool vendor is named on the site.
   assert.doesNotMatch(read('src/content/site.json'), /Calibre|Cadence|Spectre|Virtuoso|signoff|sign-off/i);
-  assert.match(read('src/shared/PortfolioCard.tsx'), /\{item\.fabricated \? <span className="portfolio-silicon"><Icon name="chip" \/>Fabricated in silicon<\/span>/);
+  assert.doesNotMatch(read('src/shared/PortfolioCard.tsx'), /fabricated|silicon/i);
 });
 
 test('the membership offers a free demo and three tiers with their own symbols; questions are folded until opened', () => {
@@ -139,7 +137,6 @@ test('the membership offers a free demo and three tiers with their own symbols; 
   assert.equal(tiers[0].label, 'Free');
   assert.match(tiers[0].features.join(' '), /free live demo sessions/i);
   assert.match(tiers[2].features[0], /Everything in Pro/);
-  assert.match(membership.note, /offer/);
   // No fixed term is promised on the page.
   assert.doesNotMatch(JSON.stringify(membership), /one year|annual|yearly/i);
   assert.ok(faq.items.length >= 4);
@@ -303,19 +300,19 @@ test('the membership speaks for a general RFIC design system, and the home claim
   const content = JSON.parse(read('src/content/site.json'));
   const { membership } = content;
   // General, not one application: front-ends and specialised circuits, with nothing that narrows it down.
-  const general = [membership.headline, membership.headlineAccent, membership.intro];
-  assert.match(membership.intro, /general RFIC design system/);
+  const general = [membership.headline, membership.headlineAccent];
   assert.match(membership.headlineAccent, /front-ends to specialised circuits/);
   assert.doesNotMatch(general.join(' '), /\d|GHz|radar|automotive|GlobalFoundries|STMicro|imec|IC-Link|MPW|partner/i);
-  // How the system is shown in silicon: specification, design in GENESIS, tape-out, measurement; joined, not numbered.
+  // The claims are only what a record backs: the layout time of the recorded flow, its DRC and LVS result and the run's
+  // designs. No silicon claim (no tape-out or measurement record) and no technology claim (no technology scene).
   const page = read('src/pages/Explore.tsx');
-  assert.match(page, /<ol className="silicon-steps">\{home\.claims\.items\.map\(item =>/);
-  assert.deepEqual(content.home.claims.items.map(item => item.title), ['Silicon demonstration', 'Technology independent', 'Layout generation', 'Validated layout']);
+  assert.match(page, /<section id="claims" className="claims-band"/);
+  assert.deepEqual(content.home.claims.items.map(item => item.value), ['< 1 hour', 'DRC + LVS', '290']);
+  assert.doesNotMatch(JSON.stringify(content.home), /silicon|fabricated|any PDK/i);
   // The home page speaks for general RFIC design automation: no single technique as a headline and no slogans.
   const home = content.home, headings = Object.values(home).flatMap(s => [s?.eyebrow, s?.headline, s?.accent]).filter(Boolean).join(' | ');
   assert.doesNotMatch(headings, /pixel|no one|same day|\bfast\b/i);
   assert.doesNotMatch(home.claims.items.map(i => `${i.value} ${i.title} ${i.detail}`).join(' '), /same day|\bfast\b/i);
-  assert.match(read('src/styles/site.css'), /\.silicon-steps::before \{ content: ''; position: absolute;/);
 });
 test('production bundle has no local service client or assistant endpoint', () => {
   assert.ok(existsSync(resolve(root, 'dist/index.html')), 'Run npm run build before npm test');
@@ -399,16 +396,12 @@ test('the film and the site draw from one design and one set of scenes', () => {
   assert.equal(design.motion.transition, 12);
   // Scene code lives once, in src/shared/story; the film keeps no copy.
   for (const moved of ['Schematic.tsx', 'BlockView.tsx']) assert.ok(!existsSync(resolve(root, 'video/src/story', moved)), moved);
-  // Every scene a page section asks for is one the player draws, and every StoryStage reads its scenes from site.json.
-  const home = JSON.parse(read('src/content/site.json')).home, player = read('src/shared/story/StoryPlayer.tsx');
-  const asked = [...Object.values(home).flatMap(section => section?.story?.scenes ?? []), ...home.flow.journey.stages.map(stage => stage.scene)];
-  assert.ok(asked.length >= 6, `${asked.length} scenes on the page`);
-  for (const id of asked) assert.match(player, new RegExp(`id === '${id}' && <`), id);
-  for (const stage of read('src/pages/Explore.tsx').match(/<StoryStage [^>]*>/g)) assert.match(stage, /scenes=\{home\.\w+\.story\.scenes/);
+  // The page draws the film's schematic with the film's own component.
+  assert.match(read('src/shared/FlowMotion.tsx'), /from '\.\/story\/Schematic'/);
 });
 
 test('the passive step shows pixelated designs from our EM dataset, with no record paths or hashes', () => {
-  const pixels = JSON.parse(read('src/content/story/pixels.json')), board = JSON.parse(read('src/content/site.json')).home.methods.board;
+  const pixels = JSON.parse(read('src/content/story/pixels.json'));
   assert.ok(pixels.designs.length >= 12, `${pixels.designs.length} designs`);
   for (const design of pixels.designs) {
     assert.ok(design.grid.length === 12 && design.grid.every(row => /^[01]{12}$/.test(row)));
@@ -417,8 +410,7 @@ test('the passive step shows pixelated designs from our EM dataset, with no reco
     for (const name of ['S21', 'S31']) assert.equal(design[name].length, pixels.ghz.length);
   }
   for (const pattern of [ABSOLUTE_PATH, PRIVATE, /[0-9a-f]{32}/i]) assert.doesNotMatch(read('src/content/story/pixels.json'), pattern);
-  assert.deepEqual(Object.keys(board.passives), ['pixelated', 'parametric', 'another', 'previous', 'note', 'candidate']);
-  assert.doesNotMatch(JSON.stringify(board), /switch FET|three-port RF switch/);
+  assert.match(read('src/shared/CoDesignDiagram.tsx'), /pixels on a random grid/);
 });
 
 // GENESIS_TOKENS names a GENESIS checkout (GENESIS_TOKENS_REF a ref in it, HEAD by default); without it the site builds
@@ -428,4 +420,35 @@ test('the film tokens copy matches the GENESIS design library', { skip: !genesis
   const { staleTokens } = await import('./sync-film-tokens.mjs');
   const stale = staleTokens(genesisTokens, genesisRef);
   assert.deepEqual(stale, [], `src/content/film.json is stale in ${stale.join(', ')}: run node scripts/sync-film-tokens.mjs ${genesisTokens} --ref ${genesisRef}`);
+});
+
+test('the physical flow is one CSS motion drawn from the recorded chain, played on screen and paused off it', () => {
+  const motion = JSON.parse(read('src/content/story/motion.json')), component = read('src/shared/FlowMotion.tsx');
+  assert.ok(read('src/content/story/motion.json').length < 150_000, 'motion.json under 150 kB');
+  assert.equal(motion.verify.drc_violations, 0);
+  assert.equal(motion.verify.lvs, 'LVS_CORRECT');
+  assert.ok(motion.blocks.length && motion.rf.length && motion.dc.length && motion.tiles.length && motion.fill.length);
+  assert.equal((component.match(/\{ id: '/g) ?? []).length, 7, 'seven steps');
+  // No video and no per-frame script: CSS keyframes, an observer that starts and pauses them.
+  assert.doesNotMatch(component, /requestAnimationFrame|addEventListener\('scroll'|<video|setInterval/);
+  assert.match(component, /IntersectionObserver/);
+  assert.match(read('src/styles/flow-motion.css'), /\.flow-motion:not\(\.is-on\)[^{]*\{ animation-play-state: paused/);
+});
+
+test('the 3D view is a still poster until tapped; its layer pictures load only then', () => {
+  const chip = read('src/shared/Chip3D.tsx');
+  assert.match(chip, /lazy\(\(\) => import\('\.\/Layers3D'\)\)/);
+  assert.match(chip, /\{on \? <Suspense/);
+  assert.doesNotMatch(read('src/pages/Explore.tsx'), /Layers3D/);
+  const sizes = readdirSync('public/assets/layers3d').map(f => statSync(`public/assets/layers3d/${f}`).size);
+  assert.ok(sizes.reduce((a, b) => a + b, 0) < 200_000, 'poster and layers under 200 kB');
+});
+
+test('portfolio pictures show crisp at once: no filter or blend, no lazy fade, real sizes', () => {
+  const card = read('src/shared/PortfolioCard.tsx'), css = read('src/styles/site.css');
+  assert.doesNotMatch(css.match(/\.layout-media \{[^}]*\}/)[0], /filter|blend/);
+  assert.doesNotMatch(card, /loading="lazy"/);
+  assert.match(card, /<img className="layout-media"[^>]*width=\{image\.width\} height=\{image\.height\}/);
+  assert.doesNotMatch(css, /will-rise/);
+  assert.doesNotMatch(card, /SparamPlot/);
 });

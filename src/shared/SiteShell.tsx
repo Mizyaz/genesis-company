@@ -50,7 +50,7 @@ export function SiteShell({ children, explore, workbenchUrl, homeUrl = '#/', cap
     <header className="site-header" data-menu={menuOpen ? 'open' : 'closed'}>
       <a className="brand-link" href={homeUrl} aria-label="GENESIS home"><Brand /></a>
       <span className="header-divider" />
-      <span className="header-caption">{caption || (explore ? 'FROM SPECS TO SILICON' : 'RFIC DESIGN ASSISTANT')}</span>
+      <span className="header-caption">{caption || (explore ? 'FROM SPECS TO VALIDATED LAYOUT' : 'RFIC DESIGN ASSISTANT')}</span>
       <button className="icon-button menu-toggle" type="button" aria-expanded={menuOpen} aria-controls={navId} aria-label={menuOpen ? 'Close menu' : 'Open menu'} onClick={() => setMenuOpen(open => !open)}><Icon name={menuOpen ? 'close' : 'menu'} /></button>
       <nav id={navId} aria-label="Main navigation" onClick={followLink}>
         {explore && <><a href="#/explore/research">Research</a><a href="#/explore/portfolio">Designs</a><a href="#/explore/membership">Membership</a><a href="#/explore/partnership">Partnership</a></>}
@@ -63,6 +63,6 @@ export function SiteShell({ children, explore, workbenchUrl, homeUrl = '#/', cap
       </nav>
     </header>
     {children}
-    <footer className="site-footer"><span>GENESIS <span className="footer-separator">/</span> Autonomous RFIC design</span><span>From specs to silicon.</span></footer>
+    <footer className="site-footer"><span>GENESIS <span className="footer-separator">/</span> Autonomous RFIC design</span><span>From specs to validated layout.</span></footer>
   </div>;
 }
