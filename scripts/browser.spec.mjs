@@ -76,7 +76,7 @@ test('the process cards rise into place and every one ends fully shown', async (
   expect((await opacities(page)).at(-1)).toBeLessThan(1);
   for (const card of await page.locator('.pc-card').all()) await card.scrollIntoViewIfNeeded();
   await fullyShown(page);
-  await expect(page.locator('.pc-visual-layout svg')).toBeVisible();
+  await expect(page.locator('.pc-visual-layout .pv-gds')).toBeVisible();
 });
 
 test('the cards are shown at once with less motion and without IntersectionObserver', async ({ browser }) => {

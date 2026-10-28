@@ -3,8 +3,8 @@ import optimization from '../content/story/optimization.json';
 import codesign from '../content/story/codesign.json';
 import simulation from '../content/story/simulation.json';
 import verification from '../content/story/verification.json';
-// Its own module id, so the geometry stays in this chunk while the cards read the two small fields of the same file.
-import motion from '../content/story/motion.json?geometry';
+// The layout rendered from its GDS (scripts/export-layout.py): one alpha mask per kind of shape.
+import layout from '../content/story/layout.json';
 // Drawn by the GENESIS design library (glyphs.py, the one symbol language), its colors as the theme's CSS variables.
 import schematic from '../content/story/schematic.svg?raw';
 import symbol from '../content/story/symbol.svg?raw';
@@ -13,7 +13,7 @@ import { assetUrl } from './ui';
 /** The process cards' pictures, each drawn from its record (loaded after the page, in their own chunk): the
  * specification (codesign.json), the schematic and symbol of the switch in the design library's symbols, the simulated
  * S-parameters of its traditional version (simulation.json), the optimizer's designs (optimization.json), the layout of
- * one physical-flow chain (motion.json) and the DRC and LVS reports of that layout (verification.json). */
+ * one physical-flow chain rendered from its GDS (layout.json) and the DRC and LVS reports of that layout (verification.json). */
 const W = 400, H = 160;
 const BAND = '1–110 GHz', TOP = '110 GHz';
 const minus = (s: string) => s.split('-').join('−');
@@ -98,8 +98,9 @@ function SParameterChart({ chart }: { chart: Chart }) {
   const y = (v: number) => M.t + (hi - Math.min(hi, Math.max(lo, v))) / (hi - lo) * ph;
   const ticks = Array.from({ length: Math.round((hi - lo) / chart.step) + 1 }, (_, i) => hi - i * chart.step);
   const series = chart.curves.map((k, i) => {
-    const values = simulation[k], g = goal(NAME[k], BAND);
-    return { k, i, values, mean: mean(values), top: values[values.length - 1], goal: g };
+    const values = simulation[k], g = goal(NAME[k], BAND), t = goal(NAME[k], TOP), top = values[values.length - 1];
+    // The goal error at the top of the band: how far the value is on the wrong side of its goal there (0 when met).
+    return { k, i, values, mean: mean(values), top, goal: g, topGoal: t, topError: Math.max(0, t.floor ? t.limit - top : top - t.limit) };
   });
   const pick = (clientX: number, rect: DOMRect) => {
     const f = F0 + (clientX - rect.left - M.l) / pw * (F1 - F0);
@@ -114,7 +115,14 @@ function SParameterChart({ chart }: { chart: Chart }) {
     const gap = (at: number) => Math.min(...series.map(o => Math.abs(o.values[Math.round(at * (GHZ.length - 1))] - text)));
     return gap(.3) > gap(.6) ? .3 : .6;
   };
-  const label = `${chart.title}: ${series.map(s => `${s.k} from ${F0} to ${F1} GHz, band mean ${dB(s.mean)}, ${dB(s.top)} at ${TOP}, goal ${s.goal.text}`).join('; ')}`;
+  // A missed goal is labelled beside its bar in two lines (the goal, then its error), on the side away from the value; a met one mid-plot, on the side of its line
+  // away from the curves there, so the label crosses no curve and no value at the top of the band.
+  const topLabel = (limit: number, missed: boolean, top: number) => {
+    if (missed) return { x: x(F1) - 28, y: y(limit) + (y(top) < y(limit) ? 13 : -18), textAnchor: 'end' as const };
+    const j = Math.round(.45 * (GHZ.length - 1)), above = series.every(o => o.values[j] > limit);
+    return { x: M.l + pw * .45, y: y(limit) + (above ? 13 : -5), textAnchor: 'middle' as const };
+  };
+  const label = `${chart.title}: ${series.map(s => `${s.k} from ${F0} to ${F1} GHz, band mean ${dB(s.mean)}, goal ${s.goal.text}; ${dB(s.top)} at ${TOP}, goal ${s.topGoal.text}${s.topError ? `, goal error ${dB(s.topError)}` : ''}`).join('; ')}`;
   return <figure className="pv-chart">
     <figcaption>{chart.title}</figcaption>
     <div className="pv-chart-box" ref={box} style={{ minHeight: height }}>
@@ -147,6 +155,16 @@ function SParameterChart({ chart }: { chart: Chart }) {
         </g>)}
         {series.map(s => <path key={`c${s.k}`} className={`pv-curve pv-curve-${s.i}`} pathLength={1}
           d={s.values.map((v, j) => `${j ? 'L' : 'M'}${x(GHZ[j]).toFixed(1)} ${y(v).toFixed(1)}`).join('')} />)}
+        {/* The goal at the top of the band: a short bar at its frequency, the goal error drawn to the value when it is missed;
+            labelled when it differs from the band goal or is missed. */}
+        {series.map(s => <g key={`t${s.k}`} className="pv-top-goal">
+          <line x1={x(F1) - 22} x2={x(F1) + 6} y1={y(s.topGoal.limit)} y2={y(s.topGoal.limit)} />
+          {s.topError > 0 && <line className="pv-top-error" x1={x(F1)} x2={x(F1)} y1={y(s.topGoal.limit)} y2={y(s.top)} />}
+          {(s.topError > 0 || s.topGoal.limit !== s.goal.limit) && <text {...topLabel(s.topGoal.limit, s.topError > 0, s.top)}>
+            {chart.curves.length > 1 ? `${s.k} ` : ''}goal at {TOP} {s.topGoal.text}
+            {s.topError > 0 && <tspan x={x(F1) - 28} dy={13}>error {dB(s.topError)}</tspan>}
+          </text>}
+        </g>)}
         {series.map(s => <g key={`m${s.k}`} className={`pv-marker pv-curve-${s.i}`}>
           <circle cx={x(F1)} cy={y(s.top)} r={4} />
           <text x={x(F1) - 8} y={y(s.top) + (s.top < Math.max(...series.map(o => o.top)) ? 15 : -8)} textAnchor="end">{dB(s.top)}</text>
@@ -186,24 +204,19 @@ function Designs() {
     <g className="pv-dots">{errors.map((e, i) => <circle key={i} cx={x(i)} cy={y(e)} r={2.2} />)}</g><path className="pv-line" d={steps} /></Plot>;
 }
 
-type Box = number[];
-const [X0, Y0, X1, Y1] = motion.die, DW = X1 - X0, DH = Y1 - Y0;
-const px = (x: number) => +(x - X0).toFixed(1), py = (y: number) => +(Y1 - y).toFixed(1);
-const rects = (boxes: Box[]) => boxes.map(([a, b, c, d]) => `M${px(a)} ${py(d)}h${+(c - a).toFixed(1)}v${+(d - b).toFixed(1)}h${-(c - a).toFixed(1)}z`).join('');
-
-/** The finished layout of the chain the flow card times: ground tiles, density fill, the blocks, then the RF and DC lines on top. */
-function Layout({ label = "The switch's verified layout" }: { label?: string }) {
-  const tiles = motion.tiles.map(([x, y, w, h]) => [x + 1.2, y + 1.2, x + w - 1.2, y + h - 1.2]);
-  const nets = new Map<number, Box[]>();
-  for (const box of motion.dc) nets.set(box[4], [...nets.get(box[4]) ?? [], box]);
-  return <svg viewBox={`0 0 ${DW} ${DH}`} role="img" aria-label={label}>
-    <rect className="pv-die" width={DW} height={DH} rx={4} />
-    <path className="pv-tile" d={rects(tiles)} />
-    <path className="pv-fill" d={rects(motion.fill)} />
-    {motion.blocks.map(block => <path key={block.name} className="pv-block" d={rects(block.members.map(m => m.box))} />)}
-    {motion.rf.map((line, i) => <path key={i} className="pv-rf" strokeWidth={line.width} d={line.path.map(([x, y], j) => `${j ? 'L' : 'M'}${px(x)} ${py(y)}`).join('')} />)}
-    {[...nets.values()].map((boxes, i) => <path key={i} className="pv-dc" d={rects(boxes)} />)}
-  </svg>;
+/** The finished layout from its GDS: the density fill and the ground tiles faint, then the blocks and the RF lines on
+ * their thick top metals (the metals under them faint), the transistors and the DC lines. Each kind is one mask painted
+ * with a theme color. */
+const KINDS = ['fill', 'ground', 'blocks_below', 'rf_below', 'blocks', 'devices', 'dc', 'rf'] as const;
+const LAYOUT_KEY = [['rf', 'RF lines'], ['blocks', 'Blocks'], ['dc', 'Bias lines and transistors'], ['ground', 'Ground tiles']] as const;
+function Layout({ label = "The switch's verified layout, from its GDS", legend = true }: { label?: string; legend?: boolean }) {
+  const [w, h] = layout.pixels;
+  return <figure className="pv-layout">
+    <div className="pv-gds" role="img" aria-label={label} style={{ aspectRatio: `${w} / ${h}` }}>
+      {KINDS.map(kind => <i key={kind} className={`pv-gds-${kind}`} style={{ maskImage: `url(${assetUrl(layout.files[kind])})`, WebkitMaskImage: `url(${assetUrl(layout.files[kind])})` }} />)}
+    </div>
+    {legend && <figcaption>{LAYOUT_KEY.map(([kind, name]) => <span key={kind}><i className={`pv-swatch pv-gds-key-${kind}`} />{name}</span>)}<span>{layout.die_um[0]} × {layout.die_um[1]} µm</span></figcaption>}
+  </figure>;
 }
 
 /** The verified layout with the summary of its DRC and LVS reports: a check sweeps the layout, the report beside it. */
@@ -212,7 +225,7 @@ const correct = (result: string) => result === 'CORRECT';
 function Verified() {
   const rows = [['Ports', lvs.matched.ports], ['Nets', lvs.matched.nets], ['Instances', lvs.matched.instances]] as const;
   return <div className="pv-verify">
-    <div className="pv-verify-layout"><Layout label="The layout the reports check" /><span className="pv-scan" aria-hidden="true" /></div>
+    <div className="pv-verify-layout"><Layout label="The layout the reports check, from its GDS" legend={false} /><span className="pv-scan" aria-hidden="true" /></div>
     <div className="pv-report">
       <section>
         <p className="pv-report-head">Design rule check<b className={drc.results ? 'is-bad' : 'is-good'}>{drc.results} results</b></p>
@@ -233,7 +246,7 @@ function Verified() {
 /** The delivered design library as a library browser: its cells, the views of the top cell (each one shown on
  * request) and the reports that go with it. */
 const VIEWS = [
-  { id: 'layout', name: 'layout', show: () => <Layout label="Layout view of the switch" /> },
+  { id: 'layout', name: 'layout', show: () => <Layout label="Layout view of the switch, from its GDS" legend={false} /> },
   { id: 'schematic', name: 'schematic', show: () => <div className="pv-svg" dangerouslySetInnerHTML={{ __html: schematic }} /> },
   { id: 'symbol', name: 'symbol', show: () => <div className="pv-svg pv-symbol" dangerouslySetInnerHTML={{ __html: symbol }} /> },
 ] as const;

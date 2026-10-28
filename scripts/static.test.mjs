@@ -42,7 +42,12 @@ test('the process cards are visible by default; only a page that can watch them 
   // Every number on the cards comes from its record.
   assert.match(cards, /codesign\.designs/); assert.match(cards, /drc\.rule_checks/); assert.match(cards, /verification_seconds/);
   assert.match(cards, /public\/assets\/records\/layout-timing\.json/);
-  assert.match(read('src/shared/ProcessVisuals.tsx'), /motion\.json\?geometry/);
+  // The layout picture is the GDS render: every mask it lists is published, all of them in the die's proportions.
+  assert.match(read('src/shared/ProcessVisuals.tsx'), /content\/story\/layout\.json/);
+  const layout = JSON.parse(read('src/content/story/layout.json'));
+  assert.deepEqual(Object.keys(layout.files).sort(), ['blocks', 'blocks_below', 'dc', 'devices', 'fill', 'ground', 'rf', 'rf_below']);
+  for (const file of Object.values(layout.files)) assert.ok(existsSync(resolve(root, `public${file}`)), file);
+  assert.ok(Math.abs(layout.pixels[1] / layout.pixels[0] - layout.die_um[1] / layout.die_um[0]) < .002);
 });
 
 test('the film goes in only as an export whose on-screen scan cleared every kind of leak', () => {

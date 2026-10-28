@@ -43,12 +43,22 @@
 .pv-axis { fill: none; stroke: var(--border); stroke-width: 1; }
 .pv-line { fill: none; stroke: var(--flow-cyan); stroke-width: 2; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
 .pv-dots circle { fill: var(--flow-violet); opacity: .5; }
-.pv-die { fill: var(--page); stroke: var(--border); stroke-width: 2; }
-.pv-tile { fill: var(--muted); opacity: .2; }
-.pv-fill { fill: var(--muted); opacity: .1; }
-.pv-rf { fill: none; stroke: var(--flow-cyan); stroke-linecap: square; }
-.pv-dc { fill: var(--flow-violet); opacity: .85; }
-.pv-block { fill: var(--surface-raised); stroke: var(--muted); stroke-width: 1.5; }
+/* The layout from its GDS: one alpha mask per kind of shape, each painted with a theme color. */
+.pv-layout { width: 100%; margin: 0; display: grid; gap: 10px; }
+.pv-gds { position: relative; width: 100%; border: 1px solid var(--border-soft); border-radius: 6px; background: var(--page); overflow: hidden; }
+.pv-gds i { position: absolute; inset: 0; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; }
+.pv-gds-fill { background: var(--muted); opacity: .12; }
+.pv-gds-ground { background: var(--muted); opacity: .28; }
+.pv-gds-blocks_below { background: var(--brand-3); opacity: .18; }
+.pv-gds-rf_below { background: var(--brand-1); opacity: .18; }
+.pv-gds-blocks { background: var(--brand-3); opacity: .9; }
+.pv-gds-devices { background: var(--dc); }
+.pv-gds-dc { background: var(--dc); opacity: .95; }
+.pv-gds-rf { background: var(--brand-1); }
+.pv-layout figcaption { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px; font-size: .8125rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.pv-layout figcaption span { display: inline-flex; align-items: center; gap: 6px; }
+.pv-swatch.pv-gds-key-rf { background: var(--brand-1); } .pv-swatch.pv-gds-key-blocks { background: var(--brand-3); } .pv-swatch.pv-gds-key-dc { background: var(--dc); }
+.pv-swatch.pv-gds-key-ground { background: color-mix(in srgb, var(--muted) 45%, transparent); }
 
 /* The schematic, in the design library's symbols: one color per role, the roles coming in one after another. */
 .pv-schematic { --sx-active: var(--brand-1); --sx-passive: var(--brand-3); --sx-dc: var(--dc); --sx-text: var(--text); width: 100%; display: grid; gap: 14px; }
@@ -112,6 +122,9 @@
 .pv-goal { stroke: var(--limit); stroke-width: 1.5; stroke-dasharray: 5 4; }
 .pv-goal-1 { stroke-dasharray: 2 3; }
 .pv-goal-text { font-size: 10.5px; fill: var(--limit); font-weight: 600; paint-order: stroke; stroke: var(--page); stroke-width: 3px; }
+.pv-top-goal line { stroke: var(--limit); stroke-width: 3; stroke-linecap: round; }
+.pv-top-goal .pv-top-error { stroke-width: 1.5; stroke-dasharray: 2 3; }
+.pv-top-goal text { font-size: 10.5px; fill: var(--limit); font-weight: 600; paint-order: stroke; stroke: var(--page); stroke-width: 3px; }
 .pv-mean { stroke: var(--brand-1); stroke-width: 1; stroke-dasharray: 1 3; opacity: .9; }
 .pv-mean.pv-curve-1 { stroke: var(--brand-3); }
 .pv-curve { fill: none; stroke: var(--brand-1); stroke-width: 2.2; stroke-linejoin: round; }
@@ -142,8 +155,7 @@
 
 /* Verification: a check sweeps the layout, the report summary beside it. */
 .pv-verify { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: center; }
-.pv-verify-layout { position: relative; overflow: hidden; border-radius: 6px; aspect-ratio: 790 / 530; }
-.pv-verify-layout svg { display: block; width: 100%; height: 100%; }
+.pv-verify-layout { position: relative; overflow: hidden; border-radius: 6px; }
 .pv-scan { position: absolute; inset: 0 auto 0 0; width: 18%; background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--brand-1) 30%, transparent), transparent); transform: translateX(-110%); pointer-events: none; }
 .pc-cards[data-reveal="on"] .is-in .pv-scan { animation: scan 1.6s ease-in-out .3s 2 both; }
 @keyframes scan { from { transform: translateX(-110%); } to { transform: translateX(570%); } }

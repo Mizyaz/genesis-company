@@ -1,5 +1,7 @@
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; scroll-padding-top: 96px; }
+/* Anchors and cards stop below the sticky header. */
+[id], .pc-card { scroll-margin-top: 96px; }
 body { margin: 0; background: var(--page); color: var(--text); }
 button, textarea { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
@@ -13,8 +15,9 @@ h1, h2, h3, p, figure { margin: 0; }
 img { display: block; max-width: 100%; }
 .icon { display: inline-block; width: 22px; height: 22px; flex-shrink: 0; vertical-align: middle; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.skip-link { position: fixed; z-index: 50; top: 0; left: 20px; background: var(--surface); padding: 12px; transform: translateY(-120%); }
-.skip-link:focus { transform: translateY(10px); } /* Hidden by its own height, whatever the text size. */
+/* Shown only on keyboard focus; otherwise clipped to nothing, so no scroll or pointer focus brings it into view. */
+.skip-link { position: fixed; z-index: 50; top: 10px; left: 20px; background: var(--surface); padding: 12px; clip-path: inset(50%); }
+.skip-link:focus-visible { clip-path: none; }
 .muted { color: var(--muted); }
 .gradient-text { background: var(--gradient); color: transparent; background-clip: text; -webkit-background-clip: text; }
 .no-break { white-space: nowrap; }
