@@ -452,3 +452,17 @@ test('portfolio pictures show crisp at once: no filter or blend, no lazy fade, r
   assert.doesNotMatch(css, /will-rise/);
   assert.doesNotMatch(card, /SparamPlot/);
 });
+
+// The published build holds no host path and no private word: every file (pictures too, for their metadata) is checked
+// for the private words, the text files for absolute paths, except the site's own folders (/assets/... is a URL here).
+test('the build holds no host path or private word', t => {
+  if (!existsSync(resolve(root, 'dist'))) return t.skip('no build: run npm run build first');
+  const own = new Set(readdirSync(resolve(root, 'dist')));
+  const hits = walk('dist').filter(file => {
+    const bytes = readFileSync(resolve(root, file)).toString('latin1');
+    if (PRIVATE.test(bytes)) return true;
+    if (!/\.(html|js|css|json|svg|txt|xml|webmanifest)$/.test(file)) return false;
+    return [...bytes.matchAll(new RegExp(ABSOLUTE_PATH.source, 'g'))].some(([path]) => !own.has(path.trim().replace(/^["'(=]/, '').split('/')[1]));
+  });
+  assert.deepEqual(hits, []);
+});
