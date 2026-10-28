@@ -466,3 +466,14 @@ test('the build holds no host path or private word', t => {
   });
   assert.deepEqual(hits, []);
 });
+
+test('a card title does not repeat the words its noun says', () => {
+  const require = createRequire(resolve(root, 'src/shared/story/BlockView.tsx')), hooks = {};
+  for (const ext of ['.ts', '.tsx']) hooks[ext] = require.extensions[ext], require.extensions[ext] = (m, file) => m._compile(ts.transpileModule(readFileSync(file, 'utf8'), { compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true } }).outputText, file);
+  try {
+    const { cardTitle } = require('./BlockView.tsx');
+    assert.equal(cardTitle(['dc_pad_vg1'], [{ member: 'PAD_VG1', cell: 'pad' }]), 'DC pad VG1');
+    assert.equal(cardTitle(['input_l1'], [{ member: 'L1', cell: 'inductor' }]), 'Input inductor L1');
+    assert.equal(cardTitle(['bias_r1', 'bias_r2'], [{ member: 'R1', cell: 'res' }, { member: 'R2', cell: 'res' }]), 'Bias resistors');
+  } finally { for (const ext in hooks) require.extensions[ext] = hooks[ext]; }
+});
