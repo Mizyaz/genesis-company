@@ -3,8 +3,6 @@ import codesign from '../content/story/codesign.json';
 import { useMotion } from './MotionSettings';
 
 const Visual = lazy(() => import('./ProcessVisuals'));
-/** The design rule checks the flow supports, as Islam states it (10-28). */
-const RULE_TYPES = 'Supports up to 20,000 types of design rule checks';
 
 /** The strip under the film: one value and one line each, as Islam states them (10-29). */
 export const CLAIMS: { value: string; line: string; href?: string }[] = [
@@ -22,7 +20,7 @@ export const CARDS: Card[] = [
   { id: 'simulation', step: 'Simulation', title: 'Simulated as it will be built.', line: 'The layout is extracted with its parasitics and simulated over the whole band, every goal on the plots.' },
   { id: 'optimization', step: 'Co-optimization', title: 'Transistors and passives, sized together.', line: `Every candidate is scored against the goals and the best is kept: ${codesign.designs} designs, best error ${codesign.error.toFixed(4)}.` },
   { id: 'layout', step: 'Layout', title: 'Automated layout.', line: 'Placement, RF lines, bias lines, ground tiles and density fill, all from the schematic.' },
-  { id: 'verification', step: 'Verification', title: 'Checked against the rules of your process.', line: `${RULE_TYPES}. Every finished layout goes through DRC (design rule check) and LVS (layout versus schematic).` },
+  { id: 'verification', step: 'Verification', title: 'Checked by your process rules.', line: 'DRC (design rule check) and LVS (layout versus schematic) on every finished layout.' },
   { id: 'delivery', step: 'Delivery', title: 'Open it in your own design kit.', line: 'A design library in your PDK: layout, schematic, symbol and the reports that prove it.' },
 ];
 

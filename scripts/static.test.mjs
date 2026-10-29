@@ -45,7 +45,7 @@ test('the steps: all shown, one picture wide, advancing only while motion plays;
   assert.match(css, /\.is-powering \.film-take \{ animation: film-in/);
   assert.match(read("src/shared/FilmTake.tsx"), /useState<Phase>\(enabled \? \(takes \? .wait. : .on.\) : .off.\)/);
   // Every number on the cards comes from its record.
-  assert.match(cards, /codesign\.designs/); assert.match(cards, /Supports up to 20,000 types of design rule checks/);
+  assert.match(cards, /codesign\.designs/); assert.match(cards, /value: 'Up to 20,000', line: 'Types of design rule checks supported'/);
   // The DRC and LVS run is not our tool: no rule check count and no check time on the cards.
   assert.doesNotMatch(cards, /rule_checks|verification_seconds|checkMinutes/);
   // No DRC or LVS result is claimed in the copy (Islam, 10-29): the steps say only that every layout goes through both.

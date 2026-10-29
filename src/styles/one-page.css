@@ -79,8 +79,8 @@
 .pc-stages { margin-top: 28px; display: grid; gap: 14px; }
 .pc-rail { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px; }
 .pc-rail button, .pc-step { position: relative; display: flex; flex-direction: column; gap: 4px; padding: 16px 14px 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--text); font: inherit; text-align: left; overflow: hidden; transition: border-color .35s, background .35s, box-shadow .35s, opacity .35s; }
-.pc-rail button { cursor: pointer; opacity: .72; }
-.pc-rail button:hover, .pc-rail button.is-done { opacity: .9; }
+.pc-rail button { cursor: pointer; }
+.pc-rail button:hover { border-color: color-mix(in srgb, var(--brand-1) 40%, var(--border)); }
 .pc-rail button[aria-selected="true"], .pc-step.is-active { opacity: 1; border-color: color-mix(in srgb, var(--brand-1) 65%, var(--border)); background: color-mix(in srgb, var(--brand-1) 8%, var(--surface)); box-shadow: 0 0 0 1px color-mix(in srgb, var(--brand-1) 35%, transparent), 0 10px 34px -12px color-mix(in srgb, var(--brand-1) 70%, transparent); }
 .pc-num { font-size: .875rem; font-weight: 650; color: var(--accent); font-variant-numeric: tabular-nums; }
 .pc-name { font-size: .875rem; font-weight: 600; color: var(--muted); letter-spacing: .02em; }
@@ -106,7 +106,9 @@
 .pc-panel .pv-sim > :not(.pv-chart) { grid-column: 1 / -1; }
 /* Phone: the steps one under another on a line that runs down their left. */
 .pc-flow { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
-.pc-step { opacity: .8; }
+/* On a phone each step keeps its main picture: the first plot, the report, the library view; the panel on a wide
+ * screen shows the rest. */
+.pc-step :is(.pv-sim > .pv-chart ~ .pv-chart, .pv-verify-layout, .pv-lib-tree) { display: none; }
 .pc-step .pc-visual { margin-top: 12px; }
 
 /* The pictures, drawn from the records. */
