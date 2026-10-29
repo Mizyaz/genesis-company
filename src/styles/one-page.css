@@ -16,6 +16,8 @@
 .film-take { position: relative; aspect-ratio: var(--film-ratio); border-radius: var(--radius); overflow: hidden; background: var(--surface); box-shadow: var(--shadow); }
 .film-take video, .film-mosaic { display: block; width: 100%; height: 100%; object-fit: cover; }
 .film-mosaic { position: absolute; inset: 0; }
+.film-mark { width: 100%; height: 100%; display: grid; place-items: center; background: radial-gradient(closest-side, color-mix(in srgb, var(--brand-1) 10%, var(--surface)), var(--surface)); }
+.film-mark svg { width: min(34%, 360px); height: auto; overflow: visible; }
 .film-toggle { position: absolute; right: 12px; bottom: 12px; background: color-mix(in srgb, var(--page) 70%, transparent); color: var(--text); backdrop-filter: blur(8px); }
 .power-chip { position: absolute; z-index: -2; left: 50%; top: 50%; width: 260%; aspect-ratio: var(--chip-ratio); transform: translate(var(--meet-x), var(--meet-y)); pointer-events: none; will-change: transform; }
 .power-chip:not(.chip-pulses) { -webkit-mask-image: radial-gradient(closest-side, #000 55%, transparent), linear-gradient(#000 calc(var(--chip-cut) - 5%), transparent var(--chip-cut));

@@ -1,14 +1,5 @@
 {
-  "takes": {
-    "dark": {
-      "video": "/assets/film/take-dark.mp4",
-      "poster": "/assets/film/take-dark.jpg"
-    },
-    "light": {
-      "video": "/assets/film/take-light.mp4",
-      "poster": "/assets/film/take-light.jpg"
-    }
-  },
+  "takes": null,
   "width": 1920,
   "height": 1080
 }

@@ -3,6 +3,7 @@ import film from '../content/film-take.json';
 // Named imports: the build keeps the lines and pads of the chain's record, not its tiles (those load with the cards).
 import { die, rf, dc, blocks } from '../content/story/motion.json';
 import { assetUrl, Icon } from './ui';
+import { MarkDrawing, useMarkClock } from './GenesisMark';
 import { useMotion } from './MotionSettings';
 
 type Take = { video: string; poster: string };
@@ -85,6 +86,12 @@ function useIdlePulses(group: RefObject<SVGGElement | null>, on: boolean) {
   }, [on]);
 }
 
+/** Without a take of record, the frame holds the GENESIS mark drawn by current, again and again (at rest with less motion). */
+function FilmMark() {
+  const t = useMarkClock();
+  return <div className="film-mark"><MarkDrawing t={t} loop title="GENESIS" /></div>;
+}
+
 /** The product film: the recorded take of the theme in use (src/content/film-take.json, written by
  * scripts/export-film-take.mjs only for a take whose on-screen leak check is clean). It powers on with the page: pulses
  * run in along the chip's lines behind it, the page blurs and brightens where they meet, the lines draw the film's frame
@@ -111,7 +118,6 @@ export function FilmTake({ theme, label }: { theme: 'dark' | 'light'; label: str
     if (!el) return;
     if (playing && onScreen) el.play().catch(() => setPlaying(false)); else el.pause();
   }, [playing, onScreen, theme]);
-  if (!takes) return null;
   return <div className={`power${powering ? ' is-powering' : ''}`} style={{ '--film-ratio': `${width} / ${height}`, '--meet-x': `${-MEET[0] * 100}%`, '--meet-y': `${-MEET[1] * 100}%`, '--chip-cut': `${(MEET[1] + CUT) * 100}%`, '--chip-ratio': `${DW} / ${DH}` } as CSSProperties}>
     {/* Two layers: the still chip (drawn once) and the pulses (the only one repainted while they run). */}
     <svg className="power-chip" viewBox={`0 0 ${DW} ${DH}`} aria-hidden="true">
@@ -123,10 +129,12 @@ export function FilmTake({ theme, label }: { theme: 'dark' | 'light'; label: str
     </svg>
     <div className="power-condense" aria-hidden="true" />
     <figure className="film-take">
-      <video key={theme} ref={video} src={assetUrl(takes[theme].video)} poster={poster} width={width} height={height}
-        muted loop playsInline autoPlay={enabled} preload="auto" aria-label={label} />
-      {!settled && <canvas ref={canvas} className="film-mosaic" aria-hidden="true" />}
-      <button className="icon-button film-toggle" type="button" onClick={() => setPlaying(on => !on)} aria-label={playing ? 'Pause the film' : 'Play the film'}><Icon name={playing ? 'pause' : 'play'} /></button>
+      {takes ? <>
+        <video key={theme} ref={video} src={assetUrl(takes[theme].video)} poster={poster} width={width} height={height}
+          muted loop playsInline autoPlay={enabled} preload="auto" aria-label={label} />
+        {!settled && <canvas ref={canvas} className="film-mosaic" aria-hidden="true" />}
+        <button className="icon-button film-toggle" type="button" onClick={() => setPlaying(on => !on)} aria-label={playing ? 'Pause the film' : 'Play the film'}><Icon name={playing ? 'pause' : 'play'} /></button>
+      </> : <FilmMark />}
     </figure>
     <svg className="power-frame" viewBox={`-8 -8 ${FW + 16} ${FH + 16}`} preserveAspectRatio="none" aria-hidden="true">
       {EDGES.map(edge => edge.d.map((d, i) => <path key={`${edge.kind}${i}`} className={edge.kind} d={d} pathLength={1} />))}
