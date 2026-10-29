@@ -37,7 +37,7 @@ function Specification() {
   const p1 = codesign.goals.find(g => g.goal === 'P1dB');
   return <figure className="pv-spec">
     <div className="pv-sheet">
-      <p className="pv-sheet-head"><b>Specification</b><span>Design A</span></p>
+      <p className="pv-sheet-head"><b>Performance targets</b><span>Design A</span></p>
       <table>
         <thead><tr><th scope="col">Goal</th><th scope="col">{BAND}</th><th scope="col">At {TOP}</th></tr></thead>
         <tbody>

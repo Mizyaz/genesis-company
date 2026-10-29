@@ -101,7 +101,7 @@ test('with motion stopped the film is there and the steps wait; without Intersec
   expect(await reduced.locator('.film-take').evaluate(el => +getComputedStyle(el).opacity)).toBe(1);
   await reduced.goto('/#/process');
   await reduced.waitForTimeout(8000);
-  await expect(selected(reduced)).toHaveText(/Specification/);
+  await expect(selected(reduced)).toHaveText(/Performance targets/);
   await expect(reduced.locator('.pc-panel:not([hidden]) .pv-spec')).toBeVisible();
   const blind = await browser.newPage();
   await blind.addInitScript(() => { delete window.IntersectionObserver; });

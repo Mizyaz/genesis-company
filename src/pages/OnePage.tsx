@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import site from '../content/site.json';
 import papers from '../content/publications.json';
 import { publicationUrl, type Publication } from '../shared/citations';
@@ -50,8 +50,11 @@ export function Home({ theme }: { theme: 'dark' | 'light' }) {
     </div>
     <section id="contact" className="home-section contact" aria-labelledby="contact-title">
       <h2 id="contact-title">{home.contact.headline} <span className="accent">{home.contact.accent}</span></h2>
+      <ul className="contact-ways">{home.contact.ways.map((way, i) => <li key={way.title} style={{ '--c': `var(--step-${i * 3})` } as CSSProperties}>
+        <a href={way.href.startsWith('mail:') ? mailto(way.href.slice(5)) : way.href}><b>{way.title}</b><span>{way.line}</span><em>{way.cta} <span aria-hidden="true">→</span></em></a>
+      </li>)}</ul>
       <a className="contact-mail" href={mailto('GENESIS')}>{brand.email}</a>
-      <a className="button button-primary" href={mailto('GENESIS specification')}>{home.contact.action}</a>
+      <nav className="contact-map" aria-label="Every page">{home.contact.map.map(link => <a key={link.href} href={link.href}>{link.label}</a>)}</nav>
     </section>
   </main>;
 }

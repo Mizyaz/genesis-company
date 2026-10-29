@@ -28,7 +28,9 @@ test('one page: the lead, the film, the process cards, membership, research, tea
   for (const section of ['how', 'membership', 'research', 'team', 'contact']) assert.match(app, new RegExp(`'${section}'`));
   for (const old of ['#/about', '#/publications', '#/explore/lab', '#/design']) assert.ok(app.includes(`'${old}'`), old);
   const shell = read('src/shared/SiteShell.tsx');
-  for (const link of ['How it works', 'Membership', 'Research', 'Team', 'Send us a spec']) assert.ok(shell.includes(link), link);
+  for (const link of ['How it works', 'Membership', 'Research', 'Team', 'Collaboration', 'Send us your targets']) assert.ok(shell.includes(link), link);
+  // Every page is reachable from the contact section at the bottom.
+  for (const href of ['#/process', '#/collaboration', '#/explore/research', '#/explore/team']) assert.ok(read('src/content/site.json').includes(`"${href}"`), href);
   for (const gone of ['src/pages/Explore.tsx', 'src/shared/ScrollCurrent.tsx', 'src/shared/FilmPlayer.tsx', 'src/shared/Membership.tsx', 'public/assets/story', 'public/assets/hero-metal.webp']) assert.ok(!existsSync(resolve(root, gone)), gone);
 });
 
@@ -120,7 +122,7 @@ test('the copy keeps the wording of record and names no vendor, foundry, tool or
   for (const path of copy) assert.doesNotMatch(read(path), BANNED, path);
   const site = JSON.parse(read('src/content/site.json'));
   assert.equal(`${site.home.headline} ${site.home.accent}`, 'Automated layout for RF and mmWave front-ends.');
-  assert.match(site.home.intro, /^Send a specification:/);
+  assert.match(site.home.intro, /^Send your band and performance targets:/);
   // No cell or run name (lower_case_words_joined) in the copy.
   assert.doesNotMatch(JSON.stringify(site), /\b[a-z0-9]+(?:_[a-z0-9]+){2,}\b/);
 });

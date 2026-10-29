@@ -357,7 +357,7 @@
 /* Colour: the brand's cyan, blue and violet, one shade per step along the gradient (--step-0 .. --step-6). */
 :root { --step-0: var(--brand-1); --step-1: color-mix(in oklab, var(--brand-1) 66%, var(--brand-2)); --step-2: color-mix(in oklab, var(--brand-1) 33%, var(--brand-2)); --step-3: var(--brand-2); --step-4: color-mix(in oklab, var(--brand-2) 66%, var(--brand-3)); --step-5: color-mix(in oklab, var(--brand-2) 33%, var(--brand-3)); --step-6: var(--brand-3); }
 .home-section > h2::before, .collab-start h2::before { content: ""; display: block; width: 56px; height: 4px; margin-bottom: 16px; border-radius: 2px; background: var(--gradient); }
-.collab-start h2::before { margin-inline: auto; }
+.collab-start h2::before, .contact h2::before { margin-inline: auto; }
 .pipeline ol::before { background: linear-gradient(90deg, var(--step-0), var(--step-3), var(--step-6)); opacity: .6; }
 .pl-dot { border-color: var(--c); background: color-mix(in srgb, var(--c) 12%, var(--surface)); color: color-mix(in oklab, var(--c) 75%, var(--text)); }
 .pipeline strong { color: color-mix(in oklab, var(--c) 35%, var(--text)); }
@@ -369,3 +369,17 @@
 .collab-kinds h2 { color: color-mix(in oklab, var(--c) 40%, var(--text)); }
 .collab-start ol li::marker { color: var(--accent); font-weight: 700; }
 @media (max-width: 900px) { .pipeline ol::before { background: linear-gradient(180deg, var(--step-0), var(--step-3), var(--step-6)); } }
+
+/* Contact: three ways in, each a card that lifts and takes its colour under the pointer, then a link to every page. */
+.contact-ways { list-style: none; margin: 8px 0 0; padding: 0; width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; text-align: left; }
+.contact-ways a { height: 100%; display: grid; grid-template-rows: auto 1fr auto; gap: 10px; padding: 24px; border: 1px solid var(--border); border-top: 4px solid var(--c); border-radius: var(--radius); background: var(--surface); color: var(--text); text-decoration: none; transition: transform .25s, box-shadow .25s, background .25s, border-color .25s; }
+.contact-ways b { font-size: 1.25rem; font-weight: 680; letter-spacing: -.02em; }
+.contact-ways span { color: var(--muted); line-height: 1.5; }
+.contact-ways em { font-style: normal; font-weight: 640; color: color-mix(in oklab, var(--c) 70%, var(--text)); }
+.contact-ways em span { display: inline-block; color: inherit; transition: transform .25s; }
+.contact-ways a:hover, .contact-ways a:focus-visible { transform: translateY(-4px); border-color: var(--c); background: color-mix(in srgb, var(--c) 9%, var(--surface)); box-shadow: 0 18px 40px -18px color-mix(in srgb, var(--c) 80%, transparent); }
+.contact-ways a:hover em span, .contact-ways a:focus-visible em span { transform: translateX(5px); }
+.contact-map { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 22px; padding-top: 18px; border-top: 1px solid var(--border-soft); width: 100%; }
+.contact-map a { color: var(--muted); font-weight: 560; text-decoration: none; }
+.contact-map a:hover { color: var(--accent); }
+@media (max-width: 900px) { .contact-ways { grid-template-columns: minmax(0, 1fr); } }

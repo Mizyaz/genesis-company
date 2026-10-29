@@ -7,11 +7,11 @@
   "home": {
     "headline": "Automated layout",
     "accent": "for RF and mmWave front-ends.",
-    "intro": "Send a specification: you never open a simulator or a commercial tool, and you get the finished library for your own design kit.",
-    "film": "GENESIS designing a circuit, from the specification to the verified layout.",
+    "intro": "Send your band and performance targets: you never open a simulator or a commercial tool, and you get the finished library for your own design kit.",
+    "film": "GENESIS designing a circuit, from the performance targets to the verified layout.",
     "process": {
-      "headline": "From specification to verified layout",
-      "intro": "Seven steps, from your specification to a finished layout checked by DRC (design rule check) and LVS (layout versus schematic).",
+      "headline": "From performance targets to verified layout",
+      "intro": "Seven steps, from your performance targets to a finished layout checked by DRC (design rule check) and LVS (layout versus schematic).",
       "more": "See every step",
       "detail": "Every step shown on real designs, from their own records."
     },
@@ -25,7 +25,7 @@
           "price": "Free",
           "for": "See how GENESIS works.",
           "items": [
-            "Watch the full flow, from specification to layout",
+            "Watch the full flow, from performance targets to layout",
             "Inspect one example circuit library",
             "Read its DRC and LVS reports"
           ],
@@ -38,14 +38,14 @@
           "price": "Price on request",
           "for": "Your circuit, designed, with automated layout.",
           "items": [
-            "Your specification in, scored on your goals",
+            "Your band and targets in, every design scored on them",
             "A design library in your PDK",
             "DRC and LVS reports",
             "Extracted netlist and S-parameters",
             "The testbenches, ready to rerun"
           ],
-          "action": "Send us a specification",
-          "subject": "GENESIS specification"
+          "action": "Send us your targets",
+          "subject": "GENESIS performance targets"
         }
       ]
     },
@@ -57,8 +57,54 @@
     },
     "contact": {
       "headline": "Have a front-end to build?",
-      "accent": "Send us the specification.",
-      "action": "Send us a specification"
+      "accent": "Send us your targets.",
+      "action": "Send us your targets",
+      "ways": [
+        {
+          "title": "Send us your targets",
+          "line": "Your band and performance goals, by mail.",
+          "href": "mail:GENESIS performance targets",
+          "cta": "Write to us"
+        },
+        {
+          "title": "Contact for collaboration",
+          "line": "Semiconductor companies, design teams and research groups.",
+          "href": "#/collaboration",
+          "cta": "See how we work together"
+        },
+        {
+          "title": "See every step",
+          "line": "From performance targets to verified layout, on real designs.",
+          "href": "#/process",
+          "cta": "Open the process"
+        }
+      ],
+      "map": [
+        {
+          "label": "How it works",
+          "href": "#/explore/how"
+        },
+        {
+          "label": "Every step",
+          "href": "#/process"
+        },
+        {
+          "label": "Membership",
+          "href": "#/explore/membership"
+        },
+        {
+          "label": "Research",
+          "href": "#/explore/research"
+        },
+        {
+          "label": "Team",
+          "href": "#/explore/team"
+        },
+        {
+          "label": "Collaboration",
+          "href": "#/collaboration"
+        }
+      ]
     },
     "collaboration": {
       "nav": "Collaboration",
@@ -71,7 +117,7 @@
         },
         {
           "title": "Design teams",
-          "line": "Send a specification and receive the finished, validated layout in your own library, with every report."
+          "line": "Send your performance targets and receive the finished, validated layout in your own library, with every report."
         },
         {
           "title": "Research groups and universities",

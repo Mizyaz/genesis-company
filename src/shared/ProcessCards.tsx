@@ -15,7 +15,7 @@ export const CLAIMS: { value: string; line: string; href?: string }[] = [
 type Card = { id: string; step: string; short: string; title: string; line: string };
 /** The process, one step each: what happens, and a picture or numbers from its record. */
 export const CARDS: Card[] = [
-  { id: 'spec', step: 'Specification', short: 'Your goals', title: 'Tell it what you need.', line: 'Band, targets and priorities. They become the goals every candidate design is scored on.' },
+  { id: 'spec', step: 'Performance targets', short: 'Band and goals', title: 'Tell it what you need.', line: 'Band, targets and priorities. They become the goals every candidate design is scored on.' },
   { id: 'schematic', step: 'Schematic', short: 'A topology from your PDK', title: 'A circuit drawn from your process.', line: 'A topology built from the devices of your PDK, every block named.' },
   { id: 'simulation', step: 'Simulation', short: 'Parasitics over the whole band', title: 'Simulated as it will be built.', line: 'The layout is extracted with its parasitics and simulated over the whole band, every goal on the plots.' },
   { id: 'optimization', step: 'Co-optimization', short: 'Transistors and passives together', title: 'Transistors and passives, sized together.', line: `Every candidate is scored against the goals and the best is kept: ${codesign.designs} designs, best error ${codesign.error.toFixed(4)}.` },
