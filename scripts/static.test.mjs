@@ -36,11 +36,12 @@ test('the steps: one panel shown, advancing only while motion plays; the film is
   const cards = read('src/shared/ProcessCards.tsx'), css = read('src/styles/one-page.css');
   assert.ok(cards.includes("data-run={enabled && onScreen && !held ? 'on' : 'off'}"));
   assert.match(cards, /hidden=\{i !== active\}/);
-  // Nothing rests at opacity 0 but keyframe starts and the power-on decorations (pulses, the condensing glow).
+  // Nothing rests at opacity 0 but keyframe starts, the power-on decorations (pulses, the condensing glow) and the film
+  // while it waits for its first picture (only while motion plays, at most 2.5 s).
   const hiding = css.match(/[^\n{}]*\{[^}]*opacity: 0[^}]*\}/g).map(rule => rule.split('{')[0].trim());
-  for (const rule of hiding) assert.match(rule, /^(?:@keyframes |(?:from|to|\d+%)(?:, (?:from|to|\d+%))*$|\.chip-pulses path$|\.power-condense$)/, rule);
+  for (const rule of hiding) assert.match(rule, /^(?:@keyframes |(?:from|to|\d+%)(?:, (?:from|to|\d+%))*$|\.chip-pulses path$|\.power-condense$|\.is-waiting :is\(\.film-take, \.power-frame\)$)/, rule);
   assert.match(css, /\.is-powering \.film-take \{ animation: film-in/);
-  assert.match(read('src/shared/FilmTake.tsx'), /const \[powering\] = useState\(enabled\)/);
+  assert.match(read("src/shared/FilmTake.tsx"), /useState<Phase>\(enabled \? \(takes \? .wait. : .on.\) : .off.\)/);
   // Every number on the cards comes from its record.
   assert.match(cards, /codesign\.designs/); assert.match(cards, /Supports up to 20,000 types of design rule checks/);
   // The DRC and LVS run is not our tool: no rule check count and no check time on the cards.

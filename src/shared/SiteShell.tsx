@@ -60,6 +60,6 @@ export function SiteShell({ children, theme, onThemeChange }: { children: ReactN
       </nav>
     </header>
     {children}
-    <footer className="site-footer"><span>GENESIS <span className="footer-separator">/</span> Automated RF circuit layout</span><span>Zero DRC, LVS correct.</span></footer>
+    <footer className="site-footer"><span>GENESIS <span className="footer-separator">/</span> Automated RF circuit layout</span></footer>
   </div>;
 }
