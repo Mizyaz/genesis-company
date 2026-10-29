@@ -24,7 +24,7 @@ const SHORTENINGS = /\b(?:specs?|PEX|vs|info|config|e\.g|i\.e|etc|approx|SPDT|RF
 test('the page writes no shortenings and spells out DRC and LVS where they first appear', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
-  await page.locator('#how .pv-sheet').waitFor({ state: 'attached' });
+  await page.locator('#how .pipeline').waitFor();
   const seen = await page.evaluate(() => {
     const cited = [...document.querySelectorAll('#research .papers li')];
     const text = [...document.querySelectorAll('body *')].filter(el => !cited.some(li => li.contains(el)) && el.childNodes.length)
@@ -77,8 +77,9 @@ test('the film powers on, and the steps advance on screen, hold under the pointe
   // The film powers on and settles: the square pixels are gone within the entrance.
   await expect(page.locator('.power')).toHaveClass(/is-powering/);
   await expect(page.locator('.film-mosaic')).toHaveCount(0, { timeout: 4000 });
-  await expect(page.locator('.pc-stages')).toHaveAttribute('data-run', 'off');
-  await page.locator('#how').scrollIntoViewIfNeeded();
+  // The home page holds the process in one line; it opens the page of every step.
+  await page.locator('#how .pipeline').click();
+  await expect(page).toHaveURL(/#\/process$/);
   await page.mouse.move(0, 0);
   await expect(page.locator('.pc-stages')).toHaveAttribute('data-run', 'on');
   await expect(selected(page)).toHaveText(/Schematic/, { timeout: 9000 });
@@ -97,16 +98,26 @@ test('with less motion the film is there and the steps wait; without Intersectio
   await expect(reduced.locator('.power')).not.toHaveClass(/is-powering/);
   await expect(reduced.locator('.film-mosaic')).toHaveCount(0);
   expect(await reduced.locator('.film-take').evaluate(el => +getComputedStyle(el).opacity)).toBe(1);
-  await reduced.locator('#how').scrollIntoViewIfNeeded();
+  await reduced.goto('/#/process');
   await reduced.waitForTimeout(8000);
   await expect(selected(reduced)).toHaveText(/Specification/);
   await expect(reduced.locator('.pc-panel:not([hidden]) .pv-spec')).toBeVisible();
   const blind = await browser.newPage();
   await blind.addInitScript(() => { delete window.IntersectionObserver; });
-  await blind.goto('/');
+  await blind.goto('/#/process');
   await expect(blind.locator('h1')).toBeVisible();
   await blind.getByRole('tab', { name: /Verification/ }).click();
   await expect(blind.locator('.pc-panel:not([hidden]) .pv-verify')).toBeVisible();
+});
+
+test('the collaboration page opens from the header and leads back home', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Collaboration', exact: true }).click();
+  await expect(page.locator('h1')).toHaveText('Collaboration');
+  await expect(page.locator('.collab-kinds li')).toHaveCount(3);
+  await page.getByRole('link', { name: /Back to the home page/ }).click();
+  await expect(page.locator('#how .pipeline')).toBeAttached();
 });
 
 test('research opens every publication on request', async ({ page }) => {

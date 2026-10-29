@@ -52,7 +52,7 @@ export function SiteShell({ children, theme, onThemeChange }: { children: ReactN
       <span className="header-caption">AUTOMATED RF CIRCUIT LAYOUT</span>
       <button className="icon-button menu-toggle" type="button" aria-expanded={menuOpen} aria-controls={navId} aria-label={menuOpen ? 'Close menu' : 'Open menu'} onClick={() => setMenuOpen(open => !open)}><Icon name={menuOpen ? 'close' : 'menu'} /></button>
       <nav id={navId} aria-label="Main navigation" onClick={followLink}>
-        <a href="#/explore/how">How it works</a><a href="#/explore/membership">Membership</a><a href="#/explore/research">Research</a><a href="#/explore/team">Team</a>
+        <a href="#/explore/how">How it works</a><a href="#/explore/membership">Membership</a><a href="#/explore/research">Research</a><a href="#/explore/team">Team</a><a href="#/collaboration">Collaboration</a>
         <a className="button button-primary header-cta" href={mailto('GENESIS specification')}>Send us a specification</a>
         <div className="nav-settings">
         <button className="icon-button theme-toggle" type="button" onClick={() => onThemeChange(theme === 'dark' ? 'light' : 'dark')} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}><Icon name={theme === 'dark' ? 'sun' : 'moon'} /></button>

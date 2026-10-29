@@ -11,7 +11,9 @@
     "film": "GENESIS designing a circuit, from the specification to the verified layout.",
     "process": {
       "headline": "From specification to verified layout",
-      "intro": "Every step shown on real designs, from their own records."
+      "intro": "Seven steps, from your specification to a finished layout checked by DRC (design rule check) and LVS (layout versus schematic).",
+      "more": "See every step",
+      "detail": "Every step shown on real designs, from their own records."
     },
     "membership": {
       "headline": "Membership",
@@ -57,6 +59,33 @@
       "headline": "Have a front-end to build?",
       "accent": "Send us the specification.",
       "action": "Send us a specification"
+    },
+    "collaboration": {
+      "nav": "Collaboration",
+      "headline": "Collaboration",
+      "intro": "We work with semiconductor companies, design teams and research groups to bring automated layout to their own processes and circuits.",
+      "kinds": [
+        {
+          "title": "Semiconductor companies",
+          "line": "GENESIS set up on your technology: your design kit, your design rules, your circuits."
+        },
+        {
+          "title": "Design teams",
+          "line": "Send a specification and receive the finished, validated layout in your own library, with every report."
+        },
+        {
+          "title": "Research groups and universities",
+          "line": "Joint work on non-intuitive passive devices, automated layout and optimization, published together."
+        }
+      ],
+      "stepsTitle": "How a collaboration starts",
+      "steps": [
+        "Write to us with your process and the circuits you need.",
+        "We agree on a first design and its goals.",
+        "You receive the finished library and its reports."
+      ],
+      "action": "Start a collaboration",
+      "subject": "GENESIS collaboration"
     }
   },
   "about": {

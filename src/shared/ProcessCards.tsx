@@ -12,16 +12,16 @@ export const CLAIMS: { value: string; line: string; href?: string }[] = [
   { value: 'DC to 170\u202fGHz', line: 'Designs supported over the whole range' },
 ];
 
-type Card = { id: string; step: string; title: string; line: string };
+type Card = { id: string; step: string; short: string; title: string; line: string };
 /** The process, one step each: what happens, and a picture or numbers from its record. */
 export const CARDS: Card[] = [
-  { id: 'spec', step: 'Specification', title: 'Tell it what you need.', line: 'Band, targets and priorities. They become the goals every candidate design is scored on.' },
-  { id: 'schematic', step: 'Schematic', title: 'A circuit drawn from your process.', line: 'A topology built from the devices of your PDK, every block named.' },
-  { id: 'simulation', step: 'Simulation', title: 'Simulated as it will be built.', line: 'The layout is extracted with its parasitics and simulated over the whole band, every goal on the plots.' },
-  { id: 'optimization', step: 'Co-optimization', title: 'Transistors and passives, sized together.', line: `Every candidate is scored against the goals and the best is kept: ${codesign.designs} designs, best error ${codesign.error.toFixed(4)}.` },
-  { id: 'layout', step: 'Layout', title: 'Automated layout.', line: 'Placement, RF lines, bias lines, ground tiles and density fill, all from the schematic.' },
-  { id: 'verification', step: 'Verification', title: 'Checked by your process rules.', line: 'DRC (design rule check) and LVS (layout versus schematic) on every finished layout.' },
-  { id: 'delivery', step: 'Delivery', title: 'Open it in your own design kit.', line: 'A design library in your PDK: layout, schematic, symbol and the reports that prove it.' },
+  { id: 'spec', step: 'Specification', short: 'Your goals', title: 'Tell it what you need.', line: 'Band, targets and priorities. They become the goals every candidate design is scored on.' },
+  { id: 'schematic', step: 'Schematic', short: 'A topology from your PDK', title: 'A circuit drawn from your process.', line: 'A topology built from the devices of your PDK, every block named.' },
+  { id: 'simulation', step: 'Simulation', short: 'Parasitics over the whole band', title: 'Simulated as it will be built.', line: 'The layout is extracted with its parasitics and simulated over the whole band, every goal on the plots.' },
+  { id: 'optimization', step: 'Co-optimization', short: 'Transistors and passives together', title: 'Transistors and passives, sized together.', line: `Every candidate is scored against the goals and the best is kept: ${codesign.designs} designs, best error ${codesign.error.toFixed(4)}.` },
+  { id: 'layout', step: 'Layout', short: 'Automated, from the schematic', title: 'Automated layout.', line: 'Placement, RF lines, bias lines, ground tiles and density fill, all from the schematic.' },
+  { id: 'verification', step: 'Verification', short: 'DRC and LVS', title: 'Checked by your process rules.', line: 'DRC (design rule check) and LVS (layout versus schematic) on every finished layout.' },
+  { id: 'delivery', step: 'Delivery', short: 'A library in your design kit', title: 'Open it in your own design kit.', line: 'A design library in your PDK: layout, schematic, symbol and the reports that prove it.' },
 ];
 
 /** Phones (and narrow windows) get the steps one under another. */

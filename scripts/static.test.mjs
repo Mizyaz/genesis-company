@@ -22,7 +22,7 @@ test('the supplied Scholar profile is used', () => {
 
 test('one page: the lead, the film, the process cards, membership, research, team and contact', () => {
   const home = read('src/pages/OnePage.tsx');
-  const order = ['home-lead', '<FilmTake', 'id="how"', '<ProcessCards', 'id="membership"', 'id="research"', 'id="team"', 'id="contact"'].map(mark => home.indexOf(mark));
+  const order = ['home-lead', '<FilmTake', 'id="how"', '<Pipeline', 'id="membership"', 'id="research"', 'id="team"', 'id="contact"'].map(mark => home.indexOf(mark));
   assert.ok(order.every((at, i) => at > 0 && (!i || at > order[i - 1])), order.join());
   const app = read('src/PublicApp.tsx');
   for (const section of ['how', 'membership', 'research', 'team', 'contact']) assert.match(app, new RegExp(`'${section}'`));
@@ -116,7 +116,7 @@ test('the film goes in only as an export whose on-screen scan cleared every kind
 // The wording of record: "Automated layout", no vendor, foundry, tool or model names, no "sign-off".
 const BANNED = /\blaid out\b|sign-?off|signoff|\bcadence\b|calibre|virtuoso|spectre|maestro|keysight|\bads\b|ansys|synopsys|mentor graphics|globalfoundries|\b22fdx\b|tsmc|gpt-|openai|\bcodex\b|\bcoils?\b|em-searched|pixel-searched/i;
 test('the copy keeps the wording of record and names no vendor, foundry, tool or model', () => {
-  const copy = ['src/content/site.json', 'index.html', 'src/pages/OnePage.tsx', 'src/shared/ProcessCards.tsx', 'src/shared/ProcessVisuals.tsx', 'src/shared/FilmTake.tsx', 'src/shared/SiteShell.tsx', 'src/PublicApp.tsx'];
+  const copy = ['src/content/site.json', 'index.html', 'src/pages/OnePage.tsx', 'src/pages/SubPages.tsx', 'src/shared/Pipeline.tsx', 'src/shared/ProcessCards.tsx', 'src/shared/ProcessVisuals.tsx', 'src/shared/FilmTake.tsx', 'src/shared/SiteShell.tsx', 'src/PublicApp.tsx'];
   for (const path of copy) assert.doesNotMatch(read(path), BANNED, path);
   const site = JSON.parse(read('src/content/site.json'));
   assert.equal(`${site.home.headline} ${site.home.accent}`, 'Automated layout for RF and mmWave front-ends.');

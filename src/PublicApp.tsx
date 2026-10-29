@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Home } from './pages/OnePage';
+import { CollaborationPage, ProcessPage } from './pages/SubPages';
 import { SiteShell, useCompanyAppearance } from './shared/SiteShell';
 import { MotionProvider } from './shared/MotionSettings';
 import './styles/tokens.css';
 import './styles/site.css';
 import './styles/one-page.css';
 
-// The site is one page: links to the old pages and sections land on the section that now holds them.
+// The site is one page and two of its own (#/process, #/collaboration): links to the old pages and sections land on the section that now holds them.
 const legacyRoutes: Readonly<Record<string, string>> = {
   '#/about': '#/explore/team',
   '#/about/story': '#/explore/how',
@@ -44,5 +45,7 @@ export function PublicApp() {
     }, 30);
     return () => clearTimeout(timer);
   }, [route]);
-  return <MotionProvider><SiteShell theme={theme} onThemeChange={setTheme}><Home theme={theme} /></SiteShell></MotionProvider>;
+  // Two pages of their own: every step of the process, and collaboration.
+  const page = route === '#/process' ? <ProcessPage /> : route === '#/collaboration' ? <CollaborationPage /> : <Home theme={theme} />;
+  return <MotionProvider><SiteShell theme={theme} onThemeChange={setTheme}>{page}</SiteShell></MotionProvider>;
 }

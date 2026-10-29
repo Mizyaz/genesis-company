@@ -4,14 +4,15 @@ import papers from '../content/publications.json';
 import { publicationUrl, type Publication } from '../shared/citations';
 import { assetUrl, Icon } from '../shared/ui';
 import { FilmTake } from '../shared/FilmTake';
-import { CLAIMS, ProcessCards } from '../shared/ProcessCards';
+import { CLAIMS } from '../shared/ProcessCards';
+import { Pipeline } from '../shared/Pipeline';
 
 const { home, about, brand } = site;
 export const mailto = (subject: string) => `mailto:${brand.email}?subject=${encodeURIComponent(subject)}`;
 const newest = (papers as Publication[]).slice().sort((a, b) => b.year - a.year || a.title.localeCompare(b.title));
 const FEW = 3;
 
-/** The one page: the film first, the results it shows in one strip, then the process it shows as cards, what membership brings, our research, team and contact. */
+/** The one page: the film first, the results it shows in one strip, then the process in one line (each step on its own page), what membership brings, our research, team and contact. */
 export function Home({ theme }: { theme: 'dark' | 'light' }) {
   const [everything, setEverything] = useState(false);
   return <main id="main" className="home">
@@ -23,7 +24,7 @@ export function Home({ theme }: { theme: 'dark' | 'light' }) {
     <ul className="claims" aria-label="Results">{CLAIMS.map(claim => <li key={claim.line}><strong>{claim.href ? <a href={claim.href}>{claim.value}</a> : claim.value}</strong><span>{claim.line}</span></li>)}</ul>
     <section id="how" className="home-section" aria-labelledby="how-title">
       <h2 id="how-title">{home.process.headline}</h2><p className="home-sub">{home.process.intro}</p>
-      <ProcessCards />
+      <Pipeline more={home.process.more} />
     </section>
     <section id="membership" className="home-section" aria-labelledby="membership-title">
       <h2 id="membership-title">{home.membership.headline}</h2><p className="home-sub">{home.membership.intro}</p>
