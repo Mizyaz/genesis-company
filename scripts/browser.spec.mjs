@@ -20,7 +20,8 @@ test('the lead names the claim, both themes work and a phone never scrolls sidew
 
 // Islam, 2026-10-28: no shortenings in what a reader sees ("Normal haliyle"). DRC, LVS, RF, mmWave, PDK and GHz are
 // terms; DRC and LVS are spelled out where they first appear. Publication titles and venues are cited as published.
-const SHORTENINGS = /\b(?:specs?|PEX|vs|info|config|e\.g|i\.e|etc|approx|SPDT|RFIC|AI|ML|UI|FAQ|DC|EM|P1dB|LNA|SOI|CMOS)\b|\b(?:min|max|sec|hrs?)\.?(?=\s|$)/;
+// "DC" as the bottom of a frequency range ("DC to 170 GHz", Islam 10-29) is a term too.
+const SHORTENINGS = /\b(?:specs?|PEX|vs|info|config|e\.g|i\.e|etc|approx|SPDT|RFIC|AI|ML|UI|FAQ|DC(?! to \d)|EM|P1dB|LNA|SOI|CMOS)\b|\b(?:min|max|sec|hrs?)\.?(?=\s|$)/;
 test('the page writes no shortenings and spells out DRC and LVS where they first appear', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');

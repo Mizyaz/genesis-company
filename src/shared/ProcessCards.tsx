@@ -7,22 +7,19 @@ import { useMotion } from './MotionSettings';
 import { assetUrl } from './ui';
 
 const Visual = lazy(() => import('./ProcessVisuals'));
-const band = codesign.goals.find(g => g.band.includes('–'))?.band ?? '';
-/** The layout in minutes with one decimal: every stage (the record leaves out the DRC and LVS run, not our tool's time). */
-const minutes = timing.stages.reduce((a, s) => a + s.seconds, 0) / 60;
-const min = (m: number) => `${m.toFixed(1)} minutes`;
 const { drc } = timing, lvs = timing.lvs === 'LVS_CORRECT';
 /** The design rule checks the flow supports, as Islam states it (10-28). */
 const RULE_TYPES = 'Supports up to 20,000 types of design rule checks';
 const TIMING = assetUrl('/assets/records/layout-timing.json');
 
-/** The strip under the film: one value and one line each, every value computed from the records the cards show. */
+/** The strip under the film: one value and one line each. The times, the rule types and the frequency range are as
+ * Islam states them (10-29); the DRC and LVS result comes from the timing record. */
 export const CLAIMS: { value: string; line: string; href?: string }[] = [
-  { value: min(minutes), line: 'Automated layout, from schematic to finished layout', href: TIMING },
+  { value: 'Under 30\u00a0minutes', line: 'Automated layout, from schematic to finished layout' },
+  { value: 'Under 6\u00a0hours', line: 'Full design, with circuit simulations and optimization' },
   { value: `${drc.violations} DRC violations`, line: `LVS ${lvs ? 'correct' : 'not correct'} on the finished layout`, href: TIMING },
   { value: 'Up to 20,000', line: 'Types of design rule checks supported' },
-  { value: `${codesign.designs} designs`, line: 'In one co-design run' },
-  { value: band.replace(' GHz', '\u202fGHz'), line: 'Every goal scored over the band' },
+  { value: 'DC to 170\u202fGHz', line: 'Designs supported over the whole range' },
 ];
 
 type Card = { id: string; step: string; title: string; line: string; visual: ReactNode };
@@ -32,7 +29,7 @@ export const CARDS: Card[] = [
   { id: 'schematic', step: 'Schematic', title: 'A topology on your PDK.', line: 'The circuit is drawn from your process devices, every block named.', visual: null },
   { id: 'simulation', step: 'Simulation', title: 'Simulated with parasitics.', line: 'The layout is extracted and its S-parameters simulated.', visual: null },
   { id: 'optimization', step: 'Co-optimization', title: 'Transistors and passives, sized together.', line: `${codesign.designs} designs evaluated. The best scores an error of ${codesign.error.toFixed(4)} against the goals.`, visual: null },
-  { id: 'layout', step: 'Layout', title: 'Automated layout.', line: `Placement, RF lines and bias lines, ground tiles and density fill. Design A in ${min(minutes)}.`, visual: null },
+  { id: 'layout', step: 'Layout', title: 'Automated layout.', line: 'Placement, RF lines and bias lines, ground tiles and density fill.', visual: null },
   { id: 'verification', step: 'Verification', title: `DRC ${drc.violations} violations. LVS ${lvs ? 'correct' : 'not correct'}.`, line: `${RULE_TYPES}. DRC and LVS run on every finished layout.`, visual: null },
   { id: 'delivery', step: 'Delivery', title: 'Open it in your own design kit.', line: 'A design library in your PDK, with the reports that prove it.', visual: null },
 ];
