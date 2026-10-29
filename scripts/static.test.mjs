@@ -34,7 +34,7 @@ test('one page: the lead, the film, the process cards, membership, research, tea
 
 test('the steps: one panel shown, advancing only while motion plays; the film is hidden by no rule', () => {
   const cards = read('src/shared/ProcessCards.tsx'), css = read('src/styles/one-page.css');
-  assert.match(cards, /data-run=\{enabled && onScreen && !held \? 'on' : 'off'\}/);
+  assert.ok(cards.includes("data-run={enabled && onScreen && !held ? 'on' : 'off'}"));
   assert.match(cards, /hidden=\{i !== active\}/);
   // Nothing rests at opacity 0 but keyframe starts and the power-on decorations (pulses, the condensing glow).
   const hiding = css.match(/[^\n{}]*\{[^}]*opacity: 0[^}]*\}/g).map(rule => rule.split('{')[0].trim());
