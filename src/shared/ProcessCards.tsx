@@ -1,23 +1,15 @@
 import { lazy, Suspense, useEffect, useRef, useState, type PointerEvent } from 'react';
 import codesign from '../content/story/codesign.json';
-// The published timing record of the chain the layout card draws (scripts/export-chain-timing.mjs): wall seconds per
-// stage, launch included, and the DRC and LVS result.
-import timing from '../../public/assets/records/layout-timing.json';
 import { useMotion } from './MotionSettings';
-import { assetUrl } from './ui';
 
 const Visual = lazy(() => import('./ProcessVisuals'));
-const { drc } = timing, lvs = timing.lvs === 'LVS_CORRECT';
 /** The design rule checks the flow supports, as Islam states it (10-28). */
 const RULE_TYPES = 'Supports up to 20,000 types of design rule checks';
-const TIMING = assetUrl('/assets/records/layout-timing.json');
 
-/** The strip under the film: one value and one line each. The times, the rule types and the frequency range are as
- * Islam states them (10-29); the DRC and LVS result comes from the timing record. */
+/** The strip under the film: one value and one line each, as Islam states them (10-29). */
 export const CLAIMS: { value: string; line: string; href?: string }[] = [
   { value: '<\u202f30\u00a0minutes', line: 'Automated layout, from schematic to finished layout' },
   { value: '<\u202f6\u00a0hours', line: 'Full design, with circuit simulations and optimization' },
-  { value: `${drc.violations} DRC violations`, line: `LVS ${lvs ? 'correct' : 'not correct'} on the finished layout`, href: TIMING },
   { value: 'Up to 20,000', line: 'Types of design rule checks supported' },
   { value: 'DC to 170\u202fGHz', line: 'Designs supported over the whole range' },
 ];
@@ -30,7 +22,7 @@ export const CARDS: Card[] = [
   { id: 'simulation', step: 'Simulation', title: 'Simulated as it will be built.', line: 'The layout is extracted with its parasitics and simulated over the whole band, every goal on the plots.' },
   { id: 'optimization', step: 'Co-optimization', title: 'Transistors and passives, sized together.', line: `Every candidate is scored against the goals and the best is kept: ${codesign.designs} designs, best error ${codesign.error.toFixed(4)}.` },
   { id: 'layout', step: 'Layout', title: 'Automated layout.', line: 'Placement, RF lines, bias lines, ground tiles and density fill, all from the schematic.' },
-  { id: 'verification', step: 'Verification', title: `DRC ${drc.violations} violations. LVS ${lvs ? 'correct' : 'not correct'}.`, line: `${RULE_TYPES}. Every finished layout goes through DRC and LVS.` },
+  { id: 'verification', step: 'Verification', title: 'Checked against the rules of your process.', line: `${RULE_TYPES}. Every finished layout goes through DRC (design rule check) and LVS (layout versus schematic).` },
   { id: 'delivery', step: 'Delivery', title: 'Open it in your own design kit.', line: 'A design library in your PDK: layout, schematic, symbol and the reports that prove it.' },
 ];
 

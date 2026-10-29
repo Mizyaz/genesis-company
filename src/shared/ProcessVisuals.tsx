@@ -228,7 +228,7 @@ function Layout({ layout = DESIGN_A, label, legend = true }: { layout?: Design; 
   </figure>;
 }
 
-/** The layouts, one at a time: a button per design, its die size and its own DRC and LVS result under it. */
+/** The layouts, one at a time: a button per design, its die size under it. */
 function Gallery() {
   const [id, setId] = useState(DESIGN_A.id), shown = layouts.designs.find(d => d.id === id) ?? DESIGN_A;
   return <div className="pv-gallery">
@@ -236,7 +236,7 @@ function Gallery() {
       {layouts.designs.map(d => <button key={d.id} type="button" aria-pressed={d.id === shown.id} onClick={() => setId(d.id)}>{designName(d)}</button>)}
     </div>
     <Layout key={shown.id} layout={shown} label={`${designName(shown)}: its verified layout, from its GDS`} />
-    <p className="pv-gallery-result">{designName(shown)} · DRC {shown.drc_results} violations · LVS {shown.lvs}</p>
+    <p className="pv-gallery-result">{designName(shown)} · {shown.die_um[0]} × {shown.die_um[1]} µm</p>
   </div>;
 }
 

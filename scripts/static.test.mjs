@@ -46,7 +46,8 @@ test('the steps: one panel shown, advancing only while motion plays; the film is
   assert.match(cards, /codesign\.designs/); assert.match(cards, /Supports up to 20,000 types of design rule checks/);
   // The DRC and LVS run is not our tool: no rule check count and no check time on the cards.
   assert.doesNotMatch(cards, /rule_checks|verification_seconds|checkMinutes/);
-  assert.match(cards, /public\/assets\/records\/layout-timing\.json/);
+  // No DRC or LVS result is claimed in the copy (Islam, 10-29): the steps say only that every layout goes through both.
+  assert.doesNotMatch(cards, /drc\.violations|layout-timing/);
   // The layout pictures are GDS renders, one per design, each DRC and LVS clean: every mask is published, in the die's
   // proportions, and covers the pixels the export counted, so a mask left from another export fails.
   assert.match(read('src/shared/ProcessVisuals.tsx'), /content\/story\/layouts\.json/);
@@ -117,7 +118,7 @@ test('the copy keeps the wording of record and names no vendor, foundry, tool or
   for (const path of copy) assert.doesNotMatch(read(path), BANNED, path);
   const site = JSON.parse(read('src/content/site.json'));
   assert.equal(`${site.home.headline} ${site.home.accent}`, 'Automated layout for RF and mmWave front-ends.');
-  assert.match(site.home.intro, /^Zero DRC \(design rule check\) violations, LVS \(layout versus schematic\) correct\./);
+  assert.match(site.home.intro, /^Send a specification:/);
   // No cell or run name (lower_case_words_joined) in the copy.
   assert.doesNotMatch(JSON.stringify(site), /\b[a-z0-9]+(?:_[a-z0-9]+){2,}\b/);
 });
