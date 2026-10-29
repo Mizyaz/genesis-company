@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState, type CSSProperties } from 'react';
 import codesign from '../content/story/codesign.json';
 import { useMotion } from './MotionSettings';
 
@@ -68,7 +68,7 @@ export function ProcessCards() {
   const visual = (id: string) => <div className={`pc-visual pc-visual-${id}`}><Suspense fallback={null}><Visual id={id} /></Suspense></div>;
   if (narrow) return <div className="pc-stages is-narrow" ref={box} data-run={enabled && onScreen ? 'on' : 'off'} data-motion={enabled ? 'on' : 'off'}>
     <ol className="pc-flow" aria-label="Process steps">
-      {CARDS.map((card, i) => <li key={card.id} className={`pc-step${i === active ? ' is-active' : i < active ? ' is-done' : ''}`} data-step={i} aria-current={i === active ? 'step' : undefined}>
+      {CARDS.map((card, i) => <li key={card.id} className={`pc-step${i === active ? ' is-active' : i < active ? ' is-done' : ''}`} data-step={i} style={{ '--c': `var(--step-${i})` } as CSSProperties} aria-current={i === active ? 'step' : undefined}>
         <i className="pc-load" key={i === active ? `on-${active}` : 'off'} />
         <span className="pc-num">{num(i)}</span><span className="pc-name">{card.step}</span>
         <h3>{card.title}</h3><p>{card.line}</p>
@@ -82,7 +82,7 @@ export function ProcessCards() {
     onFocus={() => setHeld(true)} onBlur={e => !e.currentTarget.contains(e.relatedTarget) && setHeld(false)}>
     <div className="pc-rail" role="tablist" aria-label="Process steps">
       {CARDS.map((card, i) => <button key={card.id} id={`pc-tab-${card.id}`} type="button" role="tab" aria-selected={i === active} aria-controls="pc-panel"
-        tabIndex={i === active ? 0 : -1} className={i < active ? 'is-done' : undefined} onClick={() => go(i)}
+        tabIndex={i === active ? 0 : -1} className={i < active ? 'is-done' : undefined} onClick={() => go(i)} style={{ '--c': `var(--step-${i})` } as CSSProperties}
         onKeyDown={e => { const next = { ArrowRight: 1, ArrowLeft: -1 }[e.key]; if (next) { e.preventDefault(); go(i + next); (e.currentTarget.parentElement!.children[(i + next + CARDS.length) % CARDS.length] as HTMLElement).focus(); } }}>
         <i className="pc-load" key={i === active ? `on-${active}` : 'off'} onAnimationEnd={() => go(active + 1)} />
         <span className="pc-num">{num(i)}</span><span className="pc-name">{card.step}</span>

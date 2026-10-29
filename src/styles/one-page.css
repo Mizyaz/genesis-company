@@ -267,7 +267,7 @@
 /* Membership: the demo, then Premium. */
 .tiers { margin-top: 36px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
 .tier { display: flex; flex-direction: column; gap: 14px; padding: 30px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
-.tier-main { border-color: color-mix(in srgb, var(--cyan) 55%, var(--border)); box-shadow: 0 0 0 1px color-mix(in srgb, var(--cyan) 25%, transparent), 0 20px 60px var(--glow); }
+.tier-main { border: 1.5px solid transparent; background: linear-gradient(var(--surface), var(--surface)) padding-box, var(--gradient) border-box; box-shadow: 0 24px 60px -24px color-mix(in srgb, var(--brand-3) 55%, transparent); }
 .tier h3 { font-size: 1.5rem; font-weight: 680; letter-spacing: -.02em; }
 .tier-price { margin-top: -8px; font-size: 1.15rem; font-weight: 620; color: var(--accent); }
 .tier-for { color: var(--muted); }
@@ -353,3 +353,19 @@
   .pipeline strong { margin-top: 2px; }
   .collab-kinds { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* Colour: the brand's cyan, blue and violet, one shade per step along the gradient (--step-0 .. --step-6). */
+:root { --step-0: var(--brand-1); --step-1: color-mix(in oklab, var(--brand-1) 66%, var(--brand-2)); --step-2: color-mix(in oklab, var(--brand-1) 33%, var(--brand-2)); --step-3: var(--brand-2); --step-4: color-mix(in oklab, var(--brand-2) 66%, var(--brand-3)); --step-5: color-mix(in oklab, var(--brand-2) 33%, var(--brand-3)); --step-6: var(--brand-3); }
+.home-section > h2::before, .collab-start h2::before { content: ""; display: block; width: 56px; height: 4px; margin-bottom: 16px; border-radius: 2px; background: var(--gradient); }
+.collab-start h2::before { margin-inline: auto; }
+.pipeline ol::before { background: linear-gradient(90deg, var(--step-0), var(--step-3), var(--step-6)); opacity: .6; }
+.pl-dot { border-color: var(--c); background: color-mix(in srgb, var(--c) 12%, var(--surface)); color: color-mix(in oklab, var(--c) 75%, var(--text)); }
+.pipeline strong { color: color-mix(in oklab, var(--c) 35%, var(--text)); }
+@keyframes pl-lit { 0%, 16%, 100% { box-shadow: none; } 6% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--c) 25%, transparent), 0 0 24px color-mix(in srgb, var(--c) 80%, transparent); background: color-mix(in srgb, var(--c) 30%, var(--surface)); } }
+.pc-rail button, .pc-step { box-shadow: inset 0 3px 0 color-mix(in srgb, var(--c) 55%, transparent); }
+.pc-rail button .pc-num, .pc-step .pc-num { color: color-mix(in oklab, var(--c) 75%, var(--text)); }
+.pc-rail button[aria-selected="true"], .pc-step.is-active { border-color: var(--c); background: color-mix(in srgb, var(--c) 10%, var(--surface)); box-shadow: 0 0 0 1px color-mix(in srgb, var(--c) 40%, transparent), 0 10px 34px -12px color-mix(in srgb, var(--c) 75%, transparent); }
+.collab-kinds li { border-top: 4px solid var(--c); background: linear-gradient(180deg, color-mix(in srgb, var(--c) 9%, var(--surface)), var(--surface) 60%); }
+.collab-kinds h2 { color: color-mix(in oklab, var(--c) 40%, var(--text)); }
+.collab-start ol li::marker { color: var(--accent); font-weight: 700; }
+@media (max-width: 900px) { .pipeline ol::before { background: linear-gradient(180deg, var(--step-0), var(--step-3), var(--step-6)); } }

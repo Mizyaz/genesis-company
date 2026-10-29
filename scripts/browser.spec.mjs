@@ -90,11 +90,12 @@ test('the film powers on, and the steps advance on screen, hold under the pointe
   await expect(page.locator('.pc-panel:not([hidden])')).toHaveCount(1);
 });
 
-test('with less motion the film is there and the steps wait; without IntersectionObserver a click still picks a step', async ({ browser }) => {
+test('with motion stopped the film is there and the steps wait; without IntersectionObserver a click still picks a step', async ({ browser }) => {
   const reduced = await browser.newPage();
-  await reduced.emulateMedia({ reducedMotion: 'reduce' });
+  // Motion stopped with the header button (the system setting alone does not stop the entrance, Islam 10-29).
+  await reduced.addInitScript(() => localStorage.setItem('genesis.company.motion.v2', 'paused'));
   await reduced.goto('/');
-  // Less motion: the film is simply there, with no power-on and no square pixels, and no step advances on its own.
+  // Motion stopped: the film is simply there, with no power-on and no square pixels, and no step advances on its own.
   await expect(reduced.locator('.power')).not.toHaveClass(/is-powering/);
   await expect(reduced.locator('.film-mosaic')).toHaveCount(0);
   expect(await reduced.locator('.film-take').evaluate(el => +getComputedStyle(el).opacity)).toBe(1);

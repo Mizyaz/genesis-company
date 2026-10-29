@@ -1,27 +1,24 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 
+// The reader's own choice from the header button (v2: choices kept before 10-29 start over). Motion plays until the
+// reader stops it there; the system's reduced-motion setting does not stop the film's entrance (Islam, 10-29).
+const KEY = 'genesis.company.motion.v2';
+
 const MotionContext = createContext<{ enabled: boolean; toggle: () => void } | null>(null);
 
 /** One site-wide preference; individual diagrams still pause outside the viewport. */
 export function MotionProvider({ children }: { children: ReactNode }) {
-  const [reduced, setReduced] = useState(() => matchMedia('(prefers-reduced-motion: reduce)').matches);
   const [choice, setChoice] = useState<boolean | null>(() => {
     try {
-      const saved = localStorage.getItem('genesis.company.motion');
+      const saved = localStorage.getItem(KEY);
       return saved === 'playing' ? true : saved === 'paused' ? false : null;
     } catch { return null; }
   });
-  const enabled = choice ?? !reduced;
-  useEffect(() => {
-    const preference = matchMedia('(prefers-reduced-motion: reduce)');
-    const update = () => setReduced(preference.matches);
-    preference.addEventListener('change', update);
-    return () => preference.removeEventListener('change', update);
-  }, []);
+  const enabled = choice ?? true;
   useEffect(() => { document.documentElement.dataset.motion = enabled ? 'playing' : 'paused'; }, [enabled]);
   function toggle() {
     setChoice(!enabled);
-    try { localStorage.setItem('genesis.company.motion', enabled ? 'paused' : 'playing'); } catch { /* Optional local preference. */ }
+    try { localStorage.setItem(KEY, enabled ? 'paused' : 'playing'); } catch { /* Optional local preference. */ }
   }
   return <MotionContext.Provider value={{ enabled, toggle }}>{children}</MotionContext.Provider>;
 }

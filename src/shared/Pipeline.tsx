@@ -7,7 +7,7 @@ import { useMotion } from './MotionSettings';
 export function Pipeline({ more }: { more: string }) {
   const { enabled } = useMotion();
   return <a className="pipeline" href="#/process" data-motion={enabled ? 'on' : 'off'}>
-    <ol>{CARDS.map((card, i) => <li key={card.id} style={{ '--i': i } as CSSProperties}>
+    <ol>{CARDS.map((card, i) => <li key={card.id} style={{ '--i': i, '--c': `var(--step-${i})` } as CSSProperties}>
       <span className="pl-dot">{String(i + 1).padStart(2, '0')}</span><strong>{card.step}</strong><span className="pl-short">{card.short}</span>
     </li>)}</ol>
     <span className="pl-more">{more} <span aria-hidden="true">→</span></span>
