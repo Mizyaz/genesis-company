@@ -151,7 +151,9 @@ export function FilmTake({ theme, label }: { theme: 'dark' | 'light'; label: str
   useEffect(() => {
     const el = video.current;
     if (!el) return;
-    if (playing && onScreen) el.play().catch(() => setPlaying(false)); else el.pause();
+    // Only a browser that refuses to play shows the film paused: a play cut short by a reload or a pause (an AbortError)
+    // is tried again by the next change.
+    if (playing && onScreen) el.play().catch(error => { if (error.name === 'NotAllowedError') setPlaying(false); }); else el.pause();
   }, [playing, onScreen, theme]);
   return <><div className={`power${phase === 'on' ? ' is-powering' : phase === 'wait' ? ' is-waiting' : ''}`} style={{ '--film-ratio': `${width} / ${height}`, '--meet-x': `${-MEET[0] * 100}%`, '--meet-y': `${-MEET[1] * 100}%`, '--chip-cut': `${(MEET[1] + CUT) * 100}%`, '--chip-ratio': `${DW} / ${DH}` } as CSSProperties}>
     {/* Two layers: the still chip (drawn once) and the pulses (the only one repainted while they run). */}
@@ -166,7 +168,8 @@ export function FilmTake({ theme, label }: { theme: 'dark' | 'light'; label: str
     <figure className="film-take">
       {takes ? <>
         <video key={theme} ref={video} src={assetUrl(takes[theme].video)} poster={poster} width={width} height={height}
-          muted loop playsInline autoPlay={enabled} preload="auto" aria-label={label} />
+          muted loop playsInline autoPlay={enabled} preload="auto" aria-label={label}
+          onCanPlay={e => { if (playing && onScreen && e.currentTarget.paused) e.currentTarget.play().catch(() => {}); }} />
         {!settled && <canvas ref={canvas} className="film-mosaic" aria-hidden="true" />}
       </> : <FilmMark />}
     </figure>

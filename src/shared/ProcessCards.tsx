@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState, type PointerEvent } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import codesign from '../content/story/codesign.json';
 import { useMotion } from './MotionSettings';
 
@@ -26,47 +26,71 @@ export const CARDS: Card[] = [
   { id: 'delivery', step: 'Delivery', title: 'Open it in your own design kit.', line: 'A design library in your PDK: layout, schematic, symbol and the reports that prove it.' },
 ];
 
-/** The steps side by side, one panel under them for the step shown. While the section is on screen and motion plays, a
- * bar loads across the step shown and the next step follows when it is full; pointing at or focusing the section holds
- * it. A click (or a swipe on the panel) picks a step. With less motion nothing advances on its own. */
+/** Phones (and narrow windows) get the steps one under another. */
+const NARROW = '(max-width: 1100px)';
+function useNarrow() {
+  const [narrow, setNarrow] = useState(() => window.matchMedia?.(NARROW).matches ?? false);
+  useEffect(() => {
+    const query = window.matchMedia?.(NARROW);
+    if (!query) return;
+    const change = () => setNarrow(query.matches);
+    query.addEventListener('change', change);
+    return () => query.removeEventListener('change', change);
+  }, []);
+  return narrow;
+}
+
+const num = (i: number) => String(i + 1).padStart(2, '0');
+
+/** Every step at once, each with its title and line: side by side on a wide screen, with the picture of the step shown
+ * under them, and one under another on a phone, each with its own picture. The step shown glows with a bar loading
+ * across its top. Wide: while the section is on screen and motion plays, the next step follows when the bar is full;
+ * pointing at or focusing the section holds it, a click picks a step. Phone: the step in the middle of the screen is
+ * the one shown. With less motion nothing advances on its own. */
 export function ProcessCards() {
-  const box = useRef<HTMLDivElement>(null), rail = useRef<HTMLDivElement>(null), { enabled } = useMotion();
+  const box = useRef<HTMLDivElement>(null), { enabled } = useMotion(), narrow = useNarrow();
   const [active, setActive] = useState(0), [onScreen, setOnScreen] = useState(false), [held, setHeld] = useState(false);
-  const swipe = useRef<number | null>(null);
   const go = (i: number) => setActive((i + CARDS.length) % CARDS.length);
   useEffect(() => {
     const el = box.current;
     if (!el || !('IntersectionObserver' in window)) return;
-    const view = new IntersectionObserver(([entry]) => setOnScreen(entry.isIntersecting), { threshold: .35 });
+    const view = new IntersectionObserver(([entry]) => setOnScreen(entry.isIntersecting), { threshold: narrow ? 0 : .35 });
     view.observe(el);
     return () => view.disconnect();
-  }, []);
-  // The step shown stays in view in the rail when the rail scrolls (phone), without moving the page.
+  }, [narrow]);
+  // On a phone the step crossing the middle of the screen is the step shown.
   useEffect(() => {
-    const strip = rail.current, tab = strip?.children[active] as HTMLElement | undefined;
-    if (strip && tab && strip.scrollWidth > strip.clientWidth) strip.scrollTo({ left: tab.offsetLeft - (strip.clientWidth - tab.offsetWidth) / 2, behavior: enabled ? 'smooth' : 'instant' });
-  }, [active, enabled]);
-  const down = (e: PointerEvent) => { swipe.current = e.pointerType === 'mouse' ? null : e.clientX; };
-  const up = (e: PointerEvent) => {
-    if (swipe.current === null) return;
-    const dx = e.clientX - swipe.current; swipe.current = null;
-    if (Math.abs(dx) > 60) go(active + (dx < 0 ? 1 : -1));
-  };
+    const el = box.current;
+    if (!narrow || !el || !('IntersectionObserver' in window)) return;
+    const view = new IntersectionObserver(entries => entries.forEach(entry => entry.isIntersecting && setActive(Number((entry.target as HTMLElement).dataset.step))),
+      { rootMargin: '-45% 0px -45% 0px' });
+    el.querySelectorAll('.pc-step').forEach(step => view.observe(step));
+    return () => view.disconnect();
+  }, [narrow]);
+  const visual = (id: string) => <div className={`pc-visual pc-visual-${id}`}><Suspense fallback={null}><Visual id={id} /></Suspense></div>;
+  if (narrow) return <div className="pc-stages is-narrow" ref={box} data-run={enabled && onScreen ? 'on' : 'off'} data-motion={enabled ? 'on' : 'off'}>
+    <ol className="pc-flow" aria-label="Process steps">
+      {CARDS.map((card, i) => <li key={card.id} className={`pc-step${i === active ? ' is-active' : i < active ? ' is-done' : ''}`} data-step={i} aria-current={i === active ? 'step' : undefined}>
+        <i className="pc-load" key={i === active ? `on-${active}` : 'off'} />
+        <span className="pc-num">{num(i)}</span><span className="pc-name">{card.step}</span>
+        <h3>{card.title}</h3><p>{card.line}</p>
+        {visual(card.id)}
+      </li>)}
+    </ol>
+  </div>;
+  const shown = CARDS[active];
   return <div className="pc-stages" ref={box} data-run={enabled && onScreen && !held ? 'on' : 'off'} data-motion={enabled ? 'on' : 'off'}
     onPointerEnter={e => e.pointerType === 'mouse' && setHeld(true)} onPointerLeave={() => setHeld(false)}
     onFocus={() => setHeld(true)} onBlur={e => !e.currentTarget.contains(e.relatedTarget) && setHeld(false)}>
-    <div className="pc-rail" role="tablist" aria-label="Process steps" ref={rail}>
-      {CARDS.map((card, i) => <button key={card.id} id={`pc-tab-${card.id}`} type="button" role="tab" aria-selected={i === active} aria-controls={`pc-panel-${card.id}`}
+    <div className="pc-rail" role="tablist" aria-label="Process steps">
+      {CARDS.map((card, i) => <button key={card.id} id={`pc-tab-${card.id}`} type="button" role="tab" aria-selected={i === active} aria-controls="pc-panel"
         tabIndex={i === active ? 0 : -1} className={i < active ? 'is-done' : undefined} onClick={() => go(i)}
         onKeyDown={e => { const next = { ArrowRight: 1, ArrowLeft: -1 }[e.key]; if (next) { e.preventDefault(); go(i + next); (e.currentTarget.parentElement!.children[(i + next + CARDS.length) % CARDS.length] as HTMLElement).focus(); } }}>
-        <span className="pc-num">{String(i + 1).padStart(2, '0')}</span><span className="pc-name">{card.step}</span>
         <i className="pc-load" key={i === active ? `on-${active}` : 'off'} onAnimationEnd={() => go(active + 1)} />
+        <span className="pc-num">{num(i)}</span><span className="pc-name">{card.step}</span>
+        <strong className="pc-title">{card.title}</strong><span className="pc-line">{card.line}</span>
       </button>)}
     </div>
-    {CARDS.map((card, i) => <section key={card.id} id={`pc-panel-${card.id}`} className="pc-panel" role="tabpanel" aria-labelledby={`pc-tab-${card.id}`} hidden={i !== active}
-      onPointerDown={down} onPointerUp={up}>
-      <div className="pc-text"><h3>{card.title}</h3><p>{card.line}</p></div>
-      <div className={`pc-visual pc-visual-${card.id}`}><Suspense fallback={null}><Visual id={card.id} /></Suspense></div>
-    </section>)}
+    <section id="pc-panel" key={shown.id} className="pc-panel" role="tabpanel" aria-labelledby={`pc-tab-${shown.id}`}>{visual(shown.id)}</section>
   </div>;
 }

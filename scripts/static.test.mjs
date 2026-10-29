@@ -32,10 +32,12 @@ test('one page: the lead, the film, the process cards, membership, research, tea
   for (const gone of ['src/pages/Explore.tsx', 'src/shared/ScrollCurrent.tsx', 'src/shared/FilmPlayer.tsx', 'src/shared/Membership.tsx', 'public/assets/story', 'public/assets/hero-metal.webp']) assert.ok(!existsSync(resolve(root, gone)), gone);
 });
 
-test('the steps: one panel shown, advancing only while motion plays; the film is hidden by no rule', () => {
+test('the steps: all shown, one picture wide, advancing only while motion plays; the film is hidden by no rule', () => {
   const cards = read('src/shared/ProcessCards.tsx'), css = read('src/styles/one-page.css');
   assert.ok(cards.includes("data-run={enabled && onScreen && !held ? 'on' : 'off'}"));
-  assert.match(cards, /hidden=\{i !== active\}/);
+  // Every step's title and line is always on the page; on a phone every step also carries its picture.
+  assert.match(cards, /<strong className="pc-title">\{card\.title\}<\/strong><span className="pc-line">\{card\.line\}<\/span>/);
+  assert.match(cards, /<h3>\{card\.title\}<\/h3><p>\{card\.line\}<\/p>\s*\{visual\(card\.id\)\}/);
   // Nothing rests at opacity 0 but keyframe starts, the power-on decorations (pulses, the condensing glow) and the film
   // while it waits for its first picture (only while motion plays, at most 2.5 s).
   const hiding = css.match(/[^\n{}]*\{[^}]*opacity: 0[^}]*\}/g).map(rule => rule.split('{')[0].trim());

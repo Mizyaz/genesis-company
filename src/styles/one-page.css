@@ -74,33 +74,40 @@
 .claims strong a { color: inherit; text-decoration: none; }
 .claims span { color: var(--muted); font-size: .875rem; line-height: 1.45; }
 
-/* Process: the steps side by side, a bar loading across the step shown, one panel under them for that step. */
+/* Process: every step at once, the step shown glowing under a bar that loads across its top; the picture of that step
+ * under the row (wide), or each step with its own picture one under another (phone). */
 .pc-stages { margin-top: 28px; display: grid; gap: 14px; }
-.pc-rail { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
-.pc-rail button { position: relative; display: grid; gap: 2px; padding: 12px 12px 14px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); color: var(--muted); font: inherit; text-align: left; cursor: pointer; overflow: hidden; transition: color .25s, border-color .25s, background .25s; }
-.pc-rail button:hover { color: var(--text); }
-.pc-rail button[aria-selected="true"] { color: var(--text); border-color: color-mix(in srgb, var(--brand-1) 60%, var(--border)); background: color-mix(in srgb, var(--brand-1) 9%, var(--surface)); }
+.pc-rail { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px; }
+.pc-rail button, .pc-step { position: relative; display: flex; flex-direction: column; gap: 4px; padding: 16px 14px 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--text); font: inherit; text-align: left; overflow: hidden; transition: border-color .35s, background .35s, box-shadow .35s, opacity .35s; }
+.pc-rail button { cursor: pointer; opacity: .72; }
+.pc-rail button:hover, .pc-rail button.is-done { opacity: .9; }
+.pc-rail button[aria-selected="true"], .pc-step.is-active { opacity: 1; border-color: color-mix(in srgb, var(--brand-1) 65%, var(--border)); background: color-mix(in srgb, var(--brand-1) 8%, var(--surface)); box-shadow: 0 0 0 1px color-mix(in srgb, var(--brand-1) 35%, transparent), 0 10px 34px -12px color-mix(in srgb, var(--brand-1) 70%, transparent); }
 .pc-num { font-size: .875rem; font-weight: 650; color: var(--accent); font-variant-numeric: tabular-nums; }
-.pc-name { font-size: 1rem; font-weight: 620; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-/* The load bar: full on the steps done, filling on the step shown while it plays. */
-.pc-load { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--gradient); transform-origin: left; transform: scaleX(0); }
-.pc-rail .is-done .pc-load, .pc-stages[data-motion="off"] [aria-selected="true"] .pc-load { transform: none; opacity: .55; }
-.pc-stages[data-motion="on"] [aria-selected="true"] .pc-load { animation: pc-load 7s linear forwards; }
+.pc-name { font-size: .875rem; font-weight: 600; color: var(--muted); letter-spacing: .02em; }
+.pc-title, .pc-step h3 { margin: 6px 0 2px; font-size: 1.0625rem; line-height: 1.3; font-weight: 680; letter-spacing: -.015em; }
+.pc-line, .pc-step p { margin: 0; color: var(--muted); font-size: .9375rem; line-height: 1.5; }
+/* The load bar across the top: full on the steps done, filling on the step shown while it plays. */
+.pc-load { position: absolute; left: 0; right: 0; top: 0; height: 3px; background: var(--gradient); transform-origin: left; transform: scaleX(0); }
+.is-done > .pc-load, .pc-stages[data-motion="off"] :is([aria-selected="true"], .is-active) > .pc-load { transform: none; opacity: .55; }
+.pc-stages[data-motion="on"] [aria-selected="true"] > .pc-load { animation: pc-load 7s linear forwards; }
+.pc-stages[data-motion="on"] .is-active > .pc-load { animation: pc-load 1.6s ease-out forwards; }
 .pc-stages[data-run="off"] .pc-load { animation-play-state: paused !important; }
 @keyframes pc-load { to { transform: none; } }
-.pc-panel { display: grid; grid-template-columns: minmax(0, 17rem) minmax(0, 1fr); gap: clamp(20px, 3vw, 40px); align-items: center; min-height: 560px; padding: clamp(18px, 2.4vw, 28px); border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
-.pc-panel[hidden] { display: none; }
+.pc-panel { display: grid; place-items: center; min-height: 400px; padding: clamp(18px, 2.4vw, 28px); border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
 .pc-stages[data-motion="on"] .pc-panel { animation: pc-in .45s cubic-bezier(.2, .7, .2, 1) both; }
 @keyframes pc-in { from { opacity: 0; transform: translateY(10px); } }
-.pc-text h3 { margin: 0 0 12px; font-size: clamp(1.45rem, 2.2vw, 1.9rem); line-height: 1.18; font-weight: 680; letter-spacing: -.03em; text-wrap: balance; }
-.pc-text p { color: var(--muted); font-size: 1.0625rem; line-height: 1.6; }
+.pc-panel > .pc-visual { width: min(100%, 900px); }
 .pc-visual { display: grid; place-items: center; min-width: 0; }
 .pc-visual > svg, .pc-visual > figure { width: 100%; height: 100%; }
-.pc-visual-layout .pv-gallery { max-width: 540px; margin: 0 auto; }
-/* No small print in the panel: captions, sources and testbenches read at body size. */
-.pc-panel :is(.pv-sheet-tests, .pv-sim-source, .pv-plot figcaption, .pv-lib-view figcaption, .pv-gallery-result, .pv-layout figcaption) { font-size: .875rem; }
-.pc-panel .pv-sim { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.pc-panel .pv-sim > .pv-chart:nth-child(3), .pc-panel .pv-sim > :not(.pv-chart) { grid-column: 1 / -1; }
+.pc-visual-layout .pv-gallery { max-width: 480px; margin: 0 auto; }
+/* No small print: captions, sources and testbenches read at a size one can read. */
+.pc-stages :is(.pv-sheet-tests, .pv-sim-source, .pv-plot figcaption, .pv-lib-view figcaption, .pv-gallery-result, .pv-layout figcaption) { font-size: .875rem; }
+.pc-panel .pv-sim { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.pc-panel .pv-sim > :not(.pv-chart) { grid-column: 1 / -1; }
+/* Phone: the steps one under another on a line that runs down their left. */
+.pc-flow { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.pc-step { opacity: .8; }
+.pc-step .pc-visual { margin-top: 12px; }
 
 /* The pictures, drawn from the records. */
 .pv-plot { display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: 6px; }
@@ -292,9 +299,6 @@
 .contact-mail:hover { color: var(--text); }
 
 @media (max-width: 900px) {
-  .pc-panel { grid-template-columns: minmax(0, 1fr); align-items: start; min-height: 0; }
-  .pc-rail { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; margin-inline: -16px; padding-inline: 16px; }
-  .pc-rail button { flex: 0 0 auto; min-width: 9.5rem; scroll-snap-align: center; }
   .tiers, .home-pair { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 700px) {
@@ -306,8 +310,7 @@
   .pv-lib-tree { border-right: 0; border-bottom: 1px solid var(--border-soft); }
   .home { padding: 0 16px 32px; }
   .power, .film-bar { min-width: 0; width: 100%; }
-  .pc-panel { padding: 18px; }
-  .pc-panel .pv-sim { grid-template-columns: minmax(0, 1fr); }
+  .pc-step { padding: 16px; }
   .tier { padding: 22px; }
   .tier .button { align-self: stretch; }
   .team a { min-height: 44px; }

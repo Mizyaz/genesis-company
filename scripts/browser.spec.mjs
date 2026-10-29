@@ -24,7 +24,7 @@ const SHORTENINGS = /\b(?:specs?|PEX|vs|info|config|e\.g|i\.e|etc|approx|SPDT|RF
 test('the page writes no shortenings and spells out DRC and LVS where they first appear', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
-  await page.locator('#how .pv-sim').waitFor({ state: 'attached' });
+  await page.locator('#how .pv-sheet').waitFor({ state: 'attached' });
   const seen = await page.evaluate(() => {
     const cited = [...document.querySelectorAll('#research .papers li')];
     const text = [...document.querySelectorAll('body *')].filter(el => !cited.some(li => li.contains(el)) && el.childNodes.length)
