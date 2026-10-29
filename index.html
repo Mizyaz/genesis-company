@@ -4,7 +4,8 @@
     <meta charset="UTF-8" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#041325" />
+    <meta name="theme-color" content="#041325" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f3f7fc" media="(prefers-color-scheme: light)" />
     <meta name="description" content="Automated layout for RF and mmWave front-ends. Zero DRC (design rule check) violations, LVS (layout versus schematic) correct. Send a specification; you get the finished design library for your own design kit." />
     <!-- Link previews require absolute URLs: update them if the public site moves. -->
     <meta property="og:type" content="website" />
@@ -18,7 +19,8 @@
     <meta property="og:image:alt" content="GENESIS: automated RF circuit layout." />
     <meta name="twitter:card" content="summary_large_image" />
     <title>GENESIS | Automated layout for RF and mmWave front-ends</title>
-    <style>html { background: #041325; }</style>
+    <!-- The first paint, before the script, follows the system theme: no dark flash on a light screen. -->
+    <style>html { background: #041325; } @media (prefers-color-scheme: light) { html { background: #f3f7fc; } }</style>
   </head>
   <body>
     <div id="root"></div>

@@ -1,7 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const opacities = page => page.locator('.pc-card').evaluateAll(cards => cards.map(card => +getComputedStyle(card).opacity));
-const fullyShown = async page => expect.poll(() => opacities(page)).toEqual([1, 1, 1, 1, 1, 1, 1]);
+const selected = page => page.locator('.pc-rail [aria-selected="true"]');
 
 test('the lead names the claim, both themes work and a phone never scrolls sideways', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: 'dark' });
@@ -25,7 +24,7 @@ const SHORTENINGS = /\b(?:specs?|PEX|vs|info|config|e\.g|i\.e|etc|approx|SPDT|RF
 test('the page writes no shortenings and spells out DRC and LVS where they first appear', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
-  await page.locator('#how .pv-sim').waitFor();
+  await page.locator('#how .pv-sim').waitFor({ state: 'attached' });
   const seen = await page.evaluate(() => {
     const cited = [...document.querySelectorAll('#research .papers li')];
     const text = [...document.querySelectorAll('body *')].filter(el => !cited.some(li => li.contains(el)) && el.childNodes.length)
@@ -72,27 +71,42 @@ test('the header links reach their sections', async ({ page }) => {
   }
 });
 
-test('the process cards rise into place and every one ends fully shown', async ({ page }) => {
+test('the film powers on, and the steps advance on screen, hold under the pointer and follow a click', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.goto('/');
-  await expect(page.locator('.pc-cards')).toHaveAttribute('data-reveal', 'on');
-  expect((await opacities(page)).at(-1)).toBeLessThan(1);
-  for (const card of await page.locator('.pc-card').all()) await card.scrollIntoViewIfNeeded();
-  await fullyShown(page);
+  // The film powers on and settles: the square pixels are gone within the entrance.
+  await expect(page.locator('.power')).toHaveClass(/is-powering/);
+  await expect(page.locator('.film-mosaic')).toHaveCount(0, { timeout: 4000 });
+  await expect(page.locator('.pc-stages')).toHaveAttribute('data-run', 'off');
+  await page.locator('#how').scrollIntoViewIfNeeded();
+  await page.mouse.move(0, 0);
+  await expect(page.locator('.pc-stages')).toHaveAttribute('data-run', 'on');
+  await expect(selected(page)).toHaveText(/Schematic/, { timeout: 9000 });
+  await page.locator('.pc-panel:not([hidden])').hover();
+  await expect(page.locator('.pc-stages')).toHaveAttribute('data-run', 'off');
+  await page.getByRole('tab', { name: /Layout/ }).click();
   await expect(page.locator('.pc-visual-layout .pv-gds')).toBeVisible();
+  await expect(page.locator('.pc-panel:not([hidden])')).toHaveCount(1);
 });
 
-test('the cards are shown at once with less motion and without IntersectionObserver', async ({ browser }) => {
+test('with less motion the film is there and the steps wait; without IntersectionObserver a click still picks a step', async ({ browser }) => {
   const reduced = await browser.newPage();
   await reduced.emulateMedia({ reducedMotion: 'reduce' });
   await reduced.goto('/');
-  await expect(reduced.locator('.pc-cards')).not.toHaveAttribute('data-reveal', 'on');
-  await fullyShown(reduced);
+  // Less motion: the film is simply there, with no power-on and no square pixels, and no step advances on its own.
+  await expect(reduced.locator('.power')).not.toHaveClass(/is-powering/);
+  await expect(reduced.locator('.film-mosaic')).toHaveCount(0);
+  expect(await reduced.locator('.film-take').evaluate(el => +getComputedStyle(el).opacity)).toBe(1);
+  await reduced.locator('#how').scrollIntoViewIfNeeded();
+  await reduced.waitForTimeout(8000);
+  await expect(selected(reduced)).toHaveText(/Specification/);
+  await expect(reduced.locator('.pc-panel:not([hidden]) .pv-spec')).toBeVisible();
   const blind = await browser.newPage();
   await blind.addInitScript(() => { delete window.IntersectionObserver; });
   await blind.goto('/');
   await expect(blind.locator('h1')).toBeVisible();
-  await fullyShown(blind);
+  await blind.getByRole('tab', { name: /Verification/ }).click();
+  await expect(blind.locator('.pc-panel:not([hidden]) .pv-verify')).toBeVisible();
 });
 
 test('research opens every publication on request', async ({ page }) => {

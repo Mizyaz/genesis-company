@@ -32,14 +32,15 @@ test('one page: the lead, the film, the process cards, membership, research, tea
   for (const gone of ['src/pages/Explore.tsx', 'src/shared/ScrollCurrent.tsx', 'src/shared/FilmPlayer.tsx', 'src/shared/Membership.tsx', 'public/assets/story', 'public/assets/hero-metal.webp']) assert.ok(!existsSync(resolve(root, gone)), gone);
 });
 
-test('the process cards are visible by default; only a page that can watch them and plays motion hides them first', () => {
+test('the steps: one panel shown, advancing only while motion plays; the film is hidden by no rule', () => {
   const cards = read('src/shared/ProcessCards.tsx'), css = read('src/styles/one-page.css');
-  assert.match(cards, /if \(!el \|\| !enabled \|\| !\('IntersectionObserver' in window\)\) return;/);
-  assert.match(cards, /el\.dataset\.reveal = 'on'/);
-  // Every rule that hides a card or part of one waits for data-reveal (the film fades in on its own; keyframes start hidden).
+  assert.match(cards, /data-run=\{enabled && onScreen && !held \? 'on' : 'off'\}/);
+  assert.match(cards, /hidden=\{i !== active\}/);
+  // Nothing rests at opacity 0 but keyframe starts and the power-on decorations (pulses, the condensing glow).
   const hiding = css.match(/[^\n{}]*\{[^}]*opacity: 0[^}]*\}/g).map(rule => rule.split('{')[0].trim());
-  assert.ok(hiding.includes('.pc-cards[data-reveal="on"] .pc-card:not(.is-in)'));
-  for (const rule of hiding) assert.match(rule, /^(?:\.film-take|@keyframes |\.pc-cards\[data-reveal="on"\] )/, rule);
+  for (const rule of hiding) assert.match(rule, /^(?:@keyframes |(?:from|to|\d+%)(?:, (?:from|to|\d+%))*$|\.chip-pulses path$|\.power-condense$)/, rule);
+  assert.match(css, /\.is-powering \.film-take \{ animation: film-in/);
+  assert.match(read('src/shared/FilmTake.tsx'), /const \[powering\] = useState\(enabled\)/);
   // Every number on the cards comes from its record.
   assert.match(cards, /codesign\.designs/); assert.match(cards, /Supports up to 20,000 types of design rule checks/);
   // The DRC and LVS run is not our tool: no rule check count and no check time on the cards.

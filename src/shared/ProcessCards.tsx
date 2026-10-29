@@ -1,4 +1,4 @@
-import { lazy, Suspense, useLayoutEffect, useRef, type ReactNode } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState, type PointerEvent } from 'react';
 import codesign from '../content/story/codesign.json';
 // The published timing record of the chain the layout card draws (scripts/export-chain-timing.mjs): wall seconds per
 // stage, launch included, and the DRC and LVS result.
@@ -15,43 +15,66 @@ const TIMING = assetUrl('/assets/records/layout-timing.json');
 /** The strip under the film: one value and one line each. The times, the rule types and the frequency range are as
  * Islam states them (10-29); the DRC and LVS result comes from the timing record. */
 export const CLAIMS: { value: string; line: string; href?: string }[] = [
-  { value: 'Under 30\u00a0minutes', line: 'Automated layout, from schematic to finished layout' },
-  { value: 'Under 6\u00a0hours', line: 'Full design, with circuit simulations and optimization' },
+  { value: '<\u202f30\u00a0minutes', line: 'Automated layout, from schematic to finished layout' },
+  { value: '<\u202f6\u00a0hours', line: 'Full design, with circuit simulations and optimization' },
   { value: `${drc.violations} DRC violations`, line: `LVS ${lvs ? 'correct' : 'not correct'} on the finished layout`, href: TIMING },
   { value: 'Up to 20,000', line: 'Types of design rule checks supported' },
   { value: 'DC to 170\u202fGHz', line: 'Designs supported over the whole range' },
 ];
 
-type Card = { id: string; step: string; title: string; line: string; visual: ReactNode };
-/** The process, one card per step, each with a number or a picture from its record. */
+type Card = { id: string; step: string; title: string; line: string };
+/** The process, one step each: what happens, and a picture or numbers from its record. */
 export const CARDS: Card[] = [
-  { id: 'spec', step: 'Specification', title: 'Describe the front-end you need.', line: 'Bands, targets and priorities become the goals every design is scored on.', visual: null },
-  { id: 'schematic', step: 'Schematic', title: 'A topology on your PDK.', line: 'The circuit is drawn from your process devices, every block named.', visual: null },
-  { id: 'simulation', step: 'Simulation', title: 'Simulated with parasitics.', line: 'The layout is extracted and its S-parameters simulated.', visual: null },
-  { id: 'optimization', step: 'Co-optimization', title: 'Transistors and passives, sized together.', line: `${codesign.designs} designs evaluated. The best scores an error of ${codesign.error.toFixed(4)} against the goals.`, visual: null },
-  { id: 'layout', step: 'Layout', title: 'Automated layout.', line: 'Placement, RF lines and bias lines, ground tiles and density fill.', visual: null },
-  { id: 'verification', step: 'Verification', title: `DRC ${drc.violations} violations. LVS ${lvs ? 'correct' : 'not correct'}.`, line: `${RULE_TYPES}. DRC and LVS run on every finished layout.`, visual: null },
-  { id: 'delivery', step: 'Delivery', title: 'Open it in your own design kit.', line: 'A design library in your PDK, with the reports that prove it.', visual: null },
+  { id: 'spec', step: 'Specification', title: 'Tell it what you need.', line: 'Band, targets and priorities. They become the goals every candidate design is scored on.' },
+  { id: 'schematic', step: 'Schematic', title: 'A circuit drawn from your process.', line: 'A topology built from the devices of your PDK, every block named.' },
+  { id: 'simulation', step: 'Simulation', title: 'Simulated as it will be built.', line: 'The layout is extracted with its parasitics and simulated over the whole band, every goal on the plots.' },
+  { id: 'optimization', step: 'Co-optimization', title: 'Transistors and passives, sized together.', line: `Every candidate is scored against the goals and the best is kept: ${codesign.designs} designs, best error ${codesign.error.toFixed(4)}.` },
+  { id: 'layout', step: 'Layout', title: 'Automated layout.', line: 'Placement, RF lines, bias lines, ground tiles and density fill, all from the schematic.' },
+  { id: 'verification', step: 'Verification', title: `DRC ${drc.violations} violations. LVS ${lvs ? 'correct' : 'not correct'}.`, line: `${RULE_TYPES}. Every finished layout goes through DRC and LVS.` },
+  { id: 'delivery', step: 'Delivery', title: 'Open it in your own design kit.', line: 'A design library in your PDK: layout, schematic, symbol and the reports that prove it.' },
 ];
 
-/** The cards rise into place one by one as they come on screen. They are visible by default: only a page that can watch
- * them (IntersectionObserver) and plays motion hides them first, so nothing stays hidden without it. A card the reader
- * has scrolled past (a jump to a later section) counts as seen. Set before the first paint, so no card shows and then hides. */
+/** The steps side by side, one panel under them for the step shown. While the section is on screen and motion plays, a
+ * bar loads across the step shown and the next step follows when it is full; pointing at or focusing the section holds
+ * it. A click (or a swipe on the panel) picks a step. With less motion nothing advances on its own. */
 export function ProcessCards() {
-  const list = useRef<HTMLOListElement>(null), { enabled } = useMotion();
-  useLayoutEffect(() => {
-    const el = list.current;
-    if (!el || !enabled || !('IntersectionObserver' in window)) return;
-    const view = new IntersectionObserver(entries => entries.forEach(entry => {
-      if (!entry.isIntersecting && entry.boundingClientRect.top > 0) return;
-      entry.target.classList.add('is-in'); view.unobserve(entry.target);
-    }), { rootMargin: '0px 0px -12% 0px' });
-    el.dataset.reveal = 'on';
-    el.querySelectorAll('.pc-card').forEach(card => view.observe(card));
-    return () => { view.disconnect(); delete el.dataset.reveal; el.querySelectorAll('.pc-card').forEach(card => card.classList.remove('is-in')); };
-  }, [enabled]);
-  return <ol className="pc-cards" ref={list}>{CARDS.map((card, i) => <li key={card.id} className="pc-card">
-    <div className="pc-text"><p className="pc-step">{String(i + 1).padStart(2, '0')} · {card.step}</p><h3>{card.title}</h3><p>{card.line}</p></div>
-    <div className={`pc-visual pc-visual-${card.id}`}>{card.visual ?? <Suspense fallback={null}><Visual id={card.id} /></Suspense>}</div>
-  </li>)}</ol>;
+  const box = useRef<HTMLDivElement>(null), rail = useRef<HTMLDivElement>(null), { enabled } = useMotion();
+  const [active, setActive] = useState(0), [onScreen, setOnScreen] = useState(false), [held, setHeld] = useState(false);
+  const swipe = useRef<number | null>(null);
+  const go = (i: number) => setActive((i + CARDS.length) % CARDS.length);
+  useEffect(() => {
+    const el = box.current;
+    if (!el || !('IntersectionObserver' in window)) return;
+    const view = new IntersectionObserver(([entry]) => setOnScreen(entry.isIntersecting), { threshold: .35 });
+    view.observe(el);
+    return () => view.disconnect();
+  }, []);
+  // The step shown stays in view in the rail when the rail scrolls (phone), without moving the page.
+  useEffect(() => {
+    const strip = rail.current, tab = strip?.children[active] as HTMLElement | undefined;
+    if (strip && tab && strip.scrollWidth > strip.clientWidth) strip.scrollTo({ left: tab.offsetLeft - (strip.clientWidth - tab.offsetWidth) / 2, behavior: enabled ? 'smooth' : 'instant' });
+  }, [active, enabled]);
+  const down = (e: PointerEvent) => { swipe.current = e.pointerType === 'mouse' ? null : e.clientX; };
+  const up = (e: PointerEvent) => {
+    if (swipe.current === null) return;
+    const dx = e.clientX - swipe.current; swipe.current = null;
+    if (Math.abs(dx) > 60) go(active + (dx < 0 ? 1 : -1));
+  };
+  return <div className="pc-stages" ref={box} data-run={enabled && onScreen && !held ? 'on' : 'off'} data-motion={enabled ? 'on' : 'off'}
+    onPointerEnter={e => e.pointerType === 'mouse' && setHeld(true)} onPointerLeave={() => setHeld(false)}
+    onFocus={() => setHeld(true)} onBlur={e => !e.currentTarget.contains(e.relatedTarget) && setHeld(false)}>
+    <div className="pc-rail" role="tablist" aria-label="Process steps" ref={rail}>
+      {CARDS.map((card, i) => <button key={card.id} id={`pc-tab-${card.id}`} type="button" role="tab" aria-selected={i === active} aria-controls={`pc-panel-${card.id}`}
+        tabIndex={i === active ? 0 : -1} className={i < active ? 'is-done' : undefined} onClick={() => go(i)}
+        onKeyDown={e => { const next = { ArrowRight: 1, ArrowLeft: -1 }[e.key]; if (next) { e.preventDefault(); go(i + next); (e.currentTarget.parentElement!.children[(i + next + CARDS.length) % CARDS.length] as HTMLElement).focus(); } }}>
+        <span className="pc-num">{String(i + 1).padStart(2, '0')}</span><span className="pc-name">{card.step}</span>
+        <i className="pc-load" key={i === active ? `on-${active}` : 'off'} onAnimationEnd={() => go(active + 1)} />
+      </button>)}
+    </div>
+    {CARDS.map((card, i) => <section key={card.id} id={`pc-panel-${card.id}`} className="pc-panel" role="tabpanel" aria-labelledby={`pc-tab-${card.id}`} hidden={i !== active}
+      onPointerDown={down} onPointerUp={up}>
+      <div className="pc-text"><h3>{card.title}</h3><p>{card.line}</p></div>
+      <div className={`pc-visual pc-visual-${card.id}`}><Suspense fallback={null}><Visual id={card.id} /></Suspense></div>
+    </section>)}
+  </div>;
 }
