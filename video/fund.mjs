@@ -14,7 +14,7 @@ const ffmpeg = process.env.FFMPEG ?? 'ffmpeg';
 /** The story's parts kept, in seconds of the story film, in the film's order: the product cut, then the end card. */
 // A join dips through the page colour (Y 31, U 139, V 120) with no frame holding both clips (2d, 11-01: no text over text).
 const DIP = 'if(gt(P,0.5),A*(2*P-1)+if(eq(PLANE,0),31,if(eq(PLANE,1),139,120))*(2-2*P),B*(1-2*P)+if(eq(PLANE,0),31,if(eq(PLANE,1),139,120))*2*P)';
-const PRODUCT = [[1.5, 6], [11, 14], [15.5, 18], [42, 46], [68.5, 71.5], [72.5, 75.5], [77, 80], [88, 92]], END = [106.5, 110], XFADE = .5;
+const PRODUCT = [[1.5, 6], [11, 14], [15.5, 18], [42, 48], [68.5, 71.5], [72.5, 75.5], [77, 80], [88, 91.5]], END = [106.5, 110], XFADE = .5;
 
 const step = (command, args) => {
   const run = spawnSync(command, args, { stdio: 'inherit', cwd: import.meta.dirname });
