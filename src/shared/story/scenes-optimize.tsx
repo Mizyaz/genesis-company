@@ -67,10 +67,11 @@ export function OptimizeView({ frame, layout, links, run, frames: all, objective
   const widths = run.flatMap(r => [1, 2, 3, 4].map(m => r.fet[`w_M${m}`])), wMin = Math.min(...widths), wMax = Math.max(...widths);
   const width = (m: number) => (e0.fet[`w_M${m}`] + (e1.fet[`w_M${m}`] - e0.fet[`w_M${m}`]) * u - wMin) / (wMax - wMin || 1);
   const settle = ease(frame, ...OPT.settle), cards = cardBoxes(layout, BENCH.x, BENCH.y, BENCH.w, BENCH.h, links);
-  // While the run draws them, each coil card names the kind on screen: the kind, then the card's role and the member.
+  // Each coil card names the kind on screen, then the card's role and the member: during the run the candidate's kind,
+  // once the coils settle the layout's own coil, which is a pixelated inductor (its cell is a pix_ cell, pixels merged).
   const KIND_NAMES = ['Inductor', 'Pixelated grid', 'Pixelated inductor'];
-  const titles = settle >= 1 ? undefined : Object.fromEntries(coils.map((m, i) => {
-    const { png } = shot(i, step), role = cards.find(c => c.glyphs.some(g => g.member === m))?.title.split(' ')[0] ?? '';
+  const titles = Object.fromEntries(coils.map((m, i) => {
+    const { png } = settle >= 1 ? {} : shot(i, step), role = cards.find(c => c.glyphs.some(g => g.member === m))?.title.split(' ')[0] ?? '';
     return [m, [png ? KIND_NAMES[png.family === 'spiral' ? 0 : 1] : KIND_NAMES[2], `${role} ${m}`.trim()]];
   }));
   // The card names shrink to one small line, so each coil takes the card's room: its centre moves to the middle of the
