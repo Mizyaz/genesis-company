@@ -261,7 +261,7 @@ export function BlockView({ layout, links, colours, frame, x, y, w, h, start, fo
       const k = out(frame, cardAt(c), cardAt(c) + 12), colour = c.blocks.length > 1 ? C.muted : colours.get(c.blocks[0]) ?? C.muted;
       const faded = dim && !c.blocks.some(b => dim.blocks.includes(b)) ? 1 - .7 * dim.k : 1;
       return <g key={c.id} opacity={k * faded} transform={`translate(${c.cx} ${c.cy}) scale(${.7 + .3 * k}) translate(${-c.cx} ${-c.cy})`}>
-        <rect x={c.cx - c.w / 2} y={c.cy - c.h / 2} width={c.w} height={c.h} rx={12} fill={C.card} stroke={colour} strokeWidth={2} />
+        <rect x={c.cx - c.w / 2} y={c.cy - c.h / 2} width={c.w} height={c.h} rx={12} fill={c.blocks.length > 1 ? C.card : `oklch(from ${colour} var(--fill-l, .35) var(--fill-c, .07) h)`} stroke={colour} strokeWidth={2} />
         {focus && c.glyphs.map(g => focus.kinds.includes(kindOf(g.m.cell)) && <rect key={`f${g.m.member}`} x={c.cx + g.x - g.s * .62} y={c.cy + g.y - g.s * .62} width={g.s * 1.24} height={g.s * 1.24} rx={10}
           fill={P.glow} fillOpacity={.1 * focus.k} stroke={P.glow} strokeOpacity={.9 * focus.k} strokeWidth={3} />)}
         {c.glyphs.map(g => draw(g, c.cx + g.x, c.cy + g.y, colours.get(g.m.block) ?? colour))}
