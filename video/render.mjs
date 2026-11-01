@@ -1,4 +1,4 @@
-// One command per film:  node render.mjs [--composition GenesisPromo|GenesisPromoFramed|GenesisStory|GenesisFundIntro] [--gl angle-egl] [--inputs <folder>] [--audio <music.wav>] [--out <file.mp4>] [--concurrency 4] [--theme light]
+// One command per film:  node render.mjs [--composition GenesisPromo|GenesisPromoFramed|GenesisStory|GenesisFundHead|GenesisFundTail|GenesisFundStory] [--gl angle-egl] [--inputs <folder>] [--audio <music.wav>] [--out <file.mp4>] [--concurrency 4] [--theme light]
 // GenesisPromo reads a footage folder (clips/manifest.json, clips/*.mp4); GenesisStory a story folder (story.json, layout.json,
 // layout/*.png from story/collect.mjs and story/layout_layers.mjs). Both need brand/InterVariable.woff2; renders stay outside git.
 // Remotion's own encoder (compositor) needs glibc >= 2.31; the build host has 2.28. So Chrome renders a JPEG sequence and an
@@ -14,7 +14,7 @@ const inputs = resolve(arg('inputs') ?? (() => { throw new Error('Pass --inputs'
 const stamp = new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '');
 const out = resolve(arg('out', `renders/${composition.startsWith('GenesisStory') ? 'genesis-story' : 'genesis-promo'}-${stamp}.mp4`));
 const ffmpeg = process.env.FFMPEG ?? 'ffmpeg';
-const needed = composition.startsWith('GenesisStory') ? 'story.json' : composition === 'GenesisFundIntro' ? 'brand/InterVariable.woff2' : 'clips/manifest.json';
+const needed = /^Genesis(Story|FundStory)/.test(composition) ? 'story.json' : composition.startsWith('GenesisFund') ? 'brand/InterVariable.woff2' : 'clips/manifest.json';
 if (!existsSync(`${inputs}/${needed}`)) throw new Error(`No ${needed} in ${inputs}`);
 if (ffmpeg.includes('/') && !existsSync(ffmpeg)) throw new Error(`No FFmpeg at ${ffmpeg}; set FFMPEG`);
 const audio = arg('audio') && resolve(arg('audio'));

@@ -1,31 +1,45 @@
-// The fund application's team film: the GenesisFundIntro opening (rendered by render.mjs) and a cut of the story film.
-//   node fund.mjs --inputs <folder with brand/InterVariable.woff2 and assets/team-*.webp> --story <story.mp4> --out <file.mp4> [--gl angle-egl]
-// The story keeps the ask, the schematic, the end of the optimization, the layout, the 3D view and the end card; the parts join with short cross-fades. Needs FFMPEG (or ffmpeg on the PATH), as render.mjs.
+// The fund film: the GenesisFundHead part, a cut of the story film in plain words (GenesisFundStory), the GenesisFundTail
+// part and the story's end card, joined with short cross-fades; a narration track, if given, is muxed as AAC 48 kHz.
+//   node fund.mjs --inputs <folder with brand/InterVariable.woff2, assets/team-*.webp, layout.json, layout/*.png>
+//     --story-inputs <story folder> --out <file.mp4> [--audio <narration.wav>] [--gl angle-egl]
+// Each part renders to <out>_head.mp4, <out>_story.mp4 and <out>_tail.mp4; a part already there is reused, so one part can
+// be rendered again alone by deleting its file. Needs FFMPEG (or ffmpeg on the PATH), as render.mjs.
 import { spawnSync } from 'node:child_process';
-import { rmSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const argv = process.argv.slice(2), arg = (name, fallback) => { const i = argv.indexOf(`--${name}`); return i < 0 ? fallback : argv[i + 1]; };
-const story = resolve(arg('story')), out = resolve(arg('out')), intro = out.replace(/\.mp4$/, '') + '_intro.mp4';
+const out = resolve(arg('out')), stem = out.replace(/\.mp4$/, ''), audio = arg('audio') && resolve(arg('audio'));
 const ffmpeg = process.env.FFMPEG ?? 'ffmpeg';
-/** The story's parts kept, in seconds of the story film, and the cross-fade between parts. */
-const PARTS = [[1.5, 20.3], [58.5, 83.6], [87.6, 94.0], [106.5, 110.5]], XFADE = .5;
+/** The story's parts kept, in seconds of the story film, in the film's order: the product cut, then the end card. */
+const PRODUCT = [[1.5, 6], [11, 14], [15.5, 18], [42, 46], [68.5, 71.5], [72.5, 75.5], [77, 80], [88, 92]], END = [106.5, 110], XFADE = .5;
 
 const step = (command, args) => {
   const run = spawnSync(command, args, { stdio: 'inherit', cwd: import.meta.dirname });
   if (run.status !== 0) { console.error(`Failed: ${command} ${args.join(' ')}`); process.exit(run.status ?? 1); }
 };
-step('node', ['render.mjs', '--composition', 'GenesisFundIntro', '--inputs', resolve(arg('inputs')), '--out', intro, '--concurrency', arg('concurrency', '6'), ...(arg('gl') ? ['--gl', arg('gl')] : [])]);
-// Both inputs carry one frame rate and the same colour tags, so xfade and concat see one stream format.
+const part = (name, composition, inputs) => {
+  const file = `${stem}_${name}.mp4`;
+  if (!existsSync(file)) step('node', ['render.mjs', '--composition', composition, '--inputs', resolve(inputs), '--out', file, '--concurrency', arg('concurrency', '4'), ...(arg('gl') ? ['--gl', arg('gl')] : [])]);
+  return file;
+};
+const seconds = file => {
+  const [, h, m, s] = spawnSync(ffmpeg, ['-hide_banner', '-i', file], { encoding: 'utf8' }).stderr.match(/Duration: (\d+):(\d+):([\d.]+)/);
+  return +h * 3600 + +m * 60 + +s;
+};
+const head = part('head', 'GenesisFundHead', arg('inputs')), tail = part('tail', 'GenesisFundTail', arg('inputs')), story = part('story', 'GenesisFundStory', arg('story-inputs'));
+
+// Both kinds of input carry one frame rate and the same colour tags, so xfade sees one stream format.
 const SAME = 'fps=30,setparams=range=tv:color_primaries=bt709:color_trc=bt709:colorspace=bt709';
-const trims = PARTS.map(([a, b], i) => `[1:v]trim=${a}:${b},setpts=PTS-STARTPTS,${SAME}[s${i}]`);
-let last = 's0', length = PARTS[0][1] - PARTS[0][0];
-const fades = PARTS.slice(1).map(([a, b], i) => {
+const segments = [[0, 0, seconds(head)], ...PRODUCT.map(([a, b]) => [1, a, b]), [2, 0, seconds(tail)], [1, ...END]];
+const trims = segments.map(([input, a, b], i) => `[${input}:v]trim=${a}:${b},setpts=PTS-STARTPTS,${SAME}[s${i}]`);
+let last = 's0', length = segments[0][2] - segments[0][1];
+const starts = [0];
+const fades = segments.slice(1).map(([, a, b], i) => {
   const into = `x${i + 1}`, f = `[${last}][s${i + 1}]xfade=transition=fade:duration=${XFADE}:offset=${(length - XFADE).toFixed(3)}[${into}]`;
-  length += b - a - XFADE; last = into; return f;
+  starts.push(length - XFADE); length += b - a - XFADE; last = into; return f;
 });
-step(ffmpeg, ['-hide_banner', '-loglevel', 'error', '-y', '-threads', '6', '-i', intro, '-i', story, '-filter_complex',
-  [...trims, ...fades, `[0:v]${SAME}[i];[i][${last}]concat=n=2:v=1:a=0,format=yuv420p[v]`].join(';'), '-map', '[v]',
-  '-c:v', 'libx264', '-preset', 'slow', '-crf', '18', '-movflags', '+faststart', out]);
-rmSync(intro);
-console.log(`Rendered ${out}`);
+step(ffmpeg, ['-hide_banner', '-loglevel', 'error', '-y', '-threads', '6', '-i', head, '-i', story, '-i', tail, ...(audio ? ['-i', audio] : []), '-filter_complex',
+  [...trims, ...fades, `[${last}]format=yuv420p[v]`].join(';'), '-map', '[v]', ...(audio ? ['-map', '3:a', '-c:a', 'aac', '-b:a', '192k', '-ar', '48000'] : []),
+  '-t', length.toFixed(3), '-c:v', 'libx264', '-preset', 'slow', '-crf', '18', '-movflags', '+faststart', out]);
+console.log(`Rendered ${out}, ${length.toFixed(2)} s; segments start at ${starts.map(s => s.toFixed(2)).join(', ')} s`);
