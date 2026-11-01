@@ -158,7 +158,7 @@ function Figure({ value, line, source, colour, frame, at }: { value: string; lin
 /** The expensive problem: three sourced numbers, then many variables pulling against many goals. */
 function Problem() {
   const frame = useSceneFrame(), knobs = out(frame, 330, 360), pull = Math.sin(frame / 9);
-  return <Scene chapter="An expensive problem" captions={[[0, 'Chip design is an *expensive* engineering problem.'], [100, ''], [200, ''], [330, 'Every design balances *many variables* against *many goals* at once.']]}>
+  return <Scene chapter="An expensive problem" captions={[[0, 'Chip design is an *expensive* engineering problem.'], [100, ''], [200, ''], [330, 'Moreover, every design has to balance *many variables* against *many goals* at once.']]}>
     <Grid columns={3} top={130}>
       <Figure value="$4.9 billion" line="Chip design software and IP sold in one quarter" source="SEMI ESD Alliance, Q4 2024" colour={B.brand1} frame={frame} at={10} />
       <Figure value="$127,590" line="Median yearly pay of an electronics engineer in the US" source="US Bureau of Labor Statistics, 2024" colour={B.brand3} frame={frame} at={200} />
@@ -216,7 +216,7 @@ function Flow({ from, to, colour, frame, at, span = 24 }: { from: [number, numbe
 /** Business model, customers: RF research knowledge reaches the RF design teams of chip companies through GENESIS. */
 function Customers() {
   const frame = useSceneFrame(), uses: [string, string][] = [['phone', 'Phones'], ['car', 'Car radar'], ['router', 'Wi-Fi'], ['satellite', 'Satellite links']];
-  return <Scene chapter="Business model" captions={[[0, 'Our years at Broadcom, Nokia Siemens Networks and Anokiwave showed us *where the need is*.'], [130, 'Our customers are *the RF design teams* at chip companies.']]}>
+  return <Scene chapter="Business model" captions={[[0, 'Our years at Broadcom, Nokia Siemens Networks and Anokiwave showed us *where the need is*.'], [130, 'Therefore, our customers are *the RF design teams* at chip companies.']]}>
     <svg width={1920} height={1080} style={{ position: 'absolute', inset: 0 }}>
       <Flow from={[520, 300]} to={[820, 300]} colour={B.brand1} frame={frame} at={30} />
       <Flow from={[1100, 300]} to={[1400, 300]} colour={B.brand2} frame={frame} at={120} />
@@ -265,7 +265,7 @@ function Revenue() {
   const steps: [string, string, number][] = [['coin', 'Paid pilots', 130], ['cycle', 'Yearly subscription', 230], ['factory', 'Chip factory partnerships', 330]];
   const at = [100, 200, 300];
   const curve = ease(frame, 100, 380);
-  return <Scene chapter="Business model" captions={[[0, ''], [100, 'From our startup experience, we start with *paid pilots*, where we design RF blocks for a fee.'], [200, ''], [300, 'Finally, chip factories partner with us, so *GENESIS comes with their tools*.']]}>
+  return <Scene chapter="Business model" captions={[[0, ''], [100, 'First, drawing on our startup experience, we start with *paid pilots*, where we design RF blocks for a fee.'], [200, ''], [300, 'Finally, we partner with chip factories, so that *GENESIS comes with their tools*.']]}>
     <svg width={1920} height={1080} style={{ position: 'absolute', inset: 0 }}>
       <line x1={200} y1={BASE} x2={1720} y2={BASE} stroke={alpha(C.muted, .4)} strokeWidth={3} />
       {steps.map(([, , h], i) => { const k = ease(frame, at[i], at[i] + 30);
@@ -285,7 +285,7 @@ function Revenue() {
 /** Business model, why now: AI agents and the factory's rules meet in a chip that passes its checks. */
 function WhyNow() {
   const frame = useSceneFrame();
-  return <Scene chapter="Why now" captions={[[0, 'Today, AI can plan and check this work, so *full automation is possible now*.']]}>
+  return <Scene chapter="Why now" captions={[[0, 'Today, AI can plan and check this work, and therefore *full automation is possible now*.']]}>
     <svg width={1920} height={1080} style={{ position: 'absolute', inset: 0 }}>
       <Flow from={[560, 230]} to={[1250, 360]} colour={B.brand1} frame={frame} at={30} />
       <Flow from={[560, 520]} to={[1250, 400]} colour={B.brand3} frame={frame} at={44} />
@@ -315,8 +315,8 @@ function MillimeterWave({ layout }: FundProps) {
   const frame = useSceneFrame(), SWAP = 190;
   if (!layout) return null;
   const src = layoutSrc(layout), market = 1 - out(frame, SWAP - 16, SWAP);
-  return <Scene chapter="Why it is hard" captions={[[0, 'Millimeter-wave is the next step for *5G, car radar and satellite links*.'], [100, 'At these frequencies, *every wire and every metal layer* is part of the circuit.'],
-    [SWAP, ''], [SWAP + 100, 'It is built on technology stacks held in *proprietary design kits*.'], [SWAP + 200, 'Those kits are *under NDA*, so cloud AI models cannot access them.']]}>
+  return <Scene chapter="Why it is hard" captions={[[0, 'At these frequencies, *every wire and every metal layer* becomes part of the circuit.'],
+    [SWAP, ''], [SWAP + 100, 'In addition, it is built on technology stacks that are held in *proprietary design kits*.'], [SWAP + 200, 'Since these kits are *under NDA*, cloud AI models cannot access them.']]}>
     <div style={{ position: 'absolute', left: -420, top: -40, width: 1920, height: 1080, opacity: out(frame, 0, 20) }}>
       <Chip3DView frame={frame + 60} die={layout.die} layers={layout.layers} src={src} Image={StageImg} />
     </div>
@@ -334,7 +334,7 @@ function MillimeterWave({ layout }: FundProps) {
 /** Our approach: RF know-how with AI methods and local language models, on local hardware, light in the cloud. */
 function Approach() {
   const frame = useSceneFrame(), load = .18 + .04 * Math.sin(frame / 8);
-  return <Scene chapter="Our approach" captions={[[0, 'With our AI expertise, we combine academic RF knowledge with AI methods and *local language models*.'], [150, 'Our models run on local hardware, so *the design kits never leave the company*.'], [270, '']]}>
+  return <Scene chapter="Our approach" captions={[[0, 'That is why we combine academic RF knowledge with AI methods and *local language models*.'], [150, 'Because our models run on local hardware, *the design kits never leave the company*.'], [270, '']]}>
     <svg width={1920} height={1080} style={{ position: 'absolute', inset: 0 }}>
       <Flow from={[520, 250]} to={[800, 360]} colour={B.brand1} frame={frame} at={20} />
       <Flow from={[520, 520]} to={[800, 400]} colour={B.brand3} frame={frame} at={34} />
@@ -366,8 +366,8 @@ function Intro() {
     <SunriseView frame={frame} k={.15 + .45 * ease(frame, 0, 120)} />
     <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 36 }}>
       <LitEmblemView frame={frame} width={340} from={10} />
-      <div style={{ ...font, ...rise(out(frame, 40, 70)), fontSize: 96, fontWeight: 800, letterSpacing: '.06em', background: GRADIENT, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>GENESIS</div>
-      <div style={{ ...font, ...rise(out(frame, 70, 96)), fontSize: 40, fontWeight: 600, color: C.text }}>RF chip design, automated with AI.</div>
+      <div style={{ ...font, ...rise(out(frame, 30, 55)), fontSize: 96, fontWeight: 800, letterSpacing: '.06em', background: GRADIENT, WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }}>GENESIS</div>
+      <div style={{ ...font, ...rise(out(frame, 50, 75)), fontSize: 40, fontWeight: 600, color: C.text }}>RF chip design, automated with AI.</div>
     </div>
   </AbsoluteFill>;
 }
@@ -378,7 +378,7 @@ function Demo() {
     <SunriseView frame={frame} k={.5} />
     <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 40 }}>
       <LitEmblemView frame={frame} width={320} from={2} />
-      <div style={{ ...font, ...rise(out(frame, 30, 52)), fontSize: 60, fontWeight: 750, color: C.text, letterSpacing: '-.01em' }}>Now to the demonstration.</div>
+      <div style={{ ...font, ...rise(out(frame, 30, 52)), fontSize: 60, fontWeight: 750, color: C.text, letterSpacing: '-.01em' }}>Now, let us show you how it works.</div>
     </div>
   </AbsoluteFill>;
 }
@@ -403,7 +403,7 @@ function Team() {
     </div>;
   };
   const together = out(frame, 400, 420);
-  return <Scene chapter="Team" captions={[[0, 'We are the founders of GENESIS, and we build *the AI that designs RF chips*.'], [220, 'We bring *more than ten years* of millimeter-wave chip design in the industry, and the experience of *founding a chip startup*.']]}>
+  return <Scene chapter="Team" captions={[[0, 'We are the founders of GENESIS, and together we build *the AI that designs RF chips*.'], [220, 'Between us, we bring *more than ten years* of millimeter-wave chip design in the industry, as well as the experience of *founding a chip startup*.']]}>
     <div style={{ position: 'absolute', left: 100, right: 100, top: 60, display: 'flex', gap: 70 }}>
       {column(ISLAM, B.brand1, islam, 0)}
       <div style={{ width: 2, background: alpha(C.border, .8) }} />
@@ -433,7 +433,7 @@ function Close() {
 }
 
 const SCENES: Record<FundProps['part'], [string, number, (props: FundProps) => ReactNode][]> = {
-  head: [['intro', 165, Intro], ['opening', 600, Opening], ['team', 480, Team], ['problem', 450, Problem], ['mmwave', 500, MillimeterWave], ['approach', 390, Approach], ['demo', 120, Demo]],
+  head: [['intro', 120, Intro], ['opening', 600, Opening], ['team', 480, Team], ['problem', 450, Problem], ['mmwave', 500, MillimeterWave], ['approach', 390, Approach], ['demo', 120, Demo]],
   tail: [['customers', 270, Customers], ['value', 280, Value], ['revenue', 420, Revenue], ['why-now', 180, WhyNow], ['close', 150, Close]],
 };
 /** The scenes of a part with their film lengths: the narration's timing where there is one, else the design length. */
@@ -441,12 +441,20 @@ const scenes = (part: FundProps['part'], timing: Timing | null) => SCENES[part].
 export const fundFrames = (part: FundProps['part'], timing: Timing | null = null) =>
   scenes(part, timing).reduce((n, [, f]) => n + f, 0) - FADE * (SCENES[part].length - 1);
 
+/** A scene's content, faded out before the next scene's comes in (2d, 11-01: no text over text in a dissolve): the
+ * outgoing scene is gone by the middle of the fade, where the incoming one starts, so only the page is shared. */
+function Gate({ frames, first, last, children }: { frames: number; first: boolean; last: boolean; children: ReactNode }) {
+  const frame = useCurrentFrame(), k = (first ? 1 : out(frame, FADE / 2, FADE + 6)) * (last ? 1 : 1 - out(frame, frames - FADE - 6, frames - FADE / 2));
+  return <AbsoluteFill style={{ background: C.page }}><AbsoluteFill style={{ opacity: k }}>{children}</AbsoluteFill></AbsoluteFill>;
+}
+
 export function FundIntro(props: FundProps) {
+  const all = scenes(props.part, props.timing);
   return <AbsoluteFill><TransitionSeries>
-    {scenes(props.part, props.timing).flatMap(([id, frames, View], i) => [
+    {all.flatMap(([id, frames, View], i) => [
       ...(i ? [<TransitionSeries.Transition key={`${id}-in`} presentation={fade()} timing={linearTiming({ durationInFrames: FADE })} />] : []),
       <TransitionSeries.Sequence key={id} name={id} durationInFrames={frames}>
-        <SceneBeats.Provider value={props.timing?.[id]?.beats}><View {...props} /></SceneBeats.Provider>
+        <Gate frames={frames} first={!i} last={i === all.length - 1}><SceneBeats.Provider value={props.timing?.[id]?.beats}><View {...props} /></SceneBeats.Provider></Gate>
       </TransitionSeries.Sequence>,
     ])}
   </TransitionSeries></AbsoluteFill>;

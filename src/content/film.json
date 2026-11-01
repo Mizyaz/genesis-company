@@ -143,6 +143,14 @@
     "well-border": {
       "dark": "#20364b",
       "light": "#c4d4e5"
+    },
+    "fill-l": {
+      "dark": ".35",
+      "light": ".93"
+    },
+    "fill-c": {
+      "dark": ".07",
+      "light": ".045"
     }
   }
 }

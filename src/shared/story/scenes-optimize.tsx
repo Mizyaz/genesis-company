@@ -26,34 +26,42 @@ const PARETO = { y: 92, h: 388 };
 // Inductor pictures are drawn for a dark ground: the lift filter brightens them there and inverts them on the light stage.
 const LIFT = film('lift');
 const COIL_NAMES = ['L1', 'L2', 'L3'];
-// The run draws the parametric candidates only (spirals); pixel-filled shapes are left out.
+// The run shows the three kinds of passive device (Islam 11-01): traditional inductors (spirals), pixelated grids
+// (square, hexagon and triangle pixels) and pixelated inductors (the coil search's square-pixel candidates). Each coil
+// takes the next kind at every step, so all three kinds are on screen at once and every coil shows each kind.
+const KINDS = 3, STEPS = 6;
 const spirals = (frames: CoilFrame[]) => frames.filter(f => f.family === 'spiral');
-const runTimes = (frames: CoilFrame[]) => {
-  const steps = Math.floor(frames.length / COIL_NAMES.length), [from, to] = OPT.run, per = (to - from) / steps;
+const grids = (frames: CoilFrame[]) => frames.filter(f => f.family !== 'spiral');
+const runTimes = () => {
+  const steps = STEPS, [from, to] = OPT.run, per = (to - from) / steps;
   return { steps, from, to, per, sizeAt: Math.round((from + to) / 2) };
 };
 /** The scene's caption band: chapter and captions from the frame each starts. */
 export const optimizeCaptions = (frames: CoilFrame[]): { chapter: string; captions: [number, string][] } => {
-  const { sizeAt } = runTimes(spirals(frames));
+  const { sizeAt } = runTimes();
   return { chapter: 'Optimization', captions: [[0, 'GENESIS explores passive shapes and metal layers.'], [sizeAt, 'GENESIS sizes your passives and switch FETs together.'],
     [OPT.fan, 'GENESIS brings your best passive designs.'], [OPT.pareto[0], 'Identify your trade-offs from multiple designs.'], [OPT.choose, 'GENESIS updates your circuit.']] };
 };
 
 /** The optimizer at work on the block view itself, going on from the specification's picture: the block view comes
  * forward and the score turns into the optimization's panel. The coils inside the cards try the candidates in order
- * (spirals of every turn count and metal stack, all at one scale: a parametric shape is never drawn filled with pixels) and the switch FETs take the run's
+ * (spirals, pixelated grids and pixelated inductors in turn, the pictures at one scale: a parametric shape is never drawn filled with pixels) and the switch FETs take the run's
  * widths while its error falls. At the end the best coil designs of the layout's coil search fan out beside each coil,
  * the layout's own coil is chosen and settles in, the run's Pareto front opens in the free room above the panel with
  * three designs of it lit, and the block view goes back to the size the layout scene starts from. `src` turns a
  * candidate's file into the picture's address. */
 export function OptimizeView({ frame, layout, links, run, frames: all, objective, candidates, src }: { frame: number; layout: OptLayout; links: BlockLinks; run: RunStep[];
   frames: CoilFrame[]; objective: Objective; candidates: CoilCandidate[]; src: (file: string) => string }) {
-  const chip = chipColours(layout), chipCoils = (k: number) => coilGlyphs(layout.shapes, k), list = spirals(all);
+  const chip = chipColours(layout), chipCoils = (k: number) => coilGlyphs(layout.shapes, k), list = [...spirals(all), ...grids(all)], kinds = [spirals(all), grids(all)];
   const come = ease(frame, 0, 36), back = ease(frame, ...OPT.back), k = come * (1 - back);
   // The run: each coil steps through its share of the candidates, the FETs through the run's widths.
-  const coils = COIL_NAMES, { steps, from, to, per } = runTimes(list);
+  const coils = COIL_NAMES, { steps, from, to, per } = runTimes();
   const step = Math.min(steps - 1, Math.max(0, Math.floor((frame - from) / per))), grow = ease(frame - from - step * per, 0, Math.min(10, per * .6));
-  const shot = (i: number, j: number) => list[Math.max(0, j) * coils.length + i];
+  /** Coil i's candidate at step j: a picture (spiral or pixel grid) or a pixelated inductor's record (`pix`). */
+  const shot = (i: number, j: number): { png?: CoilFrame; pix?: CoilCandidate } => {
+    const n = Math.max(0, j), kind = (i + n) % KINDS, at = n * coils.length + i;
+    return kind < 2 && kinds[kind].length ? { png: kinds[kind][at % kinds[kind].length] } : { pix: candidates[at % candidates.length] };
+  };
   const first = 8, at = first + Math.max(0, Math.min(1, (frame - from) / (to - from))) * (run.length - 1 - first);
   const e0 = run[Math.floor(at)], e1 = run[Math.min(run.length - 1, Math.floor(at) + 1)], u = at - Math.floor(at);
   const widths = run.flatMap(r => [1, 2, 3, 4].map(m => r.fet[`w_M${m}`])), wMin = Math.min(...widths), wMax = Math.max(...widths);
@@ -73,9 +81,14 @@ export function OptimizeView({ frame, layout, links, run, frames: all, objective
     if (i >= 0) {
       const r = roomOf(member), x = gx + (r.x - gx) * k, y = gy + (r.y - gy) * k, sz = s + (Math.min(r.w, r.h) * .95 / 1.15 - s) * k;
       if (settle >= 1) return chipCoils(1)(member, x, y, sz);
-      const now = shot(i, step), was = shot(i, step - 1), fNow = scaleOf(member, now), f = fNow * (1 + (Math.max(...was.px) * scaleOf(member, was) / (Math.max(...now.px) * fNow) - 1) * (1 - grow)), w = now.px[0] * f, h = now.px[1] * f;
+      const { png, pix } = shot(i, step), pop = .85 + .15 * grow;
+      let drawn;
+      if (png) { const f = scaleOf(member, png) * pop, w = png.px[0] * f, h = png.px[1] * f;
+        drawn = <image href={src(png.file)} x={x - w / 2} y={y - h / 2} width={w} height={h} style={{ filter: LIFT }} />; }
+      else { const [x0, y0, x1, y1] = pix!.bbox;
+        drawn = <CoilShape sample={{ ...pix!, source: pix!.run, eval: '' }} cx={x} cy={y} s={sz * 1.15 * pop / Math.max(x1 - x0, y1 - y0)} colour={COILS[member]} />; }
       return <g key={member}>
-        <g opacity={1 - settle} transform={vertical ? `rotate(90 ${x} ${y})` : undefined}><image href={src(now.file)} x={x - w / 2} y={y - h / 2} width={w} height={h} style={{ filter: LIFT }} /></g>
+        <g opacity={1 - settle} transform={vertical ? `rotate(90 ${x} ${y})` : undefined}>{drawn}</g>
         {settle > 0 && chipCoils(settle)(member, x, y, sz)}
       </g>;
     }
