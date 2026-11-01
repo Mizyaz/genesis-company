@@ -224,7 +224,7 @@ function Bench({ cards, die, k, t }: { cards: Card[]; die: { x: number; y: numbe
   </g>;
 }
 
-export function BlockView({ layout, links, colours, frame, x, y, w, h, start, focus, bench = 0, glyph, dim, compact = 0, textUnits = TITLE }:
+export function BlockView({ layout, links, colours, frame, x, y, w, h, start, focus, bench = 0, glyph, dim, compact = 0, textUnits = TITLE, titles }:
   { layout: Layout; links: BlockLinks; colours: Map<string, string>; frame: number; x: number; y: number; w: number; h: number; start: number;
     focus?: { kinds: Kind[]; k: number }; bench?: number;
     /** Draws a member in place of its glyph, or returns undefined to keep the glyph. */
@@ -234,7 +234,9 @@ export function BlockView({ layout, links, colours, frame, x, y, w, h, start, fo
     /** By k, each card's name turns into one small line at its bottom, leaving the card's room to its drawing. */
     compact?: number;
     /** The card names' size in stage units, the bench names' with them; a print sets it, and the cards grow to fit. */
-    textUnits?: number }) {
+    textUnits?: number;
+    /** A card's small name, by a member it holds, in place of its own (lines; the optimization names the kind on screen). */
+    titles?: Record<string, string[]> }) {
   const { cards, die } = arrange(layout, x, y, w, h, links, textUnits), t = textUnits / TITLE, recorded = coilGlyphs(layout.shapes, 1);
   // A pixelated member is drawn as its recorded shape; the card's name follows the drawing.
   const draw = (g: Card['glyphs'][number], x: number, y: number, colour: string) => glyph?.(g.m.member, x, y, g.s, g.vertical)
@@ -265,7 +267,7 @@ export function BlockView({ layout, links, colours, frame, x, y, w, h, start, fo
         {focus && c.glyphs.map(g => focus.kinds.includes(kindOf(g.m.cell)) && <rect key={`f${g.m.member}`} x={c.cx + g.x - g.s * .62} y={c.cy + g.y - g.s * .62} width={g.s * 1.24} height={g.s * 1.24} rx={10}
           fill={P.glow} fillOpacity={.1 * focus.k} stroke={P.glow} strokeOpacity={.9 * focus.k} strokeWidth={3} />)}
         {c.glyphs.map(g => draw(g, c.cx + g.x, c.cy + g.y, colours.get(g.m.block) ?? colour))}
-        {[{ lines: c.lines, small: c.title.length > 22 ? c.lines : [c.title] }].map(({ lines, small }, n) => <g key={n}>
+        {[{ lines: c.lines, small: c.glyphs.map(g => titles?.[g.m.member]).find(Boolean) ?? (c.title.length > 22 ? c.lines : [c.title]) }].map(({ lines, small }, n) => <g key={n}>
           {compact < 1 && lines.map((l, i) => <text key={l} x={c.cx} y={c.cy + c.h / 2 - 11 * t - (lines.length - 1 - i) * 25 * t} textAnchor="middle" fontFamily="Inter" fontWeight={650} fontSize={textUnits} fill={P.ink} opacity={1 - compact}>{l}</text>)}
           {compact > 0 && small.map((l, i, all) => <text key={`s${l}`} x={c.cx} y={c.cy + c.h / 2 - 8 - (all.length - 1 - i) * 17} textAnchor="middle" fontFamily="Inter" fontWeight={600} fontSize={15} fill={P.soft} opacity={compact}>{l}</text>)}
         </g>)}
