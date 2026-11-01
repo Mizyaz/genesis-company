@@ -1,5 +1,6 @@
 import { Composition } from 'remotion';
 import { FramedPromo } from './FramedPromo';
+import { FundIntro, fundIntroFrames } from './FundIntro';
 import { Promo, promoMetadata } from './Promo';
 import { Story, storyFrames, storyMetadata } from './Story';
 import { FPS, totalFrames } from './storyboard';
@@ -14,5 +15,6 @@ export function Root() {
       durationInFrames={storyFrames()} defaultProps={{ story: null, layout: null, links: null, sparams: null, optimize: null, circuits: null, coilFrames: null, objective: null, candidates: null }} calculateMetadata={storyMetadata} />
     <Composition id="GenesisStoryAlt" component={Story} width={1920} height={1080} fps={FPS}
       durationInFrames={storyFrames(true)} defaultProps={{ alt: true, story: null, layout: null, links: null, sparams: null, optimize: null, circuits: null, coilFrames: null, objective: null, candidates: null }} calculateMetadata={storyMetadata} />
+    <Composition id="GenesisFundIntro" component={FundIntro} width={1920} height={1080} fps={FPS} durationInFrames={fundIntroFrames()} />
   </>;
 }
