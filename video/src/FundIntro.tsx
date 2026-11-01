@@ -4,7 +4,7 @@ import { linearTiming, TransitionSeries } from '@remotion/transitions';
 import { fade } from '@remotion/transitions/fade';
 import { loadFont } from '@remotion/fonts';
 import { alpha, B, C, GRADIENT } from './Brand';
-import { LitEmblemView, SunriseView, Wordmark } from '../../src/shared/story/landing';
+import { LitEmblemView, SunriseView } from '../../src/shared/story/landing';
 import { Signature } from '../../src/shared/story/scenes-end';
 import { CaptionBand } from '../../src/shared/story/scenes';
 import { Chip3DView } from '../../src/shared/story/scenes-validation';
@@ -27,14 +27,20 @@ const FADE = 16;
 /** The site's claims strip (ProcessCards' CLAIMS): layout and full design times. */
 const CLAIMS = [{ value: '< 30 minutes', line: 'Automated layout, from schematic to finished layout' }, { value: '< 6 hours', line: 'Full design, with circuit simulations and optimization' }];
 const [ISLAM, MEHMET] = site.about.people;
-/** From the founders' public scholar profiles (read 2026-11-01): citations, publications and research directions.
- * Mehmet's industry line (role, years, the startups he built) is set here once Islam gives it; until then the card
- * shows the site's own line. */
+/** Public facts on the founders (read 2026-11-01): citations and publications from their scholar profiles, Mehmet's
+ * industry, startup and degrees from his research-group page and his interview with the microwave society, İslam's
+ * degree and group from his research-group page and his master's lab. A slot left null is a fact no public page
+ * confirms; it shows nothing until it is filled. */
 const FOUNDERS = {
-  islam: { citations: 253, themes: ['RF circuit synthesis with learning', 'Chip design with artificial intelligence', 'Multi-agent reinforcement learning', 'Drone swarms and wireless networks', 'Radar signal classification', 'Joint communication and sensing'] },
-  mehmet: { citations: 400, publications: 31, chips: 13, phd: 'PhD on millimeter-wave circuits in silicon, University of California San Diego',
-    industry: null as string | null,
-    designs: [['DC to 60 GHz', 'Switch, 2.5 dB loss'], ['Q-band', 'Low-noise amplifier, 2.9 dB noise figure'], ['77 to 90 GHz', 'Bidirectional amplifier'], ['W-band', 'Phase shifter']] },
+  islam: { citations: 253, publications: 'Multi-drone networks, radar signal classification, and RF circuit design with learning',
+    intro: ['PhD researcher at Université catholique de Louvain.', 'He builds GENESIS end to end: learning systems that design RF circuits and their layout.'],
+    academic: ["Master's in electrical engineering, Özyeğin University, 2024", 'Networked and Autonomous Systems Lab: multi-drone planning with reinforcement learning'],
+    phd: 'PhD researcher, RF group, Université catholique de Louvain', advisor: null as string | null },
+  mehmet: { citations: 400, publications: 31, chips: 13,
+    intro: ['More than ten years designing millimeter-wave chips in industry, at Broadcom among others.', 'He founded a millimeter-wave startup from his PhD research, and holds an MBA.'],
+    industry: ['Broadcom: millimeter-wave backhaul transceivers and a 60 GHz mesh chipset', 'Also Nokia Siemens Networks, Panasonic and Anokiwave'],
+    startup: ['Founder, Radiofast Microsystems, from his PhD research', 'Winner, UC San Diego Entrepreneur Challenge'],
+    education: ["Bachelor's in electrical engineering, Middle East Technical University, 2005", 'PhD in electrical engineering, UC San Diego, 2012', 'MBA, UC Irvine, Paul Merage School of Business, 2019'] },
 };
 
 const font: CSSProperties = { fontFamily: 'Inter' };
@@ -52,15 +58,6 @@ const Chip = ({ children, colour, k }: { children: ReactNode; colour: string; k:
   <span style={{ ...font, ...rise(k, 14), display: 'inline-block', padding: '10px 20px', borderRadius: 999, fontSize: 24, fontWeight: 600, color: C.text,
     background: alpha(colour, .12), border: `2px solid ${alpha(colour, .55)}`, whiteSpace: 'nowrap' }}>{children}</span>;
 
-/** A large number that counts up, with its line. */
-function Big({ value, line, colour, frame, at, suffix = '' }: { value: number; line: string; colour: string; frame: number; at: number; suffix?: string }) {
-  const k = out(frame, at, at + 16);
-  return <div style={{ ...font, ...rise(k), maxWidth: 520 }}>
-    <div style={{ fontSize: 112, fontWeight: 800, lineHeight: 1, color: colour, letterSpacing: '-.03em', textShadow: `0 0 40px ${alpha(colour, .35)}` }}>{count(value, frame, at)}{suffix}</div>
-    <div style={{ marginTop: 8, fontSize: 28, fontWeight: 600, color: C.muted, lineHeight: 1.3 }}>{line}</div>
-  </div>;
-}
-
 const Scene = ({ children, chapter, captions }: { children: ReactNode; chapter: string; captions: [number, string][] }) => {
   const frame = useCurrentFrame();
   return <AbsoluteFill style={{ background: C.page, overflow: 'hidden' }}>{children}<CaptionBand chapter={chapter} captions={captions} frame={frame} shade={out(frame, 4, 16)} /></AbsoluteFill>;
@@ -77,107 +74,74 @@ function Opening() {
   </AbsoluteFill>;
 }
 
+/** One team window: İslam, then Mehmet, fill the same window in turn, each with two sentences. */
 function Team() {
-  const frame = useCurrentFrame();
-  const card = (person: typeof ISLAM, colour: string, at: number) => {
-    const k = out(frame, at, at + 22);
-    return <div style={{ ...font, ...rise(k, 40), width: 780, display: 'flex', gap: 36, alignItems: 'center', padding: 34, borderRadius: 32, background: alpha(C.card, .9), border: `1px solid ${C.border}`, boxShadow: `0 30px 80px ${alpha('#000', .35)}` }}>
-      <Portrait person={person} size={250} colour={colour} k={k} />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <div style={{ fontSize: 46, fontWeight: 800, color: C.text, letterSpacing: '-.01em' }}>{person.name}</div>
-        <div style={{ fontSize: 27, fontWeight: 600, color: colour, lineHeight: 1.25 }}>{person.role}</div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 10 }}>
-          {person.focus.map((f, i) => <Chip key={f} colour={colour} k={out(frame, at + 30 + i * 8, at + 46 + i * 8)}>{f}</Chip>)}
-        </div>
+  const frame = useCurrentFrame(), SWAP = 500;
+  const page = (person: typeof ISLAM, colour: string, lines: string[], from: number, to: number) => {
+    const k = out(frame, from + 6, from + 28) * (1 - out(frame, to - 18, to));
+    if (k <= 0) return null;
+    return <div style={{ position: 'absolute', inset: 0, display: 'flex', gap: 70, alignItems: 'center', padding: '0 70px', opacity: k }}>
+      <Portrait person={person} size={330} colour={colour} k={k} />
+      <div style={{ ...font, display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={{ ...rise(k), fontSize: 64, fontWeight: 800, color: C.text, letterSpacing: '-.015em' }}>{person.name}</div>
+        <div style={{ ...rise(out(frame, from + 16, from + 36)), fontSize: 30, fontWeight: 650, color: colour }}>{person.role}</div>
+        {lines.map((l, i) => <div key={l} style={{ ...rise(out(frame, from + 50 + i * 90, from + 72 + i * 90)), fontSize: 36, fontWeight: 500, color: C.text, lineHeight: 1.4, maxWidth: 1000, marginTop: i ? 0 : 14 }}>{l}</div>)}
       </div>
     </div>;
   };
-  return <Scene chapter="Team" captions={[[0, site.about.headline], [170, 'Millimeter-wave chips and artificial intelligence, in one team.']]}>
-    <SunriseView frame={frame} k={.45} />
-    <div style={{ position: 'absolute', left: 0, right: 0, top: 170, display: 'flex', justifyContent: 'center', gap: 60 }}>
-      {card(MEHMET, B.brand3, 10)}{card(ISLAM, B.brand1, 34)}
+  return <Scene chapter="Team" captions={[[0, site.about.headline], [SWAP, 'Millimeter-wave chips and artificial intelligence, in one team.']]}>
+    <SunriseView frame={frame} k={.4} />
+    <div style={{ position: 'absolute', left: 120, right: 120, top: 90, height: 560, borderRadius: 36, background: alpha(C.card, .92), border: `1px solid ${C.border}`, boxShadow: `0 30px 90px ${alpha('#000', .4)}`, overflow: 'hidden' }}>
+      {page(ISLAM, B.brand1, FOUNDERS.islam.intro, 0, SWAP)}
+      {page(MEHMET, B.brand3, FOUNDERS.mehmet.intro, SWAP, 10_000)}
     </div>
   </Scene>;
 }
 
-/** A founder's page: the portrait and name on the left, the numbers and the story on the right. */
-function Founder({ person, colour, chapter, captions, children }: { person: typeof ISLAM; colour: string; chapter: string; captions: [number, string][]; children: ReactNode }) {
-  const frame = useCurrentFrame(), head = out(frame, 6, 26);
-  return <Scene chapter={chapter} captions={captions}>
-    <div style={{ position: 'absolute', inset: 0, background: `radial-gradient(ellipse at 15% 32%, ${alpha(colour, .16)}, transparent 55%)` }} />
-    <div style={{ position: 'absolute', left: 110, top: 100, width: 360, display: 'flex', flexDirection: 'column', gap: 22 }}>
-      <Portrait person={person} size={320} colour={colour} k={head} />
-      <div style={{ ...font, ...rise(head), fontSize: 46, fontWeight: 800, color: C.text, letterSpacing: '-.01em' }}>{person.name}</div>
-      <div style={{ ...font, ...rise(out(frame, 14, 32)), fontSize: 26, fontWeight: 600, color: colour, lineHeight: 1.3, marginTop: -12 }}>{person.role}</div>
-    </div>
-    <div style={{ position: 'absolute', left: 560, right: 110, top: 100, bottom: 330 }}>{children}</div>
-  </Scene>;
+/** One row of the portfolio: a heading and its lines, lit when it arrives. */
+function Row({ heading, lines, colour, frame, at, lead = false }: { heading: string; lines: string[]; colour: string; frame: number; at: number; lead?: boolean }) {
+  const k = out(frame, at, at + 18);
+  return <div style={{ ...font, ...rise(k, 20), padding: lead ? '12px 20px' : '2px 20px', borderRadius: 20, background: lead ? alpha(colour, .1) : 'transparent', borderLeft: `4px solid ${alpha(colour, lead ? 1 : .5)}` }}>
+    <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: colour }}>{heading}</div>
+    {lines.map(l => <div key={l} style={{ marginTop: 4, fontSize: 25, fontWeight: 550, color: C.text, lineHeight: 1.3 }}>{l}</div>)}
+  </div>;
 }
 
-/** Mehmet: citations and chip designs from his scholar profile, the front-ends he designed, his industry line. */
-function Mehmet() {
-  const frame = useCurrentFrame(), m = FOUNDERS.mehmet;
-  return <Founder person={MEHMET} colour={B.brand3} chapter="Team · Millimeter-wave chips and ventures"
-    captions={[[0, `${MEHMET.name} has designed millimeter-wave chips since 2010.`], [400, 'More than 20 years building technology ventures.']]}>
-    <div style={{ display: 'flex', gap: 90 }}>
-      <Big value={m.citations} line="Citations" colour={B.brand3} frame={frame} at={30} />
-      <Big value={m.publications} line={`Publications, ${m.chips} of them RF and millimeter-wave chip designs`} colour={B.brand3} frame={frame} at={52} />
+/** The joint portfolio: both founders side by side, İslam first, Mehmet's industry first in his column. */
+function Portfolio() {
+  const frame = useCurrentFrame(), { islam, mehmet } = FOUNDERS;
+  const column = (person: typeof ISLAM, colour: string, rows: [string, string[], boolean?][], from: number) =>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 22, marginBottom: 6 }}>
+        <Portrait person={person} size={96} colour={colour} k={out(frame, from - 30, from - 10)} />
+        <div style={{ ...font, ...rise(out(frame, from - 30, from - 10)), fontSize: 40, fontWeight: 800, color: C.text }}>{person.name}</div>
+      </div>
+      {rows.map(([heading, lines, lead], i) => <Row key={heading} heading={heading} lines={lines} colour={colour} frame={frame} at={from + i * 75} lead={lead} />)}
+    </div>;
+  const islamRows: [string, string[], boolean?][] = [
+    ['Publications', [`${islam.citations} citations`, islam.publications]],
+    ['Academic experience', islam.academic],
+    ['PhD', [islam.phd]],
+    ...(islam.advisor ? [['Advisor', [islam.advisor]] as [string, string[]]] : []),
+  ];
+  const mehmetRows: [string, string[], boolean?][] = [
+    ['Industry', mehmet.industry, true],
+    ['Startup', mehmet.startup, true],
+    ['Publications', [`${mehmet.citations} citations, ${mehmet.publications} publications`, `${mehmet.chips} of them RF and millimeter-wave chip designs`]],
+    ['Education', mehmet.education],
+  ];
+  const together = out(frame, 760, 780);
+  return <Scene chapter="Team · Portfolio" captions={[[0, `${ISLAM.name}: learning systems that design RF circuits.`], [360, `${MEHMET.name}: millimeter-wave chips, in industry and in his own startup.`], [760, 'Together, they are GENESIS, working today.']]}>
+    <div style={{ position: 'absolute', left: 90, right: 90, top: 40, display: 'flex', gap: 60 }}>
+      {column(ISLAM, B.brand1, islamRows, 40)}
+      <div style={{ width: 2, background: alpha(C.border, .8), opacity: out(frame, 330, 350) }} />
+      {column(MEHMET, B.brand3, mehmetRows, 380)}
     </div>
-    <div style={{ ...font, ...rise(out(frame, 90, 110)), marginTop: 36, fontSize: 30, fontWeight: 600, color: C.text }}>{m.phd}</div>
-    <div style={{ marginTop: 24, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20 }}>
-      {m.designs.map(([band, what], i) => { const at = 130 + i * 55, k = out(frame, at, at + 18);
-        return <div key={band} style={{ ...font, ...rise(k, 30), padding: '20px 22px', borderRadius: 22, background: C.card, border: `1px solid ${C.border}`, borderTop: `4px solid ${B.brand3}` }}>
-          <div style={{ fontSize: 34, fontWeight: 800, color: B.brand3, letterSpacing: '-.01em' }}>{band}</div>
-          <div style={{ marginTop: 8, fontSize: 24, fontWeight: 600, color: C.text, lineHeight: 1.3 }}>{what}</div>
-        </div>; })}
-    </div>
-    {/* The industry slot: Islam's line on Mehmet's industry role and startups replaces the site's line here. */}
-    <div style={{ ...font, ...rise(out(frame, 400, 420)), marginTop: 30, fontSize: 30, fontWeight: 500, color: C.muted, lineHeight: 1.4, minHeight: 126 }}>{m.industry ?? MEHMET.description}</div>
-  </Founder>;
-}
-
-/** İslam: citations from his scholar profile and the directions of his research, joined in GENESIS. */
-function Islam() {
-  const frame = useCurrentFrame(), themes = FOUNDERS.islam.themes, cx = 620, cy = 380, rx = 560, ry = 200, join = 70 + themes.length * 40;
-  const centre = out(frame, join, join + 30);
-  const at = (i: number) => { const a = -Math.PI / 2 + i * 2 * Math.PI / themes.length; return [cx + rx * Math.cos(a), cy + ry * Math.sin(a)]; };
-  return <Founder person={ISLAM} colour={B.brand1} chapter="Team · Learning systems and GENESIS"
-    captions={[[0, `${ISLAM.name}: learning systems, from drone swarms to RF circuits.`], [420, 'He builds GENESIS end to end.']]}>
-    <Big value={FOUNDERS.islam.citations} line="Citations" colour={B.brand1} frame={frame} at={30} />
-    <svg width={1250} height={650} style={{ position: 'absolute', left: 0, top: 0, overflow: 'visible' }}>
-      {themes.map((_, i) => { const [x, y] = at(i), k = ease(frame, join, join + 50);
-        return <line key={i} x1={x} y1={y} x2={x + (cx - x) * k} y2={y + (cy - y) * k} stroke={alpha(B.brand1, .55)} strokeWidth={3} />; })}
-    </svg>
-    {themes.map((t, i) => { const [x, y] = at(i), k = out(frame, 70 + i * 40, 90 + i * 40);
-      return <div key={t} style={{ position: 'absolute', left: x, top: y, transform: `translate(-50%, -50%) scale(${.8 + .2 * k})`, opacity: k, borderRadius: 999, background: C.page }}>
-        <Chip colour={i < 2 ? B.brand1 : B.brand2} k={1}>{t}</Chip>
-      </div>; })}
-    <div style={{ position: 'absolute', left: cx, top: cy, transform: `translate(-50%, -50%) scale(${.6 + .4 * centre})`, opacity: centre, display: 'flex', alignItems: 'center', gap: 18,
-      padding: '14px 26px', borderRadius: 26, background: alpha(C.page, .9) }}>
-      <LitEmblemView frame={frame} width={110} from={join} /><Wordmark size={60} />
-    </div>
-  </Founder>;
-}
-
-/** Why this team: the two backgrounds run in as two streams and join in the mark. */
-function WhyTeam() {
-  const frame = useCurrentFrame(), draw = ease(frame, 10, 70), mark = out(frame, 60, 90);
-  const stream = (y: number, colour: string, label: string, at: number, below = false) => <>
-    <path d={`M 160 ${y} C 620 ${y}, 700 330, 1060 330`} fill="none" stroke={colour} strokeWidth={10} strokeLinecap="round" pathLength={1} strokeDasharray="1 1" strokeDashoffset={1 - draw} style={{ filter: `drop-shadow(0 0 12px ${colour})` }} />
-    <foreignObject x={150} y={below ? y + 26 : y - 92} width={760} height={70}><div style={{ ...font, ...rise(out(frame, at, at + 18)), fontSize: 34, fontWeight: 700, color: colour }}>{label}</div></foreignObject>
-  </>;
-  return <Scene chapter="Why this team" captions={[[0, 'Chips that work in silicon, and learning systems that design them.'], [300, 'Together, they are GENESIS, working today.']]}>
-    <svg width={1920} height={1080} style={{ position: 'absolute', inset: 0, overflow: 'visible' }}>
-      {stream(200, B.brand3, 'Millimeter-wave chips, designed and measured', 6)}
-      {stream(470, B.brand1, 'Machine learning, optimization and agents', 18, true)}
-    </svg>
-    <div style={{ position: 'absolute', left: 1060, top: 330, transform: `translate(-6%, -50%) scale(${.6 + .4 * mark})`, opacity: mark, display: 'flex', alignItems: 'center', gap: 28 }}>
-      <LitEmblemView frame={frame} width={200} from={60} /><Wordmark size={92} />
-    </div>
-    <div style={{ position: 'absolute', left: 0, right: 0, top: 600, display: 'flex', gap: 120, justifyContent: 'center' }}>
-      <Big value={FOUNDERS.mehmet.citations + FOUNDERS.islam.citations} line="Citations together" colour={B.brand2} frame={frame} at={110} />
-      <Big value={FOUNDERS.mehmet.chips} line="RF and millimeter-wave chip designs" colour={B.brand3} frame={frame} at={130} />
-      <Big value={20} suffix="+" line="Years of venture building" colour={B.brand1} frame={frame} at={150} />
+    <div style={{ ...font, ...rise(together), position: 'absolute', left: 110, top: 690, display: 'flex', alignItems: 'center', gap: 20 }}>
+      <LitEmblemView frame={frame} width={80} from={760} />
+      <div style={{ fontSize: 30, fontWeight: 700, color: C.text }}>
+        <span style={{ color: B.brand2, fontWeight: 800 }}>{count(islam.citations + mehmet.citations, frame, 770)}</span> citations together
+      </div>
     </div>
   </Scene>;
 }
@@ -308,7 +272,7 @@ function Bridge() {
 }
 
 const SCENES: [string, number, (props: FundProps) => ReactNode][] = [
-  ['opening', 140, Opening], ['team', 420, Team], ['mehmet', 780, Mehmet], ['islam', 720, Islam], ['why', 600, WhyTeam],
+  ['opening', 140, Opening], ['team', 1000, Team], ['portfolio', 1260, Portfolio],
   ['what', 300, WhatIs], ['hard', 360, WhyHard], ['bottleneck', 330, Bottleneck], ['answer', 210, Answer], ['bridge', 74, Bridge],
 ];
 export const fundIntroFrames = () => SCENES.reduce((n, [, f]) => n + f, 0) - FADE * (SCENES.length - 1);
