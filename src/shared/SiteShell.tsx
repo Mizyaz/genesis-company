@@ -49,7 +49,7 @@ export function SiteShell({ children, theme, onThemeChange }: { children: ReactN
     <header className="site-header" data-menu={menuOpen ? 'open' : 'closed'}>
       <a className="brand-link" href="#/" aria-label="GENESIS home"><Brand /></a>
       <span className="header-divider" />
-      <span className="header-caption">AUTOMATED RF CIRCUIT LAYOUT</span>
+      <span className="header-caption">AUTOMATED CIRCUIT AND SYSTEM DESIGN</span>
       <button className="icon-button menu-toggle" type="button" aria-expanded={menuOpen} aria-controls={navId} aria-label={menuOpen ? 'Close menu' : 'Open menu'} onClick={() => setMenuOpen(open => !open)}><Icon name={menuOpen ? 'close' : 'menu'} /></button>
       <nav id={navId} aria-label="Main navigation" onClick={followLink}>
         <a href="#/explore/how">How it works</a><a href="#/explore/membership">Membership</a><a href="#/explore/research">Research</a><a href="#/explore/team">Team</a><a href="#/collaboration">Collaboration</a>
@@ -60,6 +60,6 @@ export function SiteShell({ children, theme, onThemeChange }: { children: ReactN
       </nav>
     </header>
     {children}
-    <footer className="site-footer"><span>GENESIS <span className="footer-separator">/</span> Automated RF circuit layout</span></footer>
+    <footer className="site-footer"><span>GENESIS <span className="footer-separator">/</span> Automated circuit and system design</span></footer>
   </div>;
 }

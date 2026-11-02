@@ -5,7 +5,7 @@
     "email": "islam.guven@uclouvain.be"
   },
   "home": {
-    "headline": "Automated layout",
+    "headline": "Automated circuit and system design",
     "accent": "for RF and mmWave front-ends.",
     "intro": "Send your band and performance targets: you never open a simulator or a commercial tool, and you get the finished library for your own design kit.",
     "film": "GENESIS designing a circuit, from the performance targets to the verified layout.",
@@ -109,7 +109,7 @@
     "collaboration": {
       "nav": "Collaboration",
       "headline": "Collaboration",
-      "intro": "We work with semiconductor companies, design teams and research groups to bring automated layout to their own processes and circuits.",
+      "intro": "We work with semiconductor companies, design teams and research groups to bring automated circuit and system design to their own processes and circuits.",
       "kinds": [
         {
           "title": "Semiconductor companies",

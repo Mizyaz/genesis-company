@@ -115,13 +115,13 @@ test('the film goes in only as an export whose on-screen scan cleared every kind
   }
 });
 
-// The wording of record: "Automated layout", no vendor, foundry, tool or model names, no "sign-off".
+// The wording of record: "Automated circuit and system design", no vendor, foundry, tool or model names, no "sign-off".
 const BANNED = /\blaid out\b|sign-?off|signoff|\bcadence\b|calibre|virtuoso|spectre|maestro|keysight|\bads\b|ansys|synopsys|mentor graphics|globalfoundries|\b22fdx\b|tsmc|gpt-|openai|\bcodex\b|\bcoils?\b|em-searched|pixel-searched/i;
 test('the copy keeps the wording of record and names no vendor, foundry, tool or model', () => {
   const copy = ['src/content/site.json', 'index.html', 'src/pages/OnePage.tsx', 'src/pages/SubPages.tsx', 'src/shared/Pipeline.tsx', 'src/shared/ProcessCards.tsx', 'src/shared/ProcessVisuals.tsx', 'src/shared/FilmTake.tsx', 'src/shared/SiteShell.tsx', 'src/PublicApp.tsx'];
   for (const path of copy) assert.doesNotMatch(read(path), BANNED, path);
   const site = JSON.parse(read('src/content/site.json'));
-  assert.equal(`${site.home.headline} ${site.home.accent}`, 'Automated layout for RF and mmWave front-ends.');
+  assert.equal(`${site.home.headline} ${site.home.accent}`, 'Automated circuit and system design for RF and mmWave front-ends.');
   assert.match(site.home.intro, /^Send your band and performance targets:/);
   // No cell or run name (lower_case_words_joined) in the copy.
   assert.doesNotMatch(JSON.stringify(site), /\b[a-z0-9]+(?:_[a-z0-9]+){2,}\b/);

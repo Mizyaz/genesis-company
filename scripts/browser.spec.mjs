@@ -6,7 +6,7 @@ test('the lead names the claim, both themes work and a phone never scrolls sidew
   await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: 'dark' });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
-  await expect(page.locator('h1')).toHaveText('Automated layout for RF and mmWave front-ends.');
+  await expect(page.locator('h1')).toHaveText('Automated circuit and system design for RF and mmWave front-ends.');
   await page.getByRole('button', { name: 'Open menu' }).click();
   await page.getByRole('button', { name: 'Switch to light mode' }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');

@@ -35,7 +35,7 @@ export function PublicApp() {
     window.addEventListener('hashchange', change);
     return () => window.removeEventListener('hashchange', change);
   }, []);
-  useEffect(() => { document.title = 'GENESIS | Automated layout for RF and mmWave front-ends'; }, []);
+  useEffect(() => { document.title = 'GENESIS | Automated circuit and system design for RF and mmWave front-ends'; }, []);
   useEffect(() => {
     const section = route.split('/')[2];
     const timer = window.setTimeout(() => {
