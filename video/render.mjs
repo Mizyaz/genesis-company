@@ -1,4 +1,5 @@
-// One command per film:  node render.mjs [--composition GenesisPromo|GenesisPromoFramed|GenesisStory|GenesisFundHead|GenesisFundTail|GenesisFundStory] [--gl angle-egl] [--inputs <folder>] [--audio <music.wav>] [--out <file.mp4>] [--concurrency 4] [--theme light]
+// One command per film:  node render.mjs [--composition GenesisPromo|GenesisPromoFramed|GenesisStory|GenesisFundHead|GenesisFundTail|GenesisFundStory] [--gl angle-egl] [--inputs <folder>] [--audio <music.wav>] [--out <file.mp4>] [--concurrency 4] [--theme light] [--frames a-b]
+// --frames renders only those frames of the composition (both ends included), as fund.mjs's scene cache does.
 // GenesisPromo reads a footage folder (clips/manifest.json, clips/*.mp4); GenesisStory a story folder (story.json, layout.json,
 // layout/*.png from story/collect.mjs and story/layout_layers.mjs). Both need brand/InterVariable.woff2; renders stay outside git.
 // Remotion's own encoder (compositor) needs glibc >= 2.31; the build host has 2.28. So Chrome renders a JPEG sequence and an
@@ -27,7 +28,7 @@ const step = (command, args) => {
   if (run.status !== 0) { console.error(`Failed: ${command} ${args.join(' ')}`); process.exit(run.status ?? 1); }
 };
 step('npx', ['remotion', 'render', 'src/index.ts', composition, frames, '--sequence', '--image-format=jpeg', '--jpeg-quality=95',
-  `--public-dir=${inputs}`, `--concurrency=${arg('concurrency', '4')}`, ...(arg('gl') ? [`--gl=${arg('gl')}`] : []), ...(arg('theme') ? [`--props=${JSON.stringify({ theme: arg('theme') })}`] : [])]);
+  `--public-dir=${inputs}`, `--concurrency=${arg('concurrency', '4')}`, ...(arg('frames') ? [`--frames=${arg('frames')}`] : []), ...(arg('gl') ? [`--gl=${arg('gl')}`] : []), ...(arg('theme') ? [`--props=${JSON.stringify({ theme: arg('theme') })}`] : [])]);
 const seconds = readdirSync(frames).length / 30;
 step(ffmpeg, ['-hide_banner', '-loglevel', 'error', '-y', '-threads', '4', '-framerate', '30', '-pattern_type', 'glob', '-i', `${frames}/element-*.jpeg`,
   ...(audio ? ['-i', audio, '-map', '0:v', '-map', '1:a', '-af', `afade=t=out:st=${seconds - 2}:d=2`, '-c:a', 'aac', '-b:a', '192k', '-t', String(seconds)] : []),
